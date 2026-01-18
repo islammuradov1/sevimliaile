@@ -375,6 +375,16 @@
       opacity: 1;
     }
 
+    body.fullscreen-mode .fullscreen-exit {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 50;
+      pointer-events: auto;
+      opacity: 1;
+      box-shadow: var(--shadow);
+    }
+
     .player-area.theater {
       width: 100%;
     }
@@ -1629,6 +1639,7 @@
         isFull ? "Exit fullscreen" : "Fullscreen"
       );
       document.body.classList.toggle("fullscreen-mode", isFull);
+      ui.controlsFullscreen.classList.toggle("fullscreen-exit", isFull);
     }
 
     function updateStatus(label) {
