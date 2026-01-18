@@ -6,7 +6,7 @@
   <title>Sevimli Aile - Video Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Bubblegum+Sans&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #fff5ec;
@@ -23,6 +23,9 @@
       --radius-lg: 34px;
       --radius-md: 24px;
       --radius-sm: 18px;
+      --font-base: "Baloo 2", "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
+      --font-title: "Fredoka", "Baloo 2", system-ui, sans-serif;
+      --font-accent: "Bubblegum Sans", "Baloo 2", system-ui, sans-serif;
     }
 
     body[data-theme="dark"] {
@@ -39,13 +42,27 @@
       --shadow: 0 24px 50px rgba(6, 6, 10, 0.5);
     }
 
+    body[data-theme="party"] {
+      --bg: #fff2ff;
+      --bg-alt: #ffffff;
+      --bg-soft: #ffe9f7;
+      --ink: #2b1e33;
+      --muted: #8f6b8b;
+      --stroke: #ffd6ef;
+      --accent: #ff6bb7;
+      --accent-2: #32c9ff;
+      --accent-3: #ffd36a;
+      --accent-4: #7bffb2;
+      --shadow: 0 22px 44px rgba(54, 26, 58, 0.18);
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      font-family: "Baloo 2", "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
+      font-family: var(--font-base);
       background:
         radial-gradient(4px 4px at 20px 20px, rgba(255, 210, 111, 0.25) 40%, transparent 45%),
         radial-gradient(4px 4px at 50px 60px, rgba(58, 188, 196, 0.2) 40%, transparent 45%),
@@ -65,6 +82,26 @@
         radial-gradient(650px 450px at 85% 10%, rgba(89, 211, 219, 0.18) 0%, transparent 55%),
         radial-gradient(700px 500px at 90% 80%, rgba(176, 139, 255, 0.18) 0%, transparent 60%),
         var(--bg);
+    }
+
+    body[data-theme="party"] {
+      background:
+        radial-gradient(6px 6px at 12% 18%, rgba(255, 107, 183, 0.28) 40%, transparent 45%),
+        radial-gradient(6px 6px at 80% 14%, rgba(50, 201, 255, 0.22) 40%, transparent 45%),
+        radial-gradient(6px 6px at 75% 75%, rgba(123, 255, 178, 0.18) 40%, transparent 45%),
+        radial-gradient(700px 500px at 15% 20%, rgba(255, 211, 106, 0.3) 0%, transparent 60%),
+        radial-gradient(700px 500px at 85% 70%, rgba(255, 107, 183, 0.25) 0%, transparent 60%),
+        var(--bg);
+    }
+
+    h1, h2, h3, .logo {
+      font-family: var(--font-title);
+    }
+
+    .pill,
+    button.primary,
+    button.ghost {
+      font-family: var(--font-accent);
     }
 
     .app {
@@ -793,6 +830,42 @@
       gap: 14px;
     }
 
+    .admin-modal {
+      width: min(960px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+    }
+
+    .admin-header {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .admin-tab.active {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-4));
+      color: #f7f1e8;
+      border-color: transparent;
+    }
+
+    .admin-panel {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 2px dashed var(--stroke);
+      background: var(--bg-soft);
+    }
+
+    .admin-panel input[type="search"] {
+      max-width: 260px;
+    }
+
     .load-more {
       display: grid;
       place-items: center;
@@ -1077,6 +1150,23 @@
           </div>
         </section>
 
+        <section class="recommendations hidden" id="search-view" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="search_title">Search results</h2>
+            <button class="pill icon-button" id="search-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="section-sub" id="search-title"></div>
+          <div class="grid" id="search-grid"></div>
+          <div class="load-more">
+            <div class="card-meta" data-i18n="feed_load_hint">More videos below</div>
+            <button class="ghost" id="search-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
         <section class="recommendations" id="viral-view">
           <div class="section-head">
             <h2 data-i18n="feed_viral">Viral</h2>
@@ -1168,26 +1258,71 @@
   </div>
 
   <div class="modal" id="admin-modal" aria-hidden="true">
-    <div class="modal-card">
-      <h2 data-i18n="admin_title">Admin controls</h2>
-      <div id="admin-list" class="form-grid"></div>
-      <div class="card-meta" data-i18n="admin_reports">Reports</div>
-      <div id="admin-reports" class="form-grid"></div>
-      <div class="admin-tools">
-        <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
-        <label class="card-meta" for="admin-csv" data-i18n="admin_csv_label">CSV file</label>
-        <input id="admin-csv" name="admin-csv" type="file" accept=".csv,text/csv">
-        <div class="form-actions">
-          <button class="ghost" type="button" id="admin-import-csv" data-i18n="admin_import_csv">Import CSV</button>
-          <button class="ghost" type="button" id="admin-export-sql" data-i18n="admin_export_sql">Download SQL</button>
+    <div class="modal-card admin-modal">
+      <div class="admin-header">
+        <h2 data-i18n="admin_title">Admin controls</h2>
+        <div class="admin-tabs">
+          <button class="pill admin-tab active" type="button" data-admin-tab="overview" data-i18n="admin_tab_overview">Overview</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="users" data-i18n="admin_tab_users">Users</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="channels" data-i18n="admin_tab_channels">Channels</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="videos" data-i18n="admin_tab_videos">Videos</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="reports" data-i18n="admin_tab_reports">Reports</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="imports" data-i18n="admin_tab_imports">Imports</button>
         </div>
-        <label class="card-meta" for="admin-sql" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
-        <textarea id="admin-sql" name="admin-sql" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
-        <div class="form-actions">
-          <button class="ghost" type="button" id="admin-import-sql" data-i18n="admin_import_sql">Import SQL</button>
-        </div>
-        <div class="card-meta" id="admin-import-message"></div>
       </div>
+
+      <div class="admin-panel" id="admin-overview">
+        <div class="card-meta" data-i18n="admin_stats">Stats</div>
+        <div class="form-grid" id="admin-stats"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-users">
+        <div class="section-actions">
+          <span class="section-hint" data-i18n="admin_users_hint">Search users</span>
+          <input id="admin-user-search" type="search" placeholder="Search users" data-i18n-placeholder="admin_users_search">
+        </div>
+        <div id="admin-list" class="form-grid"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-channels">
+        <div class="section-actions">
+          <span class="section-hint" data-i18n="admin_channels_hint">Artists and channels</span>
+          <input id="admin-channel-search" type="search" placeholder="Search channels" data-i18n-placeholder="admin_channels_search">
+        </div>
+        <div id="admin-channels-list" class="form-grid"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-videos">
+        <div class="section-actions">
+          <span class="section-hint" data-i18n="admin_videos_hint">All videos</span>
+          <input id="admin-video-search" type="search" placeholder="Search videos" data-i18n-placeholder="admin_videos_search">
+        </div>
+        <div id="admin-videos-list" class="form-grid"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-reports-panel">
+        <div class="card-meta" data-i18n="admin_reports">Reports</div>
+        <div id="admin-reports" class="form-grid"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-imports">
+        <div class="admin-tools">
+          <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
+          <label class="card-meta" for="admin-csv" data-i18n="admin_csv_label">CSV file</label>
+          <input id="admin-csv" name="admin-csv" type="file" accept=".csv,text/csv">
+          <div class="form-actions">
+            <button class="ghost" type="button" id="admin-import-csv" data-i18n="admin_import_csv">Import CSV</button>
+            <button class="ghost" type="button" id="admin-export-sql" data-i18n="admin_export_sql">Download SQL</button>
+          </div>
+          <label class="card-meta" for="admin-sql" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
+          <textarea id="admin-sql" name="admin-sql" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
+          <div class="form-actions">
+            <button class="ghost" type="button" id="admin-import-sql" data-i18n="admin_import_sql">Import SQL</button>
+          </div>
+          <div class="card-meta" id="admin-import-message"></div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button class="ghost" type="button" data-close="admin-modal" data-i18n="action_close">Close</button>
       </div>
@@ -1318,6 +1453,11 @@
       subscribedList: document.getElementById("subscribed-list"),
       recommendations: document.getElementById("recommendations-grid"),
       loadMore: document.getElementById("load-more"),
+      searchView: document.getElementById("search-view"),
+      searchGrid: document.getElementById("search-grid"),
+      searchLoadMore: document.getElementById("search-load-more"),
+      searchTitle: document.getElementById("search-title"),
+      searchBack: document.getElementById("search-back"),
       searchContext: document.getElementById("search-context"),
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
@@ -1383,6 +1523,19 @@
       profileSlogan: document.getElementById("profile-slogan"),
       profileAvatar: document.getElementById("profile-avatar"),
       adminList: document.getElementById("admin-list"),
+      adminStats: document.getElementById("admin-stats"),
+      adminOverview: document.getElementById("admin-overview"),
+      adminUsers: document.getElementById("admin-users"),
+      adminChannels: document.getElementById("admin-channels"),
+      adminVideos: document.getElementById("admin-videos"),
+      adminReportsPanel: document.getElementById("admin-reports-panel"),
+      adminImports: document.getElementById("admin-imports"),
+      adminTabs: document.querySelectorAll(".admin-tab"),
+      adminUserSearch: document.getElementById("admin-user-search"),
+      adminChannelSearch: document.getElementById("admin-channel-search"),
+      adminVideoSearch: document.getElementById("admin-video-search"),
+      adminChannelsList: document.getElementById("admin-channels-list"),
+      adminVideosList: document.getElementById("admin-videos-list"),
       uploadMetadata: document.getElementById("upload-metadata"),
       studioModal: document.getElementById("studio-modal"),
       statsSummary: document.getElementById("stats-summary"),
@@ -1462,6 +1615,8 @@
       logout:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M10 17l5-5-5-5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M15 12H3\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M19 5h2v14h-2\"/></svg>"
       ,
+      sparkle:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3l1.8 4.7L18 9.5l-4.2 1.8L12 16l-1.8-4.7L6 9.5l4.2-1.8L12 3z\" fill=\"currentColor\"/><circle cx=\"18\" cy=\"5\" r=\"2\" fill=\"currentColor\"/><circle cx=\"5\" cy=\"18\" r=\"2\" fill=\"currentColor\"/></svg>",
       fullscreen:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zm4 10h2v6h-6v-2h4v-4zM4 14h2v4h4v2H4v-6z\"/></svg>",
       exitFullscreen:
@@ -1503,6 +1658,8 @@
         feed_viral: "Viral",
         channel_title: "Channel",
         search_results: "Results for",
+        search_title: "Search results",
+        search_back: "Back to feed",
         auth_welcome: "Welcome to Sevimli Aile",
         auth_subtitle: "Log in or create an account to start watching.",
         auth_email: "Email",
@@ -1644,14 +1801,33 @@
         label_up_next: "Up next: ",
         control_dark_mode: "Dark mode",
         control_light_mode: "Light mode",
+        control_party_mode: "Party mode",
         control_start: "Start video",
         control_heart_loved: "Loved",
         admin_grant_artist: "Grant artist",
+        admin_make_artist: "Make artist",
+        admin_make_user: "Make user",
+        admin_stats: "Stats",
         admin_set_free: "Set Free",
         admin_set_pro: "Set Pro",
+        admin_tab_overview: "Overview",
+        admin_tab_users: "Users",
+        admin_tab_channels: "Channels",
+        admin_tab_videos: "Videos",
+        admin_tab_reports: "Reports",
+        admin_tab_imports: "Imports",
+        admin_users_hint: "Search users",
+        admin_users_search: "Search users",
+        admin_channels_hint: "Artists and channels",
+        admin_channels_search: "Search channels",
+        admin_videos_hint: "All videos",
+        admin_videos_search: "Search videos",
+        admin_view_videos: "View videos",
+        admin_video_language: "Language",
         admin_report_message_placeholder: "Message to reporter (optional)",
         action_resolve: "Resolve",
         action_delete: "Delete",
+        action_save: "Save",
         action_mark_read: "Mark read",
         message_auth_required: "Auth setup required.",
         message_verify_needed: "Verify your email to continue.",
@@ -1715,6 +1891,8 @@
         feed_viral: "Вирусное",
         channel_title: "Канал",
         search_results: "Результаты для",
+        search_title: "Результаты поиска",
+        search_back: "Назад к ленте",
         auth_welcome: "Добро пожаловать в Sevimli Aile",
         auth_subtitle: "Войдите или создайте аккаунт, чтобы смотреть.",
         auth_email: "Эл. почта",
@@ -1856,14 +2034,33 @@
         label_up_next: "Далее: ",
         control_dark_mode: "Тёмный режим",
         control_light_mode: "Светлый режим",
+        control_party_mode: "Праздничный режим",
         control_start: "Начать видео",
         control_heart_loved: "Люблю",
         admin_grant_artist: "Дать роль автора",
+        admin_make_artist: "Сделать автором",
+        admin_make_user: "Сделать пользователем",
+        admin_stats: "Статистика",
         admin_set_free: "Сделать Free",
         admin_set_pro: "Сделать Pro",
+        admin_tab_overview: "Обзор",
+        admin_tab_users: "Пользователи",
+        admin_tab_channels: "Каналы",
+        admin_tab_videos: "Видео",
+        admin_tab_reports: "Жалобы",
+        admin_tab_imports: "Импорт",
+        admin_users_hint: "Поиск пользователей",
+        admin_users_search: "Поиск пользователей",
+        admin_channels_hint: "Авторы и каналы",
+        admin_channels_search: "Поиск каналов",
+        admin_videos_hint: "Все видео",
+        admin_videos_search: "Поиск видео",
+        admin_view_videos: "Видео канала",
+        admin_video_language: "Язык",
         admin_report_message_placeholder: "Сообщение автору жалобы (необязательно)",
         action_resolve: "Решено",
         action_delete: "Удалить",
+        action_save: "Сохранить",
         action_mark_read: "Отметить как прочитанное",
         message_auth_required: "Требуется настройка авторизации.",
         message_verify_needed: "Подтвердите почту для продолжения.",
@@ -1927,6 +2124,8 @@
         feed_viral: "热门",
         channel_title: "频道",
         search_results: "搜索结果：",
+        search_title: "搜索结果",
+        search_back: "返回首页",
         auth_welcome: "欢迎来到 Sevimli Aile",
         auth_subtitle: "登录或注册即可观看。",
         auth_email: "邮箱",
@@ -2068,14 +2267,33 @@
         label_up_next: "接下来：",
         control_dark_mode: "深色模式",
         control_light_mode: "浅色模式",
+        control_party_mode: "缤纷模式",
         control_start: "开始播放",
         control_heart_loved: "已喜欢",
         admin_grant_artist: "授予作者权限",
+        admin_make_artist: "设为作者",
+        admin_make_user: "设为用户",
+        admin_stats: "统计",
         admin_set_free: "设为免费",
         admin_set_pro: "设为专业",
+        admin_tab_overview: "概览",
+        admin_tab_users: "用户",
+        admin_tab_channels: "频道",
+        admin_tab_videos: "视频",
+        admin_tab_reports: "举报",
+        admin_tab_imports: "导入",
+        admin_users_hint: "搜索用户",
+        admin_users_search: "搜索用户",
+        admin_channels_hint: "作者与频道",
+        admin_channels_search: "搜索频道",
+        admin_videos_hint: "全部视频",
+        admin_videos_search: "搜索视频",
+        admin_view_videos: "查看视频",
+        admin_video_language: "语言",
         admin_report_message_placeholder: "给举报者的消息（可选）",
         action_resolve: "处理",
         action_delete: "删除",
+        action_save: "保存",
         action_mark_read: "标记已读",
         message_auth_required: "需要完成认证设置。",
         message_verify_needed: "请先验证邮箱。",
@@ -2139,6 +2357,8 @@
         feed_viral: "Viral",
         channel_title: "Kanal",
         search_results: "Arama sonuçları:",
+        search_title: "Arama sonuçları",
+        search_back: "Akışa dön",
         auth_welcome: "Sevimli Aile'e hoş geldiniz",
         auth_subtitle: "İzlemeye başlamak için giriş yapın veya hesap oluşturun.",
         auth_email: "E-posta",
@@ -2280,14 +2500,33 @@
         label_up_next: "Sıradaki: ",
         control_dark_mode: "Koyu mod",
         control_light_mode: "Açık mod",
+        control_party_mode: "Eğlenceli mod",
         control_start: "Videoyu başlat",
         control_heart_loved: "Sevildi",
         admin_grant_artist: "Sanatçı rolü ver",
+        admin_make_artist: "Sanatçı yap",
+        admin_make_user: "Kullanıcı yap",
+        admin_stats: "İstatistikler",
         admin_set_free: "Ücretsiz yap",
         admin_set_pro: "Pro yap",
+        admin_tab_overview: "Genel",
+        admin_tab_users: "Kullanıcılar",
+        admin_tab_channels: "Kanallar",
+        admin_tab_videos: "Videolar",
+        admin_tab_reports: "Raporlar",
+        admin_tab_imports: "İçe aktarma",
+        admin_users_hint: "Kullanıcı ara",
+        admin_users_search: "Kullanıcı ara",
+        admin_channels_hint: "Sanatçılar ve kanallar",
+        admin_channels_search: "Kanal ara",
+        admin_videos_hint: "Tüm videolar",
+        admin_videos_search: "Video ara",
+        admin_view_videos: "Videoları gör",
+        admin_video_language: "Dil",
         admin_report_message_placeholder: "Bildiren kişiye mesaj (isteğe bağlı)",
         action_resolve: "Çöz",
         action_delete: "Sil",
+        action_save: "Kaydet",
         action_mark_read: "Okundu işaretle",
         message_auth_required: "Kimlik doğrulama kurulumu gerekli.",
         message_verify_needed: "Devam etmek için e-postayı doğrulayın.",
@@ -2351,6 +2590,8 @@
         feed_viral: "Viral",
         channel_title: "Kanal",
         search_results: "Axtarış nəticələri:",
+        search_title: "Axtarış nəticələri",
+        search_back: "Lentə qayıt",
         auth_welcome: "Sevimli Aile-ə xoş gəldiniz",
         auth_subtitle: "İzləmək üçün daxil olun və ya hesab yaradın.",
         auth_email: "Email",
@@ -2492,14 +2733,33 @@
         label_up_next: "Növbəti: ",
         control_dark_mode: "Tünd rejim",
         control_light_mode: "Açıq rejim",
+        control_party_mode: "Şən rejim",
         control_start: "Videonu başladın",
         control_heart_loved: "Sevildi",
         admin_grant_artist: "Artist rolu ver",
+        admin_make_artist: "Artist et",
+        admin_make_user: "İstifadəçi et",
+        admin_stats: "Statistika",
         admin_set_free: "Free et",
         admin_set_pro: "Pro et",
+        admin_tab_overview: "Ümumi",
+        admin_tab_users: "İstifadəçilər",
+        admin_tab_channels: "Kanallar",
+        admin_tab_videos: "Videolar",
+        admin_tab_reports: "Şikayətlər",
+        admin_tab_imports: "İdxal",
+        admin_users_hint: "İstifadəçi axtar",
+        admin_users_search: "İstifadəçi axtar",
+        admin_channels_hint: "Artistlər və kanallar",
+        admin_channels_search: "Kanal axtar",
+        admin_videos_hint: "Bütün videolar",
+        admin_videos_search: "Video axtar",
+        admin_view_videos: "Videolara bax",
+        admin_video_language: "Dil",
         admin_report_message_placeholder: "Şikayət edənə mesaj (istəyə bağlı)",
         action_resolve: "Həll et",
         action_delete: "Sil",
+        action_save: "Yadda saxla",
         action_mark_read: "Oxundu işarələ",
         message_auth_required: "Auth qurulması tələb olunur.",
         message_verify_needed: "Davam etmək üçün emaili təsdiqləyin.",
@@ -2563,6 +2823,8 @@
         feed_viral: "شائع",
         channel_title: "القناة",
         search_results: "نتائج البحث عن",
+        search_title: "نتائج البحث",
+        search_back: "العودة للرئيسية",
         auth_welcome: "مرحباً بك في Sevimli Aile",
         auth_subtitle: "سجّل الدخول أو أنشئ حساباً لبدء المشاهدة.",
         auth_email: "البريد الإلكتروني",
@@ -2704,14 +2966,33 @@
         label_up_next: "التالي: ",
         control_dark_mode: "الوضع الداكن",
         control_light_mode: "الوضع الفاتح",
+        control_party_mode: "وضع المرح",
         control_start: "بدء الفيديو",
         control_heart_loved: "أُعجب به",
         admin_grant_artist: "منح دور فنان",
+        admin_make_artist: "تحويل إلى فنان",
+        admin_make_user: "تحويل إلى مستخدم",
+        admin_stats: "الإحصاءات",
         admin_set_free: "تعيين مجاني",
         admin_set_pro: "تعيين برو",
+        admin_tab_overview: "نظرة عامة",
+        admin_tab_users: "المستخدمون",
+        admin_tab_channels: "القنوات",
+        admin_tab_videos: "الفيديوهات",
+        admin_tab_reports: "البلاغات",
+        admin_tab_imports: "الاستيراد",
+        admin_users_hint: "ابحث عن المستخدمين",
+        admin_users_search: "ابحث عن المستخدمين",
+        admin_channels_hint: "الفنانون والقنوات",
+        admin_channels_search: "ابحث عن القنوات",
+        admin_videos_hint: "كل الفيديوهات",
+        admin_videos_search: "ابحث عن الفيديوهات",
+        admin_view_videos: "عرض الفيديوهات",
+        admin_video_language: "اللغة",
         admin_report_message_placeholder: "رسالة للمبلّغ (اختياري)",
         action_resolve: "حل",
         action_delete: "حذف",
+        action_save: "حفظ",
         action_mark_read: "وضع كمقروء",
         message_auth_required: "يلزم إعداد المصادقة.",
         message_verify_needed: "يرجى تأكيد البريد للمتابعة.",
@@ -2862,19 +3143,26 @@
     let currentStatusKey = "status_loading";
     let feedFilter = "all";
     let currentChannel = null;
+    let searchQuery = "";
+    let searchOffset = 0;
+    let searchHasMore = true;
+    let searchFetching = false;
     let firebaseAuth = null;
     let firebaseUser = null;
     let availableTopics = [];
     let settingsSelectedTopics = new Set();
+    let adminUsersData = [];
+    let adminChannelsData = [];
+    let adminVideosData = [];
 
     function setTheme(theme) {
-      document.body.setAttribute("data-theme", theme);
-      setButtonIcon(
-        ui.themeToggle,
-        theme === "dark" ? icons.sun : icons.moon,
-        theme === "dark" ? "control_light_mode" : "control_dark_mode"
-      );
-      localStorage.setItem("theme", theme);
+      const next = theme || "light";
+      document.body.setAttribute("data-theme", next);
+      const labelKey =
+        next === "dark" ? "control_light_mode" : next === "party" ? "control_party_mode" : "control_dark_mode";
+      const icon = next === "party" ? icons.sparkle : next === "dark" ? icons.sun : icons.moon;
+      setButtonIcon(ui.themeToggle, icon, labelKey);
+      localStorage.setItem("theme", next);
     }
 
     function setView(mode) {
@@ -2888,6 +3176,25 @@
         ui.playerArea.classList.add("mini");
         ui.viewMini.classList.add("active");
       }
+    }
+
+    function setPageView(view) {
+      const showFeed = view === "feed";
+      const showChannel = view === "channel";
+      const showSearch = view === "search";
+      ui.feedView.classList.toggle("hidden", !showFeed);
+      ui.feedView.setAttribute("aria-hidden", String(!showFeed));
+      ui.viralView.classList.toggle("hidden", !showFeed);
+      ui.viralView.setAttribute("aria-hidden", String(!showFeed));
+      ui.channelView.classList.toggle("hidden", !showChannel);
+      ui.channelView.setAttribute("aria-hidden", String(!showChannel));
+      ui.searchView.classList.toggle("hidden", !showSearch);
+      ui.searchView.setAttribute("aria-hidden", String(!showSearch));
+      ui.playerArea.classList.toggle("hidden", showChannel || showSearch);
+      if (showFeed) {
+        updateSearchContext(ui.searchInput.value.trim());
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function openModal(modal) {
@@ -3057,6 +3364,7 @@
         text = t("feed_intro");
       }
       ui.searchContext.textContent = text;
+      ui.searchContext.style.display = text ? "inline-flex" : "none";
     }
 
     function getPageLimit(query) {
@@ -3167,15 +3475,10 @@
     }
 
     function showChannelView(visible) {
-      ui.channelView.classList.toggle("hidden", !visible);
-      ui.channelView.setAttribute("aria-hidden", String(!visible));
-      ui.feedView.classList.toggle("hidden", visible);
-      ui.feedView.setAttribute("aria-hidden", String(visible));
-      ui.viralView.classList.toggle("hidden", visible);
-      ui.viralView.setAttribute("aria-hidden", String(visible));
+      setPageView(visible ? "channel" : "feed");
     }
 
-    function buildVideoCard(video) {
+    function buildVideoCard(video, onSelect) {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "video-card";
@@ -3229,11 +3532,11 @@
       body.appendChild(meta);
       card.appendChild(thumb);
       card.appendChild(body);
-      card.addEventListener("click", () => loadVideo(videos.findIndex((item) => item.id === video.id)));
+      card.addEventListener("click", () => onSelect(video));
       return card;
     }
 
-    function renderVideoGrid(list, container, append = false, emptyMessage) {
+    function renderVideoGrid(list, container, append = false, emptyMessage, onSelect) {
       if (!append) {
         container.innerHTML = "";
       }
@@ -3245,7 +3548,7 @@
         return;
       }
       list.forEach((video) => {
-        container.appendChild(buildVideoCard(video));
+        container.appendChild(buildVideoCard(video, onSelect));
       });
     }
 
@@ -3254,7 +3557,13 @@
         feedFilter === "subscribed"
           ? t("message_no_subscribed_videos")
           : t("message_no_videos");
-      renderVideoGrid(list, ui.recommendations, append, message);
+      renderVideoGrid(list, ui.recommendations, append, message, (video) => {
+        setPageView("feed");
+        const index = videos.findIndex((item) => item.id === video.id);
+        if (index >= 0) {
+          loadVideo(index);
+        }
+      });
     }
 
     function renderChannels(channels) {
@@ -3386,9 +3695,21 @@
       const videosRes = await apiFetch("/api/videos?" + params.toString());
       const videosData = await videosRes.json();
       videos = videosData.videos || [];
-      renderVideoGrid(videos, ui.channelVideos, false, t("message_no_channel_videos"));
+      renderVideoGrid(
+        videos,
+        ui.channelVideos,
+        false,
+        t("message_no_channel_videos"),
+        (video) => {
+          setPageView("feed");
+          const index = videos.findIndex((item) => item.id === video.id);
+          if (index >= 0) {
+            loadVideo(index);
+          }
+        }
+      );
       if (videos.length) {
-        loadVideo(0);
+        updateVideoMeta(videos[0]);
       } else {
         setOverlayState(false, false, false);
         updateStatus("status_empty");
@@ -3424,6 +3745,7 @@
         videos = [];
         hasMore = true;
       }
+      setPageView("feed");
       const params = new URLSearchParams();
       const limit = getPageLimit(query);
       params.set("limit", String(limit));
@@ -3459,6 +3781,55 @@
       isFetching = false;
     }
 
+    async function fetchSearchResults(query, reset = false) {
+      if (searchFetching) {
+        return;
+      }
+      if (!currentUser) {
+        return;
+      }
+      const trimmed = query.trim();
+      if (!trimmed) {
+        setPageView("feed");
+        return;
+      }
+      searchFetching = true;
+      if (reset) {
+        searchOffset = 0;
+        searchHasMore = true;
+        searchQuery = trimmed;
+        ui.searchGrid.innerHTML = "";
+      }
+      setPageView("search");
+      ui.searchTitle.textContent = t("search_results") + " \"" + searchQuery + "\"";
+      const params = new URLSearchParams();
+      params.set("limit", String(searchLimit));
+      params.set("offset", String(searchOffset));
+      params.set("search", searchQuery);
+      const res = await apiFetch("/api/videos?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        searchFetching = false;
+        return;
+      }
+      const batch = data.videos || [];
+      searchHasMore = Boolean(data.hasMore);
+      renderVideoGrid(
+        batch,
+        ui.searchGrid,
+        !reset,
+        t("message_no_videos"),
+        (video) => {
+          setPageView("feed");
+          videos = [video];
+          loadVideo(0);
+        }
+      );
+      ui.searchLoadMore.style.display = searchHasMore ? "inline-flex" : "none";
+      searchOffset += batch.length;
+      searchFetching = false;
+    }
+
     async function fetchViral() {
       if (!currentUser) {
         return;
@@ -3469,7 +3840,13 @@
         ui.viralGrid.textContent = t("message_fetch_viral_failed");
         return;
       }
-      renderVideoGrid(data.videos || [], ui.viralGrid, false, t("message_no_viral"));
+      renderVideoGrid(data.videos || [], ui.viralGrid, false, t("message_no_viral"), (video) => {
+        setPageView("feed");
+        const index = videos.findIndex((item) => item.id === video.id);
+        if (index >= 0) {
+          loadVideo(index);
+        }
+      });
     }
 
     async function fetchChannels() {
@@ -3654,6 +4031,36 @@
       updateHeartButton();
     }
 
+    const LOGIN_ATTEMPT_KEY = "loginAttempts";
+    const LOGIN_ATTEMPT_RESET_MS = 15 * 60 * 1000;
+
+    function getLoginAttempts() {
+      const raw = localStorage.getItem(LOGIN_ATTEMPT_KEY);
+      if (!raw) {
+        return { count: 0, ts: 0 };
+      }
+      try {
+        const data = JSON.parse(raw);
+        if (!data.ts || Date.now() - data.ts > LOGIN_ATTEMPT_RESET_MS) {
+          return { count: 0, ts: 0 };
+        }
+        return { count: data.count || 0, ts: data.ts };
+      } catch (err) {
+        return { count: 0, ts: 0 };
+      }
+    }
+
+    function bumpLoginAttempts() {
+      const current = getLoginAttempts();
+      const next = { count: (current.count || 0) + 1, ts: Date.now() };
+      localStorage.setItem(LOGIN_ATTEMPT_KEY, JSON.stringify(next));
+      return next.count;
+    }
+
+    function resetLoginAttempts() {
+      localStorage.removeItem(LOGIN_ATTEMPT_KEY);
+    }
+
     async function handleLogin(event) {
       event.preventDefault();
       ui.authMessage.textContent = "";
@@ -3665,12 +4072,18 @@
       const password = document.getElementById("login-password").value;
       try {
         const cred = await firebaseAuth.signInWithEmailAndPassword(email, password);
+        resetLoginAttempts();
         if (!cred.user.emailVerified) {
           ui.authMessage.textContent = t("message_verification_needed");
           await cred.user.sendEmailVerification();
           return;
         }
       } catch (err) {
+        const attempts = bumpLoginAttempts();
+        if (err && err.code === "auth/too-many-requests" && attempts < 14) {
+          ui.authMessage.textContent = t("message_login_failed");
+          return;
+        }
         ui.authMessage.textContent = err.message || t("message_login_failed");
       }
     }
@@ -3736,61 +4149,64 @@
     async function openAdmin() {
       ui.adminList.innerHTML = t("status_loading");
       ui.adminReports.innerHTML = t("status_loading");
-      const [usersRes, reportsRes] = await Promise.all([apiFetch("/api/users"), apiFetch("/api/reports")]);
+      ui.adminStats.innerHTML = t("status_loading");
+      ui.adminChannelsList.innerHTML = t("status_loading");
+      ui.adminVideosList.innerHTML = t("status_loading");
+      const [usersRes, reportsRes, statsRes, videosRes] = await Promise.all([
+        apiFetch("/api/users"),
+        apiFetch("/api/reports"),
+        apiFetch("/api/stats"),
+        apiFetch("/api/videos/manage")
+      ]);
       const data = await usersRes.json();
+      const videosData = await videosRes.json();
       ui.adminList.innerHTML = "";
-      (data.users || []).forEach((user) => {
-        const row = document.createElement("div");
-        row.className = "channel";
-        const buttonLabel = user.role === "user" ? t("admin_grant_artist") : user.role;
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "ghost";
-        button.textContent = buttonLabel;
-        button.disabled = user.role !== "user";
-        button.addEventListener("click", async () => {
-          const grantRes = await apiFetch("/api/admin/grant-artist", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id })
-          });
-          if (grantRes.ok) {
-            openAdmin();
-          }
-        });
-        row.innerHTML =
-          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
-          "<div><div class=\"channel-name\">" +
-          escapeHtml(user.email) +
-          "</div><div class=\"card-meta\">" +
-          escapeHtml(user.role) +
-          " · " +
-          (user.firebase_uid ? "UID: " + escapeHtml(user.firebase_uid) : "UID: -") +
-          " · " +
-          t("label_plan") +
+      const statsData = statsRes.ok ? await statsRes.json() : null;
+      ui.adminStats.innerHTML = "";
+      if (statsData && statsData.totals) {
+        const summary = document.createElement("div");
+        summary.className = "card-meta";
+        summary.textContent =
+          statsData.totals.videos +
           " " +
-          escapeHtml(user.plan || "free") +
-          "</div></div>";
-        const planButton = document.createElement("button");
-        planButton.type = "button";
-        planButton.className = "pill";
-        planButton.textContent =
-          (user.plan || "free") === "pro" ? t("admin_set_free") : t("admin_set_pro");
-        planButton.addEventListener("click", async () => {
-          const nextPlan = (user.plan || "free") === "pro" ? "free" : "pro";
-          const planRes = await apiFetch("/api/admin/plan", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user.id, plan: nextPlan })
-          });
-          if (planRes.ok) {
-            openAdmin();
-          }
+          t("label_videos") +
+          " · " +
+          statsData.totals.views +
+          " " +
+          t("label_views") +
+          " · " +
+          statsData.totals.artists +
+          " " +
+          t("label_artists");
+        ui.adminStats.appendChild(summary);
+        (statsData.artists || []).forEach((artist) => {
+          const row = document.createElement("div");
+          row.className = "channel";
+          row.innerHTML =
+            "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+            "<div><div class=\"channel-name\">" +
+            escapeHtml(artist.email) +
+            "</div><div class=\"card-meta\">" +
+            escapeHtml(artist.videos) +
+            " " +
+            t("label_videos") +
+            " · " +
+            escapeHtml(artist.views) +
+            " " +
+            t("label_views") +
+            "</div></div>";
+          ui.adminStats.appendChild(row);
         });
-        row.appendChild(button);
-        row.appendChild(planButton);
-        ui.adminList.appendChild(row);
-      });
+      } else {
+        ui.adminStats.textContent = t("message_stats_unavailable");
+      }
+      const users = data.users || [];
+      adminUsersData = users;
+      adminChannelsData = users.filter((user) => user.role === "artist");
+      adminVideosData = videosData.videos || [];
+      renderAdminUsers(adminUsersData);
+      renderAdminChannels(adminChannelsData);
+      renderAdminVideos(adminVideosData);
       const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
       ui.adminReports.innerHTML = "";
       if (!reportsRes.ok) {
@@ -3845,6 +4261,246 @@
         });
       }
       openModal(ui.adminModal);
+      setAdminTab("overview");
+    }
+
+    function renderAdminUsers(list) {
+      ui.adminList.innerHTML = "";
+      list.forEach((user) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        let buttonLabel = user.role;
+        if (user.role === "user") {
+          buttonLabel = t("admin_make_artist");
+        } else if (user.role === "artist") {
+          buttonLabel = t("admin_make_user");
+        }
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ghost";
+        button.textContent = buttonLabel;
+        button.disabled = user.role === "admin";
+        button.addEventListener("click", async () => {
+          const nextRole = user.role === "artist" ? "user" : "artist";
+          const grantRes = await apiFetch("/api/admin/role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id, role: nextRole })
+          });
+          if (grantRes.ok) {
+            openAdmin();
+          }
+        });
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(user.email) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(user.role) +
+          " · " +
+          (user.firebase_uid ? "UID: " + escapeHtml(user.firebase_uid) : "UID: -") +
+          " · " +
+          t("label_plan") +
+          " " +
+          escapeHtml(user.plan || "free") +
+          "</div></div>";
+        const planButton = document.createElement("button");
+        planButton.type = "button";
+        planButton.className = "pill";
+        planButton.textContent =
+          (user.plan || "free") === "pro" ? t("admin_set_free") : t("admin_set_pro");
+        planButton.addEventListener("click", async () => {
+          const nextPlan = (user.plan || "free") === "pro" ? "free" : "pro";
+          const planRes = await apiFetch("/api/admin/plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id, plan: nextPlan })
+          });
+          if (planRes.ok) {
+            openAdmin();
+          }
+        });
+        row.appendChild(button);
+        row.appendChild(planButton);
+        ui.adminList.appendChild(row);
+      });
+    }
+
+    function renderAdminChannels(list) {
+      ui.adminChannelsList.innerHTML = "";
+      list.forEach((user) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(user.display_name || user.email) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(user.email) +
+          "</div></div>";
+        setAvatar(row.querySelector(".avatar"), user.avatar_url);
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const revoke = document.createElement("button");
+        revoke.type = "button";
+        revoke.className = "ghost";
+        revoke.textContent = t("admin_make_user");
+        revoke.addEventListener("click", async () => {
+          const res = await apiFetch("/api/admin/role", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id, role: "user" })
+          });
+          if (res.ok) {
+            openAdmin();
+          }
+        });
+        const viewVideos = document.createElement("button");
+        viewVideos.type = "button";
+        viewVideos.className = "pill";
+        viewVideos.textContent = t("admin_view_videos");
+        viewVideos.addEventListener("click", async () => {
+          ui.adminVideoSearch.value = "";
+          const res = await apiFetch("/api/videos/manage?ownerId=" + user.id);
+          const data = await res.json();
+          adminVideosData = data.videos || [];
+          renderAdminVideos(adminVideosData);
+          setAdminTab("videos");
+        });
+        actions.appendChild(viewVideos);
+        actions.appendChild(revoke);
+        row.appendChild(actions);
+        ui.adminChannelsList.appendChild(row);
+      });
+    }
+
+    function renderAdminVideos(list) {
+      ui.adminVideosList.innerHTML = "";
+      list.forEach((video) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        const editor = document.createElement("div");
+        editor.className = "form-grid";
+        editor.style.minWidth = "220px";
+        const titleInput = document.createElement("input");
+        titleInput.type = "text";
+        titleInput.value = video.title || "";
+        titleInput.placeholder = t("label_untitled");
+        const topicsInput = document.createElement("input");
+        topicsInput.type = "text";
+        let parsedTopics = [];
+        if (Array.isArray(video.topics)) {
+          parsedTopics = video.topics;
+        } else {
+          try {
+            parsedTopics = video.topics ? JSON.parse(video.topics) : [];
+          } catch (err) {
+            parsedTopics = [];
+          }
+        }
+        topicsInput.value = parsedTopics.join(", ");
+        topicsInput.placeholder = t("upload_topics_placeholder");
+        const languageInput = document.createElement("input");
+        languageInput.type = "text";
+        languageInput.value = (video.language || "");
+        languageInput.placeholder = t("admin_video_language");
+        editor.appendChild(titleInput);
+        editor.appendChild(topicsInput);
+        editor.appendChild(languageInput);
+        row.innerHTML =
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(video.title) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(video.channel || "") +
+          " · " +
+          escapeHtml(video.views || 0) +
+          " " +
+          t("label_views") +
+          "</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "pill";
+        saveBtn.textContent = t("action_save");
+        saveBtn.addEventListener("click", async () => {
+          const topics = topicsInput.value
+            .split(/[|,]/g)
+            .map((topic) => topic.trim())
+            .filter(Boolean);
+          const language = languageInput.value.trim().toLowerCase();
+          const res = await apiFetch("/api/videos/" + video.id + "/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: titleInput.value.trim(), language, topics })
+          });
+          if (res.ok) {
+            openAdmin();
+          }
+        });
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "ghost";
+        delBtn.textContent = t("action_delete");
+        delBtn.addEventListener("click", async () => {
+          const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
+          if (res.ok) {
+            openAdmin();
+          }
+        });
+        actions.appendChild(saveBtn);
+        actions.appendChild(delBtn);
+        row.appendChild(editor);
+        row.appendChild(actions);
+        ui.adminVideosList.appendChild(row);
+      });
+    }
+
+    function setAdminTab(tab) {
+      ui.adminTabs.forEach((button) => {
+        button.classList.toggle("active", button.dataset.adminTab === tab);
+      });
+      ui.adminOverview.classList.toggle("hidden", tab !== "overview");
+      ui.adminUsers.classList.toggle("hidden", tab !== "users");
+      ui.adminChannels.classList.toggle("hidden", tab !== "channels");
+      ui.adminVideos.classList.toggle("hidden", tab !== "videos");
+      ui.adminReportsPanel.classList.toggle("hidden", tab !== "reports");
+      ui.adminImports.classList.toggle("hidden", tab !== "imports");
+    }
+
+    function filterAdminUsers() {
+      const query = ui.adminUserSearch.value.trim().toLowerCase();
+      const filtered = !query
+        ? adminUsersData
+        : adminUsersData.filter((user) =>
+          (user.email || "").toLowerCase().includes(query) ||
+          (user.display_name || "").toLowerCase().includes(query) ||
+          (user.firebase_uid || "").toLowerCase().includes(query)
+        );
+      renderAdminUsers(filtered);
+    }
+
+    function filterAdminChannels() {
+      const query = ui.adminChannelSearch.value.trim().toLowerCase();
+      const filtered = !query
+        ? adminChannelsData
+        : adminChannelsData.filter((user) =>
+          (user.email || "").toLowerCase().includes(query) ||
+          (user.display_name || "").toLowerCase().includes(query)
+        );
+      renderAdminChannels(filtered);
+    }
+
+    function filterAdminVideos() {
+      const query = ui.adminVideoSearch.value.trim().toLowerCase();
+      const filtered = !query
+        ? adminVideosData
+        : adminVideosData.filter((video) =>
+          (video.title || "").toLowerCase().includes(query) ||
+          (video.channel || "").toLowerCase().includes(query) ||
+          (video.youtube_url || "").toLowerCase().includes(query)
+        );
+      renderAdminVideos(filtered);
     }
 
     async function importCsv() {
@@ -4488,13 +5144,12 @@
 
     ui.searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      showChannelView(false);
-      fetchVideos(ui.searchInput.value.trim(), true);
-      ui.feedView.scrollIntoView({ behavior: "smooth", block: "start" });
+      fetchSearchResults(ui.searchInput.value.trim(), true);
     });
 
     ui.themeToggle.addEventListener("click", () => {
-      const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      const current = document.body.getAttribute("data-theme") || "light";
+      const next = current === "light" ? "dark" : current === "dark" ? "party" : "light";
       setTheme(next);
     });
 
@@ -4528,6 +5183,12 @@
     ui.adminImportCsv.addEventListener("click", importCsv);
     ui.adminImportSql.addEventListener("click", importSql);
     ui.adminExportSql.addEventListener("click", exportSql);
+    ui.adminUserSearch.addEventListener("input", filterAdminUsers);
+    ui.adminChannelSearch.addEventListener("input", filterAdminChannels);
+    ui.adminVideoSearch.addEventListener("input", filterAdminVideos);
+    ui.adminTabs.forEach((button) => {
+      button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
+    });
 
     ui.loginForm.addEventListener("submit", handleLogin);
     ui.registerForm.addEventListener("submit", handleRegister);
@@ -4597,6 +5258,14 @@
       if (hasMore) {
         fetchVideos(ui.searchInput.value.trim(), false);
       }
+    });
+    ui.searchLoadMore.addEventListener("click", () => {
+      if (searchHasMore) {
+        fetchSearchResults(searchQuery, false);
+      }
+    });
+    ui.searchBack.addEventListener("click", () => {
+      setPageView("feed");
     });
 
     lockApp(t("message_sign_in"));

@@ -285,7 +285,10 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: withCors({}, origin) });
     }
-    const path = url.pathname.replace(/^\/api/, "");
+    let path = url.pathname.replace(/^\/api/, "");
+    if (path.length > 1 && path.endsWith("/")) {
+      path = path.slice(0, -1);
+    }
     const user = await auth(request, env);
     if (!user) {
       if (path === "/firebase-config") {
@@ -486,6 +489,21 @@ export default {
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
+    if (path === "/admin/role" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      if (!body.userId) {
+        return jsonResponse({ error: "userId required." }, 400, withCors({}, origin));
+      }
+      const nextRole = body.role === "artist" ? "artist" : "user";
+      await env.DB.prepare("UPDATE users SET role = ? WHERE id = ?")
+        .bind(nextRole, body.userId)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
     if (path === "/videos" && request.method === "GET") {
       const search = url.searchParams.get("search") || "";
       const channelId = url.searchParams.get("channelId") || "";
@@ -559,12 +577,17 @@ export default {
     }
 
     if (path === "/videos/manage" && request.method === "GET") {
+      const ownerId = url.searchParams.get("ownerId") || "";
       const query =
         user.role === "admin"
-          ? "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id ORDER BY videos.created_at DESC"
+          ? "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id" +
+            (ownerId ? " WHERE owner_id = ?" : "") +
+            " ORDER BY videos.created_at DESC"
           : "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
       const result = user.role === "admin"
-        ? await env.DB.prepare(query).all()
+        ? (ownerId
+          ? await env.DB.prepare(query).bind(ownerId).all()
+          : await env.DB.prepare(query).all())
         : await env.DB.prepare(query).bind(user.id).all();
       return jsonResponse({ videos: result.results || [] }, 200, withCors({}, origin));
     }
@@ -579,6 +602,35 @@ export default {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
       await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(videoId).run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/videos/") && path.endsWith("/update") && request.method === "POST") {
+      const videoId = path.split("/")[2];
+      const video = await env.DB.prepare("SELECT owner_id FROM videos WHERE id = ?")
+        .bind(videoId)
+        .first();
+      if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
+      if (user.role !== "admin" && Number(video.owner_id) !== Number(user.id)) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const title = String(body.title || "").trim();
+      const language = String(body.language || "").trim().toLowerCase();
+      const languages = normalizeLanguages(body.languages || language);
+      const storedLanguages = languages.length ? languages : language ? [language] : [];
+      const topics = normalizeTopics(body.topics);
+      await env.DB.prepare(
+        "UPDATE videos SET title = ?, language = ?, languages = ?, topics = ? WHERE id = ?"
+      )
+        .bind(
+          title || "Untitled video",
+          language || "unspecified",
+          JSON.stringify(storedLanguages),
+          JSON.stringify(topics),
+          videoId
+        )
+        .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
