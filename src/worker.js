@@ -293,7 +293,37 @@ export default {
     }
 
     if (path === "/me" && request.method === "GET") {
-      return jsonResponse({ user }, 200, withCors({}, origin));
+      const current = await env.DB.prepare(
+        "SELECT id, email, role, plan, display_name, avatar_url, slogan, created_at FROM users WHERE id = ?"
+      )
+        .bind(user.id)
+        .first();
+      return jsonResponse({ user: current || user }, 200, withCors({}, origin));
+    }
+
+    if (path === "/profile" && request.method === "GET") {
+      const current = await env.DB.prepare(
+        "SELECT display_name, avatar_url, slogan FROM users WHERE id = ?"
+      )
+        .bind(user.id)
+        .first();
+      return jsonResponse({ profile: current || {} }, 200, withCors({}, origin));
+    }
+
+    if (path === "/profile" && request.method === "POST") {
+      if (!requireRole(user, ["artist", "admin"])) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const displayName = String(body.displayName || "").trim();
+      const slogan = String(body.slogan || "").trim();
+      const avatarUrl = String(body.avatarUrl || "").trim();
+      await env.DB.prepare(
+        "UPDATE users SET display_name = ?, slogan = ?, avatar_url = ? WHERE id = ?"
+      )
+        .bind(displayName, slogan, avatarUrl, user.id)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
     if (path === "/settings" && request.method === "GET") {
@@ -354,7 +384,9 @@ export default {
 
     if (path === "/channels" && request.method === "GET") {
       const result = await env.DB.prepare(
-        "SELECT users.id, users.email, users.role, " +
+        "SELECT users.id, users.role, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as display_name, " +
+          "users.avatar_url, users.slogan, " +
           "COUNT(DISTINCT videos.id) as videos, " +
           "COUNT(DISTINCT subscriptions.channel_id) as subscribers " +
           "FROM users " +
@@ -377,7 +409,9 @@ export default {
     if (path.startsWith("/channels/") && request.method === "GET") {
       const channelId = path.split("/")[2];
       const channel = await env.DB.prepare(
-        "SELECT users.id, users.email, users.role, " +
+        "SELECT users.id, users.role, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as display_name, " +
+          "users.avatar_url, users.slogan, " +
           "COUNT(DISTINCT videos.id) as videos, " +
           "COUNT(DISTINCT subscriptions.channel_id) as subscribers " +
           "FROM users " +
@@ -406,7 +440,7 @@ export default {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
       const result = await env.DB.prepare(
-        "SELECT id, email, role, plan, created_at FROM users ORDER BY created_at DESC"
+        "SELECT id, email, role, plan, firebase_uid, created_at FROM users ORDER BY created_at DESC"
       ).all();
       return jsonResponse({ users: result.results || [] }, 200, withCors({}, origin));
     }
@@ -419,6 +453,21 @@ export default {
       if (!body.userId) return jsonResponse({ error: "userId required." }, 400, withCors({}, origin));
       await env.DB.prepare("UPDATE users SET role = 'artist' WHERE id = ?")
         .bind(body.userId)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/plan" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const plan = body.plan === "pro" ? "pro" : "free";
+      if (!body.userId) {
+        return jsonResponse({ error: "userId required." }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare("UPDATE users SET plan = ? WHERE id = ?")
+        .bind(plan, body.userId)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -448,8 +497,9 @@ export default {
         binds.push(channelId);
       }
       if (search) {
-        where += " AND videos.title LIKE ?";
-        binds.push("%" + search + "%");
+        where +=
+          " AND (videos.title LIKE ? OR users.display_name LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
+        binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
       }
       if (allowedLanguages.length) {
         where += " AND videos.language IN (" + allowedLanguages.map(() => "?").join(",") + ")";
@@ -467,7 +517,9 @@ export default {
         binds.push(...allowedTopics);
       }
       const query =
-        "SELECT videos.*, users.email as channel, users.role as channel_role, " +
+        "SELECT videos.*, " +
+        "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+        "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
         "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts, " +
         "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id AND likes.user_id = ?) as liked " +
         "FROM videos JOIN users ON videos.owner_id = users.id " +
@@ -488,8 +540,8 @@ export default {
     if (path === "/videos/manage" && request.method === "GET") {
       const query =
         user.role === "admin"
-          ? "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id ORDER BY videos.created_at DESC"
-          : "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
+          ? "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id ORDER BY videos.created_at DESC"
+          : "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
       const result = user.role === "admin"
         ? await env.DB.prepare(query).all()
         : await env.DB.prepare(query).bind(user.id).all();
@@ -594,7 +646,9 @@ export default {
 
     if (path === "/subscriptions" && request.method === "GET") {
       const subs = await env.DB.prepare(
-        "SELECT users.id, users.email, " +
+        "SELECT users.id, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as display_name, " +
+          "users.avatar_url, " +
           "(SELECT COUNT(*) FROM subscriptions subs WHERE subs.channel_id = users.id) as subscribers " +
           "FROM subscriptions JOIN users ON subscriptions.channel_id = users.id WHERE subscriptions.user_id = ? " +
           "ORDER BY subscriptions.created_at DESC"
@@ -706,7 +760,8 @@ export default {
       const end = new Date(date);
       end.setHours(23, 59, 59, 999);
       const result = await env.DB.prepare(
-        "SELECT view_history.watched_at, videos.title, videos.youtube_id, users.email as channel " +
+        "SELECT view_history.watched_at, videos.title, videos.youtube_id, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel " +
           "FROM view_history JOIN videos ON view_history.video_id = videos.id " +
           "JOIN users ON videos.owner_id = users.id " +
           "WHERE view_history.user_id = ? AND view_history.watched_at BETWEEN ? AND ? " +
@@ -715,6 +770,25 @@ export default {
         .bind(user.id, start.toISOString(), end.toISOString())
         .all();
       return jsonResponse({ history: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/viral" && request.method === "GET") {
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
+      const result = await env.DB.prepare(
+        "SELECT videos.*, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+          "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+          "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+          "FROM videos JOIN users ON videos.owner_id = users.id " +
+          "ORDER BY videos.views DESC, hearts DESC LIMIT ?"
+      )
+        .bind(limit)
+        .all();
+      const videos = (result.results || []).map((row) => ({
+        ...row,
+        topics: row.topics ? JSON.parse(row.topics) : []
+      }));
+      return jsonResponse({ videos }, 200, withCors({}, origin));
     }
 
     if (path === "/stats" && request.method === "GET") {
@@ -727,7 +801,9 @@ export default {
           "SELECT COUNT(*) as artists FROM users WHERE role = 'artist'"
         ).first();
         const artists = await env.DB.prepare(
-          "SELECT users.id, users.email, COUNT(videos.id) as videos, COALESCE(SUM(videos.views), 0) as views " +
+          "SELECT users.id, " +
+            "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as email, " +
+            "COUNT(videos.id) as videos, COALESCE(SUM(videos.views), 0) as views " +
             "FROM users LEFT JOIN videos ON users.id = videos.owner_id WHERE users.role = 'artist' " +
             "GROUP BY users.id ORDER BY views DESC"
         ).all();

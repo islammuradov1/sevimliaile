@@ -253,6 +253,12 @@
       font-weight: 600;
     }
 
+    .avatar-image {
+      background-size: cover;
+      background-position: center;
+      border: 2px solid var(--stroke);
+    }
+
     .channel-actions {
       display: flex;
       gap: 8px;
@@ -310,6 +316,63 @@
       display: grid;
       gap: 14px;
       transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    .player-meta {
+      display: grid;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-soft);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-md);
+    }
+
+    .meta-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .meta-stats {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .meta-channel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .heart-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .heart-row .icon-button {
+      font-size: 1rem;
+      padding: 10px 18px;
+      border-radius: 999px;
+    }
+
+    .quality-select {
+      border-radius: 999px;
+      border: 2px solid var(--stroke);
+      padding: 6px 10px;
+      background: var(--bg-alt);
+      color: var(--ink);
+      font: inherit;
+    }
+
+    body.fullscreen-mode .controls button,
+    body.fullscreen-mode .controls select {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    body.fullscreen-mode #controls-fullscreen {
+      pointer-events: auto;
+      opacity: 1;
     }
 
     .player-area.theater {
@@ -871,6 +934,22 @@
             </div>
           </div>
 
+          <div class="player-meta">
+            <div class="meta-title" id="video-title">Select a video</div>
+            <div class="meta-stats" id="video-stats"></div>
+            <div class="meta-channel">
+              <span class="avatar avatar-image" id="channel-avatar" aria-hidden="true"></span>
+              <div>
+                <div class="channel-name" id="channel-name"></div>
+                <div class="card-meta" id="channel-slogan"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="heart-row">
+            <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
+          </div>
+
           <div class="controls">
             <div class="timeline">
               <label class="sr-only" for="seek-bar">Video timeline</label>
@@ -880,20 +959,33 @@
             </div>
             <div class="control-group">
               <div class="control-row">
-              <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
-              <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
-              <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
-              <span class="volume-readout" id="volume-level">100%</span>
-              <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
+                <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
+                <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
+                <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
+                <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
+                <span class="volume-readout" id="volume-level">100%</span>
+                <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
+                <button class="ghost icon-button" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
               </div>
               <div class="control-row control-row--secondary">
                 <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
                 <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
                 <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+                <select class="quality-select" id="quality-select" aria-label="Playback quality">
+                  <option value="default">Auto</option>
+                  <option value="tiny">144p</option>
+                  <option value="small">240p</option>
+                  <option value="medium">360p</option>
+                  <option value="large">480p</option>
+                  <option value="hd720">720p</option>
+                  <option value="hd1080">1080p</option>
+                  <option value="hd1440">2K</option>
+                  <option value="hd2160">4K</option>
+                </select>
+                <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
               </div>
             </div>
             <div class="control-row control-row--emote">
-              <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
               <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
             </div>
           </div>
@@ -915,6 +1007,13 @@
           </div>
         </section>
 
+        <section class="recommendations" id="viral-view">
+          <div class="section-head">
+            <h2>Viral</h2>
+          </div>
+          <div class="grid" id="viral-grid"></div>
+        </section>
+
         <section class="channel-view hidden" id="channel-view" aria-hidden="true">
           <div class="section-head">
             <div class="channel-hero">
@@ -922,6 +1021,7 @@
               <div>
                 <div class="channel-name" id="channel-title">Channel</div>
                 <div class="card-meta" id="channel-stats"></div>
+                <div class="card-meta" id="channel-slogan-view"></div>
               </div>
             </div>
             <div class="channel-actions">
@@ -1026,6 +1126,19 @@
   <div class="modal" id="studio-modal" aria-hidden="true">
     <div class="modal-card">
       <h2>Studio</h2>
+      <form class="form-grid" id="profile-form">
+        <div class="card-meta">Creator profile</div>
+        <label for="profile-name">Display name</label>
+        <input id="profile-name" name="profile-name" type="text" placeholder="Creator name">
+        <label for="profile-slogan">Short slogan</label>
+        <input id="profile-slogan" name="profile-slogan" type="text" placeholder="Fun slogan">
+        <label for="profile-avatar">Profile image URL</label>
+        <input id="profile-avatar" name="profile-avatar" type="url" placeholder="https://...">
+        <div class="form-actions">
+          <button class="primary" type="submit">Save profile</button>
+        </div>
+      </form>
+      <div class="card-meta" id="profile-message"></div>
       <div class="form-grid">
         <div class="channel">
           <span class="avatar" aria-hidden="true"></span>
@@ -1134,13 +1247,20 @@
       loadMore: document.getElementById("load-more"),
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
+      viralView: document.getElementById("viral-view"),
       channelView: document.getElementById("channel-view"),
       channelTitle: document.getElementById("channel-title"),
       channelStats: document.getElementById("channel-stats"),
+      channelSloganView: document.getElementById("channel-slogan-view"),
       channelVideos: document.getElementById("channel-videos"),
       channelBack: document.getElementById("channel-back"),
       channelSubscribe: document.getElementById("channel-subscribe"),
       playerHost: document.getElementById("player"),
+      videoTitle: document.getElementById("video-title"),
+      videoStats: document.getElementById("video-stats"),
+      channelAvatar: document.getElementById("channel-avatar"),
+      channelName: document.getElementById("channel-name"),
+      channelSlogan: document.getElementById("channel-slogan"),
       statusChip: document.getElementById("status-chip"),
       loadingLayer: document.getElementById("loading-layer"),
       startLayer: document.getElementById("start-layer"),
@@ -1181,6 +1301,12 @@
       uploadTopics: document.getElementById("upload-topics"),
       topicsList: document.getElementById("topics-list"),
       maxWatch: document.getElementById("max-watch"),
+      viralGrid: document.getElementById("viral-grid"),
+      profileForm: document.getElementById("profile-form"),
+      profileMessage: document.getElementById("profile-message"),
+      profileName: document.getElementById("profile-name"),
+      profileSlogan: document.getElementById("profile-slogan"),
+      profileAvatar: document.getElementById("profile-avatar"),
       adminList: document.getElementById("admin-list"),
       uploadMetadata: document.getElementById("upload-metadata"),
       studioModal: document.getElementById("studio-modal"),
@@ -1198,6 +1324,10 @@
       controlsReport: document.getElementById("controls-report"),
       controlsReplay: document.getElementById("controls-replay"),
       controlsNext: document.getElementById("controls-next"),
+      controlsSeekBack: document.getElementById("controls-seek-back"),
+      controlsSeekForward: document.getElementById("controls-seek-forward"),
+      controlsFullscreen: document.getElementById("controls-fullscreen"),
+      qualitySelect: document.getElementById("quality-select"),
       reportModal: document.getElementById("report-modal"),
       reportMessage: document.getElementById("report-message"),
       notificationsModal: document.getElementById("notifications-modal"),
@@ -1254,6 +1384,16 @@
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z\"/></svg>",
       logout:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M10 17l5-5-5-5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M15 12H3\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M19 5h2v14h-2\"/></svg>"
+      ,
+      fullscreen:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zm4 10h2v6h-6v-2h4v-4zM4 14h2v4h4v2H4v-6z\"/></svg>",
+      exitFullscreen:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M9 5v2H6v3H4V5h5zm6 0h5v5h-2V7h-3V5zM4 14h2v3h3v2H4v-5zm14 0h2v5h-5v-2h3v-3z\"/></svg>"
+      ,
+      seekBack:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M11 7v10l-6-5 6-5zm1 5a5 5 0 1 1 5 5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      seekForward:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13 7v10l6-5-6-5zm-1 5a5 5 0 1 0-5 5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
     };
 
     function setButtonIcon(button, icon, label, suffix) {
@@ -1274,6 +1414,20 @@
         .replace(/'/g, "&#39;");
     }
 
+    function setAvatar(element, url) {
+      if (!element) {
+        return;
+      }
+      const clean = String(url || "").trim();
+      if (clean) {
+        element.style.backgroundImage = "url('" + clean + "')";
+        element.classList.add("avatar-image");
+      } else {
+        element.style.backgroundImage = "";
+        element.classList.remove("avatar-image");
+      }
+    }
+
     function initControlIcons() {
       setButtonIcon(ui.volumeDown, icons.minus, "Volume down");
       setButtonIcon(ui.volumeUp, icons.plus, "Volume up");
@@ -1284,6 +1438,9 @@
       setButtonIcon(ui.autoNextToggle, icons.autoNext, "Auto next off");
       setButtonIcon(ui.playToggle, icons.play, "Play");
       setButtonIcon(ui.muteToggle, icons.mute, "Mute");
+      setButtonIcon(ui.controlsFullscreen, icons.fullscreen, "Fullscreen");
+      setButtonIcon(ui.controlsSeekBack, icons.seekBack, "Back 30 seconds");
+      setButtonIcon(ui.controlsSeekForward, icons.seekForward, "Forward 30 seconds");
       setButtonIcon(ui.viewTheater, icons.theater, "Theater");
       setButtonIcon(ui.viewMini, icons.mini, "Mini player");
       setButtonIcon(ui.uploadOpen, icons.upload, "Add video");
@@ -1440,6 +1597,7 @@
         ui.muteToggle.disabled = true;
         ui.autoNextToggle.disabled = true;
         ui.seekBar.disabled = true;
+        ui.qualitySelect.disabled = true;
         syncVolumeDisplay();
         syncTimelineDisplay();
         return;
@@ -1458,13 +1616,43 @@
       ui.playToggle.disabled = false;
       ui.muteToggle.disabled = false;
       ui.autoNextToggle.disabled = false;
+      ui.qualitySelect.disabled = false;
       syncVolumeDisplay();
       syncTimelineDisplay();
+    }
+
+    function updateFullscreenButton() {
+      const isFull = Boolean(document.fullscreenElement);
+      setButtonIcon(
+        ui.controlsFullscreen,
+        isFull ? icons.exitFullscreen : icons.fullscreen,
+        isFull ? "Exit fullscreen" : "Fullscreen"
+      );
+      document.body.classList.toggle("fullscreen-mode", isFull);
     }
 
     function updateStatus(label) {
       const title = videos[currentIndex] ? videos[currentIndex].title : "No video";
       ui.statusChip.textContent = label + ": " + title;
+    }
+
+    function updateVideoMeta(video) {
+      if (!video) {
+        ui.videoTitle.textContent = "Select a video";
+        ui.videoStats.textContent = "";
+        ui.channelName.textContent = "";
+        ui.channelSlogan.textContent = "";
+        setAvatar(ui.channelAvatar, "");
+        return;
+      }
+      const durationLabel = video.duration ? formatTime(video.duration) : "--:--";
+      const views = video.views || 0;
+      const hearts = video.hearts || 0;
+      ui.videoTitle.textContent = video.title || "Untitled";
+      ui.videoStats.textContent = views + " views · " + hearts + " hearts · " + durationLabel;
+      ui.channelName.textContent = video.channel_name || "Creator";
+      ui.channelSlogan.textContent = video.channel_slogan || "";
+      setAvatar(ui.channelAvatar, video.channel_avatar);
     }
 
     function updateHeartButton() {
@@ -1516,11 +1704,15 @@
       updateStatus("Loading");
       updateNextUp();
       updateHeartButton();
+      updateVideoMeta(video);
       if (player.loadVideoById) {
         player.loadVideoById(video.youtube_id);
       }
       const res = await apiFetch("/api/videos/" + video.id + "/view", { method: "POST" });
-      if (res.status === 403) {
+      if (res.ok) {
+        video.views = (video.views || 0) + 1;
+        updateVideoMeta(video);
+      } else if (res.status === 403) {
         const data = await res.json();
         setOverlayState(false, false, false);
         updateStatus("Limit reached");
@@ -1543,6 +1735,8 @@
       ui.channelView.setAttribute("aria-hidden", String(!visible));
       ui.feedView.classList.toggle("hidden", visible);
       ui.feedView.setAttribute("aria-hidden", String(visible));
+      ui.viralView.classList.toggle("hidden", visible);
+      ui.viralView.setAttribute("aria-hidden", String(visible));
     }
 
     function buildVideoCard(video) {
@@ -1567,11 +1761,12 @@
       const meta = document.createElement("div");
       meta.className = "card-meta";
       let channelNode;
+      const channelName = video.channel_name || "Creator";
       if (video.channel_role === "artist") {
         const channelButton = document.createElement("button");
         channelButton.type = "button";
         channelButton.className = "link-button";
-        channelButton.textContent = video.channel || "Channel";
+        channelButton.textContent = channelName;
         channelButton.addEventListener("click", (event) => {
           event.stopPropagation();
           openChannel(video.owner_id);
@@ -1579,7 +1774,7 @@
         channelNode = channelButton;
       } else {
         const channelLabel = document.createElement("span");
-        channelLabel.textContent = video.channel || "Channel";
+        channelLabel.textContent = channelName;
         channelNode = channelLabel;
       }
       const details = document.createElement("span");
@@ -1633,12 +1828,13 @@
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
-          escapeHtml(channel.email) +
+          escapeHtml(channel.display_name || "Creator") +
           "</div><div class=\"card-meta\">" +
           escapeHtml(channel.videos) +
           " videos · " +
           escapeHtml(channel.subscribers || 0) +
           " subs</div></div>";
+        setAvatar(row.querySelector(".avatar"), channel.avatar_url);
         const actions = document.createElement("div");
         actions.className = "channel-actions";
         const button = document.createElement("button");
@@ -1672,10 +1868,11 @@
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
-          escapeHtml(channel.email) +
+          escapeHtml(channel.display_name || "Creator") +
           "</div><div class=\"card-meta\">" +
           escapeHtml(channel.subscribers || 0) +
           " subs</div></div>";
+        setAvatar(row.querySelector(".avatar"), channel.avatar_url);
         const actions = document.createElement("div");
         actions.className = "channel-actions";
         const button = document.createElement("button");
@@ -1713,12 +1910,15 @@
         return;
       }
       currentChannel = channelData.channel;
-      ui.channelTitle.textContent = currentChannel.email;
+      ui.channelTitle.textContent = currentChannel.display_name || "Creator";
       ui.channelStats.textContent =
         currentChannel.videos +
         " videos · " +
         currentChannel.subscribers +
         " subs";
+      ui.channelSloganView.textContent = currentChannel.slogan || "";
+      const heroAvatar = ui.channelView.querySelector(".channel-hero .avatar");
+      setAvatar(heroAvatar, currentChannel.avatar_url);
       setButtonIcon(
         ui.channelSubscribe,
         currentChannel.is_subscribed ? icons.check : icons.plus,
@@ -1799,9 +1999,23 @@
       } else if (!videos.length) {
         setOverlayState(false, false, false);
         updateStatus("No video");
+        updateVideoMeta(null);
       }
       pageOffset += batch.length;
       isFetching = false;
+    }
+
+    async function fetchViral() {
+      if (!currentUser) {
+        return;
+      }
+      const res = await apiFetch("/api/viral?limit=8");
+      const data = await res.json();
+      if (!res.ok) {
+        ui.viralGrid.textContent = "Unable to load viral videos.";
+        return;
+      }
+      renderVideoGrid(data.videos || [], ui.viralGrid, false, "No viral videos yet.");
     }
 
     async function fetchChannels() {
@@ -1861,6 +2075,7 @@
           await fetchMe();
           await fetchChannels();
           await fetchTopics();
+          await fetchViral();
           await fetchVideos("", true);
         });
       } catch (err) {
@@ -2036,6 +2251,7 @@
       closeModal(ui.uploadModal);
       await fetchVideos(ui.searchInput.value.trim());
       await fetchChannels();
+      await fetchViral();
       await fetchTopics();
       ui.uploadMessage.textContent = "";
     }
@@ -2071,8 +2287,29 @@
           escapeHtml(user.email) +
           "</div><div class=\"card-meta\">" +
           escapeHtml(user.role) +
+          " · " +
+          (user.firebase_uid ? "UID: " + escapeHtml(user.firebase_uid) : "UID: -") +
+          " · " +
+          "Plan: " +
+          escapeHtml(user.plan || "free") +
           "</div></div>";
+        const planButton = document.createElement("button");
+        planButton.type = "button";
+        planButton.className = "pill";
+        planButton.textContent = (user.plan || "free") === "pro" ? "Set Free" : "Set Pro";
+        planButton.addEventListener("click", async () => {
+          const nextPlan = (user.plan || "free") === "pro" ? "free" : "pro";
+          const planRes = await apiFetch("/api/admin/plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id, plan: nextPlan })
+          });
+          if (planRes.ok) {
+            openAdmin();
+          }
+        });
         row.appendChild(button);
+        row.appendChild(planButton);
         ui.adminList.appendChild(row);
       });
       const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
@@ -2196,6 +2433,13 @@
       ui.statsSummary.textContent = "Loading...";
       ui.artistStats.innerHTML = "";
       ui.manageList.innerHTML = "";
+      ui.profileMessage.textContent = "";
+      if (currentUser && (currentUser.role === "artist" || currentUser.role === "admin")) {
+        ui.profileForm.style.display = "grid";
+        await loadProfile();
+      } else {
+        ui.profileForm.style.display = "none";
+      }
       const statsRes = await apiFetch("/api/stats");
       const statsData = await statsRes.json();
       if (statsRes.ok && statsData.totals) {
@@ -2273,6 +2517,38 @@
         ui.manageList.textContent = "No videos yet.";
       }
       openModal(ui.studioModal);
+    }
+
+    async function loadProfile() {
+      const res = await apiFetch("/api/profile");
+      const data = await res.json();
+      if (!res.ok) {
+        ui.profileMessage.textContent = data.error || "Unable to load profile.";
+        return;
+      }
+      ui.profileName.value = data.profile?.display_name || "";
+      ui.profileSlogan.value = data.profile?.slogan || "";
+      ui.profileAvatar.value = data.profile?.avatar_url || "";
+    }
+
+    async function saveProfile(event) {
+      event.preventDefault();
+      ui.profileMessage.textContent = "";
+      const displayName = ui.profileName.value.trim();
+      const slogan = ui.profileSlogan.value.trim();
+      const avatarUrl = ui.profileAvatar.value.trim();
+      const res = await apiFetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName, slogan, avatarUrl })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        ui.profileMessage.textContent = data.error || "Unable to save profile.";
+        return;
+      }
+      ui.profileMessage.textContent = "Profile saved.";
+      fetchChannels();
     }
 
     async function openSettings() {
@@ -2629,6 +2905,39 @@
       syncControlLabels();
     }
 
+    function toggleFullscreen() {
+      const container = document.getElementById("player-shell");
+      if (!document.fullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        }
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    function setQuality() {
+      if (!player || !player.setPlaybackQuality) {
+        return;
+      }
+      const value = ui.qualitySelect.value;
+      if (value === "default") {
+        return;
+      }
+      player.setPlaybackQuality(value);
+    }
+
+    function seekBy(seconds) {
+      if (!player || !player.getCurrentTime || !player.seekTo) {
+        return;
+      }
+      const current = player.getCurrentTime();
+      const duration = player.getDuration ? player.getDuration() : 0;
+      const next = Math.max(0, Math.min(duration || current + seconds, current + seconds));
+      player.seekTo(next, true);
+      syncTimelineDisplay();
+    }
+
     async function toggleHeart() {
       if (!currentUser) {
         lockApp("Please sign in to continue.");
@@ -2645,6 +2954,7 @@
       currentVideo.hearts = data.hearts;
       currentVideo.liked = data.liked;
       updateHeartButton();
+      updateVideoMeta(currentVideo);
     }
 
     ui.searchForm.addEventListener("submit", (event) => {
@@ -2694,6 +3004,7 @@
     ui.verifyResend.addEventListener("click", resendVerification);
     ui.uploadForm.addEventListener("submit", handleUpload);
     ui.settingsForm.addEventListener("submit", saveSettings);
+    ui.profileForm.addEventListener("submit", saveProfile);
     ui.signoutForm.addEventListener("submit", confirmSignout);
     ui.reportForm.addEventListener("submit", submitReport);
 
@@ -2702,6 +3013,10 @@
     ui.volumeDown.addEventListener("click", () => changeVolume(-10));
     ui.volumeUp.addEventListener("click", () => changeVolume(10));
     ui.autoNextToggle.addEventListener("click", toggleAutoNext);
+    ui.controlsFullscreen.addEventListener("click", toggleFullscreen);
+    ui.qualitySelect.addEventListener("change", setQuality);
+    ui.controlsSeekBack.addEventListener("click", () => seekBy(-30));
+    ui.controlsSeekForward.addEventListener("click", () => seekBy(30));
     ui.controlsHeart.addEventListener("click", toggleHeart);
     ui.controlsReport.addEventListener("click", openReport);
     document.querySelectorAll("[data-action='replay']").forEach((button) => {
@@ -2731,10 +3046,13 @@
       });
     });
 
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+
     const storedTheme = localStorage.getItem("theme") || "light";
     setTheme(storedTheme);
     setView("default");
     initControlIcons();
+    updateFullscreenButton();
 
     ui.loadMore.addEventListener("click", () => {
       if (hasMore) {
