@@ -400,6 +400,15 @@ export default {
     }
 
     if (path === "/channels" && request.method === "GET") {
+      const search = url.searchParams.get("search") || "";
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      let where = "WHERE users.role = 'artist'";
+      const binds = [];
+      if (search) {
+        where += " AND (users.display_name LIKE ? OR users.slogan LIKE ?)";
+        binds.push("%" + search + "%", "%" + search + "%");
+      }
       const result = await env.DB.prepare(
         "SELECT users.id, users.role, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as display_name, " +
@@ -409,18 +418,22 @@ export default {
           "FROM users " +
           "LEFT JOIN videos ON users.id = videos.owner_id " +
           "LEFT JOIN subscriptions ON subscriptions.channel_id = users.id " +
-          "WHERE users.role = 'artist' " +
-          "GROUP BY users.id ORDER BY videos DESC, users.created_at DESC"
-      ).all();
+          where +
+          " GROUP BY users.id ORDER BY videos DESC, users.created_at DESC LIMIT ? OFFSET ?"
+      )
+        .bind(...binds, limit + 1, offset)
+        .all();
       const subs = await env.DB.prepare("SELECT channel_id FROM subscriptions WHERE user_id = ?")
         .bind(user.id)
         .all();
       const subscribed = new Set(subs.results.map((row) => row.channel_id));
-      const channels = result.results.map((channel) => ({
+      const rows = result.results || [];
+      const hasMore = rows.length > limit;
+      const channels = rows.slice(0, limit).map((channel) => ({
         ...channel,
         is_subscribed: subscribed.has(channel.id)
       }));
-      return jsonResponse({ channels }, 200, withCors({}, origin));
+      return jsonResponse({ channels, hasMore }, 200, withCors({}, origin));
     }
 
     if (path.startsWith("/channels/") && request.method === "GET") {
@@ -456,10 +469,31 @@ export default {
       if (!requireRole(user, "admin")) {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
+      const search = url.searchParams.get("search") || "";
+      const role = url.searchParams.get("role") || "";
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      let where = "WHERE 1=1";
+      const binds = [];
+      if (role) {
+        where += " AND role = ?";
+        binds.push(role);
+      }
+      if (search) {
+        where += " AND (email LIKE ? OR display_name LIKE ? OR firebase_uid LIKE ?)";
+        binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
+      }
       const result = await env.DB.prepare(
-        "SELECT id, email, role, plan, firebase_uid, created_at FROM users ORDER BY created_at DESC"
-      ).all();
-      return jsonResponse({ users: result.results || [] }, 200, withCors({}, origin));
+        "SELECT id, email, role, plan, display_name, avatar_url, firebase_uid, created_at " +
+          "FROM users " +
+          where +
+          " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+      )
+        .bind(...binds, limit + 1, offset)
+        .all();
+      const rows = result.results || [];
+      const hasMore = rows.length > limit;
+      return jsonResponse({ users: rows.slice(0, limit), hasMore }, 200, withCors({}, origin));
     }
 
     if (path === "/admin/grant-artist" && request.method === "POST") {
@@ -578,18 +612,36 @@ export default {
 
     if (path === "/videos/manage" && request.method === "GET") {
       const ownerId = url.searchParams.get("ownerId") || "";
+      const search = url.searchParams.get("search") || "";
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      let where = "WHERE 1=1";
+      const binds = [];
+      if (ownerId) {
+        where += " AND videos.owner_id = ?";
+        binds.push(ownerId);
+      }
+      if (search) {
+        where += " AND (videos.title LIKE ? OR videos.youtube_url LIKE ? OR users.email LIKE ? OR users.display_name LIKE ?)";
+        binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%", "%" + search + "%");
+      }
       const query =
         user.role === "admin"
-          ? "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id" +
-            (ownerId ? " WHERE owner_id = ?" : "") +
-            " ORDER BY videos.created_at DESC"
-          : "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
+          ? "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel " +
+            "FROM videos JOIN users ON videos.owner_id = users.id " +
+            where +
+            " ORDER BY videos.created_at DESC LIMIT ? OFFSET ?"
+          : "SELECT videos.*, CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel " +
+            "FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
       const result = user.role === "admin"
-        ? (ownerId
-          ? await env.DB.prepare(query).bind(ownerId).all()
-          : await env.DB.prepare(query).all())
+        ? await env.DB.prepare(query).bind(...binds, limit + 1, offset).all()
         : await env.DB.prepare(query).bind(user.id).all();
-      return jsonResponse({ videos: result.results || [] }, 200, withCors({}, origin));
+      if (user.role !== "admin") {
+        return jsonResponse({ videos: result.results || [] }, 200, withCors({}, origin));
+      }
+      const rows = result.results || [];
+      const hasMore = rows.length > limit;
+      return jsonResponse({ videos: rows.slice(0, limit), hasMore }, 200, withCors({}, origin));
     }
 
     if (path.startsWith("/videos/") && request.method === "DELETE") {
@@ -642,6 +694,14 @@ export default {
       const youtubeUrl = body.youtubeUrl || "";
       const youtubeId = extractYouTubeId(youtubeUrl);
       if (!youtubeId) return jsonResponse({ error: "Valid YouTube URL required." }, 400, withCors({}, origin));
+      const exists = await env.DB.prepare(
+        "SELECT id FROM videos WHERE youtube_id = ? AND owner_id = ?"
+      )
+        .bind(youtubeId, user.id)
+        .first();
+      if (exists) {
+        return jsonResponse({ error: "You already uploaded this video." }, 409, withCors({}, origin));
+      }
       const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
       const language = (body.language || "unspecified").toLowerCase();
       const languages = normalizeLanguages(body.languages);

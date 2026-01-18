@@ -9,17 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Bubblegum+Sans&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #fff5ec;
+      --bg: #fff9e8;
       --bg-alt: #ffffff;
-      --bg-soft: #ffeedd;
-      --ink: #201c1a;
-      --muted: #7c6a60;
-      --stroke: #f3dcc6;
-      --accent: #ff7a59;
-      --accent-2: #3abcc4;
-      --accent-3: #ffd26f;
-      --accent-4: #9c7dff;
-      --shadow: 0 20px 40px rgba(34, 22, 15, 0.18);
+      --bg-soft: #fff0c9;
+      --ink: #241a12;
+      --muted: #7a6154;
+      --stroke: #ffd89a;
+      --accent: #ff3b30;
+      --accent-2: #1e88ff;
+      --accent-3: #ffd500;
+      --accent-4: #22c55e;
+      --shadow: 0 22px 44px rgba(36, 20, 6, 0.2);
       --radius-lg: 34px;
       --radius-md: 24px;
       --radius-sm: 18px;
@@ -29,31 +29,31 @@
     }
 
     body[data-theme="dark"] {
-      --bg: #161322;
-      --bg-alt: #221b34;
-      --bg-soft: #2a233f;
-      --ink: #f8f2ec;
-      --muted: #d1c4ba;
+      --bg: #151126;
+      --bg-alt: #201a36;
+      --bg-soft: #2a2247;
+      --ink: #fff4e6;
+      --muted: #d9c6bb;
       --stroke: #3b2f52;
-      --accent: #ff8a6a;
-      --accent-2: #59d3db;
-      --accent-3: #ffd576;
-      --accent-4: #b08bff;
-      --shadow: 0 24px 50px rgba(6, 6, 10, 0.5);
+      --accent: #ff5b5b;
+      --accent-2: #4da3ff;
+      --accent-3: #ffd500;
+      --accent-4: #35d27a;
+      --shadow: 0 24px 50px rgba(6, 6, 12, 0.5);
     }
 
     body[data-theme="party"] {
-      --bg: #fff2ff;
+      --bg: #fff0fb;
       --bg-alt: #ffffff;
-      --bg-soft: #ffe9f7;
-      --ink: #2b1e33;
-      --muted: #8f6b8b;
-      --stroke: #ffd6ef;
-      --accent: #ff6bb7;
-      --accent-2: #32c9ff;
-      --accent-3: #ffd36a;
-      --accent-4: #7bffb2;
-      --shadow: 0 22px 44px rgba(54, 26, 58, 0.18);
+      --bg-soft: #ffe4f5;
+      --ink: #2b1830;
+      --muted: #8d6a8b;
+      --stroke: #ffc6ea;
+      --accent: #ff3ea5;
+      --accent-2: #00c2ff;
+      --accent-3: #ffd400;
+      --accent-4: #5bff9a;
+      --shadow: 0 22px 44px rgba(55, 20, 58, 0.2);
     }
 
     * {
@@ -64,11 +64,12 @@
       margin: 0;
       font-family: var(--font-base);
       background:
-        radial-gradient(4px 4px at 20px 20px, rgba(255, 210, 111, 0.25) 40%, transparent 45%),
-        radial-gradient(4px 4px at 50px 60px, rgba(58, 188, 196, 0.2) 40%, transparent 45%),
-        radial-gradient(700px 500px at 10% 15%, rgba(255, 210, 111, 0.45) 0%, transparent 60%),
-        radial-gradient(650px 450px at 85% 10%, rgba(88, 201, 214, 0.35) 0%, transparent 55%),
-        radial-gradient(700px 500px at 90% 80%, rgba(156, 125, 255, 0.25) 0%, transparent 60%),
+        radial-gradient(6px 6px at 12% 18%, rgba(255, 213, 0, 0.22) 40%, transparent 45%),
+        radial-gradient(6px 6px at 80% 20%, rgba(30, 136, 255, 0.18) 40%, transparent 45%),
+        radial-gradient(6px 6px at 50% 80%, rgba(34, 197, 94, 0.16) 40%, transparent 45%),
+        radial-gradient(700px 500px at 10% 15%, rgba(255, 213, 0, 0.35) 0%, transparent 60%),
+        radial-gradient(650px 450px at 85% 10%, rgba(30, 136, 255, 0.25) 0%, transparent 55%),
+        radial-gradient(700px 500px at 90% 80%, rgba(255, 59, 48, 0.2) 0%, transparent 60%),
         var(--bg);
       color: var(--ink);
       min-height: 100vh;
@@ -76,11 +77,12 @@
 
     body[data-theme="dark"] {
       background:
-        radial-gradient(4px 4px at 20px 20px, rgba(255, 138, 106, 0.18) 40%, transparent 45%),
-        radial-gradient(4px 4px at 50px 60px, rgba(89, 211, 219, 0.14) 40%, transparent 45%),
-        radial-gradient(700px 500px at 10% 15%, rgba(255, 138, 106, 0.22) 0%, transparent 60%),
-        radial-gradient(650px 450px at 85% 10%, rgba(89, 211, 219, 0.18) 0%, transparent 55%),
-        radial-gradient(700px 500px at 90% 80%, rgba(176, 139, 255, 0.18) 0%, transparent 60%),
+        radial-gradient(6px 6px at 12% 18%, rgba(255, 213, 0, 0.15) 40%, transparent 45%),
+        radial-gradient(6px 6px at 80% 20%, rgba(30, 136, 255, 0.16) 40%, transparent 45%),
+        radial-gradient(6px 6px at 50% 80%, rgba(53, 210, 122, 0.14) 40%, transparent 45%),
+        radial-gradient(700px 500px at 10% 15%, rgba(255, 91, 91, 0.2) 0%, transparent 60%),
+        radial-gradient(650px 450px at 85% 10%, rgba(77, 163, 255, 0.18) 0%, transparent 55%),
+        radial-gradient(700px 500px at 90% 80%, rgba(53, 210, 122, 0.18) 0%, transparent 60%),
         var(--bg);
     }
 
@@ -168,6 +170,15 @@
       letter-spacing: 0.03em;
     }
 
+    .logo-image {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: #fff6d1;
+      border: 2px solid var(--stroke);
+    }
+
     .logo-mark {
       width: 20px;
       height: 20px;
@@ -243,6 +254,13 @@
       cursor: pointer;
       font-weight: 600;
       font-size: 0.85rem;
+    }
+
+    .contact-button {
+      background: #fbbc04;
+      color: #3a2a00;
+      border-color: #f7c948;
+      box-shadow: 0 12px 20px rgba(251, 188, 4, 0.3);
     }
 
     .pill.active {
@@ -973,7 +991,7 @@
   <div class="app">
     <header>
       <div class="logo">
-        <span class="logo-mark" aria-hidden="true"></span>
+        <img src="logo.png" alt="Sevimli Aile logo" class="logo-image">
         <span>Sevimli Aile</span>
       </div>
       <form class="search" id="search-form" role="search">
@@ -998,10 +1016,12 @@
           </select>
         </div>
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
+        <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
         <button class="pill icon-button" id="view-theater" type="button" aria-label="Theater"></button>
         <button class="pill icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
         <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
         <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
+        <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
         <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
         <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
         <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
@@ -1017,7 +1037,14 @@
           <div id="subscribed-list" class="form-grid"></div>
         </div>
         <div class="sidebar-section">
-          <h3 data-i18n="sidebar_channels">Channels</h3>
+          <div class="section-head">
+            <h3 data-i18n="sidebar_channels">Channels</h3>
+            <button class="pill icon-button" id="channels-open" type="button" aria-label="All channels" data-i18n-aria="channels_open">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
           <div id="channel-list" class="form-grid"></div>
         </div>
       </aside>
@@ -1027,7 +1054,7 @@
           <div class="player-shell" id="player-shell" data-state="loading">
             <div class="player-ratio">
               <div id="player" aria-label="YouTube player"></div>
-              <div class="status-chip" id="status-chip" data-i18n="status_loading">Loading</div>
+              <div class="status-chip hidden" id="status-chip" data-i18n="status_loading">Loading</div>
               <div class="overlay loading active" id="loading-layer">
                 <div class="loader" aria-hidden="true"></div>
                 <p data-i18n="player_loading">Loading player...</p>
@@ -1164,6 +1191,44 @@
           <div class="load-more">
             <div class="card-meta" data-i18n="feed_load_hint">More videos below</div>
             <button class="ghost" id="search-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
+        <section class="recommendations hidden" id="channels-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="channels_title">Channels</h2>
+            <button class="pill icon-button" id="channels-back" type="button" aria-label="Back to feed" data-i18n-aria="channels_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="section-actions">
+            <span class="section-hint" data-i18n="channels_search_hint">Find a channel</span>
+            <input id="channels-search" type="search" placeholder="Search channels" data-i18n-placeholder="channels_search_placeholder">
+          </div>
+          <div class="form-grid" id="channels-page-list"></div>
+          <div class="load-more">
+            <button class="ghost" id="channels-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
+        <section class="recommendations hidden" id="admin-videos-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_videos_page_title">Admin videos</h2>
+            <button class="pill icon-button" id="admin-videos-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="section-actions">
+            <span class="section-hint" data-i18n="admin_videos_hint">All videos</span>
+            <input id="admin-videos-search" type="search" placeholder="Search videos" data-i18n-placeholder="admin_videos_search">
+          </div>
+          <div class="form-grid" id="admin-videos-page-list"></div>
+          <div class="load-more">
+            <button class="ghost" id="admin-videos-load-more" type="button" data-i18n="feed_load_more">Load more</button>
           </div>
         </section>
 
@@ -1435,6 +1500,19 @@
     </div>
   </div>
 
+  <div class="modal" id="contact-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2 data-i18n="contact_title">Contact</h2>
+      <div class="form-grid">
+        <a class="pill contact-button contact-link" href="https://wa.me/994554195347" target="_blank" rel="noopener" data-i18n="contact_whatsapp">WhatsApp: +994554195347</a>
+        <a class="pill contact-button contact-link" href="https://instagram.com/islammuradovtahir" target="_blank" rel="noopener" data-i18n="contact_instagram">@islammuradovtahir</a>
+      </div>
+      <div class="form-actions">
+        <button class="ghost" type="button" data-close="contact-modal" data-i18n="action_close">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script>
@@ -1450,6 +1528,12 @@
       searchForm: document.getElementById("search-form"),
       searchInput: document.getElementById("search-input"),
       channelList: document.getElementById("channel-list"),
+      channelsOpen: document.getElementById("channels-open"),
+      channelsPage: document.getElementById("channels-page"),
+      channelsPageList: document.getElementById("channels-page-list"),
+      channelsSearch: document.getElementById("channels-search"),
+      channelsLoadMore: document.getElementById("channels-load-more"),
+      channelsBack: document.getElementById("channels-back"),
       subscribedList: document.getElementById("subscribed-list"),
       recommendations: document.getElementById("recommendations-grid"),
       loadMore: document.getElementById("load-more"),
@@ -1463,6 +1547,11 @@
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
       channelView: document.getElementById("channel-view"),
+      adminVideosPage: document.getElementById("admin-videos-page"),
+      adminVideosPageList: document.getElementById("admin-videos-page-list"),
+      adminVideosSearchPage: document.getElementById("admin-videos-search"),
+      adminVideosLoadMore: document.getElementById("admin-videos-load-more"),
+      adminVideosBack: document.getElementById("admin-videos-back"),
       channelTitle: document.getElementById("channel-title"),
       channelStats: document.getElementById("channel-stats"),
       channelSloganView: document.getElementById("channel-slogan-view"),
@@ -1497,9 +1586,11 @@
       authLogout: document.getElementById("auth-logout"),
       uploadOpen: document.getElementById("upload-open"),
       adminOpen: document.getElementById("admin-open"),
+      adminVideosOpen: document.getElementById("admin-videos-open"),
       studioOpen: document.getElementById("studio-open"),
       settingsOpen: document.getElementById("settings-open"),
       notificationsOpen: document.getElementById("notifications-open"),
+      contactOpen: document.getElementById("contact-open"),
       loginForm: document.getElementById("login-form"),
       registerForm: document.getElementById("register-form"),
       verifyResend: document.getElementById("verify-resend"),
@@ -1562,6 +1653,7 @@
       reportMessage: document.getElementById("report-message"),
       notificationsModal: document.getElementById("notifications-modal"),
       notificationsList: document.getElementById("notifications-list"),
+      contactModal: document.getElementById("contact-modal"),
       signoutModal: document.getElementById("signout-modal"),
       signoutForm: document.getElementById("signout-form"),
       signoutMessage: document.getElementById("signout-message")
@@ -1660,6 +1752,11 @@
         search_results: "Results for",
         search_title: "Search results",
         search_back: "Back to feed",
+        channels_open: "All channels",
+        channels_title: "Channels",
+        channels_back: "Back to feed",
+        channels_search_hint: "Find a channel",
+        channels_search_placeholder: "Search channels",
         auth_welcome: "Welcome to Sevimli Aile",
         auth_subtitle: "Log in or create an account to start watching.",
         auth_email: "Email",
@@ -1804,10 +1901,16 @@
         control_party_mode: "Party mode",
         control_start: "Start video",
         control_heart_loved: "Loved",
+        contact_button: "CONTACT BUTTON FOR EVERYTHING",
+        contact_title: "Contact",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "Grant artist",
         admin_make_artist: "Make artist",
         admin_make_user: "Make user",
         admin_stats: "Stats",
+        admin_videos_open: "Admin videos",
+        admin_videos_page_title: "Admin videos",
         admin_set_free: "Set Free",
         admin_set_pro: "Set Pro",
         admin_tab_overview: "Overview",
@@ -1893,6 +1996,11 @@
         search_results: "Результаты для",
         search_title: "Результаты поиска",
         search_back: "Назад к ленте",
+        channels_open: "Все каналы",
+        channels_title: "Каналы",
+        channels_back: "Назад к ленте",
+        channels_search_hint: "Найти канал",
+        channels_search_placeholder: "Поиск каналов",
         auth_welcome: "Добро пожаловать в Sevimli Aile",
         auth_subtitle: "Войдите или создайте аккаунт, чтобы смотреть.",
         auth_email: "Эл. почта",
@@ -2037,10 +2145,16 @@
         control_party_mode: "Праздничный режим",
         control_start: "Начать видео",
         control_heart_loved: "Люблю",
+        contact_button: "КНОПКА СВЯЗИ ПО ЛЮБЫМ ВОПРОСАМ",
+        contact_title: "Связаться",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "Дать роль автора",
         admin_make_artist: "Сделать автором",
         admin_make_user: "Сделать пользователем",
         admin_stats: "Статистика",
+        admin_videos_open: "Видео админа",
+        admin_videos_page_title: "Видео админа",
         admin_set_free: "Сделать Free",
         admin_set_pro: "Сделать Pro",
         admin_tab_overview: "Обзор",
@@ -2126,6 +2240,11 @@
         search_results: "搜索结果：",
         search_title: "搜索结果",
         search_back: "返回首页",
+        channels_open: "全部频道",
+        channels_title: "频道",
+        channels_back: "返回首页",
+        channels_search_hint: "查找频道",
+        channels_search_placeholder: "搜索频道",
         auth_welcome: "欢迎来到 Sevimli Aile",
         auth_subtitle: "登录或注册即可观看。",
         auth_email: "邮箱",
@@ -2270,10 +2389,16 @@
         control_party_mode: "缤纷模式",
         control_start: "开始播放",
         control_heart_loved: "已喜欢",
+        contact_button: "联系按钮（任何问题）",
+        contact_title: "联系",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "授予作者权限",
         admin_make_artist: "设为作者",
         admin_make_user: "设为用户",
         admin_stats: "统计",
+        admin_videos_open: "管理视频",
+        admin_videos_page_title: "管理视频",
         admin_set_free: "设为免费",
         admin_set_pro: "设为专业",
         admin_tab_overview: "概览",
@@ -2359,6 +2484,11 @@
         search_results: "Arama sonuçları:",
         search_title: "Arama sonuçları",
         search_back: "Akışa dön",
+        channels_open: "Tüm kanallar",
+        channels_title: "Kanallar",
+        channels_back: "Akışa dön",
+        channels_search_hint: "Kanal bul",
+        channels_search_placeholder: "Kanal ara",
         auth_welcome: "Sevimli Aile'e hoş geldiniz",
         auth_subtitle: "İzlemeye başlamak için giriş yapın veya hesap oluşturun.",
         auth_email: "E-posta",
@@ -2503,10 +2633,16 @@
         control_party_mode: "Eğlenceli mod",
         control_start: "Videoyu başlat",
         control_heart_loved: "Sevildi",
+        contact_button: "HER ŞEY İÇİN İLETİŞİM DÜĞMESİ",
+        contact_title: "İletişim",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "Sanatçı rolü ver",
         admin_make_artist: "Sanatçı yap",
         admin_make_user: "Kullanıcı yap",
         admin_stats: "İstatistikler",
+        admin_videos_open: "Video yönetimi",
+        admin_videos_page_title: "Video yönetimi",
         admin_set_free: "Ücretsiz yap",
         admin_set_pro: "Pro yap",
         admin_tab_overview: "Genel",
@@ -2592,6 +2728,11 @@
         search_results: "Axtarış nəticələri:",
         search_title: "Axtarış nəticələri",
         search_back: "Lentə qayıt",
+        channels_open: "Bütün kanallar",
+        channels_title: "Kanallar",
+        channels_back: "Lentə qayıt",
+        channels_search_hint: "Kanal tap",
+        channels_search_placeholder: "Kanal axtar",
         auth_welcome: "Sevimli Aile-ə xoş gəldiniz",
         auth_subtitle: "İzləmək üçün daxil olun və ya hesab yaradın.",
         auth_email: "Email",
@@ -2736,10 +2877,16 @@
         control_party_mode: "Şən rejim",
         control_start: "Videonu başladın",
         control_heart_loved: "Sevildi",
+        contact_button: "HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ",
+        contact_title: "Əlaqə",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "Artist rolu ver",
         admin_make_artist: "Artist et",
         admin_make_user: "İstifadəçi et",
         admin_stats: "Statistika",
+        admin_videos_open: "Video idarəetmə",
+        admin_videos_page_title: "Video idarəetmə",
         admin_set_free: "Free et",
         admin_set_pro: "Pro et",
         admin_tab_overview: "Ümumi",
@@ -2825,6 +2972,11 @@
         search_results: "نتائج البحث عن",
         search_title: "نتائج البحث",
         search_back: "العودة للرئيسية",
+        channels_open: "كل القنوات",
+        channels_title: "القنوات",
+        channels_back: "العودة للرئيسية",
+        channels_search_hint: "ابحث عن قناة",
+        channels_search_placeholder: "ابحث عن القنوات",
         auth_welcome: "مرحباً بك في Sevimli Aile",
         auth_subtitle: "سجّل الدخول أو أنشئ حساباً لبدء المشاهدة.",
         auth_email: "البريد الإلكتروني",
@@ -2969,10 +3121,16 @@
         control_party_mode: "وضع المرح",
         control_start: "بدء الفيديو",
         control_heart_loved: "أُعجب به",
+        contact_button: "زر التواصل لكل شيء",
+        contact_title: "تواصل",
+        contact_whatsapp: "WhatsApp: +994554195347",
+        contact_instagram: "Instagram: @islammuradovtahir",
         admin_grant_artist: "منح دور فنان",
         admin_make_artist: "تحويل إلى فنان",
         admin_make_user: "تحويل إلى مستخدم",
         admin_stats: "الإحصاءات",
+        admin_videos_open: "إدارة الفيديوهات",
+        admin_videos_page_title: "إدارة الفيديوهات",
         admin_set_free: "تعيين مجاني",
         admin_set_pro: "تعيين برو",
         admin_tab_overview: "نظرة عامة",
@@ -3116,6 +3274,7 @@
       setButtonIcon(ui.viewMini, icons.mini, "control_mini");
       setButtonIcon(ui.uploadOpen, icons.upload, "control_add_video");
       setButtonIcon(ui.adminOpen, icons.admin, "control_admin");
+      setButtonIcon(ui.adminVideosOpen, icons.admin, "admin_videos_open");
       setButtonIcon(ui.studioOpen, icons.studio, "control_studio");
       setButtonIcon(ui.settingsOpen, icons.settings, "control_settings");
       setButtonIcon(ui.notificationsOpen, icons.bell, "control_updates");
@@ -3147,6 +3306,10 @@
     let searchOffset = 0;
     let searchHasMore = true;
     let searchFetching = false;
+    let channelsQuery = "";
+    let channelsOffset = 0;
+    let channelsHasMore = true;
+    let channelsFetching = false;
     let firebaseAuth = null;
     let firebaseUser = null;
     let availableTopics = [];
@@ -3154,6 +3317,10 @@
     let adminUsersData = [];
     let adminChannelsData = [];
     let adminVideosData = [];
+    let adminVideosQuery = "";
+    let adminVideosOffset = 0;
+    let adminVideosHasMore = true;
+    let adminVideosFetching = false;
 
     function setTheme(theme) {
       const next = theme || "light";
@@ -3182,6 +3349,8 @@
       const showFeed = view === "feed";
       const showChannel = view === "channel";
       const showSearch = view === "search";
+      const showChannels = view === "channels";
+      const showAdminVideos = view === "admin-videos";
       ui.feedView.classList.toggle("hidden", !showFeed);
       ui.feedView.setAttribute("aria-hidden", String(!showFeed));
       ui.viralView.classList.toggle("hidden", !showFeed);
@@ -3190,7 +3359,21 @@
       ui.channelView.setAttribute("aria-hidden", String(!showChannel));
       ui.searchView.classList.toggle("hidden", !showSearch);
       ui.searchView.setAttribute("aria-hidden", String(!showSearch));
-      ui.playerArea.classList.toggle("hidden", showChannel || showSearch);
+      ui.channelsPage.classList.toggle("hidden", !showChannels);
+      ui.channelsPage.setAttribute("aria-hidden", String(!showChannels));
+      ui.adminVideosPage.classList.toggle("hidden", !showAdminVideos);
+      ui.adminVideosPage.setAttribute("aria-hidden", String(!showAdminVideos));
+      const hidePlayer = showChannel || showSearch || showChannels || showAdminVideos;
+      ui.playerArea.classList.toggle("hidden", hidePlayer);
+      ui.playerArea.style.display = hidePlayer ? "none" : "grid";
+      if (hidePlayer && player && player.pauseVideo) {
+        player.pauseVideo();
+      }
+      if (hidePlayer) {
+        currentVideo = null;
+        updateVideoMeta(null);
+        setOverlayState(false, false, false);
+      }
       if (showFeed) {
         updateSearchContext(ui.searchInput.value.trim());
       }
@@ -3566,48 +3749,65 @@
       });
     }
 
-    function renderChannels(channels) {
-      ui.channelList.innerHTML = "";
+    function createChannelRow(channel) {
+      const isSubscribed = channel.is_subscribed;
+      const row = document.createElement("div");
+      row.className = "channel";
+      row.addEventListener("click", () => openChannel(channel.id));
+      row.innerHTML =
+        "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+        "<div><div class=\"channel-name\">" +
+        escapeHtml(channel.display_name || t("label_creator")) +
+        "</div><div class=\"card-meta\">" +
+        escapeHtml(channel.videos) +
+        " " +
+        t("label_videos") +
+        " · " +
+        escapeHtml(channel.subscribers || 0) +
+        " " +
+        t("label_subs") +
+        "</div></div>";
+      setAvatar(row.querySelector(".avatar"), channel.avatar_url);
+      const actions = document.createElement("div");
+      actions.className = "channel-actions";
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pill icon-button";
+      setButtonIcon(
+        button,
+        isSubscribed ? icons.check : icons.plus,
+        isSubscribed ? "label_subscribed" : "label_subscribe"
+      );
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleSubscription(channel.id);
+      });
+      actions.appendChild(button);
+      row.appendChild(actions);
+      return row;
+    }
+
+    function renderChannels(channels, container = ui.channelList) {
+      container.innerHTML = "";
       if (!channels.length) {
-        ui.channelList.textContent = t("message_no_channels");
+        container.textContent = t("message_no_channels");
         return;
       }
       channels.forEach((channel) => {
-        const isSubscribed = channel.is_subscribed;
-        const row = document.createElement("div");
-        row.className = "channel";
-        row.addEventListener("click", () => openChannel(channel.id));
-        row.innerHTML =
-          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
-          "<div><div class=\"channel-name\">" +
-          escapeHtml(channel.display_name || t("label_creator")) +
-          "</div><div class=\"card-meta\">" +
-          escapeHtml(channel.videos) +
-          " " +
-          t("label_videos") +
-          " · " +
-          escapeHtml(channel.subscribers || 0) +
-          " " +
-          t("label_subs") +
-          "</div></div>";
-        setAvatar(row.querySelector(".avatar"), channel.avatar_url);
-        const actions = document.createElement("div");
-        actions.className = "channel-actions";
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "pill icon-button";
-        setButtonIcon(
-          button,
-          isSubscribed ? icons.check : icons.plus,
-          isSubscribed ? "label_subscribed" : "label_subscribe"
-        );
-        button.addEventListener("click", (event) => {
-          event.stopPropagation();
-          toggleSubscription(channel.id);
-        });
-        actions.appendChild(button);
-        row.appendChild(actions);
-        ui.channelList.appendChild(row);
+        container.appendChild(createChannelRow(channel));
+      });
+    }
+
+    function renderChannelsPage(list, append = false) {
+      if (!append) {
+        ui.channelsPageList.innerHTML = "";
+      }
+      if (!list.length && !append) {
+        ui.channelsPageList.textContent = t("message_no_channels");
+        return;
+      }
+      list.forEach((channel) => {
+        ui.channelsPageList.appendChild(createChannelRow(channel));
       });
     }
 
@@ -3853,9 +4053,44 @@
       if (!currentUser) {
         return;
       }
-      const res = await apiFetch("/api/channels");
+      const params = new URLSearchParams();
+      params.set("limit", "20");
+      params.set("offset", "0");
+      const res = await apiFetch("/api/channels?" + params.toString());
       const data = await res.json();
-      renderChannels(data.channels || []);
+      renderChannels(data.channels || [], ui.channelList);
+    }
+
+    async function fetchChannelsPage(query, reset = false) {
+      if (channelsFetching || !currentUser) {
+        return;
+      }
+      channelsFetching = true;
+      if (reset) {
+        channelsOffset = 0;
+        channelsHasMore = true;
+        channelsQuery = query.trim();
+        ui.channelsPageList.innerHTML = t("status_loading");
+      }
+      setPageView("channels");
+      const params = new URLSearchParams();
+      params.set("limit", "24");
+      params.set("offset", String(channelsOffset));
+      if (channelsQuery) {
+        params.set("search", channelsQuery);
+      }
+      const res = await apiFetch("/api/channels?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        channelsFetching = false;
+        return;
+      }
+      const batch = data.channels || [];
+      channelsHasMore = Boolean(data.hasMore);
+      renderChannelsPage(batch, !reset);
+      ui.channelsLoadMore.style.display = channelsHasMore ? "inline-flex" : "none";
+      channelsOffset += batch.length;
+      channelsFetching = false;
     }
 
     async function fetchSubscriptions() {
@@ -4014,6 +4249,7 @@
           ? "inline-flex"
           : "none";
       ui.adminOpen.style.display = currentUser && currentUser.role === "admin" ? "inline-flex" : "none";
+      ui.adminVideosOpen.style.display = currentUser && currentUser.role === "admin" ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.settingsOpen.style.display =
         currentUser && currentUser.plan === "pro" && currentUser.role === "user"
@@ -4153,10 +4389,10 @@
       ui.adminChannelsList.innerHTML = t("status_loading");
       ui.adminVideosList.innerHTML = t("status_loading");
       const [usersRes, reportsRes, statsRes, videosRes] = await Promise.all([
-        apiFetch("/api/users"),
+        apiFetch("/api/users?limit=50&offset=0"),
         apiFetch("/api/reports"),
         apiFetch("/api/stats"),
-        apiFetch("/api/videos/manage")
+        apiFetch("/api/videos/manage?limit=40&offset=0")
       ]);
       const data = await usersRes.json();
       const videosData = await videosRes.json();
@@ -4456,6 +4692,126 @@
       });
     }
 
+    function renderAdminVideosPage(list, append = false) {
+      if (!append) {
+        ui.adminVideosPageList.innerHTML = "";
+      }
+      if (!list.length && !append) {
+        ui.adminVideosPageList.textContent = t("message_no_videos");
+        return;
+      }
+      list.forEach((video) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        const editor = document.createElement("div");
+        editor.className = "form-grid";
+        editor.style.minWidth = "220px";
+        const titleInput = document.createElement("input");
+        titleInput.type = "text";
+        titleInput.value = video.title || "";
+        titleInput.placeholder = t("label_untitled");
+        const topicsInput = document.createElement("input");
+        topicsInput.type = "text";
+        let parsedTopics = [];
+        if (Array.isArray(video.topics)) {
+          parsedTopics = video.topics;
+        } else {
+          try {
+            parsedTopics = video.topics ? JSON.parse(video.topics) : [];
+          } catch (err) {
+            parsedTopics = [];
+          }
+        }
+        topicsInput.value = parsedTopics.join(", ");
+        topicsInput.placeholder = t("upload_topics_placeholder");
+        const languageInput = document.createElement("input");
+        languageInput.type = "text";
+        languageInput.value = (video.language || "");
+        languageInput.placeholder = t("admin_video_language");
+        editor.appendChild(titleInput);
+        editor.appendChild(topicsInput);
+        editor.appendChild(languageInput);
+        row.innerHTML =
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(video.title) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(video.channel || "") +
+          " · " +
+          escapeHtml(video.views || 0) +
+          " " +
+          t("label_views") +
+          "</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "pill";
+        saveBtn.textContent = t("action_save");
+        saveBtn.addEventListener("click", async () => {
+          const topics = topicsInput.value
+            .split(/[|,]/g)
+            .map((topic) => topic.trim())
+            .filter(Boolean);
+          const language = languageInput.value.trim().toLowerCase();
+          const res = await apiFetch("/api/videos/" + video.id + "/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: titleInput.value.trim(), language, topics })
+          });
+          if (res.ok) {
+            fetchAdminVideosPage(adminVideosQuery, true);
+          }
+        });
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "ghost";
+        delBtn.textContent = t("action_delete");
+        delBtn.addEventListener("click", async () => {
+          const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
+          if (res.ok) {
+            fetchAdminVideosPage(adminVideosQuery, true);
+          }
+        });
+        actions.appendChild(saveBtn);
+        actions.appendChild(delBtn);
+        row.appendChild(editor);
+        row.appendChild(actions);
+        ui.adminVideosPageList.appendChild(row);
+      });
+    }
+
+    async function fetchAdminVideosPage(query, reset = false) {
+      if (adminVideosFetching || !currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      adminVideosFetching = true;
+      if (reset) {
+        adminVideosOffset = 0;
+        adminVideosHasMore = true;
+        adminVideosQuery = query.trim();
+        ui.adminVideosPageList.innerHTML = t("status_loading");
+      }
+      setPageView("admin-videos");
+      const params = new URLSearchParams();
+      params.set("limit", "40");
+      params.set("offset", String(adminVideosOffset));
+      if (adminVideosQuery) {
+        params.set("search", adminVideosQuery);
+      }
+      const res = await apiFetch("/api/videos/manage?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        adminVideosFetching = false;
+        return;
+      }
+      const batch = data.videos || [];
+      adminVideosHasMore = Boolean(data.hasMore);
+      renderAdminVideosPage(batch, !reset);
+      ui.adminVideosLoadMore.style.display = adminVideosHasMore ? "inline-flex" : "none";
+      adminVideosOffset += batch.length;
+      adminVideosFetching = false;
+    }
+
     function setAdminTab(tab) {
       ui.adminTabs.forEach((button) => {
         button.classList.toggle("active", button.dataset.adminTab === tab);
@@ -4468,39 +4824,50 @@
       ui.adminImports.classList.toggle("hidden", tab !== "imports");
     }
 
-    function filterAdminUsers() {
-      const query = ui.adminUserSearch.value.trim().toLowerCase();
-      const filtered = !query
-        ? adminUsersData
-        : adminUsersData.filter((user) =>
-          (user.email || "").toLowerCase().includes(query) ||
-          (user.display_name || "").toLowerCase().includes(query) ||
-          (user.firebase_uid || "").toLowerCase().includes(query)
-        );
-      renderAdminUsers(filtered);
+    async function fetchAdminUsersRemote(query, role) {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      params.set("offset", "0");
+      if (query) {
+        params.set("search", query);
+      }
+      if (role) {
+        params.set("role", role);
+      }
+      const res = await apiFetch("/api/users?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        return;
+      }
+      if (role === "artist") {
+        adminChannelsData = data.users || [];
+        renderAdminChannels(adminChannelsData);
+      } else {
+        adminUsersData = data.users || [];
+        renderAdminUsers(adminUsersData);
+      }
     }
 
-    function filterAdminChannels() {
-      const query = ui.adminChannelSearch.value.trim().toLowerCase();
-      const filtered = !query
-        ? adminChannelsData
-        : adminChannelsData.filter((user) =>
-          (user.email || "").toLowerCase().includes(query) ||
-          (user.display_name || "").toLowerCase().includes(query)
-        );
-      renderAdminChannels(filtered);
-    }
-
-    function filterAdminVideos() {
-      const query = ui.adminVideoSearch.value.trim().toLowerCase();
-      const filtered = !query
-        ? adminVideosData
-        : adminVideosData.filter((video) =>
-          (video.title || "").toLowerCase().includes(query) ||
-          (video.channel || "").toLowerCase().includes(query) ||
-          (video.youtube_url || "").toLowerCase().includes(query)
-        );
-      renderAdminVideos(filtered);
+    async function fetchAdminVideosRemote(query) {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("limit", "40");
+      params.set("offset", "0");
+      if (query) {
+        params.set("search", query);
+      }
+      const res = await apiFetch("/api/videos/manage?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        return;
+      }
+      adminVideosData = data.videos || [];
+      renderAdminVideos(adminVideosData);
     }
 
     async function importCsv() {
@@ -5186,12 +5553,37 @@
     ui.studioOpen.addEventListener("click", openStudio);
     ui.settingsOpen.addEventListener("click", openSettings);
     ui.notificationsOpen.addEventListener("click", openNotifications);
+    ui.channelsOpen.addEventListener("click", () => fetchChannelsPage("", true));
+    ui.channelsBack.addEventListener("click", () => setPageView("feed"));
+    ui.channelsSearch.addEventListener("input", () => fetchChannelsPage(ui.channelsSearch.value, true));
+    ui.channelsLoadMore.addEventListener("click", () => {
+      if (channelsHasMore) {
+        fetchChannelsPage(channelsQuery, false);
+      }
+    });
+    ui.adminVideosBack.addEventListener("click", () => setPageView("feed"));
+    ui.adminVideosSearchPage.addEventListener("input", () =>
+      fetchAdminVideosPage(ui.adminVideosSearchPage.value, true)
+    );
+    ui.adminVideosLoadMore.addEventListener("click", () => {
+      if (adminVideosHasMore) {
+        fetchAdminVideosPage(adminVideosQuery, false);
+      }
+    });
+    ui.adminVideosOpen.addEventListener("click", () => fetchAdminVideosPage("", true));
+    ui.contactOpen.addEventListener("click", () => openModal(ui.contactModal));
     ui.adminImportCsv.addEventListener("click", importCsv);
     ui.adminImportSql.addEventListener("click", importSql);
     ui.adminExportSql.addEventListener("click", exportSql);
-    ui.adminUserSearch.addEventListener("input", filterAdminUsers);
-    ui.adminChannelSearch.addEventListener("input", filterAdminChannels);
-    ui.adminVideoSearch.addEventListener("input", filterAdminVideos);
+    ui.adminUserSearch.addEventListener("input", () =>
+      fetchAdminUsersRemote(ui.adminUserSearch.value.trim(), "")
+    );
+    ui.adminChannelSearch.addEventListener("input", () =>
+      fetchAdminUsersRemote(ui.adminChannelSearch.value.trim(), "artist")
+    );
+    ui.adminVideoSearch.addEventListener("input", () =>
+      fetchAdminVideosRemote(ui.adminVideoSearch.value.trim())
+    );
     ui.adminTabs.forEach((button) => {
       button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
     });
