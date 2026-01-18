@@ -1,5 +1,6 @@
 name = "sevimli-aile-api"
 compatibility_date = "2024-10-01"
+main = "src/worker.js"
 
 [vars]
 FIREBASE_API_KEY = "AIzaSyCjyLtc5VlLmOY2C-SGKloabi6hpDhLM9Q"
@@ -13,8 +14,4 @@ FIREBASE_APP_ID = "1:955131925025:web:9f17280e385a2f6ee64960"
 [[d1_databases]]
 binding = "DB"
 database_name = "sevimli-aile"
-database_id = ""
-
-[[r2_buckets]]
-binding = "R2"
-bucket_name = "sevimli-aile-exports"
+database_id = "9dbe3d2d-6b00-41b0-895d-dbd4f251a433"
