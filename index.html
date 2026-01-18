@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sevimli Aile - Video Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff5ec;
+      --bg-alt: #ffffff;
+      --bg-soft: #ffeedd;
+      --ink: #201c1a;
+      --muted: #7c6a60;
+      --stroke: #f3dcc6;
+      --accent: #ff7a59;
+      --accent-2: #3abcc4;
+      --accent-3: #ffd26f;
+      --accent-4: #9c7dff;
+      --shadow: 0 20px 40px rgba(34, 22, 15, 0.18);
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 14px;
+    }
+
+    body[data-theme="dark"] {
+      --bg: #161322;
+      --bg-alt: #221b34;
+      --bg-soft: #2a233f;
+      --ink: #f8f2ec;
+      --muted: #d1c4ba;
+      --stroke: #3b2f52;
+      --accent: #ff8a6a;
+      --accent-2: #59d3db;
+      --accent-3: #ffd576;
+      --accent-4: #b08bff;
+      --shadow: 0 24px 50px rgba(6, 6, 10, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      background:
+        radial-gradient(700px 500px at 10% 15%, rgba(255, 210, 111, 0.45) 0%, transparent 60%),
+        radial-gradient(650px 450px at 85% 10%, rgba(88, 201, 214, 0.35) 0%, transparent 55%),
+        radial-gradient(700px 500px at 90% 80%, rgba(156, 125, 255, 0.25) 0%, transparent 60%),
+        var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    body[data-theme="dark"] {
+      background:
+        radial-gradient(700px 500px at 10% 15%, rgba(255, 138, 106, 0.22) 0%, transparent 60%),
+        radial-gradient(650px 450px at 85% 10%, rgba(89, 211, 219, 0.18) 0%, transparent 55%),
+        radial-gradient(700px 500px at 90% 80%, rgba(176, 139, 255, 0.18) 0%, transparent 60%),
+        var(--bg);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .auth-gate {
+      display: none;
+      place-items: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .auth-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--stroke);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      width: min(520px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+
+    #verify-resend {
+      display: none;
+    }
+
+    body.locked header,
+    body.locked .layout {
+      display: none;
+    }
+
+    body.locked .auth-gate {
+      display: grid;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px clamp(16px, 3vw, 32px);
+      background: rgba(255, 255, 255, 0.88);
+      border-bottom: 2px solid var(--stroke);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      backdrop-filter: blur(8px);
+    }
+
+    body[data-theme="dark"] header {
+      background: rgba(16, 17, 20, 0.92);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .logo-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-4));
+      box-shadow: 0 8px 16px rgba(255, 122, 89, 0.35);
+    }
+
+    .search {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      padding: 8px 10px;
+      border-radius: 999px;
+      box-shadow: 0 10px 20px rgba(255, 210, 111, 0.15);
+    }
+
+    .search input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font: inherit;
+      color: var(--ink);
+      padding-left: 10px;
+    }
+
+    .search button {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-4));
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+    }
+
+    .search button svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      border: 2px solid var(--stroke);
+      background: var(--bg-alt);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .pill.active {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-4));
+      color: #f7f1e8;
+      border-color: transparent;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 24px;
+      padding: 24px clamp(16px, 3vw, 32px) 48px;
+    }
+
+    aside {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .sidebar-section {
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-section h3 {
+      margin: 0 0 12px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .channel {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--stroke);
+    }
+
+    .channel:last-child {
+      border-bottom: none;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent-3));
+    }
+
+    .channel-name {
+      font-weight: 600;
+    }
+
+    .channel-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .channel .pill {
+      padding: 6px 10px;
+      font-size: 0.85rem;
+    }
+
+    .card-meta {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    main {
+      display: grid;
+      gap: 24px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .channel-view {
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .channel-hero {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-area {
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      display: grid;
+      gap: 14px;
+      transition: transform 0.3s ease, width 0.3s ease;
+    }
+
+    .player-area.theater {
+      width: 100%;
+    }
+
+    .player-area.mini {
+      width: 55%;
+    }
+
+    .player-shell {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #0b0d10;
+      position: relative;
+    }
+
+    .player-ratio {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      cursor: default;
+    }
+
+    #player {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: #0b0d10;
+    }
+
+    .status-chip {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      background: rgba(12, 12, 12, 0.75);
+      color: #f7f1e8;
+      letter-spacing: 0.01em;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateY(8px) scale(0.98);
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+    }
+
+    .overlay.loading {
+      background: #0b0d10;
+      color: #f7f1e8;
+      gap: 14px;
+      transform: none;
+    }
+
+    .loader {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(247, 241, 232, 0.3);
+      border-top-color: #f7f1e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .overlay.end {
+      background: rgba(255, 247, 239, 0.96);
+      color: #1b1a19;
+      gap: 10px;
+    }
+
+    body[data-theme="dark"] .overlay.end {
+      background: rgba(26, 24, 22, 0.96);
+      color: #f5f0ea;
+    }
+
+    .overlay.start {
+      background: rgba(12, 12, 12, 0.82);
+      color: #f7f1e8;
+      gap: 10px;
+    }
+
+    .overlay-kicker {
+      margin: 0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent-2);
+    }
+
+    .overlay-copy {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .overlay-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+      background: var(--bg-soft);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .control-group {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+    }
+
+    .control-row--secondary {
+      opacity: 0.9;
+    }
+
+    .control-row--emote {
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .time-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .timeline input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 0%, var(--stroke) 0%, var(--stroke) 100%);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .timeline input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-4));
+      box-shadow: 0 6px 12px rgba(255, 122, 89, 0.35);
+      border: 2px solid #fff7ef;
+    }
+
+    .timeline input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-4));
+      border: 2px solid #fff7ef;
+      box-shadow: 0 6px 12px rgba(255, 122, 89, 0.35);
+    }
+
+    .control-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .volume-readout {
+      font-size: 0.85rem;
+      color: var(--muted);
+      min-width: 48px;
+      text-align: center;
+    }
+
+    .recommendations {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .video-card {
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px rgba(24, 20, 16, 0.18);
+    }
+
+    .thumb {
+      aspect-ratio: 16 / 9;
+      background: linear-gradient(140deg, #ffb38a, #7fd8df);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .thumb span {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      background: rgba(19, 16, 15, 0.65);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+
+    .card-body {
+      padding: 12px 14px 16px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .card-title {
+      font-weight: 600;
+    }
+
+    .link-button {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      font-weight: 600;
+      color: var(--accent-2);
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .empty-state {
+      padding: 20px;
+      border-radius: var(--radius-sm);
+      border: 2px dashed var(--stroke);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    button {
+      font: inherit;
+      border: none;
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 600;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent-2);
+      outline-offset: 2px;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-4));
+      color: #fff7ef;
+      box-shadow: 0 12px 24px rgba(255, 122, 89, 0.3);
+    }
+
+    .ghost {
+      background: var(--bg-alt);
+      color: var(--ink);
+      border: 2px solid var(--stroke);
+    }
+
+    .ghost.toggle-on {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-4));
+      color: #f7f1e8;
+      border-color: transparent;
+      box-shadow: 0 12px 24px rgba(31, 142, 165, 0.25);
+    }
+
+    .icon-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 10px;
+      min-width: 40px;
+    }
+
+    .icon-button svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .icon-button .count {
+      font-size: 0.8rem;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--stroke);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      width: min(520px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+
+    .load-more {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .admin-tools {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+      border: 2px dashed var(--stroke);
+    }
+
+    .admin-tools textarea {
+      min-height: 120px;
+    }
+
+    .modal-card h2 {
+      margin: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .form-grid label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .form-grid input,
+    .form-grid textarea,
+    .form-grid select {
+      width: 100%;
+      border-radius: var(--radius-sm);
+      border: 2px solid var(--stroke);
+      padding: 10px 12px;
+      font: inherit;
+      background: var(--bg-alt);
+      color: var(--ink);
+    }
+
+    .topic-list {
+      max-height: 220px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .report-input {
+      min-width: 180px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .player-area.mini {
+        width: 100%;
+      }
+
+      aside {
+        order: 2;
+      }
+
+      main {
+        order: 1;
+      }
+    }
+
+    @media (max-width: 720px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .channel {
+        grid-template-columns: auto 1fr;
+      }
+
+      .channel-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <header>
+      <div class="logo">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>Sevimli Aile</span>
+      </div>
+      <form class="search" id="search-form" role="search">
+        <label class="sr-only" for="search-input">Search</label>
+        <input id="search-input" name="search-input" type="search" placeholder="Search videos and channels">
+        <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.5 14h-.8l-.3-.3a6 6 0 1 0-.9.9l.3.3v.8l4.7 4.7 1.4-1.4L15.5 14zM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+          </svg>
+        </button>
+      </form>
+      <div class="top-actions">
+        <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
+        <button class="pill icon-button" id="view-theater" type="button" aria-label="Theater"></button>
+        <button class="pill icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
+        <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
+        <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
+        <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
+        <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
+        <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
+        <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
+        <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside>
+        <div class="sidebar-section">
+          <h3>Subscribed</h3>
+          <div id="subscribed-list" class="form-grid"></div>
+        </div>
+        <div class="sidebar-section">
+          <h3>Channels</h3>
+          <div id="channel-list" class="form-grid"></div>
+        </div>
+      </aside>
+
+      <main>
+        <section class="player-area" id="player-area">
+          <div class="player-shell" id="player-shell" data-state="loading">
+            <div class="player-ratio">
+              <div id="player" aria-label="YouTube player"></div>
+              <div class="status-chip" id="status-chip">Loading</div>
+              <div class="overlay loading active" id="loading-layer">
+                <div class="loader" aria-hidden="true"></div>
+                <p>Loading player...</p>
+              </div>
+              <div class="overlay start" id="start-layer" aria-hidden="true">
+                <p class="overlay-kicker">Ready to play</p>
+                <h2>Tap to start the video</h2>
+                <p class="overlay-copy">Autoplay is often blocked. Press start to begin.</p>
+                <button class="primary icon-button" data-action="start" id="start-video" name="start-video" type="button" aria-label="Start video">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="overlay end" id="end-card" aria-hidden="true">
+                <p class="overlay-kicker">Video complete</p>
+                <h2>What do you want to watch next?</h2>
+                <p class="overlay-copy">Choose an action to keep the flow going.</p>
+                <div class="overlay-actions">
+                  <button class="ghost icon-button" data-action="replay" id="end-replay" name="end-replay" type="button" aria-label="Replay">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5v4l5-5-5-5v4a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7z"/>
+                    </svg>
+                  </button>
+                  <button class="primary icon-button" data-action="next" id="end-next" name="end-next" type="button" aria-label="Next video">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M6 18 14.5 12 6 6v12zm10-12h2v12h-2z"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="card-meta" id="next-up"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="timeline">
+              <label class="sr-only" for="seek-bar">Video timeline</label>
+              <span class="time-label" id="time-current">0:00</span>
+              <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline">
+              <span class="time-label" id="time-duration">0:00</span>
+            </div>
+            <div class="control-group">
+              <div class="control-row">
+              <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
+              <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
+              <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
+              <span class="volume-readout" id="volume-level">100%</span>
+              <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
+              </div>
+              <div class="control-row control-row--secondary">
+                <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
+                <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
+                <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+              </div>
+            </div>
+            <div class="control-row control-row--emote">
+              <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
+              <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="recommendations" id="feed-view">
+          <div class="section-head">
+            <h2>Recommended</h2>
+            <button class="pill icon-button" id="filter-subscribed" type="button" aria-label="Subscribed feed">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6a2 2 0 0 1 2-2h6a4 4 0 0 1 0 8H8v2h4a6 6 0 0 0 0-12H6a4 4 0 0 0-4 4v5h2V6z"/>
+                <path d="M9.5 16.5 7 14l-1.4 1.4 3.9 3.9 7.5-7.5L15.6 10z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="grid" id="recommendations-grid"></div>
+          <div class="load-more">
+            <button class="ghost" id="load-more" type="button">Load more</button>
+          </div>
+        </section>
+
+        <section class="channel-view hidden" id="channel-view" aria-hidden="true">
+          <div class="section-head">
+            <div class="channel-hero">
+              <span class="avatar" aria-hidden="true"></span>
+              <div>
+                <div class="channel-name" id="channel-title">Channel</div>
+                <div class="card-meta" id="channel-stats"></div>
+              </div>
+            </div>
+            <div class="channel-actions">
+              <button class="pill icon-button" id="channel-back" type="button" aria-label="Back to feed">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+                </svg>
+              </button>
+              <button class="pill icon-button" id="channel-subscribe" type="button" aria-label="Subscribe"></button>
+            </div>
+          </div>
+          <div class="grid" id="channel-videos"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <section class="auth-gate" id="auth-gate">
+    <div class="auth-card">
+      <h2>Welcome to Sevimli Aile</h2>
+      <p class="card-meta">Log in or create an account to start watching.</p>
+      <form class="form-grid" id="login-form">
+        <label for="login-email">Email</label>
+        <input id="login-email" name="login-email" type="email" autocomplete="email" required>
+        <label for="login-password">Password</label>
+        <input id="login-password" name="login-password" type="password" autocomplete="current-password" required>
+        <div class="form-actions">
+          <button class="primary" type="submit">Sign in</button>
+        </div>
+      </form>
+      <form class="form-grid" id="register-form">
+        <label for="register-email">New email</label>
+        <input id="register-email" name="register-email" type="email" autocomplete="email" required>
+        <label for="register-password">New password</label>
+        <input id="register-password" name="register-password" type="password" autocomplete="new-password" required>
+        <div class="form-actions">
+          <button class="ghost" type="submit">Create account</button>
+        </div>
+      </form>
+      <button class="ghost" id="verify-resend" type="button">Resend verification email</button>
+      <div class="card-meta" id="auth-message"></div>
+    </div>
+  </section>
+
+  <div class="modal" id="upload-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Add YouTube video</h2>
+      <form class="form-grid" id="upload-form">
+        <label for="upload-url">YouTube URL</label>
+        <input id="upload-url" name="upload-url" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+        <div id="upload-metadata" class="form-grid">
+          <label for="upload-language">Language</label>
+          <select id="upload-language" name="upload-language">
+            <option value="english">English</option>
+            <option value="russian">Russian</option>
+            <option value="azerbaijani">Azerbaijani</option>
+            <option value="turkish">Turkish</option>
+            <option value="arabic">Arabic</option>
+          </select>
+          <label for="upload-topics">Topics (comma separated)</label>
+          <input id="upload-topics" name="upload-topics" type="text" placeholder="nastya, masha, minecraft" list="topics-list">
+          <datalist id="topics-list"></datalist>
+        </div>
+        <div class="form-actions">
+          <button class="ghost" type="button" data-close="upload-modal">Close</button>
+          <button class="primary" type="submit">Add video</button>
+        </div>
+      </form>
+      <div class="card-meta">Title will auto-fill from YouTube when available.</div>
+      <div class="card-meta" id="upload-message"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="admin-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Admin controls</h2>
+      <div id="admin-list" class="form-grid"></div>
+      <div class="card-meta">Reports</div>
+      <div id="admin-reports" class="form-grid"></div>
+      <div class="admin-tools">
+        <div class="card-meta">Bulk import approved YouTube links (CSV or SQL).</div>
+        <label class="card-meta" for="admin-csv">CSV file</label>
+        <input id="admin-csv" name="admin-csv" type="file" accept=".csv,text/csv">
+        <div class="form-actions">
+          <button class="ghost" type="button" id="admin-import-csv">Import CSV</button>
+          <button class="ghost" type="button" id="admin-export-sql">Download SQL</button>
+        </div>
+        <label class="card-meta" for="admin-sql">SQL import (INSERT INTO videos)</label>
+        <textarea id="admin-sql" name="admin-sql" placeholder="Paste SQL export here..."></textarea>
+        <div class="form-actions">
+          <button class="ghost" type="button" id="admin-import-sql">Import SQL</button>
+        </div>
+        <div class="card-meta" id="admin-import-message"></div>
+      </div>
+      <div class="form-actions">
+        <button class="ghost" type="button" data-close="admin-modal">Close</button>
+      </div>
+      <div class="card-meta">Grant artist role to add YouTube videos.</div>
+    </div>
+  </div>
+
+  <div class="modal" id="studio-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Studio</h2>
+      <div class="form-grid">
+        <div class="channel">
+          <span class="avatar" aria-hidden="true"></span>
+          <div>
+            <div class="channel-name">Your stats</div>
+            <div class="card-meta" id="stats-summary">Loading...</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid" id="artist-stats"></div>
+      <div class="form-grid" id="manage-list"></div>
+      <div class="form-actions">
+        <button class="ghost" type="button" data-close="studio-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settings-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Parent settings</h2>
+      <form class="form-grid" id="settings-form">
+        <div class="card-meta">Languages to show</div>
+        <label><input type="checkbox" name="settings-language" value="english"> English</label>
+        <label><input type="checkbox" name="settings-language" value="russian"> Russian</label>
+        <label><input type="checkbox" name="settings-language" value="azerbaijani"> Azerbaijani</label>
+        <label><input type="checkbox" name="settings-language" value="turkish"> Turkish</label>
+        <label><input type="checkbox" name="settings-language" value="arabic"> Arabic</label>
+        <div class="card-meta">Topics to control</div>
+        <label><input type="radio" name="topic-mode" value="allow" checked> Allow only selected</label>
+        <label><input type="radio" name="topic-mode" value="block"> Hide selected</label>
+        <label for="topic-search">Find topic</label>
+        <input id="topic-search" name="topic-search" type="search" placeholder="Search topics">
+        <div id="settings-topics" class="form-grid topic-list"></div>
+        <label for="max-watch">Daily watch limit (hours)</label>
+        <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
+        <label for="settings-password">Confirm with your password</label>
+        <input id="settings-password" name="settings-password" type="password" autocomplete="current-password" required>
+        <div class="form-actions">
+          <button class="ghost" type="button" data-close="settings-modal">Close</button>
+          <button class="primary" type="submit">Save settings</button>
+        </div>
+      </form>
+      <div class="card-meta">Today's history</div>
+      <div class="form-grid" id="history-list"></div>
+      <div class="card-meta" id="settings-message"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="report-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Report video</h2>
+      <form class="form-grid" id="report-form">
+        <label for="report-reason">Reason</label>
+        <textarea id="report-reason" name="report-reason" rows="4" placeholder="Tell us what is wrong (min 5 characters)" required></textarea>
+        <div class="form-actions">
+          <button class="ghost" type="button" data-close="report-modal">Close</button>
+          <button class="primary" type="submit">Send report</button>
+        </div>
+      </form>
+      <div class="card-meta" id="report-message"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="signout-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Confirm sign out</h2>
+      <form class="form-grid" id="signout-form">
+        <label for="signout-password">Password</label>
+        <input id="signout-password" name="signout-password" type="password" autocomplete="current-password" required>
+        <div class="form-actions">
+          <button class="ghost" type="button" data-close="signout-modal">Close</button>
+          <button class="primary" type="submit">Sign out</button>
+        </div>
+      </form>
+      <div class="card-meta" id="signout-message"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="notifications-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2>Updates</h2>
+      <div class="form-grid" id="notifications-list"></div>
+      <div class="form-actions">
+        <button class="ghost" type="button" data-close="notifications-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    const ui = {
+      themeToggle: document.getElementById("theme-toggle"),
+      viewTheater: document.getElementById("view-theater"),
+      viewMini: document.getElementById("view-mini"),
+      playerArea: document.getElementById("player-area"),
+      searchForm: document.getElementById("search-form"),
+      searchInput: document.getElementById("search-input"),
+      channelList: document.getElementById("channel-list"),
+      subscribedList: document.getElementById("subscribed-list"),
+      recommendations: document.getElementById("recommendations-grid"),
+      loadMore: document.getElementById("load-more"),
+      filterSubscribed: document.getElementById("filter-subscribed"),
+      feedView: document.getElementById("feed-view"),
+      channelView: document.getElementById("channel-view"),
+      channelTitle: document.getElementById("channel-title"),
+      channelStats: document.getElementById("channel-stats"),
+      channelVideos: document.getElementById("channel-videos"),
+      channelBack: document.getElementById("channel-back"),
+      channelSubscribe: document.getElementById("channel-subscribe"),
+      playerHost: document.getElementById("player"),
+      statusChip: document.getElementById("status-chip"),
+      loadingLayer: document.getElementById("loading-layer"),
+      startLayer: document.getElementById("start-layer"),
+      endCard: document.getElementById("end-card"),
+      nextUp: document.getElementById("next-up"),
+      playToggle: document.getElementById("controls-play"),
+      muteToggle: document.getElementById("controls-mute"),
+      volumeDown: document.getElementById("controls-volume-down"),
+      volumeUp: document.getElementById("controls-volume-up"),
+      volumeLevel: document.getElementById("volume-level"),
+      autoNextToggle: document.getElementById("controls-auto-next"),
+      seekBar: document.getElementById("seek-bar"),
+      timeCurrent: document.getElementById("time-current"),
+      timeDuration: document.getElementById("time-duration"),
+      authGate: document.getElementById("auth-gate"),
+      uploadModal: document.getElementById("upload-modal"),
+      adminModal: document.getElementById("admin-modal"),
+      settingsModal: document.getElementById("settings-modal"),
+      authOpen: document.getElementById("auth-open"),
+      authLogout: document.getElementById("auth-logout"),
+      uploadOpen: document.getElementById("upload-open"),
+      adminOpen: document.getElementById("admin-open"),
+      studioOpen: document.getElementById("studio-open"),
+      settingsOpen: document.getElementById("settings-open"),
+      notificationsOpen: document.getElementById("notifications-open"),
+      loginForm: document.getElementById("login-form"),
+      registerForm: document.getElementById("register-form"),
+      verifyResend: document.getElementById("verify-resend"),
+      uploadForm: document.getElementById("upload-form"),
+      settingsForm: document.getElementById("settings-form"),
+      reportForm: document.getElementById("report-form"),
+      authMessage: document.getElementById("auth-message"),
+      uploadMessage: document.getElementById("upload-message"),
+      settingsMessage: document.getElementById("settings-message"),
+      historyList: document.getElementById("history-list"),
+      settingsTopicSearch: document.getElementById("topic-search"),
+      settingsTopics: document.getElementById("settings-topics"),
+      uploadTopics: document.getElementById("upload-topics"),
+      topicsList: document.getElementById("topics-list"),
+      maxWatch: document.getElementById("max-watch"),
+      adminList: document.getElementById("admin-list"),
+      uploadMetadata: document.getElementById("upload-metadata"),
+      studioModal: document.getElementById("studio-modal"),
+      statsSummary: document.getElementById("stats-summary"),
+      artistStats: document.getElementById("artist-stats"),
+      manageList: document.getElementById("manage-list"),
+      adminCsv: document.getElementById("admin-csv"),
+      adminSql: document.getElementById("admin-sql"),
+      adminImportCsv: document.getElementById("admin-import-csv"),
+      adminImportSql: document.getElementById("admin-import-sql"),
+      adminExportSql: document.getElementById("admin-export-sql"),
+      adminImportMessage: document.getElementById("admin-import-message"),
+      adminReports: document.getElementById("admin-reports"),
+      controlsHeart: document.getElementById("controls-heart"),
+      controlsReport: document.getElementById("controls-report"),
+      controlsReplay: document.getElementById("controls-replay"),
+      controlsNext: document.getElementById("controls-next"),
+      reportModal: document.getElementById("report-modal"),
+      reportMessage: document.getElementById("report-message"),
+      notificationsModal: document.getElementById("notifications-modal"),
+      notificationsList: document.getElementById("notifications-list"),
+      signoutModal: document.getElementById("signout-modal"),
+      signoutForm: document.getElementById("signout-form"),
+      signoutMessage: document.getElementById("signout-message")
+    };
+
+    const icons = {
+      play:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 5v14l11-7z\"/></svg>",
+      pause:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 5h4v14H6zm8 0h4v14h-4z\"/></svg>",
+      volume:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 9v6h4l5 5V4L9 9H5z\"/></svg>",
+      mute:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 9v6h4l5 5V4L9 9H5z\"/><path d=\"M16 8l4 4m0-4-4 4\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      minus:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      plus:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v14m-7-7h14\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      check:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 13l4 4L19 7\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      autoNext:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 17V7l8 5-8 5zm10 0V7l8 5-8 5z\"/></svg>",
+      heart:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21s-7-4.4-9.3-8.2C1 9.3 3.3 6 6.7 6c2 0 3.4 1.1 4.3 2.3C11.9 7.1 13.3 6 15.3 6 18.7 6 21 9.3 21 12.8 19.3 16.6 12 21 12 21z\"/></svg>",
+      report:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2 1 21h22L12 2zm0 7v5m0 4h.01\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      replay:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 5v4l5-5-5-5v4a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7z\"/></svg>",
+      next:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 18 14.5 12 6 6v12zm10-12h2v12h-2z\"/></svg>",
+      sun:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0-4v3m0 14v3m10-10h-3M5 12H2m15.5-7.5-2.1 2.1M8.6 15.4 6.5 17.5m11 0-2.1-2.1M8.6 8.6 6.5 6.5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      moon:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z\"/></svg>",
+      theater:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 5h18v12H3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M7 19h10\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
+      mini:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 6h16v12H4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M12 12h6v4h-6z\"/></svg>",
+      upload:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 16V5m0 0-4 4m4-4 4 4M5 19h14\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      admin:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
+      studio:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 19V5m6 14V9m6 10V12m4 7H2\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      settings:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 4-2.1-.7.3-2.2-2.1-1.2-1.4 1.7-2.1-.7-.7-2.1H11l-.7 2.1-2.1.7-1.4-1.7-2.1 1.2.3 2.2L3 12l2.1.7-.3 2.2 2.1 1.2 1.4-1.7 2.1.7.7 2.1h2.2l.7-2.1 2.1-.7 1.4 1.7 2.1-1.2-.3-2.2L21 12z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+      bell:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 17h12l-1.5-2V10a4.5 4.5 0 1 0-9 0v5L6 17z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M10 19a2 2 0 0 0 4 0\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\"/></svg>",
+      user:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z\"/></svg>",
+      logout:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M10 17l5-5-5-5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M15 12H3\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M19 5h2v14h-2\"/></svg>"
+    };
+
+    function setButtonIcon(button, icon, label, suffix) {
+      const extra = suffix ? "<span class=\"count\">" + suffix + "</span>" : "";
+      button.innerHTML = icon + extra;
+      if (label) {
+        button.setAttribute("aria-label", label);
+        button.title = label;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function initControlIcons() {
+      setButtonIcon(ui.volumeDown, icons.minus, "Volume down");
+      setButtonIcon(ui.volumeUp, icons.plus, "Volume up");
+      setButtonIcon(ui.controlsReport, icons.report, "Report");
+      setButtonIcon(ui.controlsReplay, icons.replay, "Replay");
+      setButtonIcon(ui.controlsNext, icons.next, "Next video");
+      setButtonIcon(ui.controlsHeart, icons.heart, "Heart", "0");
+      setButtonIcon(ui.autoNextToggle, icons.autoNext, "Auto next off");
+      setButtonIcon(ui.playToggle, icons.play, "Play");
+      setButtonIcon(ui.muteToggle, icons.mute, "Mute");
+      setButtonIcon(ui.viewTheater, icons.theater, "Theater");
+      setButtonIcon(ui.viewMini, icons.mini, "Mini player");
+      setButtonIcon(ui.uploadOpen, icons.upload, "Add video");
+      setButtonIcon(ui.adminOpen, icons.admin, "Admin");
+      setButtonIcon(ui.studioOpen, icons.studio, "Studio");
+      setButtonIcon(ui.settingsOpen, icons.settings, "Settings");
+      setButtonIcon(ui.notificationsOpen, icons.bell, "Updates");
+      setButtonIcon(ui.authOpen, icons.user, "Sign in");
+      setButtonIcon(ui.authLogout, icons.logout, "Sign out");
+      setButtonIcon(ui.filterSubscribed, icons.check, "Subscribed feed");
+    }
+
+    let player = null;
+    let isPlayerReady = false;
+    let timeTicker = null;
+    let videos = [];
+    let currentIndex = 0;
+    let autoNextEnabled = false;
+    let isSeeking = false;
+    let token = "";
+    let currentUser = null;
+    let pageOffset = 0;
+    const pageLimit = 12;
+    let hasMore = true;
+    let isFetching = false;
+    let subscriptions = [];
+    let currentVideo = null;
+    let feedFilter = "all";
+    let currentChannel = null;
+    let firebaseAuth = null;
+    let firebaseUser = null;
+    let availableTopics = [];
+    let settingsSelectedTopics = new Set();
+
+    function setTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+      setButtonIcon(
+        ui.themeToggle,
+        theme === "dark" ? icons.sun : icons.moon,
+        theme === "dark" ? "Light mode" : "Dark mode"
+      );
+      localStorage.setItem("theme", theme);
+    }
+
+    function setView(mode) {
+      ui.playerArea.classList.remove("theater", "mini");
+      ui.viewTheater.classList.remove("active");
+      ui.viewMini.classList.remove("active");
+      if (mode === "theater") {
+        ui.playerArea.classList.add("theater");
+        ui.viewTheater.classList.add("active");
+      } else if (mode === "mini") {
+        ui.playerArea.classList.add("mini");
+        ui.viewMini.classList.add("active");
+      }
+    }
+
+    function openModal(modal) {
+      modal.classList.add("active");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(modal) {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function lockApp(message) {
+      document.body.classList.add("locked");
+      if (message) {
+        ui.authMessage.textContent = message;
+      }
+    }
+
+    function unlockApp() {
+      document.body.classList.remove("locked");
+    }
+
+    function apiFetch(path, options = {}) {
+      const headers = options.headers || {};
+      if (!token && path.startsWith("/api/") && path !== "/api/firebase-config") {
+        lockApp("Please sign in to continue.");
+      }
+      if (token) {
+        headers.Authorization = "Bearer " + token;
+      }
+      return fetch(path, { ...options, headers });
+    }
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds <= 0) {
+        return "0:00";
+      }
+      const total = Math.floor(seconds);
+      const minutes = Math.floor(total / 60);
+      const secs = total % 60;
+      return minutes + ":" + String(secs).padStart(2, "0");
+    }
+
+    function updateSeekBarFill() {
+      const max = Number(ui.seekBar.max) || 0;
+      const value = Number(ui.seekBar.value) || 0;
+      const percent = max > 0 ? Math.min(100, Math.max(0, (value / max) * 100)) : 0;
+      ui.seekBar.style.background =
+        "linear-gradient(90deg, var(--accent) 0%, var(--accent) " +
+        percent +
+        "%, #eadfd2 " +
+        percent +
+        "%, #eadfd2 100%)";
+    }
+
+    function syncTimelineDisplay() {
+      if (!player || !isPlayerReady) {
+        return;
+      }
+      const duration = player.getDuration ? player.getDuration() : 0;
+      const current = player.getCurrentTime ? player.getCurrentTime() : 0;
+      ui.timeCurrent.textContent = formatTime(current);
+      ui.timeDuration.textContent = formatTime(duration);
+      ui.seekBar.max = duration > 0 ? Math.floor(duration) : 0;
+      if (!isSeeking) {
+        ui.seekBar.value = Math.floor(current);
+      }
+      ui.seekBar.disabled = !videos.length || duration <= 0;
+      updateSeekBarFill();
+    }
+
+    function syncVolumeDisplay() {
+      if (!player || !isPlayerReady) {
+        ui.volumeLevel.textContent = "--";
+        ui.volumeDown.disabled = true;
+        ui.volumeUp.disabled = true;
+        return;
+      }
+      const volume = player.getVolume ? player.getVolume() : 0;
+      ui.volumeLevel.textContent = volume + "%";
+      ui.volumeDown.disabled = volume <= 0;
+      ui.volumeUp.disabled = volume >= 100;
+    }
+
+    function syncControlLabels() {
+      if (!player || !isPlayerReady) {
+        setButtonIcon(ui.playToggle, icons.play, "Play");
+        setButtonIcon(ui.muteToggle, icons.mute, "Mute");
+        setButtonIcon(
+          ui.autoNextToggle,
+          icons.autoNext,
+          autoNextEnabled ? "Auto next on" : "Auto next off"
+        );
+        ui.autoNextToggle.classList.toggle("toggle-on", autoNextEnabled);
+        ui.playToggle.disabled = true;
+        ui.muteToggle.disabled = true;
+        ui.autoNextToggle.disabled = true;
+        ui.seekBar.disabled = true;
+        syncVolumeDisplay();
+        syncTimelineDisplay();
+        return;
+      }
+      const state = player.getPlayerState ? player.getPlayerState() : null;
+      const playing = state === YT.PlayerState.PLAYING;
+      setButtonIcon(ui.playToggle, playing ? icons.pause : icons.play, playing ? "Pause" : "Play");
+      const muted = player.isMuted && player.isMuted();
+      setButtonIcon(ui.muteToggle, muted ? icons.volume : icons.mute, muted ? "Unmute" : "Mute");
+      setButtonIcon(
+        ui.autoNextToggle,
+        icons.autoNext,
+        autoNextEnabled ? "Auto next on" : "Auto next off"
+      );
+      ui.autoNextToggle.classList.toggle("toggle-on", autoNextEnabled);
+      ui.playToggle.disabled = false;
+      ui.muteToggle.disabled = false;
+      ui.autoNextToggle.disabled = false;
+      syncVolumeDisplay();
+      syncTimelineDisplay();
+    }
+
+    function updateStatus(label) {
+      const title = videos[currentIndex] ? videos[currentIndex].title : "No video";
+      ui.statusChip.textContent = label + ": " + title;
+    }
+
+    function updateHeartButton() {
+      if (!currentVideo) {
+        setButtonIcon(ui.controlsHeart, icons.heart, "Heart", "0");
+        ui.controlsHeart.disabled = true;
+        ui.controlsReport.disabled = true;
+        return;
+      }
+      const count = currentVideo.hearts || 0;
+      setButtonIcon(
+        ui.controlsHeart,
+        icons.heart,
+        currentVideo.liked ? "Loved" : "Heart",
+        String(count)
+      );
+      ui.controlsHeart.disabled = !currentUser;
+      ui.controlsReport.disabled = false;
+    }
+
+    function setOverlayState(loading, start, ended) {
+      ui.loadingLayer.classList.toggle("active", loading);
+      ui.startLayer.classList.toggle("active", start);
+      ui.startLayer.setAttribute("aria-hidden", String(!start));
+      ui.endCard.classList.toggle("active", ended);
+      ui.endCard.setAttribute("aria-hidden", String(!ended));
+    }
+
+    function updateNextUp() {
+      if (videos.length < 2) {
+        ui.nextUp.textContent = autoNextEnabled
+          ? "Auto next is on, but the queue has one video."
+          : "Queue ends here. Replay when ready.";
+        return;
+      }
+      const nextIndex = (currentIndex + 1) % videos.length;
+      const prefix = autoNextEnabled ? "Auto next: " : "Up next: ";
+      ui.nextUp.textContent = prefix + videos[nextIndex].title;
+    }
+
+    async function loadVideo(index) {
+      if (!videos.length || !player) {
+        return;
+      }
+      currentIndex = (index + videos.length) % videos.length;
+      const video = videos[currentIndex];
+      currentVideo = video;
+      setOverlayState(true, false, false);
+      updateStatus("Loading");
+      updateNextUp();
+      updateHeartButton();
+      if (player.loadVideoById) {
+        player.loadVideoById(video.youtube_id);
+      }
+      const res = await apiFetch("/api/videos/" + video.id + "/view", { method: "POST" });
+      if (res.status === 403) {
+        const data = await res.json();
+        setOverlayState(false, false, false);
+        updateStatus("Limit reached");
+        ui.startLayer.classList.add("active");
+        ui.startLayer.setAttribute("aria-hidden", "false");
+        ui.startLayer.querySelector("h2").textContent = "Time is up for today";
+        ui.startLayer.querySelector("p").textContent = data.error || "Daily limit reached.";
+        if (player.pauseVideo) {
+          player.pauseVideo();
+        }
+      }
+    }
+
+    function loadNextVideo() {
+      loadVideo(currentIndex + 1);
+    }
+
+    function showChannelView(visible) {
+      ui.channelView.classList.toggle("hidden", !visible);
+      ui.channelView.setAttribute("aria-hidden", String(!visible));
+      ui.feedView.classList.toggle("hidden", visible);
+      ui.feedView.setAttribute("aria-hidden", String(visible));
+    }
+
+    function buildVideoCard(video) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "video-card";
+      card.id = "video-card-" + video.id;
+      card.name = "video-card-" + video.id;
+      const lengthLabel = video.duration ? formatTime(video.duration) : "--:--";
+      const thumbUrl = "https://img.youtube.com/vi/" + video.youtube_id + "/hqdefault.jpg";
+      const thumb = document.createElement("div");
+      thumb.className = "thumb";
+      thumb.style.backgroundImage = "url('" + thumbUrl + "')";
+      const stamp = document.createElement("span");
+      stamp.textContent = lengthLabel;
+      thumb.appendChild(stamp);
+      const body = document.createElement("div");
+      body.className = "card-body";
+      const title = document.createElement("div");
+      title.className = "card-title";
+      title.textContent = video.title;
+      const meta = document.createElement("div");
+      meta.className = "card-meta";
+      let channelNode;
+      if (video.channel_role === "artist") {
+        const channelButton = document.createElement("button");
+        channelButton.type = "button";
+        channelButton.className = "link-button";
+        channelButton.textContent = video.channel || "Channel";
+        channelButton.addEventListener("click", (event) => {
+          event.stopPropagation();
+          openChannel(video.owner_id);
+        });
+        channelNode = channelButton;
+      } else {
+        const channelLabel = document.createElement("span");
+        channelLabel.textContent = video.channel || "Channel";
+        channelNode = channelLabel;
+      }
+      const details = document.createElement("span");
+      details.textContent =
+        " · " + (video.views || 0) + " views · " + (video.hearts || 0) + " hearts";
+      meta.appendChild(channelNode);
+      meta.appendChild(details);
+      body.appendChild(title);
+      body.appendChild(meta);
+      card.appendChild(thumb);
+      card.appendChild(body);
+      card.addEventListener("click", () => loadVideo(videos.findIndex((item) => item.id === video.id)));
+      return card;
+    }
+
+    function renderVideoGrid(list, container, append = false, emptyMessage) {
+      if (!append) {
+        container.innerHTML = "";
+      }
+      if (!list.length && !append) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = emptyMessage || "No videos yet. Add the first YouTube link.";
+        container.appendChild(empty);
+        return;
+      }
+      list.forEach((video) => {
+        container.appendChild(buildVideoCard(video));
+      });
+    }
+
+    function renderRecommendations(list, append = false) {
+      const message =
+        feedFilter === "subscribed"
+          ? "No videos from your subscriptions yet."
+          : "No videos yet. Add the first YouTube link.";
+      renderVideoGrid(list, ui.recommendations, append, message);
+    }
+
+    function renderChannels(channels) {
+      ui.channelList.innerHTML = "";
+      if (!channels.length) {
+        ui.channelList.textContent = "No channels yet.";
+        return;
+      }
+      channels.forEach((channel) => {
+        const isSubscribed = channel.is_subscribed;
+        const row = document.createElement("div");
+        row.className = "channel";
+        row.addEventListener("click", () => openChannel(channel.id));
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(channel.email) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(channel.videos) +
+          " videos · " +
+          escapeHtml(channel.subscribers || 0) +
+          " subs</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "pill icon-button";
+        setButtonIcon(
+          button,
+          isSubscribed ? icons.check : icons.plus,
+          isSubscribed ? "Subscribed" : "Subscribe"
+        );
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          toggleSubscription(channel.id);
+        });
+        actions.appendChild(button);
+        row.appendChild(actions);
+        ui.channelList.appendChild(row);
+      });
+    }
+
+    function renderSubscriptions() {
+      ui.subscribedList.innerHTML = "";
+      if (!subscriptions.length) {
+        ui.subscribedList.textContent = "No subscriptions yet.";
+        return;
+      }
+      subscriptions.forEach((channel) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        row.addEventListener("click", () => openChannel(channel.id));
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(channel.email) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(channel.subscribers || 0) +
+          " subs</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "pill icon-button";
+        setButtonIcon(button, icons.minus, "Unsubscribe");
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          toggleSubscription(channel.id);
+        });
+        actions.appendChild(button);
+        row.appendChild(actions);
+        ui.subscribedList.appendChild(row);
+      });
+    }
+
+    function setFeedFilter(nextFilter) {
+      if (nextFilter === "subscribed" && !currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      feedFilter = nextFilter;
+      ui.filterSubscribed.classList.toggle("active", feedFilter === "subscribed");
+      showChannelView(false);
+      fetchVideos(ui.searchInput.value.trim(), true);
+    }
+
+    async function openChannel(channelId) {
+      showChannelView(true);
+      ui.channelVideos.innerHTML = "Loading...";
+      const channelRes = await apiFetch("/api/channels/" + channelId);
+      const channelData = await channelRes.json();
+      if (!channelRes.ok || !channelData.channel) {
+        ui.channelVideos.textContent = "Channel unavailable.";
+        return;
+      }
+      currentChannel = channelData.channel;
+      ui.channelTitle.textContent = currentChannel.email;
+      ui.channelStats.textContent =
+        currentChannel.videos +
+        " videos · " +
+        currentChannel.subscribers +
+        " subs";
+      setButtonIcon(
+        ui.channelSubscribe,
+        currentChannel.is_subscribed ? icons.check : icons.plus,
+        currentChannel.is_subscribed ? "Subscribed" : "Subscribe"
+      );
+      ui.channelSubscribe.disabled = Boolean(
+        currentUser && String(currentUser.id) === String(currentChannel.id)
+      );
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      params.set("offset", "0");
+      params.set("channelId", String(channelId));
+      const videosRes = await apiFetch("/api/videos?" + params.toString());
+      const videosData = await videosRes.json();
+      videos = videosData.videos || [];
+      renderVideoGrid(videos, ui.channelVideos, false, "No videos in this channel yet.");
+      if (videos.length) {
+        loadVideo(0);
+      } else {
+        setOverlayState(false, false, false);
+        updateStatus("No video");
+      }
+    }
+
+    async function toggleSubscription(channelId) {
+      if (!currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      const res = await apiFetch("/api/subscriptions/" + channelId, { method: "POST" });
+      if (!res.ok) {
+        return;
+      }
+      await fetchSubscriptions();
+      await fetchChannels();
+      if (currentChannel && String(currentChannel.id) === String(channelId)) {
+        await openChannel(channelId);
+      }
+    }
+
+    async function fetchVideos(query, reset = false) {
+      if (isFetching) {
+        return;
+      }
+      if (!currentUser) {
+        return;
+      }
+      isFetching = true;
+      if (reset) {
+        pageOffset = 0;
+        videos = [];
+        hasMore = true;
+      }
+      const params = new URLSearchParams();
+      params.set("limit", String(pageLimit));
+      params.set("offset", String(pageOffset));
+      if (query) {
+        params.set("search", query);
+      }
+      if (feedFilter === "subscribed") {
+        params.set("subscribed", "1");
+      }
+      const res = await apiFetch("/api/videos?" + params.toString());
+      const data = await res.json();
+      if (res.status === 401) {
+        isFetching = false;
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      const batch = data.videos || [];
+      hasMore = Boolean(data.hasMore);
+      videos = reset ? batch : videos.concat(batch);
+      renderRecommendations(batch, !reset);
+      updateNextUp();
+      ui.loadMore.style.display = hasMore ? "inline-flex" : "none";
+      if (reset && videos.length && player) {
+        loadVideo(0);
+      } else if (!videos.length) {
+        setOverlayState(false, false, false);
+        updateStatus("No video");
+      }
+      pageOffset += batch.length;
+      isFetching = false;
+    }
+
+    async function fetchChannels() {
+      if (!currentUser) {
+        return;
+      }
+      const res = await apiFetch("/api/channels");
+      const data = await res.json();
+      renderChannels(data.channels || []);
+    }
+
+    async function fetchSubscriptions() {
+      if (!currentUser) {
+        subscriptions = [];
+        renderSubscriptions();
+        return;
+      }
+      const res = await apiFetch("/api/subscriptions");
+      const data = await res.json();
+      subscriptions = data.subscriptions || [];
+      renderSubscriptions();
+    }
+
+    async function initFirebase() {
+      try {
+        const res = await fetch("/api/firebase-config");
+        const config = await res.json();
+        if (!res.ok) {
+          ui.authMessage.textContent = config.error || "Firebase config missing.";
+          lockApp("Auth setup required.");
+          return;
+        }
+        firebase.initializeApp(config);
+        firebaseAuth = firebase.auth();
+        firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        firebaseAuth.onAuthStateChanged(async (user) => {
+          firebaseUser = user;
+          if (!user) {
+            token = "";
+            currentUser = null;
+            updateAuthUI();
+            renderSubscriptions();
+            ui.verifyResend.style.display = "none";
+            lockApp("Please sign in to continue.");
+            return;
+          }
+          if (!user.emailVerified) {
+            token = "";
+            currentUser = null;
+            updateAuthUI();
+            ui.verifyResend.style.display = "inline-flex";
+            lockApp("Verify your email to continue.");
+            return;
+          }
+          ui.verifyResend.style.display = "none";
+          token = await user.getIdToken();
+          await fetchMe();
+          await fetchChannels();
+          await fetchTopics();
+          await fetchVideos("", true);
+        });
+      } catch (err) {
+        ui.authMessage.textContent = "Firebase init failed.";
+        lockApp("Auth setup required.");
+      }
+    }
+
+    async function resendVerification() {
+      if (!firebaseUser) {
+        ui.authMessage.textContent = "Sign in first to resend verification.";
+        return;
+      }
+      if (firebaseUser.emailVerified) {
+        ui.authMessage.textContent = "Email already verified.";
+        return;
+      }
+      try {
+        await firebaseUser.sendEmailVerification();
+        ui.authMessage.textContent = "Verification email sent.";
+      } catch (err) {
+        ui.authMessage.textContent = err.message || "Unable to send verification email.";
+      }
+    }
+
+    function openSignout() {
+      if (!firebaseUser) {
+        return;
+      }
+      ui.signoutMessage.textContent = "";
+      ui.signoutForm.reset();
+      openModal(ui.signoutModal);
+    }
+
+    async function confirmSignout(event) {
+      event.preventDefault();
+      ui.signoutMessage.textContent = "";
+      if (!firebaseUser) {
+        ui.signoutMessage.textContent = "Sign in first.";
+        return;
+      }
+      const password = document.getElementById("signout-password").value;
+      if (!password) {
+        ui.signoutMessage.textContent = "Password required.";
+        return;
+      }
+      try {
+        const credential = firebase.auth.EmailAuthProvider.credential(firebaseUser.email, password);
+        await firebaseUser.reauthenticateWithCredential(credential);
+        await firebaseAuth.signOut();
+        closeModal(ui.signoutModal);
+      } catch (err) {
+        ui.signoutMessage.textContent = err.message || "Password check failed.";
+      }
+    }
+
+    async function fetchMe() {
+      if (!token) {
+        currentUser = null;
+        updateAuthUI();
+        fetchSubscriptions();
+        return;
+      }
+      const res = await apiFetch("/api/me");
+      if (!res.ok) {
+        token = "";
+        currentUser = null;
+        updateAuthUI();
+        fetchSubscriptions();
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      const data = await res.json();
+      currentUser = data.user;
+      updateAuthUI();
+      fetchSubscriptions();
+      unlockApp();
+    }
+
+    function updateAuthUI() {
+      ui.authLogout.style.display = currentUser ? "inline-flex" : "none";
+      ui.authOpen.style.display = currentUser ? "none" : "inline-flex";
+      ui.uploadOpen.style.display =
+        currentUser && (currentUser.role === "artist" || currentUser.role === "admin")
+          ? "inline-flex"
+          : "none";
+      ui.adminOpen.style.display = currentUser && currentUser.role === "admin" ? "inline-flex" : "none";
+      ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
+      ui.settingsOpen.style.display =
+        currentUser && currentUser.plan === "pro" && currentUser.role === "user"
+          ? "inline-flex"
+          : "none";
+      ui.notificationsOpen.style.display = currentUser ? "inline-flex" : "none";
+      ui.uploadMetadata.style.display =
+        currentUser && (currentUser.role === "admin" || currentUser.role === "artist")
+          ? "grid"
+          : "none";
+      if (!currentUser && feedFilter === "subscribed") {
+        feedFilter = "all";
+        ui.filterSubscribed.classList.remove("active");
+      }
+      updateHeartButton();
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      ui.authMessage.textContent = "";
+      if (!firebaseAuth) {
+        ui.authMessage.textContent = "Firebase auth not ready.";
+        return;
+      }
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      try {
+        const cred = await firebaseAuth.signInWithEmailAndPassword(email, password);
+        if (!cred.user.emailVerified) {
+          ui.authMessage.textContent = "Verify your email before watching.";
+          await cred.user.sendEmailVerification();
+          return;
+        }
+      } catch (err) {
+        ui.authMessage.textContent = err.message || "Login failed.";
+      }
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+      ui.authMessage.textContent = "";
+      if (!firebaseAuth) {
+        ui.authMessage.textContent = "Firebase auth not ready.";
+        return;
+      }
+      const email = document.getElementById("register-email").value.trim();
+      const password = document.getElementById("register-password").value;
+      try {
+        const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+        await cred.user.sendEmailVerification();
+        ui.authMessage.textContent = "Verification email sent. Please verify to continue.";
+      } catch (err) {
+        ui.authMessage.textContent = err.message || "Registration failed.";
+      }
+    }
+
+    async function handleUpload(event) {
+      event.preventDefault();
+      ui.uploadMessage.textContent = "";
+      const youtubeUrl = document.getElementById("upload-url").value.trim();
+      if (!youtubeUrl) {
+        ui.uploadMessage.textContent = "YouTube URL required.";
+        return;
+      }
+      const payload = { youtubeUrl };
+      if (currentUser && (currentUser.role === "admin" || currentUser.role === "artist")) {
+        const language = document.getElementById("upload-language").value;
+        const topics = ui.uploadTopics.value
+          .split(/[|,]/g)
+          .map((topic) => topic.trim())
+          .filter(Boolean);
+        payload.language = language;
+        payload.topics = topics;
+      }
+      const res = await apiFetch("/api/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        ui.uploadMessage.textContent = data.error || "Add video failed.";
+        return;
+      }
+      ui.uploadForm.reset();
+      closeModal(ui.uploadModal);
+      await fetchVideos(ui.searchInput.value.trim());
+      await fetchChannels();
+      await fetchTopics();
+      ui.uploadMessage.textContent = "";
+    }
+
+    async function openAdmin() {
+      ui.adminList.innerHTML = "Loading...";
+      ui.adminReports.innerHTML = "Loading...";
+      const [usersRes, reportsRes] = await Promise.all([apiFetch("/api/users"), apiFetch("/api/reports")]);
+      const data = await usersRes.json();
+      ui.adminList.innerHTML = "";
+      (data.users || []).forEach((user) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        const buttonLabel = user.role === "user" ? "Grant artist" : user.role;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ghost";
+        button.textContent = buttonLabel;
+        button.disabled = user.role !== "user";
+        button.addEventListener("click", async () => {
+          const grantRes = await apiFetch("/api/admin/grant-artist", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id })
+          });
+          if (grantRes.ok) {
+            openAdmin();
+          }
+        });
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(user.email) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(user.role) +
+          "</div></div>";
+        row.appendChild(button);
+        ui.adminList.appendChild(row);
+      });
+      const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
+      ui.adminReports.innerHTML = "";
+      if (!reportsRes.ok) {
+        ui.adminReports.textContent = "Unable to load reports.";
+      } else if (!reportsData.reports || !reportsData.reports.length) {
+        ui.adminReports.textContent = "No reports yet.";
+      } else {
+        reportsData.reports.forEach((report) => {
+          const row = document.createElement("div");
+          row.className = "channel";
+          const avatar = document.createElement("span");
+          avatar.className = "avatar";
+          avatar.setAttribute("aria-hidden", "true");
+          const info = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "channel-name";
+          title.textContent = report.video_title;
+          const meta = document.createElement("div");
+          meta.className = "card-meta";
+          meta.textContent =
+            "Reported by " + report.reporter + " · " + report.reason + " · " + report.status;
+          info.appendChild(title);
+          info.appendChild(meta);
+          const actions = document.createElement("div");
+          actions.className = "channel-actions";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "report-input";
+          input.placeholder = "Message to reporter (optional)";
+          input.disabled = report.status === "resolved";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "ghost";
+          button.textContent = report.status === "resolved" ? "Resolved" : "Resolve";
+          button.disabled = report.status === "resolved";
+          button.addEventListener("click", async () => {
+            const res = await apiFetch("/api/reports/" + report.id + "/resolve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: input.value.trim() })
+            });
+            if (res.ok) {
+              openAdmin();
+            }
+          });
+          actions.appendChild(input);
+          actions.appendChild(button);
+          row.appendChild(avatar);
+          row.appendChild(info);
+          row.appendChild(actions);
+          ui.adminReports.appendChild(row);
+        });
+      }
+      openModal(ui.adminModal);
+    }
+
+    async function importCsv() {
+      ui.adminImportMessage.textContent = "";
+      const file = ui.adminCsv.files[0];
+      if (!file) {
+        ui.adminImportMessage.textContent = "Select a CSV file first.";
+        return;
+      }
+      const text = await file.text();
+      const res = await apiFetch("/api/admin/import-csv", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csv: text })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        ui.adminImportMessage.textContent = data.error || "Import failed.";
+        return;
+      }
+      ui.adminImportMessage.textContent = "Imported: " + data.inserted + ", Skipped: " + data.skipped.length;
+      ui.adminCsv.value = "";
+      fetchVideos(ui.searchInput.value.trim(), true);
+    }
+
+    async function importSql() {
+      ui.adminImportMessage.textContent = "";
+      const sql = ui.adminSql.value.trim();
+      if (!sql) {
+        ui.adminImportMessage.textContent = "Paste SQL first.";
+        return;
+      }
+      const res = await apiFetch("/api/admin/import-sql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sql })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        ui.adminImportMessage.textContent = data.error || "Import failed.";
+        return;
+      }
+      ui.adminImportMessage.textContent = "Imported: " + data.inserted + ", Skipped: " + data.skipped.length;
+      ui.adminSql.value = "";
+      fetchVideos(ui.searchInput.value.trim(), true);
+    }
+
+    async function exportSql() {
+      const res = await apiFetch("/api/admin/export-sql");
+      if (!res.ok) {
+        ui.adminImportMessage.textContent = "Export failed.";
+        return;
+      }
+      const text = await res.text();
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "videos.sql";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function openStudio() {
+      ui.statsSummary.textContent = "Loading...";
+      ui.artistStats.innerHTML = "";
+      ui.manageList.innerHTML = "";
+      const statsRes = await apiFetch("/api/stats");
+      const statsData = await statsRes.json();
+      if (statsRes.ok && statsData.totals) {
+        if (statsData.totals.users) {
+          ui.statsSummary.textContent =
+            statsData.totals.videos +
+            " videos · " +
+            statsData.totals.views +
+            " views · " +
+            statsData.totals.artists +
+            " artists";
+        } else {
+          ui.statsSummary.textContent =
+            statsData.totals.videos + " videos · " + statsData.totals.views + " views";
+        }
+      } else {
+        ui.statsSummary.textContent = "Stats unavailable.";
+      }
+
+      if (statsData.artists && statsData.artists.length) {
+        const title = document.createElement("div");
+        title.className = "card-meta";
+        title.textContent = "Artist stats";
+        ui.artistStats.appendChild(title);
+        statsData.artists.forEach((artist) => {
+          const row = document.createElement("div");
+          row.className = "channel";
+          row.innerHTML =
+            "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+            "<div><div class=\"channel-name\">" +
+            escapeHtml(artist.email) +
+            "</div><div class=\"card-meta\">" +
+            escapeHtml(artist.videos) +
+            " videos · " +
+            escapeHtml(artist.views) +
+            " views</div></div>";
+          ui.artistStats.appendChild(row);
+        });
+      }
+
+      const videosRes = await apiFetch("/api/videos/manage");
+      const videosData = await videosRes.json();
+      if (videosRes.ok && videosData.videos && videosData.videos.length) {
+        const title = document.createElement("div");
+        title.className = "card-meta";
+        title.textContent = currentUser && currentUser.role === "admin" ? "All videos" : "Your videos";
+        ui.manageList.appendChild(title);
+        videosData.videos.forEach((video) => {
+          const row = document.createElement("div");
+          row.className = "channel";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "ghost";
+          button.textContent = "Delete";
+          button.addEventListener("click", async () => {
+            const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
+            if (res.ok) {
+              openStudio();
+              fetchVideos(ui.searchInput.value.trim(), true);
+            }
+          });
+          row.innerHTML =
+            "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+            "<div><div class=\"channel-name\">" +
+            escapeHtml(video.title) +
+            "</div><div class=\"card-meta\">" +
+            escapeHtml(video.channel || "") +
+            " · " +
+            escapeHtml(video.views || 0) +
+            " views</div></div>";
+          row.appendChild(button);
+          ui.manageList.appendChild(row);
+        });
+      } else {
+        ui.manageList.textContent = "No videos yet.";
+      }
+      openModal(ui.studioModal);
+    }
+
+    async function openSettings() {
+      if (!currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      if (currentUser.plan !== "pro" || currentUser.role !== "user") {
+        return;
+      }
+      ui.settingsMessage.textContent = "";
+      ui.settingsForm.reset();
+      ui.historyList.innerHTML = "Loading...";
+      settingsSelectedTopics = new Set();
+      const res = await apiFetch("/api/settings");
+      const data = await res.json();
+      if (res.ok && data.settings) {
+        const languages = new Set(data.settings.allowed_languages || []);
+        const topics = new Set(data.settings.allowed_topics || []);
+        const mode = data.settings.topic_mode === "block" ? "block" : "allow";
+        document.querySelectorAll("input[name='topic-mode']").forEach((input) => {
+          input.checked = input.value === mode;
+        });
+        document.querySelectorAll("input[name='settings-language']").forEach((input) => {
+          input.checked = languages.has(input.value);
+        });
+        settingsSelectedTopics = topics;
+        ui.maxWatch.value = Math.round((data.settings.max_daily_minutes || 0) / 60);
+      }
+      await fetchTopics();
+      await loadHistory();
+      openModal(ui.settingsModal);
+    }
+
+    async function fetchTopics() {
+      if (!currentUser) {
+        return;
+      }
+      const res = await apiFetch("/api/topics");
+      const data = await res.json();
+      availableTopics = Array.isArray(data.topics) ? data.topics : [];
+      ui.topicsList.innerHTML = "";
+      availableTopics.forEach((topic) => {
+        const option = document.createElement("option");
+        option.value = topic;
+        ui.topicsList.appendChild(option);
+      });
+      if (!ui.settingsModal.classList.contains("active")) {
+        return;
+      }
+      renderTopicsList(settingsSelectedTopics);
+    }
+
+    function renderTopicsList(selectedTopics) {
+      const filter = ui.settingsTopicSearch.value.trim().toLowerCase();
+      ui.settingsTopics.innerHTML = "";
+      const filtered = availableTopics.filter((topic) => topic.includes(filter));
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "card-meta";
+        empty.textContent = "No topics found.";
+        ui.settingsTopics.appendChild(empty);
+        return;
+      }
+      filtered.forEach((topic) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.name = "settings-topic";
+        input.value = topic;
+        input.checked = selectedTopics.has(topic);
+        input.addEventListener("change", () => {
+          if (input.checked) {
+            selectedTopics.add(topic);
+          } else {
+            selectedTopics.delete(topic);
+          }
+        });
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + topic));
+        ui.settingsTopics.appendChild(label);
+      });
+    }
+
+    async function loadHistory() {
+      const res = await apiFetch("/api/history");
+      const data = await res.json();
+      ui.historyList.innerHTML = "";
+      if (!res.ok) {
+        ui.historyList.textContent = data.error || "History unavailable.";
+        return;
+      }
+      if (!data.history || !data.history.length) {
+        ui.historyList.textContent = "No watches today.";
+        return;
+      }
+      data.history.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">" +
+          escapeHtml(item.title) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(item.channel) +
+          " · " +
+          new Date(item.watched_at).toLocaleTimeString() +
+          "</div></div>";
+        ui.historyList.appendChild(row);
+      });
+    }
+
+    async function saveSettings(event) {
+      event.preventDefault();
+      ui.settingsMessage.textContent = "";
+      if (!firebaseUser) {
+        ui.settingsMessage.textContent = "Sign in first.";
+        return;
+      }
+      const password = document.getElementById("settings-password").value;
+      if (!password) {
+        ui.settingsMessage.textContent = "Password required.";
+        return;
+      }
+      try {
+        const credential = firebase.auth.EmailAuthProvider.credential(firebaseUser.email, password);
+        await firebaseUser.reauthenticateWithCredential(credential);
+        token = await firebaseUser.getIdToken(true);
+      } catch (err) {
+        ui.settingsMessage.textContent = err.message || "Password check failed.";
+        return;
+      }
+      const languages = Array.from(
+        document.querySelectorAll("input[name='settings-language']:checked")
+      ).map((input) => input.value);
+      const topics = Array.from(settingsSelectedTopics);
+      const topicMode = document.querySelector("input[name='topic-mode']:checked").value;
+      const maxDailyMinutes = Math.max(
+        0,
+        Math.min(24 * 60, parseInt(ui.maxWatch.value || "0", 10) * 60)
+      );
+      const res = await apiFetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ languages, topics, topicMode, maxDailyMinutes })
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        ui.settingsMessage.textContent = data.error || "Unable to save settings.";
+        return;
+      }
+      closeModal(ui.settingsModal);
+      fetchVideos(ui.searchInput.value.trim(), true);
+    }
+
+    function openReport() {
+      if (!currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      ui.reportMessage.textContent = "";
+      ui.reportForm.reset();
+      openModal(ui.reportModal);
+    }
+
+    async function submitReport(event) {
+      event.preventDefault();
+      if (!currentVideo) {
+        ui.reportMessage.textContent = "No video selected.";
+        return;
+      }
+      const reason = document.getElementById("report-reason").value.trim();
+      if (reason.length < 5) {
+        ui.reportMessage.textContent = "Reason must be at least 5 characters.";
+        return;
+      }
+      const res = await apiFetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoId: currentVideo.id, reason })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        ui.reportMessage.textContent = data.error || "Report failed.";
+        return;
+      }
+      ui.reportMessage.textContent = "Report submitted. Thank you!";
+      setTimeout(() => closeModal(ui.reportModal), 900);
+    }
+
+    async function openNotifications() {
+      if (!currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      ui.notificationsList.innerHTML = "Loading...";
+      const res = await apiFetch("/api/notifications");
+      const data = await res.json();
+      ui.notificationsList.innerHTML = "";
+      if (!res.ok || !data.notifications || !data.notifications.length) {
+        ui.notificationsList.textContent = "No updates yet.";
+        openModal(ui.notificationsModal);
+        return;
+      }
+      data.notifications.forEach((note) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        row.innerHTML =
+          "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
+          "<div><div class=\"channel-name\">Update</div><div class=\"card-meta\">" +
+          escapeHtml(note.message) +
+          "</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "pill";
+        button.textContent = note.read_at ? "Read" : "Mark read";
+        button.disabled = Boolean(note.read_at);
+        button.addEventListener("click", async () => {
+          await apiFetch("/api/notifications/" + note.id + "/read", { method: "POST" });
+          openNotifications();
+        });
+        actions.appendChild(button);
+        row.appendChild(actions);
+        ui.notificationsList.appendChild(row);
+      });
+      openModal(ui.notificationsModal);
+    }
+
+    function startTicker() {
+      if (timeTicker) {
+        return;
+      }
+      timeTicker = setInterval(syncTimelineDisplay, 500);
+    }
+
+    function attemptAutoplay() {
+      if (!player || !player.playVideo) {
+        return;
+      }
+      if (player.mute) {
+        player.mute();
+      }
+      player.playVideo();
+      setTimeout(() => {
+        const state = player.getPlayerState ? player.getPlayerState() : null;
+        if (state !== YT.PlayerState.PLAYING) {
+          setOverlayState(false, true, false);
+        }
+      }, 800);
+    }
+
+    function onPlayerReady() {
+      isPlayerReady = true;
+      updateStatus("Ready");
+      setOverlayState(false, true, false);
+      attemptAutoplay();
+      syncControlLabels();
+      startTicker();
+      if (videos.length) {
+        loadVideo(0);
+      }
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED) {
+        updateStatus("Ended");
+        if (autoNextEnabled) {
+          loadNextVideo();
+        } else {
+          setOverlayState(false, false, true);
+        }
+      } else if (event.data === YT.PlayerState.PLAYING) {
+        setOverlayState(false, false, false);
+        updateStatus("Playing");
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        updateStatus("Paused");
+      } else if (event.data === YT.PlayerState.BUFFERING) {
+        updateStatus("Buffering");
+      }
+      syncControlLabels();
+    }
+
+    function onPlayerError() {
+      updateStatus("Playback error");
+      setOverlayState(false, false, false);
+    }
+
+    function startVideo() {
+      if (!player) {
+        return;
+      }
+      if (player.unMute) {
+        player.unMute();
+      }
+      player.playVideo();
+      setOverlayState(false, false, false);
+    }
+
+    function togglePlay() {
+      if (!player) {
+        return;
+      }
+      const state = player.getPlayerState ? player.getPlayerState() : null;
+      if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+      } else {
+        player.playVideo();
+      }
+    }
+
+    function toggleMute() {
+      if (!player) {
+        return;
+      }
+      if (player.isMuted && player.isMuted()) {
+        player.unMute();
+      } else if (player.mute) {
+        player.mute();
+      }
+      syncControlLabels();
+    }
+
+    function changeVolume(delta) {
+      if (!player || !player.getVolume || !player.setVolume) {
+        return;
+      }
+      const next = Math.max(0, Math.min(100, player.getVolume() + delta));
+      player.setVolume(next);
+      if (next > 0 && player.unMute) {
+        player.unMute();
+      }
+      syncControlLabels();
+    }
+
+    function handleSeekInput() {
+      isSeeking = true;
+      ui.timeCurrent.textContent = formatTime(Number(ui.seekBar.value));
+      updateSeekBarFill();
+    }
+
+    function handleSeekCommit() {
+      isSeeking = false;
+      if (player && player.seekTo) {
+        player.seekTo(Number(ui.seekBar.value), true);
+      }
+      syncTimelineDisplay();
+    }
+
+    function toggleAutoNext() {
+      autoNextEnabled = !autoNextEnabled;
+      updateNextUp();
+      syncControlLabels();
+    }
+
+    async function toggleHeart() {
+      if (!currentUser) {
+        lockApp("Please sign in to continue.");
+        return;
+      }
+      if (!currentVideo) {
+        return;
+      }
+      const res = await apiFetch("/api/videos/" + currentVideo.id + "/like", { method: "POST" });
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      currentVideo.hearts = data.hearts;
+      currentVideo.liked = data.liked;
+      updateHeartButton();
+    }
+
+    ui.searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      showChannelView(false);
+      fetchVideos(ui.searchInput.value.trim(), true);
+    });
+
+    ui.themeToggle.addEventListener("click", () => {
+      const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      setTheme(next);
+    });
+
+    ui.viewTheater.addEventListener("click", () => setView("theater"));
+    ui.viewMini.addEventListener("click", () => setView("mini"));
+    ui.filterSubscribed.addEventListener("click", () => {
+      setFeedFilter(feedFilter === "subscribed" ? "all" : "subscribed");
+    });
+    ui.settingsTopicSearch.addEventListener("input", () => {
+      renderTopicsList(settingsSelectedTopics);
+    });
+    ui.channelBack.addEventListener("click", () => {
+      currentChannel = null;
+      showChannelView(false);
+      fetchVideos(ui.searchInput.value.trim(), true);
+    });
+    ui.channelSubscribe.addEventListener("click", () => {
+      if (!currentChannel) {
+        return;
+      }
+      toggleSubscription(currentChannel.id);
+    });
+
+    ui.authOpen.addEventListener("click", () => lockApp("Please sign in to continue."));
+    ui.authLogout.addEventListener("click", openSignout);
+    ui.uploadOpen.addEventListener("click", () => openModal(ui.uploadModal));
+    ui.adminOpen.addEventListener("click", openAdmin);
+    ui.studioOpen.addEventListener("click", openStudio);
+    ui.settingsOpen.addEventListener("click", openSettings);
+    ui.notificationsOpen.addEventListener("click", openNotifications);
+    ui.adminImportCsv.addEventListener("click", importCsv);
+    ui.adminImportSql.addEventListener("click", importSql);
+    ui.adminExportSql.addEventListener("click", exportSql);
+
+    ui.loginForm.addEventListener("submit", handleLogin);
+    ui.registerForm.addEventListener("submit", handleRegister);
+    ui.verifyResend.addEventListener("click", resendVerification);
+    ui.uploadForm.addEventListener("submit", handleUpload);
+    ui.settingsForm.addEventListener("submit", saveSettings);
+    ui.signoutForm.addEventListener("submit", confirmSignout);
+    ui.reportForm.addEventListener("submit", submitReport);
+
+    ui.playToggle.addEventListener("click", togglePlay);
+    ui.muteToggle.addEventListener("click", toggleMute);
+    ui.volumeDown.addEventListener("click", () => changeVolume(-10));
+    ui.volumeUp.addEventListener("click", () => changeVolume(10));
+    ui.autoNextToggle.addEventListener("click", toggleAutoNext);
+    ui.controlsHeart.addEventListener("click", toggleHeart);
+    ui.controlsReport.addEventListener("click", openReport);
+    document.querySelectorAll("[data-action='replay']").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (player && player.seekTo) {
+          player.seekTo(0, true);
+          player.playVideo();
+        }
+      });
+    });
+    document.querySelectorAll("[data-action='next']").forEach((button) => {
+      button.addEventListener("click", loadNextVideo);
+    });
+    document.querySelectorAll("[data-action='start']").forEach((button) => {
+      button.addEventListener("click", startVideo);
+    });
+
+    ui.seekBar.addEventListener("input", handleSeekInput);
+    ui.seekBar.addEventListener("change", handleSeekCommit);
+
+    document.querySelectorAll("[data-close]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = document.getElementById(button.getAttribute("data-close"));
+        if (target) {
+          closeModal(target);
+        }
+      });
+    });
+
+    const storedTheme = localStorage.getItem("theme") || "light";
+    setTheme(storedTheme);
+    setView("default");
+    initControlIcons();
+
+    ui.loadMore.addEventListener("click", () => {
+      if (hasMore) {
+        fetchVideos(ui.searchInput.value.trim(), false);
+      }
+    });
+
+    lockApp("Please sign in to continue.");
+    initFirebase();
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player("player", {
+        height: "315",
+        width: "560",
+        videoId: "",
+        playerVars: {
+          rel: 0,
+          modestbranding: 1,
+          controls: 0,
+          playsinline: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    }
+  </script>
+</body>
+</html>
