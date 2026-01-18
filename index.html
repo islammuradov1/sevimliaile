@@ -3798,7 +3798,7 @@
         searchOffset = 0;
         searchHasMore = true;
         searchQuery = trimmed;
-        ui.searchGrid.innerHTML = "";
+        ui.searchGrid.innerHTML = t("status_loading");
       }
       setPageView("search");
       ui.searchTitle.textContent = t("search_results") + " \"" + searchQuery + "\"";
@@ -5144,7 +5144,13 @@
 
     ui.searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      fetchSearchResults(ui.searchInput.value.trim(), true);
+      const query = ui.searchInput.value.trim();
+      setPageView("search");
+      ui.searchTitle.textContent = query
+        ? t("search_results") + " \"" + query + "\""
+        : t("search_title");
+      ui.searchGrid.innerHTML = t("status_loading");
+      fetchSearchResults(query, true);
     });
 
     ui.themeToggle.addEventListener("click", () => {
