@@ -1359,6 +1359,8 @@
       document.body.classList.remove("locked");
     }
 
+    const API_BASE = window.__API_BASE__ || "";
+
     function apiFetch(path, options = {}) {
       const headers = options.headers || {};
       if (!token && path.startsWith("/api/") && path !== "/api/firebase-config") {
@@ -1367,7 +1369,7 @@
       if (token) {
         headers.Authorization = "Bearer " + token;
       }
-      return fetch(path, { ...options, headers });
+      return fetch(API_BASE + path, { ...options, headers });
     }
 
     function formatTime(seconds) {
@@ -1822,7 +1824,7 @@
 
     async function initFirebase() {
       try {
-        const res = await fetch("/api/firebase-config");
+        const res = await fetch(API_BASE + "/api/firebase-config");
         const config = await res.json();
         if (!res.ok) {
           ui.authMessage.textContent = config.error || "Firebase config missing.";

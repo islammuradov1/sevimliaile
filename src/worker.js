@@ -1,0 +1,866 @@
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+function jsonResponse(data, status = 200, extra = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...JSON_HEADERS, ...extra }
+  });
+}
+
+function textResponse(data, status = 200, extra = {}) {
+  return new Response(data, {
+    status,
+    headers: { "Content-Type": "text/plain", ...extra }
+  });
+}
+
+function withCors(headers, origin) {
+  return {
+    ...headers,
+    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+}
+
+async function parseJson(request) {
+  const text = await request.text();
+  return text ? JSON.parse(text) : {};
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function normalizeTopics(input) {
+  if (!input) return [];
+  if (Array.isArray(input)) {
+    return input.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+  }
+  return String(input)
+    .split(/[|,]/g)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function normalizeLanguages(input) {
+  if (!input) return [];
+  if (Array.isArray(input)) {
+    return input.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+  }
+  return [];
+}
+
+function parseCsv(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return rows;
+  let headers = null;
+  for (const line of lines) {
+    const fields = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      const next = line[i + 1];
+      if (ch === '"' && next === '"') {
+        current += '"';
+        i += 1;
+        continue;
+      }
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+        continue;
+      }
+      if (ch === "," && !inQuotes) {
+        fields.push(current.trim());
+        current = "";
+        continue;
+      }
+      current += ch;
+    }
+    fields.push(current.trim());
+    if (!headers) {
+      headers = fields.map((field) => field.toLowerCase());
+      continue;
+    }
+    const row = {};
+    headers.forEach((header, index) => {
+      row[header] = fields[index] || "";
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseSqlInserts(text) {
+  const rows = [];
+  const regex = /INSERT\s+INTO\s+videos\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/gi;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const columns = match[1]
+      .split(",")
+      .map((col) => col.trim().replace(/\"/g, "").toLowerCase());
+    const values = [];
+    let current = "";
+    let inString = false;
+    for (let i = 0; i < match[2].length; i++) {
+      const ch = match[2][i];
+      const next = match[2][i + 1];
+      if (ch === "'" && next === "'" && inString) {
+        current += "'";
+        i += 1;
+        continue;
+      }
+      if (ch === "'") {
+        inString = !inString;
+        continue;
+      }
+      if (!inString && ch === ",") {
+        values.push(current.trim());
+        current = "";
+        continue;
+      }
+      current += ch;
+    }
+    values.push(current.trim());
+    const row = {};
+    columns.forEach((column, index) => {
+      row[column] = values[index] || "";
+    });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function extractYouTubeId(input) {
+  if (!input) return null;
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed;
+  }
+  try {
+    const url = new URL(trimmed);
+    if (url.hostname.includes("youtu.be")) {
+      const id = url.pathname.replace("/", "");
+      return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+    if (url.hostname.includes("youtube.com")) {
+      const id = url.searchParams.get("v");
+      return id && /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+    }
+  } catch (err) {
+    return null;
+  }
+  return null;
+}
+
+function parseYouTubeDuration(value) {
+  if (!value || typeof value !== "string") return 0;
+  const match = value.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || "0", 10);
+  const minutes = parseInt(match[2] || "0", 10);
+  const seconds = parseInt(match[3] || "0", 10);
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+async function fetchYouTubeMeta(env, youtubeId, youtubeUrl) {
+  let title = "";
+  let duration = 0;
+  if (env.YOUTUBE_API_KEY) {
+    const apiUrl =
+      "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=" +
+      youtubeId +
+      "&key=" +
+      env.YOUTUBE_API_KEY;
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      const item = data.items && data.items[0];
+      if (item && item.snippet) {
+        title = item.snippet.title || title;
+      }
+      if (item && item.contentDetails && item.contentDetails.duration) {
+        duration = parseYouTubeDuration(item.contentDetails.duration);
+      }
+    }
+  }
+  if (!title) {
+    const oembedUrl =
+      "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(youtubeUrl);
+    const response = await fetch(oembedUrl);
+    if (response.ok) {
+      const data = await response.json();
+      title = data.title || title;
+    }
+  }
+  return { title: title || "Untitled video", duration: duration || 0 };
+}
+
+async function verifyFirebaseToken(env, token) {
+  if (!env.FIREBASE_API_KEY) return null;
+  const response = await fetch(
+    "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + env.FIREBASE_API_KEY,
+    {
+      method: "POST",
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ idToken: token })
+    }
+  );
+  if (!response.ok) return null;
+  const data = await response.json();
+  const user = data.users && data.users[0];
+  if (!user || !user.emailVerified) return null;
+  return user;
+}
+
+async function upsertUser(env, firebaseUser) {
+  const email = String(firebaseUser.email || "").toLowerCase();
+  const uid = firebaseUser.localId || firebaseUser.uid;
+  if (!email || !uid) return null;
+  const existing = await env.DB.prepare(
+    "SELECT * FROM users WHERE firebase_uid = ? OR email = ? LIMIT 1"
+  )
+    .bind(uid, email)
+    .first();
+  if (existing) {
+    if (!existing.firebase_uid) {
+      await env.DB.prepare("UPDATE users SET firebase_uid = ? WHERE id = ?")
+        .bind(uid, existing.id)
+        .run();
+    }
+    if (email === env.ADMIN_EMAIL && existing.role !== "admin") {
+      await env.DB.prepare("UPDATE users SET role = 'admin' WHERE id = ?")
+        .bind(existing.id)
+        .run();
+      return { ...existing, role: "admin" };
+    }
+    return existing;
+  }
+  const createdAt = nowIso();
+  await env.DB.prepare(
+    "INSERT INTO users (email, firebase_uid, role, plan, created_at) VALUES (?, ?, 'user', 'free', ?)"
+  )
+    .bind(email, uid, createdAt)
+    .run();
+  return env.DB.prepare("SELECT * FROM users WHERE firebase_uid = ?")
+    .bind(uid)
+    .first();
+}
+
+async function auth(request, env) {
+  const header = request.headers.get("Authorization") || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  if (!token) return null;
+  const firebaseUser = await verifyFirebaseToken(env, token);
+  if (!firebaseUser) return null;
+  return upsertUser(env, firebaseUser);
+}
+
+function requireRole(user, role) {
+  if (!user) return false;
+  if (Array.isArray(role)) return role.includes(user.role);
+  return user.role === role;
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const origin = env.FRONTEND_ORIGIN || "*";
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: withCors({}, origin) });
+    }
+    const path = url.pathname.replace(/^\/api/, "");
+    const user = await auth(request, env);
+    if (!user) {
+      if (path === "/firebase-config") {
+        if (!env.FIREBASE_API_KEY || !env.FIREBASE_AUTH_DOMAIN || !env.FIREBASE_PROJECT_ID || !env.FIREBASE_APP_ID) {
+          return jsonResponse({ error: "Firebase config missing." }, 500, withCors({}, origin));
+        }
+        return jsonResponse(
+          {
+            apiKey: env.FIREBASE_API_KEY,
+            authDomain: env.FIREBASE_AUTH_DOMAIN,
+            projectId: env.FIREBASE_PROJECT_ID,
+            appId: env.FIREBASE_APP_ID
+          },
+          200,
+          withCors({}, origin)
+        );
+      }
+      return jsonResponse({ error: "Unauthorized" }, 401, withCors({}, origin));
+    }
+
+    if (path === "/me" && request.method === "GET") {
+      return jsonResponse({ user }, 200, withCors({}, origin));
+    }
+
+    if (path === "/settings" && request.method === "GET") {
+      if (user.plan !== "pro") return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      const settings = await env.DB.prepare(
+        "SELECT allowed_languages, allowed_topics, topic_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      const data = settings || {
+        allowed_languages: "[]",
+        allowed_topics: "[]",
+        topic_mode: "allow",
+        max_daily_minutes: 0
+      };
+      return jsonResponse(
+        {
+          settings: {
+            allowed_languages: JSON.parse(data.allowed_languages || "[]"),
+            allowed_topics: JSON.parse(data.allowed_topics || "[]"),
+            topic_mode: data.topic_mode || "allow",
+            max_daily_minutes: data.max_daily_minutes || 0
+          }
+        },
+        200,
+        withCors({}, origin)
+      );
+    }
+
+    if (path === "/settings" && request.method === "POST") {
+      if (user.plan !== "pro") return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      const body = await parseJson(request);
+      const languages = normalizeLanguages(body.languages);
+      const topics = normalizeTopics(body.topics);
+      const topicMode = body.topicMode === "block" ? "block" : "allow";
+      const maxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(body.maxDailyMinutes || "0", 10)));
+      await env.DB.prepare(
+        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, topic_mode, max_daily_minutes, updated_at) " +
+          "VALUES (?, ?, ?, ?, ?, ?) " +
+          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, topic_mode = excluded.topic_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
+      )
+        .bind(user.id, JSON.stringify(languages), JSON.stringify(topics), topicMode, maxDailyMinutes, nowIso())
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/topics" && request.method === "GET") {
+      const result = await env.DB.prepare("SELECT topics FROM videos WHERE topics IS NOT NULL").all();
+      const set = new Set();
+      result.results.forEach((row) => {
+        try {
+          const topics = JSON.parse(row.topics || "[]");
+          topics.forEach((topic) => set.add(String(topic).toLowerCase()));
+        } catch (err) {}
+      });
+      return jsonResponse({ topics: Array.from(set).sort() }, 200, withCors({}, origin));
+    }
+
+    if (path === "/channels" && request.method === "GET") {
+      const result = await env.DB.prepare(
+        "SELECT users.id, users.email, users.role, " +
+          "COUNT(DISTINCT videos.id) as videos, " +
+          "COUNT(DISTINCT subscriptions.channel_id) as subscribers " +
+          "FROM users " +
+          "LEFT JOIN videos ON users.id = videos.owner_id " +
+          "LEFT JOIN subscriptions ON subscriptions.channel_id = users.id " +
+          "WHERE users.role = 'artist' " +
+          "GROUP BY users.id ORDER BY videos DESC, users.created_at DESC"
+      ).all();
+      const subs = await env.DB.prepare("SELECT channel_id FROM subscriptions WHERE user_id = ?")
+        .bind(user.id)
+        .all();
+      const subscribed = new Set(subs.results.map((row) => row.channel_id));
+      const channels = result.results.map((channel) => ({
+        ...channel,
+        is_subscribed: subscribed.has(channel.id)
+      }));
+      return jsonResponse({ channels }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/channels/") && request.method === "GET") {
+      const channelId = path.split("/")[2];
+      const channel = await env.DB.prepare(
+        "SELECT users.id, users.email, users.role, " +
+          "COUNT(DISTINCT videos.id) as videos, " +
+          "COUNT(DISTINCT subscriptions.channel_id) as subscribers " +
+          "FROM users " +
+          "LEFT JOIN videos ON users.id = videos.owner_id " +
+          "LEFT JOIN subscriptions ON subscriptions.channel_id = users.id " +
+          "WHERE users.id = ? AND users.role = 'artist' " +
+          "GROUP BY users.id"
+      )
+        .bind(channelId)
+        .first();
+      if (!channel) return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
+      const sub = await env.DB.prepare(
+        "SELECT 1 FROM subscriptions WHERE user_id = ? AND channel_id = ?"
+      )
+        .bind(user.id, channelId)
+        .first();
+      return jsonResponse(
+        { channel: { ...channel, is_subscribed: Boolean(sub) } },
+        200,
+        withCors({}, origin)
+      );
+    }
+
+    if (path === "/users" && request.method === "GET") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const result = await env.DB.prepare(
+        "SELECT id, email, role, plan, created_at FROM users ORDER BY created_at DESC"
+      ).all();
+      return jsonResponse({ users: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/grant-artist" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      if (!body.userId) return jsonResponse({ error: "userId required." }, 400, withCors({}, origin));
+      await env.DB.prepare("UPDATE users SET role = 'artist' WHERE id = ?")
+        .bind(body.userId)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/videos" && request.method === "GET") {
+      const search = url.searchParams.get("search") || "";
+      const channelId = url.searchParams.get("channelId") || "";
+      const onlySubscribed = url.searchParams.get("subscribed") === "1";
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      const settings = await env.DB.prepare(
+        "SELECT allowed_languages, allowed_topics, topic_mode FROM user_settings WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      const allowedLanguages = settings ? JSON.parse(settings.allowed_languages || "[]") : [];
+      const allowedTopics = settings ? JSON.parse(settings.allowed_topics || "[]") : [];
+      const topicMode = settings?.topic_mode || "allow";
+      let where = "WHERE videos.youtube_id IS NOT NULL";
+      const binds = [];
+      if (onlySubscribed) {
+        where += " AND videos.owner_id IN (SELECT channel_id FROM subscriptions WHERE user_id = ?)";
+        binds.push(user.id);
+      }
+      if (channelId) {
+        where += " AND videos.owner_id = ?";
+        binds.push(channelId);
+      }
+      if (search) {
+        where += " AND videos.title LIKE ?";
+        binds.push("%" + search + "%");
+      }
+      if (allowedLanguages.length) {
+        where += " AND videos.language IN (" + allowedLanguages.map(() => "?").join(",") + ")";
+        binds.push(...allowedLanguages);
+      }
+      if (allowedTopics.length) {
+        const inList = allowedTopics.map(() => "?").join(",");
+        if (topicMode === "block") {
+          where +=
+            " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+        } else {
+          where +=
+            " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+        }
+        binds.push(...allowedTopics);
+      }
+      const query =
+        "SELECT videos.*, users.email as channel, users.role as channel_role, " +
+        "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts, " +
+        "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id AND likes.user_id = ?) as liked " +
+        "FROM videos JOIN users ON videos.owner_id = users.id " +
+        where +
+        " ORDER BY videos.created_at DESC LIMIT ? OFFSET ?";
+      const result = await env.DB.prepare(query)
+        .bind(user.id, ...binds, limit + 1, offset)
+        .all();
+      const rows = result.results || [];
+      const hasMore = rows.length > limit;
+      const videos = rows.slice(0, limit).map((row) => ({
+        ...row,
+        topics: row.topics ? JSON.parse(row.topics) : []
+      }));
+      return jsonResponse({ videos, hasMore }, 200, withCors({}, origin));
+    }
+
+    if (path === "/videos/manage" && request.method === "GET") {
+      const query =
+        user.role === "admin"
+          ? "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id ORDER BY videos.created_at DESC"
+          : "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE owner_id = ? ORDER BY videos.created_at DESC";
+      const result = user.role === "admin"
+        ? await env.DB.prepare(query).all()
+        : await env.DB.prepare(query).bind(user.id).all();
+      return jsonResponse({ videos: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/videos/") && request.method === "DELETE") {
+      const videoId = path.split("/")[2];
+      const video = await env.DB.prepare("SELECT owner_id FROM videos WHERE id = ?")
+        .bind(videoId)
+        .first();
+      if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
+      if (user.role !== "admin" && Number(video.owner_id) !== Number(user.id)) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      await env.DB.prepare("DELETE FROM videos WHERE id = ?").bind(videoId).run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/videos" && request.method === "POST") {
+      if (!requireRole(user, ["artist", "admin"])) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const youtubeUrl = body.youtubeUrl || "";
+      const youtubeId = extractYouTubeId(youtubeUrl);
+      if (!youtubeId) return jsonResponse({ error: "Valid YouTube URL required." }, 400, withCors({}, origin));
+      const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+      const language = (body.language || "unspecified").toLowerCase();
+      const topics = normalizeTopics(body.topics);
+      await env.DB.prepare(
+        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
+          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+      )
+        .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/videos/") && path.endsWith("/view") && request.method === "POST") {
+      const videoId = path.split("/")[2];
+      await env.DB.prepare("UPDATE videos SET views = views + 1 WHERE id = ?").bind(videoId).run();
+      if (user.plan === "pro") {
+        const settings = await env.DB.prepare(
+          "SELECT max_daily_minutes FROM user_settings WHERE user_id = ?"
+        )
+          .bind(user.id)
+          .first();
+        const maxMinutes = settings?.max_daily_minutes || 0;
+        if (maxMinutes > 0) {
+          const now = new Date();
+          const start = new Date(now);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(now);
+          end.setHours(23, 59, 59, 999);
+          const used = await env.DB.prepare(
+            "SELECT COALESCE(SUM(watch_seconds), 0) as used FROM view_history WHERE user_id = ? AND watched_at BETWEEN ? AND ?"
+          )
+            .bind(user.id, start.toISOString(), end.toISOString())
+            .first();
+          if ((used?.used || 0) >= maxMinutes * 60) {
+            return jsonResponse({ error: "Daily watch limit reached." }, 403, withCors({}, origin));
+          }
+        }
+        const video = await env.DB.prepare("SELECT duration FROM videos WHERE id = ?")
+          .bind(videoId)
+          .first();
+        await env.DB.prepare(
+          "INSERT INTO view_history (user_id, video_id, watched_at, watch_seconds) VALUES (?, ?, ?, ?)"
+        )
+          .bind(user.id, videoId, nowIso(), video?.duration || 0)
+          .run();
+      }
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/videos/") && path.endsWith("/like") && request.method === "POST") {
+      const videoId = path.split("/")[2];
+      const existing = await env.DB.prepare(
+        "SELECT 1 FROM likes WHERE user_id = ? AND video_id = ?"
+      )
+        .bind(user.id, videoId)
+        .first();
+      if (existing) {
+        await env.DB.prepare("DELETE FROM likes WHERE user_id = ? AND video_id = ?")
+          .bind(user.id, videoId)
+          .run();
+      } else {
+        await env.DB.prepare("INSERT INTO likes (user_id, video_id, created_at) VALUES (?, ?, ?)")
+          .bind(user.id, videoId, nowIso())
+          .run();
+      }
+      const count = await env.DB.prepare("SELECT COUNT(*) as hearts FROM likes WHERE video_id = ?")
+        .bind(videoId)
+        .first();
+      return jsonResponse(
+        { hearts: count?.hearts || 0, liked: !existing },
+        200,
+        withCors({}, origin)
+      );
+    }
+
+    if (path === "/subscriptions" && request.method === "GET") {
+      const subs = await env.DB.prepare(
+        "SELECT users.id, users.email, " +
+          "(SELECT COUNT(*) FROM subscriptions subs WHERE subs.channel_id = users.id) as subscribers " +
+          "FROM subscriptions JOIN users ON subscriptions.channel_id = users.id WHERE subscriptions.user_id = ? " +
+          "ORDER BY subscriptions.created_at DESC"
+      )
+        .bind(user.id)
+        .all();
+      return jsonResponse({ subscriptions: subs.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/subscriptions/") && request.method === "POST") {
+      const channelId = path.split("/")[2];
+      const existing = await env.DB.prepare(
+        "SELECT 1 FROM subscriptions WHERE user_id = ? AND channel_id = ?"
+      )
+        .bind(user.id, channelId)
+        .first();
+      if (existing) {
+        await env.DB.prepare("DELETE FROM subscriptions WHERE user_id = ? AND channel_id = ?")
+          .bind(user.id, channelId)
+          .run();
+      } else {
+        await env.DB.prepare(
+          "INSERT INTO subscriptions (user_id, channel_id, created_at) VALUES (?, ?, ?)"
+        )
+          .bind(user.id, channelId, nowIso())
+          .run();
+      }
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/notifications" && request.method === "GET") {
+      const result = await env.DB.prepare(
+        "SELECT id, message, created_at, read_at FROM notifications WHERE user_id = ? ORDER BY created_at DESC"
+      )
+        .bind(user.id)
+        .all();
+      return jsonResponse({ notifications: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/notifications/") && path.endsWith("/read") && request.method === "POST") {
+      const id = path.split("/")[2];
+      await env.DB.prepare("UPDATE notifications SET read_at = ? WHERE id = ? AND user_id = ?")
+        .bind(nowIso(), id, user.id)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/reports" && request.method === "POST") {
+      const body = await parseJson(request);
+      if (!body.videoId || !body.reason || String(body.reason).trim().length < 5) {
+        return jsonResponse({ error: "Reason required (min 5 chars)." }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare(
+        "INSERT INTO reports (video_id, reporter_id, reason, created_at) VALUES (?, ?, ?, ?)"
+      )
+        .bind(body.videoId, user.id, String(body.reason).trim(), nowIso())
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/reports" && request.method === "GET") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const result = await env.DB.prepare(
+        "SELECT reports.id, reports.reason, reports.status, reports.created_at, " +
+          "videos.id as video_id, videos.title as video_title, users.email as reporter " +
+          "FROM reports JOIN videos ON reports.video_id = videos.id " +
+          "JOIN users ON reports.reporter_id = users.id " +
+          "ORDER BY reports.created_at DESC"
+      ).all();
+      return jsonResponse({ reports: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/reports/") && path.endsWith("/resolve") && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const reportId = path.split("/")[2];
+      const body = await parseJson(request);
+      const report = await env.DB.prepare("SELECT reporter_id FROM reports WHERE id = ?")
+        .bind(reportId)
+        .first();
+      if (!report) return jsonResponse({ error: "Report not found." }, 404, withCors({}, origin));
+      await env.DB.prepare("UPDATE reports SET status = 'resolved', resolved_at = ? WHERE id = ?")
+        .bind(nowIso(), reportId)
+        .run();
+      if (body.message && String(body.message).trim()) {
+        await env.DB.prepare(
+          "INSERT INTO notifications (user_id, message, created_at) VALUES (?, ?, ?)"
+        )
+          .bind(report.reporter_id, String(body.message).trim(), nowIso())
+          .run();
+      }
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/history" && request.method === "GET") {
+      if (user.plan !== "pro") {
+        return jsonResponse({ error: "History available on pro plan only." }, 403, withCors({}, origin));
+      }
+      const day = url.searchParams.get("day") || "";
+      const date = day ? new Date(day) : new Date();
+      if (Number.isNaN(date.getTime())) {
+        return jsonResponse({ error: "Invalid day." }, 400, withCors({}, origin));
+      }
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      const result = await env.DB.prepare(
+        "SELECT view_history.watched_at, videos.title, videos.youtube_id, users.email as channel " +
+          "FROM view_history JOIN videos ON view_history.video_id = videos.id " +
+          "JOIN users ON videos.owner_id = users.id " +
+          "WHERE view_history.user_id = ? AND view_history.watched_at BETWEEN ? AND ? " +
+          "ORDER BY view_history.watched_at DESC"
+      )
+        .bind(user.id, start.toISOString(), end.toISOString())
+        .all();
+      return jsonResponse({ history: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/stats" && request.method === "GET") {
+      const totals = await env.DB.prepare(
+        "SELECT COUNT(*) as videos, COALESCE(SUM(views), 0) as views FROM videos"
+      ).first();
+      if (user.role === "admin") {
+        const usersCount = await env.DB.prepare("SELECT COUNT(*) as users FROM users").first();
+        const artistsCount = await env.DB.prepare(
+          "SELECT COUNT(*) as artists FROM users WHERE role = 'artist'"
+        ).first();
+        const artists = await env.DB.prepare(
+          "SELECT users.id, users.email, COUNT(videos.id) as videos, COALESCE(SUM(videos.views), 0) as views " +
+            "FROM users LEFT JOIN videos ON users.id = videos.owner_id WHERE users.role = 'artist' " +
+            "GROUP BY users.id ORDER BY views DESC"
+        ).all();
+        return jsonResponse(
+          {
+            totals: {
+              videos: totals?.videos || 0,
+              views: totals?.views || 0,
+              users: usersCount?.users || 0,
+              artists: artistsCount?.artists || 0
+            },
+            artists: artists.results || []
+          },
+          200,
+          withCors({}, origin)
+        );
+      }
+      const owned = await env.DB.prepare(
+        "SELECT COUNT(*) as videos, COALESCE(SUM(views), 0) as views FROM videos WHERE owner_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      return jsonResponse(
+        { totals: { videos: owned?.videos || 0, views: owned?.views || 0 }, artists: [] },
+        200,
+        withCors({}, origin)
+      );
+    }
+
+    if (path === "/admin/export-sql" && request.method === "GET") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const result = await env.DB.prepare(
+        "SELECT youtube_url, language, topics FROM videos ORDER BY created_at DESC"
+      ).all();
+      const lines = (result.results || []).map((row) => {
+        const safeUrl = String(row.youtube_url || "").replace(/'/g, "''");
+        const safeLanguage = String(row.language || "unspecified").replace(/'/g, "''");
+        const topics = row.topics ? JSON.parse(row.topics).join("|") : "";
+        const safeTopics = String(topics).replace(/'/g, "''");
+        return (
+          "INSERT INTO videos (youtube_url, language, topics) VALUES ('" +
+          safeUrl +
+          "', '" +
+          safeLanguage +
+          "', '" +
+          safeTopics +
+          "');"
+        );
+      });
+      const content = lines.join("\n");
+      if (env.R2) {
+        const key = "exports/videos-" + Date.now() + ".sql";
+        await env.R2.put(key, content, { httpMetadata: { contentType: "text/plain" } });
+      }
+      return textResponse(content, 200, withCors({ "Content-Disposition": "attachment; filename=\"videos.sql\"" }, origin));
+    }
+
+    if (path === "/admin/import-csv" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      if (!body.csv) return jsonResponse({ error: "CSV text required." }, 400, withCors({}, origin));
+      const rows = parseCsv(body.csv);
+      const inserted = [];
+      const skipped = [];
+      for (const row of rows) {
+        const youtubeUrl = row.youtube_url || row.url || "";
+        const youtubeId = extractYouTubeId(youtubeUrl);
+        if (!youtubeId) {
+          skipped.push({ youtubeUrl, reason: "Invalid URL" });
+          continue;
+        }
+        const exists = await env.DB.prepare("SELECT id FROM videos WHERE youtube_id = ?")
+          .bind(youtubeId)
+          .first();
+        if (exists) {
+          skipped.push({ youtubeUrl, reason: "Already exists" });
+          continue;
+        }
+        const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+        const language = String(row.language || row.lang || "unspecified").toLowerCase();
+        const topics = normalizeTopics(row.topics || "");
+        const result = await env.DB.prepare(
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+        )
+          .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+          .run();
+        inserted.push(result.meta.last_row_id);
+      }
+      return jsonResponse({ inserted: inserted.length, skipped }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/import-sql" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      if (!body.sql) return jsonResponse({ error: "SQL text required." }, 400, withCors({}, origin));
+      const rows = parseSqlInserts(body.sql);
+      const inserted = [];
+      const skipped = [];
+      for (const row of rows) {
+        const youtubeUrl = row.youtube_url || row.url || "";
+        const youtubeId = extractYouTubeId(youtubeUrl);
+        if (!youtubeId) {
+          skipped.push({ youtubeUrl, reason: "Invalid URL" });
+          continue;
+        }
+        const exists = await env.DB.prepare("SELECT id FROM videos WHERE youtube_id = ?")
+          .bind(youtubeId)
+          .first();
+        if (exists) {
+          skipped.push({ youtubeUrl, reason: "Already exists" });
+          continue;
+        }
+        const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+        const language = String(row.language || row.lang || "unspecified").toLowerCase();
+        const topics = normalizeTopics(row.topics || "");
+        const result = await env.DB.prepare(
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+        )
+          .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+          .run();
+        inserted.push(result.meta.last_row_id);
+      }
+      return jsonResponse({ inserted: inserted.length, skipped }, 200, withCors({}, origin));
+    }
+
+    return jsonResponse({ error: "Not found" }, 404, withCors({}, origin));
+  }
+};
