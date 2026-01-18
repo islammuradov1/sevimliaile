@@ -6,7 +6,7 @@
   <title>Sevimli Aile - Video Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #fff5ec;
@@ -20,9 +20,9 @@
       --accent-3: #ffd26f;
       --accent-4: #9c7dff;
       --shadow: 0 20px 40px rgba(34, 22, 15, 0.18);
-      --radius-lg: 28px;
-      --radius-md: 20px;
-      --radius-sm: 14px;
+      --radius-lg: 34px;
+      --radius-md: 24px;
+      --radius-sm: 18px;
     }
 
     body[data-theme="dark"] {
@@ -45,8 +45,10 @@
 
     body {
       margin: 0;
-      font-family: "Space Grotesk", sans-serif;
+      font-family: "Baloo 2", "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
       background:
+        radial-gradient(4px 4px at 20px 20px, rgba(255, 210, 111, 0.25) 40%, transparent 45%),
+        radial-gradient(4px 4px at 50px 60px, rgba(58, 188, 196, 0.2) 40%, transparent 45%),
         radial-gradient(700px 500px at 10% 15%, rgba(255, 210, 111, 0.45) 0%, transparent 60%),
         radial-gradient(650px 450px at 85% 10%, rgba(88, 201, 214, 0.35) 0%, transparent 55%),
         radial-gradient(700px 500px at 90% 80%, rgba(156, 125, 255, 0.25) 0%, transparent 60%),
@@ -57,6 +59,8 @@
 
     body[data-theme="dark"] {
       background:
+        radial-gradient(4px 4px at 20px 20px, rgba(255, 138, 106, 0.18) 40%, transparent 45%),
+        radial-gradient(4px 4px at 50px 60px, rgba(89, 211, 219, 0.14) 40%, transparent 45%),
         radial-gradient(700px 500px at 10% 15%, rgba(255, 138, 106, 0.22) 0%, transparent 60%),
         radial-gradient(650px 450px at 85% 10%, rgba(89, 211, 219, 0.18) 0%, transparent 55%),
         radial-gradient(700px 500px at 90% 80%, rgba(176, 139, 255, 0.18) 0%, transparent 60%),
@@ -183,6 +187,16 @@
       flex-wrap: wrap;
     }
 
+    .lang-select select {
+      border-radius: 999px;
+      border: 2px solid var(--stroke);
+      background: var(--bg-alt);
+      color: var(--ink);
+      padding: 6px 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     .pill {
       border: 2px solid var(--stroke);
       background: var(--bg-alt);
@@ -285,6 +299,26 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+    }
+
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-hint,
+    .section-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .section-sub {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-alt);
+      border: 2px dashed var(--stroke);
+      width: fit-content;
     }
 
     .hidden {
@@ -760,8 +794,9 @@
     }
 
     .load-more {
-      display: flex;
-      justify-content: center;
+      display: grid;
+      place-items: center;
+      gap: 8px;
       margin-top: 12px;
     }
 
@@ -869,15 +904,26 @@
         <span>Sevimli Aile</span>
       </div>
       <form class="search" id="search-form" role="search">
-        <label class="sr-only" for="search-input">Search</label>
-        <input id="search-input" name="search-input" type="search" placeholder="Search videos and channels">
-        <button type="submit" aria-label="Search">
+        <label class="sr-only" for="search-input" data-i18n="search_label">Search</label>
+        <input id="search-input" name="search-input" type="search" placeholder="Search videos and channels" data-i18n-placeholder="search_placeholder">
+        <button type="submit" aria-label="Search" data-i18n-aria="search_label">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M15.5 14h-.8l-.3-.3a6 6 0 1 0-.9.9l.3.3v.8l4.7 4.7 1.4-1.4L15.5 14zM10 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
           </svg>
         </button>
       </form>
       <div class="top-actions">
+        <div class="lang-select">
+          <label class="sr-only" for="ui-language" data-i18n="ui_language_label">Language</label>
+          <select id="ui-language" name="ui-language" aria-label="App language" data-i18n-aria="ui_language_label">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+            <option value="tr">Türkçe</option>
+            <option value="az">Azərbaycan</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
         <button class="pill icon-button" id="view-theater" type="button" aria-label="Theater"></button>
         <button class="pill icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
@@ -894,11 +940,11 @@
     <div class="layout">
       <aside>
         <div class="sidebar-section">
-          <h3>Subscribed</h3>
+          <h3 data-i18n="sidebar_subscribed">Subscribed</h3>
           <div id="subscribed-list" class="form-grid"></div>
         </div>
         <div class="sidebar-section">
-          <h3>Channels</h3>
+          <h3 data-i18n="sidebar_channels">Channels</h3>
           <div id="channel-list" class="form-grid"></div>
         </div>
       </aside>
@@ -908,32 +954,32 @@
           <div class="player-shell" id="player-shell" data-state="loading">
             <div class="player-ratio">
               <div id="player" aria-label="YouTube player"></div>
-              <div class="status-chip" id="status-chip">Loading</div>
+              <div class="status-chip" id="status-chip" data-i18n="status_loading">Loading</div>
               <div class="overlay loading active" id="loading-layer">
                 <div class="loader" aria-hidden="true"></div>
-                <p>Loading player...</p>
+                <p data-i18n="player_loading">Loading player...</p>
               </div>
               <div class="overlay start" id="start-layer" aria-hidden="true">
-                <p class="overlay-kicker">Ready to play</p>
-                <h2>Tap to start the video</h2>
-                <p class="overlay-copy">Autoplay is often blocked. Press start to begin.</p>
-                <button class="primary icon-button" data-action="start" id="start-video" name="start-video" type="button" aria-label="Start video">
+                <p class="overlay-kicker" data-i18n="overlay_ready">Ready to play</p>
+                <h2 data-i18n="overlay_tap_start">Tap to start the video</h2>
+                <p class="overlay-copy" data-i18n="overlay_autoplay_note">Autoplay is often blocked. Press start to begin.</p>
+                <button class="primary icon-button" data-action="start" id="start-video" name="start-video" type="button" aria-label="Start video" data-i18n-aria="control_start">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
                 </button>
               </div>
               <div class="overlay end" id="end-card" aria-hidden="true">
-                <p class="overlay-kicker">Video complete</p>
-                <h2>What do you want to watch next?</h2>
-                <p class="overlay-copy">Choose an action to keep the flow going.</p>
+                <p class="overlay-kicker" data-i18n="overlay_complete">Video complete</p>
+                <h2 data-i18n="overlay_next_prompt">What do you want to watch next?</h2>
+                <p class="overlay-copy" data-i18n="overlay_next_copy">Choose an action to keep the flow going.</p>
                 <div class="overlay-actions">
-                  <button class="ghost icon-button" data-action="replay" id="end-replay" name="end-replay" type="button" aria-label="Replay">
+                  <button class="ghost icon-button" data-action="replay" id="end-replay" name="end-replay" type="button" aria-label="Replay" data-i18n-aria="control_replay">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12 5v4l5-5-5-5v4a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7z"/>
                     </svg>
                   </button>
-                  <button class="primary icon-button" data-action="next" id="end-next" name="end-next" type="button" aria-label="Next video">
+                  <button class="primary icon-button" data-action="next" id="end-next" name="end-next" type="button" aria-label="Next video" data-i18n-aria="control_next">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M6 18 14.5 12 6 6v12zm10-12h2v12h-2z"/>
                     </svg>
@@ -945,7 +991,7 @@
           </div>
 
           <div class="player-meta">
-            <div class="meta-title" id="video-title">Select a video</div>
+            <div class="meta-title" id="video-title" data-i18n="video_select">Select a video</div>
             <div class="meta-stats" id="video-stats"></div>
             <div class="meta-channel">
               <span class="avatar avatar-image" id="channel-avatar" aria-hidden="true"></span>
@@ -962,9 +1008,9 @@
 
           <div class="controls">
             <div class="timeline">
-              <label class="sr-only" for="seek-bar">Video timeline</label>
+              <label class="sr-only" for="seek-bar" data-i18n="timeline_label">Video timeline</label>
               <span class="time-label" id="time-current">0:00</span>
-              <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline">
+              <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline" data-i18n-aria="timeline_seek">
               <span class="time-label" id="time-duration">0:00</span>
             </div>
             <div class="control-group">
@@ -982,7 +1028,7 @@
                 <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
                 <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
                 <select class="quality-select" id="quality-select" aria-label="Playback quality">
-                  <option value="default">Auto</option>
+                  <option value="default" data-i18n="quality_auto">Auto</option>
                   <option value="tiny">144p</option>
                   <option value="small">240p</option>
                   <option value="medium">360p</option>
@@ -991,6 +1037,15 @@
                   <option value="hd1080">1080p</option>
                   <option value="hd1440">2K</option>
                   <option value="hd2160">4K</option>
+                </select>
+                <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
+                  <option value="off" data-i18n="captions_off">Captions off</option>
+                  <option value="english" data-i18n="lang_english">English</option>
+                  <option value="russian" data-i18n="lang_russian">Russian</option>
+                  <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+                  <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+                  <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+                  <option value="arabic" data-i18n="lang_arabic">Arabic</option>
                 </select>
                 <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
               </div>
@@ -1003,23 +1058,28 @@
 
         <section class="recommendations" id="feed-view">
           <div class="section-head">
-            <h2>Recommended</h2>
-            <button class="pill icon-button" id="filter-subscribed" type="button" aria-label="Subscribed feed">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 6a2 2 0 0 1 2-2h6a4 4 0 0 1 0 8H8v2h4a6 6 0 0 0 0-12H6a4 4 0 0 0-4 4v5h2V6z"/>
-                <path d="M9.5 16.5 7 14l-1.4 1.4 3.9 3.9 7.5-7.5L15.6 10z"/>
-              </svg>
-            </button>
+            <h2 data-i18n="feed_recommended">Recommended</h2>
+            <div class="section-actions">
+              <span class="section-hint" data-i18n="feed_filter_hint">Subscribed only</span>
+              <button class="pill icon-button" id="filter-subscribed" type="button" aria-label="Subscribed feed">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6a2 2 0 0 1 2-2h6a4 4 0 0 1 0 8H8v2h4a6 6 0 0 0 0-12H6a4 4 0 0 0-4 4v5h2V6z"/>
+                  <path d="M9.5 16.5 7 14l-1.4 1.4 3.9 3.9 7.5-7.5L15.6 10z"/>
+                </svg>
+              </button>
+            </div>
           </div>
+          <div class="section-sub" id="search-context"></div>
           <div class="grid" id="recommendations-grid"></div>
           <div class="load-more">
-            <button class="ghost" id="load-more" type="button">Load more</button>
+            <div class="card-meta" data-i18n="feed_load_hint">More videos below</div>
+            <button class="ghost" id="load-more" type="button" data-i18n="feed_load_more">Load more</button>
           </div>
         </section>
 
         <section class="recommendations" id="viral-view">
           <div class="section-head">
-            <h2>Viral</h2>
+            <h2 data-i18n="feed_viral">Viral</h2>
           </div>
           <div class="grid" id="viral-grid"></div>
         </section>
@@ -1029,7 +1089,7 @@
             <div class="channel-hero">
               <span class="avatar" aria-hidden="true"></span>
               <div>
-                <div class="channel-name" id="channel-title">Channel</div>
+                <div class="channel-name" id="channel-title" data-i18n="channel_title">Channel</div>
                 <div class="card-meta" id="channel-stats"></div>
                 <div class="card-meta" id="channel-slogan-view"></div>
               </div>
@@ -1051,101 +1111,103 @@
 
   <section class="auth-gate" id="auth-gate">
     <div class="auth-card">
-      <h2>Welcome to Sevimli Aile</h2>
-      <p class="card-meta">Log in or create an account to start watching.</p>
+      <h2 data-i18n="auth_welcome">Welcome to Sevimli Aile</h2>
+      <p class="card-meta" data-i18n="auth_subtitle">Log in or create an account to start watching.</p>
       <form class="form-grid" id="login-form">
-        <label for="login-email">Email</label>
+        <label for="login-email" data-i18n="auth_email">Email</label>
         <input id="login-email" name="login-email" type="email" autocomplete="email" required>
-        <label for="login-password">Password</label>
+        <label for="login-password" data-i18n="auth_password">Password</label>
         <input id="login-password" name="login-password" type="password" autocomplete="current-password" required>
         <div class="form-actions">
-          <button class="primary" type="submit">Sign in</button>
+          <button class="primary" type="submit" data-i18n="auth_sign_in">Sign in</button>
         </div>
       </form>
       <form class="form-grid" id="register-form">
-        <label for="register-email">New email</label>
+        <label for="register-email" data-i18n="auth_new_email">New email</label>
         <input id="register-email" name="register-email" type="email" autocomplete="email" required>
-        <label for="register-password">New password</label>
+        <label for="register-password" data-i18n="auth_new_password">New password</label>
         <input id="register-password" name="register-password" type="password" autocomplete="new-password" required>
         <div class="form-actions">
-          <button class="ghost" type="submit">Create account</button>
+          <button class="ghost" type="submit" data-i18n="auth_create_account">Create account</button>
         </div>
       </form>
-      <button class="ghost" id="verify-resend" type="button">Resend verification email</button>
+      <button class="ghost" id="verify-resend" type="button" data-i18n="auth_resend">Resend verification email</button>
+      <button class="ghost" id="forgot-password" type="button" data-i18n="auth_forgot">Forgot password</button>
       <div class="card-meta" id="auth-message"></div>
     </div>
   </section>
 
   <div class="modal" id="upload-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Add YouTube video</h2>
+      <h2 data-i18n="upload_title">Add YouTube video</h2>
       <form class="form-grid" id="upload-form">
-        <label for="upload-url">YouTube URL</label>
-        <input id="upload-url" name="upload-url" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+        <label for="upload-url" data-i18n="upload_url">YouTube URL</label>
+        <input id="upload-url" name="upload-url" type="url" placeholder="https://www.youtube.com/watch?v=..." data-i18n-placeholder="upload_url_placeholder" required>
         <div id="upload-metadata" class="form-grid">
-          <label for="upload-language">Language</label>
-          <select id="upload-language" name="upload-language">
-            <option value="english">English</option>
-            <option value="russian">Russian</option>
-            <option value="azerbaijani">Azerbaijani</option>
-            <option value="turkish">Turkish</option>
-            <option value="arabic">Arabic</option>
+          <label for="upload-language" data-i18n="upload_languages">Languages</label>
+          <select id="upload-language" name="upload-language" multiple>
+            <option value="english" data-i18n="lang_english">English</option>
+            <option value="russian" data-i18n="lang_russian">Russian</option>
+            <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+            <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+            <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+            <option value="arabic" data-i18n="lang_arabic">Arabic</option>
           </select>
-          <label for="upload-topics">Topics (comma separated)</label>
-          <input id="upload-topics" name="upload-topics" type="text" placeholder="nastya, masha, minecraft" list="topics-list">
+          <label for="upload-topics" data-i18n="upload_topics">Topics (comma separated)</label>
+          <input id="upload-topics" name="upload-topics" type="text" placeholder="nastya, masha, minecraft" data-i18n-placeholder="upload_topics_placeholder" list="topics-list">
           <datalist id="topics-list"></datalist>
         </div>
         <div class="form-actions">
-          <button class="ghost" type="button" data-close="upload-modal">Close</button>
-          <button class="primary" type="submit">Add video</button>
+          <button class="ghost" type="button" data-close="upload-modal" data-i18n="action_close">Close</button>
+          <button class="primary" type="submit" data-i18n="upload_add">Add video</button>
         </div>
       </form>
-      <div class="card-meta">Title will auto-fill from YouTube when available.</div>
+      <div class="card-meta" data-i18n="upload_hint">Title will auto-fill from YouTube when available.</div>
       <div class="card-meta" id="upload-message"></div>
     </div>
   </div>
 
   <div class="modal" id="admin-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Admin controls</h2>
+      <h2 data-i18n="admin_title">Admin controls</h2>
       <div id="admin-list" class="form-grid"></div>
-      <div class="card-meta">Reports</div>
+      <div class="card-meta" data-i18n="admin_reports">Reports</div>
       <div id="admin-reports" class="form-grid"></div>
       <div class="admin-tools">
-        <div class="card-meta">Bulk import approved YouTube links (CSV or SQL).</div>
-        <label class="card-meta" for="admin-csv">CSV file</label>
+        <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
+        <label class="card-meta" for="admin-csv" data-i18n="admin_csv_label">CSV file</label>
         <input id="admin-csv" name="admin-csv" type="file" accept=".csv,text/csv">
         <div class="form-actions">
-          <button class="ghost" type="button" id="admin-import-csv">Import CSV</button>
-          <button class="ghost" type="button" id="admin-export-sql">Download SQL</button>
+          <button class="ghost" type="button" id="admin-import-csv" data-i18n="admin_import_csv">Import CSV</button>
+          <button class="ghost" type="button" id="admin-export-sql" data-i18n="admin_export_sql">Download SQL</button>
         </div>
-        <label class="card-meta" for="admin-sql">SQL import (INSERT INTO videos)</label>
-        <textarea id="admin-sql" name="admin-sql" placeholder="Paste SQL export here..."></textarea>
+        <label class="card-meta" for="admin-sql" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
+        <textarea id="admin-sql" name="admin-sql" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
         <div class="form-actions">
-          <button class="ghost" type="button" id="admin-import-sql">Import SQL</button>
+          <button class="ghost" type="button" id="admin-import-sql" data-i18n="admin_import_sql">Import SQL</button>
         </div>
         <div class="card-meta" id="admin-import-message"></div>
       </div>
       <div class="form-actions">
-        <button class="ghost" type="button" data-close="admin-modal">Close</button>
+        <button class="ghost" type="button" data-close="admin-modal" data-i18n="action_close">Close</button>
       </div>
-      <div class="card-meta">Grant artist role to add YouTube videos.</div>
+      <div class="card-meta" data-i18n="admin_grant_hint">Grant artist role to add YouTube videos.</div>
     </div>
   </div>
 
   <div class="modal" id="studio-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Studio</h2>
+      <h2 data-i18n="studio_title">Studio</h2>
       <form class="form-grid" id="profile-form">
-        <div class="card-meta">Creator profile</div>
-        <label for="profile-name">Display name</label>
-        <input id="profile-name" name="profile-name" type="text" placeholder="Creator name">
-        <label for="profile-slogan">Short slogan</label>
-        <input id="profile-slogan" name="profile-slogan" type="text" placeholder="Fun slogan">
-        <label for="profile-avatar">Profile image URL</label>
-        <input id="profile-avatar" name="profile-avatar" type="url" placeholder="https://...">
+        <div class="card-meta" data-i18n="studio_profile">Creator profile</div>
+        <label for="profile-name" data-i18n="studio_name">Display name</label>
+        <input id="profile-name" name="profile-name" type="text" placeholder="Creator name" data-i18n-placeholder="studio_name_placeholder">
+        <label for="profile-slogan" data-i18n="studio_slogan">Short slogan</label>
+        <input id="profile-slogan" name="profile-slogan" type="text" placeholder="Fun slogan" data-i18n-placeholder="studio_slogan_placeholder">
+        <label for="profile-avatar" data-i18n="studio_avatar">Profile image URL</label>
+        <input id="profile-avatar" name="profile-avatar" type="url" placeholder="https://..." data-i18n-placeholder="studio_avatar_placeholder">
         <div class="form-actions">
-          <button class="primary" type="submit">Save profile</button>
+          <button class="primary" type="submit" data-i18n="studio_save">Save profile</button>
         </div>
       </form>
       <div class="card-meta" id="profile-message"></div>
@@ -1153,45 +1215,46 @@
         <div class="channel">
           <span class="avatar" aria-hidden="true"></span>
           <div>
-            <div class="channel-name">Your stats</div>
-            <div class="card-meta" id="stats-summary">Loading...</div>
+            <div class="channel-name" data-i18n="studio_stats">Your stats</div>
+            <div class="card-meta" id="stats-summary" data-i18n="status_loading">Loading...</div>
           </div>
         </div>
       </div>
       <div class="form-grid" id="artist-stats"></div>
       <div class="form-grid" id="manage-list"></div>
       <div class="form-actions">
-        <button class="ghost" type="button" data-close="studio-modal">Close</button>
+        <button class="ghost" type="button" data-close="studio-modal" data-i18n="action_close">Close</button>
       </div>
     </div>
   </div>
 
   <div class="modal" id="settings-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Parent settings</h2>
+      <h2 data-i18n="settings_title">Parent settings</h2>
       <form class="form-grid" id="settings-form">
-        <div class="card-meta">Languages to show</div>
-        <label><input type="checkbox" name="settings-language" value="english"> English</label>
-        <label><input type="checkbox" name="settings-language" value="russian"> Russian</label>
-        <label><input type="checkbox" name="settings-language" value="azerbaijani"> Azerbaijani</label>
-        <label><input type="checkbox" name="settings-language" value="turkish"> Turkish</label>
-        <label><input type="checkbox" name="settings-language" value="arabic"> Arabic</label>
-        <div class="card-meta">Topics to control</div>
-        <label><input type="radio" name="topic-mode" value="allow" checked> Allow only selected</label>
-        <label><input type="radio" name="topic-mode" value="block"> Hide selected</label>
-        <label for="topic-search">Find topic</label>
-        <input id="topic-search" name="topic-search" type="search" placeholder="Search topics">
+        <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
+        <label><input type="checkbox" name="settings-language" value="english"> <span data-i18n="lang_english">English</span></label>
+        <label><input type="checkbox" name="settings-language" value="russian"> <span data-i18n="lang_russian">Russian</span></label>
+        <label><input type="checkbox" name="settings-language" value="chinese"> <span data-i18n="lang_chinese">Chinese</span></label>
+        <label><input type="checkbox" name="settings-language" value="azerbaijani"> <span data-i18n="lang_azerbaijani">Azerbaijani</span></label>
+        <label><input type="checkbox" name="settings-language" value="turkish"> <span data-i18n="lang_turkish">Turkish</span></label>
+        <label><input type="checkbox" name="settings-language" value="arabic"> <span data-i18n="lang_arabic">Arabic</span></label>
+        <div class="card-meta" data-i18n="settings_topics">Topics to control</div>
+        <label><input type="radio" name="topic-mode" value="allow" checked> <span data-i18n="settings_topic_allow">Allow only selected</span></label>
+        <label><input type="radio" name="topic-mode" value="block"> <span data-i18n="settings_topic_block">Hide selected</span></label>
+        <label for="topic-search" data-i18n="settings_topic_search">Find topic</label>
+        <input id="topic-search" name="topic-search" type="search" placeholder="Search topics" data-i18n-placeholder="settings_topic_placeholder">
         <div id="settings-topics" class="form-grid topic-list"></div>
-        <label for="max-watch">Daily watch limit (hours)</label>
+        <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
         <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
-        <label for="settings-password">Confirm with your password</label>
+        <label for="settings-password" data-i18n="settings_password">Confirm with your password</label>
         <input id="settings-password" name="settings-password" type="password" autocomplete="current-password" required>
         <div class="form-actions">
-          <button class="ghost" type="button" data-close="settings-modal">Close</button>
-          <button class="primary" type="submit">Save settings</button>
+          <button class="ghost" type="button" data-close="settings-modal" data-i18n="action_close">Close</button>
+          <button class="primary" type="submit" data-i18n="settings_save">Save settings</button>
         </div>
       </form>
-      <div class="card-meta">Today's history</div>
+      <div class="card-meta" data-i18n="settings_history">Today's history</div>
       <div class="form-grid" id="history-list"></div>
       <div class="card-meta" id="settings-message"></div>
     </div>
@@ -1199,13 +1262,13 @@
 
   <div class="modal" id="report-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Report video</h2>
+      <h2 data-i18n="report_title">Report video</h2>
       <form class="form-grid" id="report-form">
-        <label for="report-reason">Reason</label>
-        <textarea id="report-reason" name="report-reason" rows="4" placeholder="Tell us what is wrong (min 5 characters)" required></textarea>
+        <label for="report-reason" data-i18n="report_reason">Reason</label>
+        <textarea id="report-reason" name="report-reason" rows="4" placeholder="Tell us what is wrong (min 5 characters)" data-i18n-placeholder="report_placeholder" required></textarea>
         <div class="form-actions">
-          <button class="ghost" type="button" data-close="report-modal">Close</button>
-          <button class="primary" type="submit">Send report</button>
+          <button class="ghost" type="button" data-close="report-modal" data-i18n="action_close">Close</button>
+          <button class="primary" type="submit" data-i18n="report_send">Send report</button>
         </div>
       </form>
       <div class="card-meta" id="report-message"></div>
@@ -1214,13 +1277,13 @@
 
   <div class="modal" id="signout-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Confirm sign out</h2>
+      <h2 data-i18n="signout_title">Confirm sign out</h2>
       <form class="form-grid" id="signout-form">
-        <label for="signout-password">Password</label>
+        <label for="signout-password" data-i18n="auth_password">Password</label>
         <input id="signout-password" name="signout-password" type="password" autocomplete="current-password" required>
         <div class="form-actions">
-          <button class="ghost" type="button" data-close="signout-modal">Close</button>
-          <button class="primary" type="submit">Sign out</button>
+          <button class="ghost" type="button" data-close="signout-modal" data-i18n="action_close">Close</button>
+          <button class="primary" type="submit" data-i18n="auth_sign_out">Sign out</button>
         </div>
       </form>
       <div class="card-meta" id="signout-message"></div>
@@ -1229,10 +1292,10 @@
 
   <div class="modal" id="notifications-modal" aria-hidden="true">
     <div class="modal-card">
-      <h2>Updates</h2>
+      <h2 data-i18n="updates_title">Updates</h2>
       <div class="form-grid" id="notifications-list"></div>
       <div class="form-actions">
-        <button class="ghost" type="button" data-close="notifications-modal">Close</button>
+        <button class="ghost" type="button" data-close="notifications-modal" data-i18n="action_close">Close</button>
       </div>
     </div>
   </div>
@@ -1255,6 +1318,7 @@
       subscribedList: document.getElementById("subscribed-list"),
       recommendations: document.getElementById("recommendations-grid"),
       loadMore: document.getElementById("load-more"),
+      searchContext: document.getElementById("search-context"),
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
@@ -1299,6 +1363,7 @@
       loginForm: document.getElementById("login-form"),
       registerForm: document.getElementById("register-form"),
       verifyResend: document.getElementById("verify-resend"),
+      forgotPassword: document.getElementById("forgot-password"),
       uploadForm: document.getElementById("upload-form"),
       settingsForm: document.getElementById("settings-form"),
       reportForm: document.getElementById("report-form"),
@@ -1330,6 +1395,7 @@
       adminExportSql: document.getElementById("admin-export-sql"),
       adminImportMessage: document.getElementById("admin-import-message"),
       adminReports: document.getElementById("admin-reports"),
+      uiLanguage: document.getElementById("ui-language"),
       controlsHeart: document.getElementById("controls-heart"),
       controlsReport: document.getElementById("controls-report"),
       controlsReplay: document.getElementById("controls-replay"),
@@ -1338,6 +1404,7 @@
       controlsSeekForward: document.getElementById("controls-seek-forward"),
       controlsFullscreen: document.getElementById("controls-fullscreen"),
       qualitySelect: document.getElementById("quality-select"),
+      captionSelect: document.getElementById("caption-select"),
       reportModal: document.getElementById("report-modal"),
       reportMessage: document.getElementById("report-message"),
       notificationsModal: document.getElementById("notifications-modal"),
@@ -1406,10 +1473,1323 @@
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13 7v10l6-5-6-5zm-1 5a5 5 0 1 0-5 5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
     };
 
-    function setButtonIcon(button, icon, label, suffix) {
+    const translations = {
+      en: {
+        search_label: "Search",
+        search_placeholder: "Search videos and channels",
+        ui_language_label: "Language",
+        sidebar_subscribed: "Subscribed",
+        sidebar_channels: "Channels",
+        status_loading: "Loading",
+        player_loading: "Loading player...",
+        overlay_ready: "Ready to play",
+        overlay_tap_start: "Tap to start the video",
+        overlay_autoplay_note: "Autoplay is often blocked. Press start to begin.",
+        overlay_complete: "Video complete",
+        overlay_next_prompt: "What do you want to watch next?",
+        overlay_next_copy: "Choose an action to keep the flow going.",
+        video_select: "Select a video",
+        timeline_label: "Video timeline",
+        timeline_seek: "Seek video timeline",
+        quality_auto: "Auto",
+        captions_label: "Captions language",
+        captions_off: "Captions off",
+        feed_recommended: "Recommended",
+        feed_filter_hint: "Subscribed only",
+        feed_intro: "Fresh picks for happy watching",
+        feed_subscribed: "Only channels you follow",
+        feed_load_hint: "More videos below",
+        feed_load_more: "Load more",
+        feed_viral: "Viral",
+        channel_title: "Channel",
+        search_results: "Results for",
+        auth_welcome: "Welcome to Sevimli Aile",
+        auth_subtitle: "Log in or create an account to start watching.",
+        auth_email: "Email",
+        auth_password: "Password",
+        auth_sign_in: "Sign in",
+        auth_new_email: "New email",
+        auth_new_password: "New password",
+        auth_create_account: "Create account",
+        auth_resend: "Resend verification email",
+        auth_forgot: "Forgot password",
+        auth_sign_out: "Sign out",
+        upload_title: "Add YouTube video",
+        upload_url: "YouTube URL",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "Languages",
+        upload_topics: "Topics (comma separated)",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "Add video",
+        upload_hint: "Title will auto-fill from YouTube when available.",
+        admin_title: "Admin controls",
+        admin_reports: "Reports",
+        admin_import_hint: "Bulk import approved YouTube links (CSV or SQL).",
+        admin_csv_label: "CSV file",
+        admin_import_csv: "Import CSV",
+        admin_export_sql: "Download SQL",
+        admin_sql_label: "SQL import (INSERT INTO videos)",
+        admin_sql_placeholder: "Paste SQL export here...",
+        admin_import_sql: "Import SQL",
+        admin_grant_hint: "Grant artist role to add YouTube videos.",
+        studio_title: "Studio",
+        studio_profile: "Creator profile",
+        studio_name: "Display name",
+        studio_name_placeholder: "Creator name",
+        studio_slogan: "Short slogan",
+        studio_slogan_placeholder: "Fun slogan",
+        studio_avatar: "Profile image URL",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "Save profile",
+        studio_stats: "Your stats",
+        settings_title: "Parent settings",
+        settings_languages: "Languages to show",
+        settings_topics: "Topics to control",
+        settings_topic_allow: "Allow only selected",
+        settings_topic_block: "Hide selected",
+        settings_topic_search: "Find topic",
+        settings_topic_placeholder: "Search topics",
+        settings_watch_limit: "Daily watch limit (hours)",
+        settings_password: "Confirm with your password",
+        settings_save: "Save settings",
+        settings_history: "Today's history",
+        report_title: "Report video",
+        report_reason: "Reason",
+        report_placeholder: "Tell us what is wrong (min 5 characters)",
+        report_send: "Send report",
+        signout_title: "Confirm sign out",
+        updates_title: "Updates",
+        action_close: "Close",
+        lang_english: "English",
+        lang_russian: "Russian",
+        lang_chinese: "Chinese",
+        lang_turkish: "Turkish",
+        lang_azerbaijani: "Azerbaijani",
+        lang_arabic: "Arabic",
+        control_volume_down: "Volume down",
+        control_volume_up: "Volume up",
+        control_report: "Report",
+        control_replay: "Replay",
+        control_next: "Next video",
+        control_heart: "Heart",
+        control_auto_next_off: "Auto next off",
+        control_auto_next_on: "Auto next on",
+        control_play: "Play",
+        control_pause: "Pause",
+        control_mute: "Mute",
+        control_unmute: "Unmute",
+        control_fullscreen: "Fullscreen",
+        control_exit_fullscreen: "Exit fullscreen",
+        control_seek_back: "Back 30 seconds",
+        control_seek_forward: "Forward 30 seconds",
+        control_theater: "Theater",
+        control_mini: "Mini player",
+        control_add_video: "Add video",
+        control_admin: "Admin",
+        control_studio: "Studio",
+        control_settings: "Settings",
+        control_updates: "Updates",
+        control_sign_in: "Sign in",
+        control_sign_out: "Sign out",
+        control_subscribed_feed: "Subscribed feed",
+        status_ready: "Ready",
+        status_playing: "Playing",
+        status_paused: "Paused",
+        status_ended: "Ended",
+        message_sign_in: "Please sign in to continue.",
+        message_sign_in_first: "Sign in first.",
+        message_email_verified: "Email already verified.",
+        message_verification_sent: "Verification email sent.",
+        message_verification_failed: "Unable to send verification email.",
+        message_verification_needed: "Verify your email before watching.",
+        message_verification_prompt: "Verification email sent. Please verify to continue.",
+        message_email_required: "Email required.",
+        message_reset_sent: "Password reset email sent.",
+        message_reset_failed: "Password reset failed.",
+        message_auth_failed: "Firebase auth not ready.",
+        message_login_failed: "Login failed.",
+        message_register_failed: "Registration failed.",
+        message_password_required: "Password required.",
+        message_password_check_failed: "Password check failed.",
+        message_youTube_required: "YouTube URL required.",
+        message_add_video_failed: "Add video failed.",
+        message_loading_stats: "Loading...",
+        message_no_channels: "No channels yet.",
+        message_no_subscriptions: "No subscriptions yet.",
+        message_channel_unavailable: "Channel unavailable.",
+        message_no_channel_videos: "No videos in this channel yet.",
+        message_no_videos: "No videos yet.",
+        message_no_viral: "No viral videos yet.",
+        message_fetch_viral_failed: "Unable to load viral videos.",
+        label_creator: "Creator",
+        label_minutes: "min",
+        label_views: "views",
+        label_hearts: "hearts",
+        label_untitled: "Untitled",
+        label_videos: "videos",
+        label_subs: "subs",
+        label_plan: "Plan:",
+        label_artists: "artists",
+        label_artist_stats: "Artist stats",
+        label_all_videos: "All videos",
+        label_your_videos: "Your videos",
+        label_subscribe: "Subscribe",
+        label_subscribed: "Subscribed",
+        label_unsubscribe: "Unsubscribe",
+        label_reported_by: "Reported by",
+        label_update: "Update",
+        label_read: "Read",
+        label_resolved: "Resolved",
+        label_auto_next: "Auto next: ",
+        label_up_next: "Up next: ",
+        control_dark_mode: "Dark mode",
+        control_light_mode: "Light mode",
+        control_start: "Start video",
+        control_heart_loved: "Loved",
+        admin_grant_artist: "Grant artist",
+        admin_set_free: "Set Free",
+        admin_set_pro: "Set Pro",
+        admin_report_message_placeholder: "Message to reporter (optional)",
+        action_resolve: "Resolve",
+        action_delete: "Delete",
+        action_mark_read: "Mark read",
+        message_auth_required: "Auth setup required.",
+        message_verify_needed: "Verify your email to continue.",
+        message_queue_single_auto: "Auto next is on, but the queue has one video.",
+        message_queue_single: "Queue ends here. Replay when ready.",
+        message_no_subscribed_videos: "No videos from your subscriptions yet.",
+        message_reports_failed: "Unable to load reports.",
+        message_reports_empty: "No reports yet.",
+        message_select_csv: "Select a CSV file first.",
+        message_import_failed: "Import failed.",
+        message_imported: "Imported:",
+        message_skipped: "Skipped:",
+        message_paste_sql: "Paste SQL first.",
+        message_export_failed: "Export failed.",
+        message_profile_load_failed: "Unable to load profile.",
+        message_profile_save_failed: "Unable to save profile.",
+        message_profile_saved: "Profile saved.",
+        message_history_unavailable: "History unavailable.",
+        message_stats_unavailable: "Stats unavailable.",
+        message_settings_save_failed: "Unable to save settings.",
+        message_no_topics: "No topics found.",
+        message_no_history: "No watches today.",
+        message_report_failed: "Report failed.",
+        message_no_video_selected: "No video selected.",
+        message_reason_short: "Reason must be at least 5 characters.",
+        message_report_thanks: "Report submitted. Thank you!",
+        message_no_updates: "No updates yet.",
+        status_buffering: "Buffering",
+        status_error: "Playback error",
+        status_limit_reached: "Limit reached",
+        status_empty: "No video",
+        limit_title: "Time is up for today",
+        limit_copy: "Daily limit reached."
+      },
+      ru: {
+        search_label: "Поиск",
+        search_placeholder: "Поиск видео и каналов",
+        ui_language_label: "Язык",
+        sidebar_subscribed: "Подписки",
+        sidebar_channels: "Каналы",
+        status_loading: "Загрузка",
+        player_loading: "Загрузка плеера...",
+        overlay_ready: "Готово к воспроизведению",
+        overlay_tap_start: "Нажмите, чтобы начать видео",
+        overlay_autoplay_note: "Автовоспроизведение часто блокируется. Нажмите старт.",
+        overlay_complete: "Видео завершено",
+        overlay_next_prompt: "Что хотите посмотреть дальше?",
+        overlay_next_copy: "Выберите действие, чтобы продолжить.",
+        video_select: "Выберите видео",
+        timeline_label: "Шкала видео",
+        timeline_seek: "Перемотка по шкале",
+        quality_auto: "Авто",
+        captions_label: "Язык субтитров",
+        captions_off: "Субтитры выкл.",
+        feed_recommended: "Рекомендации",
+        feed_filter_hint: "Только подписки",
+        feed_intro: "Свежие подборки для детей",
+        feed_subscribed: "Только каналы, на которые вы подписаны",
+        feed_load_hint: "Еще видео ниже",
+        feed_load_more: "Загрузить ещё",
+        feed_viral: "Вирусное",
+        channel_title: "Канал",
+        search_results: "Результаты для",
+        auth_welcome: "Добро пожаловать в Sevimli Aile",
+        auth_subtitle: "Войдите или создайте аккаунт, чтобы смотреть.",
+        auth_email: "Эл. почта",
+        auth_password: "Пароль",
+        auth_sign_in: "Войти",
+        auth_new_email: "Новая почта",
+        auth_new_password: "Новый пароль",
+        auth_create_account: "Создать аккаунт",
+        auth_resend: "Повторить письмо",
+        auth_forgot: "Забыли пароль",
+        auth_sign_out: "Выйти",
+        upload_title: "Добавить видео YouTube",
+        upload_url: "Ссылка YouTube",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "Языки",
+        upload_topics: "Темы (через запятую)",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "Добавить видео",
+        upload_hint: "Название подставится из YouTube при наличии.",
+        admin_title: "Панель администратора",
+        admin_reports: "Жалобы",
+        admin_import_hint: "Импорт одобренных ссылок YouTube (CSV или SQL).",
+        admin_csv_label: "CSV файл",
+        admin_import_csv: "Импорт CSV",
+        admin_export_sql: "Скачать SQL",
+        admin_sql_label: "SQL импорт (INSERT INTO videos)",
+        admin_sql_placeholder: "Вставьте SQL экспорт...",
+        admin_import_sql: "Импорт SQL",
+        admin_grant_hint: "Дайте роль артиста для добавления видео.",
+        studio_title: "Студия",
+        studio_profile: "Профиль автора",
+        studio_name: "Имя",
+        studio_name_placeholder: "Имя автора",
+        studio_slogan: "Короткий слоган",
+        studio_slogan_placeholder: "Весёлый слоган",
+        studio_avatar: "URL аватара",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "Сохранить профиль",
+        studio_stats: "Ваша статистика",
+        settings_title: "Родительские настройки",
+        settings_languages: "Показываемые языки",
+        settings_topics: "Темы для контроля",
+        settings_topic_allow: "Показывать только выбранные",
+        settings_topic_block: "Скрыть выбранные",
+        settings_topic_search: "Найти тему",
+        settings_topic_placeholder: "Поиск тем",
+        settings_watch_limit: "Лимит просмотра в день (часы)",
+        settings_password: "Подтвердите паролем",
+        settings_save: "Сохранить",
+        settings_history: "История за сегодня",
+        report_title: "Пожаловаться на видео",
+        report_reason: "Причина",
+        report_placeholder: "Опишите проблему (мин. 5 символов)",
+        report_send: "Отправить",
+        signout_title: "Подтвердите выход",
+        updates_title: "Обновления",
+        action_close: "Закрыть",
+        lang_english: "Английский",
+        lang_russian: "Русский",
+        lang_chinese: "Китайский",
+        lang_turkish: "Турецкий",
+        lang_azerbaijani: "Азербайджанский",
+        lang_arabic: "Арабский",
+        control_volume_down: "Уменьшить громкость",
+        control_volume_up: "Увеличить громкость",
+        control_report: "Пожаловаться",
+        control_replay: "Повтор",
+        control_next: "Следующее видео",
+        control_heart: "Сердце",
+        control_auto_next_off: "Автоследующее выкл.",
+        control_auto_next_on: "Автоследующее вкл.",
+        control_play: "Воспроизвести",
+        control_pause: "Пауза",
+        control_mute: "Выключить звук",
+        control_unmute: "Включить звук",
+        control_fullscreen: "Полный экран",
+        control_exit_fullscreen: "Выйти из полного экрана",
+        control_seek_back: "Назад на 30 секунд",
+        control_seek_forward: "Вперёд на 30 секунд",
+        control_theater: "Широкий режим",
+        control_mini: "Мини-плеер",
+        control_add_video: "Добавить видео",
+        control_admin: "Админ",
+        control_studio: "Студия",
+        control_settings: "Настройки",
+        control_updates: "Обновления",
+        control_sign_in: "Войти",
+        control_sign_out: "Выйти",
+        control_subscribed_feed: "Лента подписок",
+        status_ready: "Готово",
+        status_playing: "Идёт",
+        status_paused: "Пауза",
+        status_ended: "Конец",
+        message_sign_in: "Пожалуйста, войдите.",
+        message_sign_in_first: "Сначала войдите.",
+        message_email_verified: "Почта уже подтверждена.",
+        message_verification_sent: "Письмо подтверждения отправлено.",
+        message_verification_failed: "Не удалось отправить письмо подтверждения.",
+        message_verification_needed: "Подтвердите почту перед просмотром.",
+        message_verification_prompt: "Письмо подтверждения отправлено. Подтвердите, чтобы продолжить.",
+        message_email_required: "Нужен email.",
+        message_reset_sent: "Письмо для сброса отправлено.",
+        message_reset_failed: "Сброс пароля не удался.",
+        message_auth_failed: "Firebase auth не готов.",
+        message_login_failed: "Ошибка входа.",
+        message_register_failed: "Ошибка регистрации.",
+        message_password_required: "Нужен пароль.",
+        message_password_check_failed: "Проверка пароля не удалась.",
+        message_youTube_required: "Нужна ссылка YouTube.",
+        message_add_video_failed: "Не удалось добавить видео.",
+        message_loading_stats: "Загрузка...",
+        message_no_channels: "Каналов пока нет.",
+        message_no_subscriptions: "Подписок пока нет.",
+        message_channel_unavailable: "Канал недоступен.",
+        message_no_channel_videos: "В этом канале пока нет видео.",
+        message_no_videos: "Видео пока нет.",
+        message_no_viral: "Вирусных видео пока нет.",
+        message_fetch_viral_failed: "Не удалось загрузить вирусные видео.",
+        label_creator: "Автор",
+        label_minutes: "мин",
+        label_views: "просмотров",
+        label_hearts: "сердец",
+        label_untitled: "Без названия",
+        label_videos: "видео",
+        label_subs: "подписчики",
+        label_plan: "Тариф:",
+        label_artists: "авторов",
+        label_artist_stats: "Статистика авторов",
+        label_all_videos: "Все видео",
+        label_your_videos: "Ваши видео",
+        label_subscribe: "Подписаться",
+        label_subscribed: "Подписан",
+        label_unsubscribe: "Отписаться",
+        label_reported_by: "Жалоба от",
+        label_update: "Обновление",
+        label_read: "Прочитано",
+        label_resolved: "Решено",
+        label_auto_next: "Авто далее: ",
+        label_up_next: "Далее: ",
+        control_dark_mode: "Тёмный режим",
+        control_light_mode: "Светлый режим",
+        control_start: "Начать видео",
+        control_heart_loved: "Люблю",
+        admin_grant_artist: "Дать роль автора",
+        admin_set_free: "Сделать Free",
+        admin_set_pro: "Сделать Pro",
+        admin_report_message_placeholder: "Сообщение автору жалобы (необязательно)",
+        action_resolve: "Решено",
+        action_delete: "Удалить",
+        action_mark_read: "Отметить как прочитанное",
+        message_auth_required: "Требуется настройка авторизации.",
+        message_verify_needed: "Подтвердите почту для продолжения.",
+        message_queue_single_auto: "Авто далее включено, но в очереди одно видео.",
+        message_queue_single: "Очередь закончилась. Повторите при готовности.",
+        message_no_subscribed_videos: "В подписках пока нет видео.",
+        message_reports_failed: "Не удалось загрузить жалобы.",
+        message_reports_empty: "Жалоб пока нет.",
+        message_select_csv: "Сначала выберите CSV файл.",
+        message_import_failed: "Импорт не удался.",
+        message_imported: "Импортировано:",
+        message_skipped: "Пропущено:",
+        message_paste_sql: "Сначала вставьте SQL.",
+        message_export_failed: "Экспорт не удался.",
+        message_profile_load_failed: "Не удалось загрузить профиль.",
+        message_profile_save_failed: "Не удалось сохранить профиль.",
+        message_profile_saved: "Профиль сохранён.",
+        message_history_unavailable: "История недоступна.",
+        message_stats_unavailable: "Статистика недоступна.",
+        message_settings_save_failed: "Не удалось сохранить настройки.",
+        message_no_topics: "Темы не найдены.",
+        message_no_history: "Сегодня просмотров нет.",
+        message_report_failed: "Жалоба не отправлена.",
+        message_no_video_selected: "Видео не выбрано.",
+        message_reason_short: "Причина должна быть не короче 5 символов.",
+        message_report_thanks: "Жалоба отправлена. Спасибо!",
+        message_no_updates: "Обновлений нет.",
+        status_buffering: "Буферизация",
+        status_error: "Ошибка воспроизведения",
+        status_limit_reached: "Лимит достигнут",
+        status_empty: "Нет видео",
+        limit_title: "Сегодня лимит исчерпан",
+        limit_copy: "Дневной лимит достигнут."
+      },
+      zh: {
+        search_label: "搜索",
+        search_placeholder: "搜索视频和频道",
+        ui_language_label: "语言",
+        sidebar_subscribed: "已订阅",
+        sidebar_channels: "频道",
+        status_loading: "加载中",
+        player_loading: "播放器加载中...",
+        overlay_ready: "准备播放",
+        overlay_tap_start: "点击开始播放",
+        overlay_autoplay_note: "自动播放常被拦截，请点击开始。",
+        overlay_complete: "视频结束",
+        overlay_next_prompt: "接下来想看什么？",
+        overlay_next_copy: "选择一个操作继续观看。",
+        video_select: "请选择一个视频",
+        timeline_label: "视频时间轴",
+        timeline_seek: "拖动时间轴",
+        quality_auto: "自动",
+        captions_label: "字幕语言",
+        captions_off: "关闭字幕",
+        feed_recommended: "推荐",
+        feed_filter_hint: "仅订阅",
+        feed_intro: "为孩子准备的新内容",
+        feed_subscribed: "只看已关注的频道",
+        feed_load_hint: "更多视频在下方",
+        feed_load_more: "加载更多",
+        feed_viral: "热门",
+        channel_title: "频道",
+        search_results: "搜索结果：",
+        auth_welcome: "欢迎来到 Sevimli Aile",
+        auth_subtitle: "登录或注册即可观看。",
+        auth_email: "邮箱",
+        auth_password: "密码",
+        auth_sign_in: "登录",
+        auth_new_email: "新邮箱",
+        auth_new_password: "新密码",
+        auth_create_account: "创建账号",
+        auth_resend: "重新发送验证邮件",
+        auth_forgot: "忘记密码",
+        auth_sign_out: "退出登录",
+        upload_title: "添加 YouTube 视频",
+        upload_url: "YouTube 链接",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "语言",
+        upload_topics: "主题（用逗号分隔）",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "添加视频",
+        upload_hint: "如可用，标题将自动从 YouTube 获取。",
+        admin_title: "管理员控制台",
+        admin_reports: "举报",
+        admin_import_hint: "批量导入已批准的 YouTube 链接（CSV 或 SQL）。",
+        admin_csv_label: "CSV 文件",
+        admin_import_csv: "导入 CSV",
+        admin_export_sql: "下载 SQL",
+        admin_sql_label: "SQL 导入（INSERT INTO videos）",
+        admin_sql_placeholder: "粘贴 SQL 导出内容...",
+        admin_import_sql: "导入 SQL",
+        admin_grant_hint: "授予作者角色以添加视频。",
+        studio_title: "工作室",
+        studio_profile: "创作者资料",
+        studio_name: "显示名称",
+        studio_name_placeholder: "创作者名称",
+        studio_slogan: "简短标语",
+        studio_slogan_placeholder: "有趣的标语",
+        studio_avatar: "头像链接",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "保存资料",
+        studio_stats: "你的数据",
+        settings_title: "家长设置",
+        settings_languages: "显示语言",
+        settings_topics: "主题控制",
+        settings_topic_allow: "仅显示所选",
+        settings_topic_block: "隐藏所选",
+        settings_topic_search: "查找主题",
+        settings_topic_placeholder: "搜索主题",
+        settings_watch_limit: "每日观看时长（小时）",
+        settings_password: "用密码确认",
+        settings_save: "保存设置",
+        settings_history: "今日观看记录",
+        report_title: "举报视频",
+        report_reason: "原因",
+        report_placeholder: "说明问题（至少 5 个字符）",
+        report_send: "发送举报",
+        signout_title: "确认退出",
+        updates_title: "通知",
+        action_close: "关闭",
+        lang_english: "英语",
+        lang_russian: "俄语",
+        lang_chinese: "中文",
+        lang_turkish: "土耳其语",
+        lang_azerbaijani: "阿塞拜疆语",
+        lang_arabic: "阿拉伯语",
+        control_volume_down: "降低音量",
+        control_volume_up: "提高音量",
+        control_report: "举报",
+        control_replay: "重播",
+        control_next: "下一个视频",
+        control_heart: "喜欢",
+        control_auto_next_off: "自动下一个：关",
+        control_auto_next_on: "自动下一个：开",
+        control_play: "播放",
+        control_pause: "暂停",
+        control_mute: "静音",
+        control_unmute: "取消静音",
+        control_fullscreen: "全屏",
+        control_exit_fullscreen: "退出全屏",
+        control_seek_back: "后退 30 秒",
+        control_seek_forward: "前进 30 秒",
+        control_theater: "影院模式",
+        control_mini: "迷你播放器",
+        control_add_video: "添加视频",
+        control_admin: "管理员",
+        control_studio: "工作室",
+        control_settings: "设置",
+        control_updates: "通知",
+        control_sign_in: "登录",
+        control_sign_out: "退出登录",
+        control_subscribed_feed: "订阅内容",
+        status_ready: "就绪",
+        status_playing: "播放中",
+        status_paused: "已暂停",
+        status_ended: "已结束",
+        message_sign_in: "请先登录。",
+        message_sign_in_first: "请先登录。",
+        message_email_verified: "邮箱已验证。",
+        message_verification_sent: "验证邮件已发送。",
+        message_verification_failed: "发送验证邮件失败。",
+        message_verification_needed: "请先验证邮箱。",
+        message_verification_prompt: "验证邮件已发送，请验证后继续。",
+        message_email_required: "需要邮箱。",
+        message_reset_sent: "密码重置邮件已发送。",
+        message_reset_failed: "密码重置失败。",
+        message_auth_failed: "Firebase 授权未就绪。",
+        message_login_failed: "登录失败。",
+        message_register_failed: "注册失败。",
+        message_password_required: "需要密码。",
+        message_password_check_failed: "密码验证失败。",
+        message_youTube_required: "需要 YouTube 链接。",
+        message_add_video_failed: "添加视频失败。",
+        message_loading_stats: "加载中...",
+        message_no_channels: "暂无频道。",
+        message_no_subscriptions: "暂无订阅。",
+        message_channel_unavailable: "频道不可用。",
+        message_no_channel_videos: "该频道暂无视频。",
+        message_no_videos: "暂无视频。",
+        message_no_viral: "暂无热门视频。",
+        message_fetch_viral_failed: "热门视频加载失败。",
+        label_creator: "创作者",
+        label_minutes: "分钟",
+        label_views: "次观看",
+        label_hearts: "喜欢",
+        label_untitled: "未命名",
+        label_videos: "视频",
+        label_subs: "订阅",
+        label_plan: "套餐：",
+        label_artists: "创作者",
+        label_artist_stats: "创作者统计",
+        label_all_videos: "全部视频",
+        label_your_videos: "你的视频",
+        label_subscribe: "订阅",
+        label_subscribed: "已订阅",
+        label_unsubscribe: "取消订阅",
+        label_reported_by: "举报者",
+        label_update: "更新",
+        label_read: "已读",
+        label_resolved: "已处理",
+        label_auto_next: "自动下一个：",
+        label_up_next: "接下来：",
+        control_dark_mode: "深色模式",
+        control_light_mode: "浅色模式",
+        control_start: "开始播放",
+        control_heart_loved: "已喜欢",
+        admin_grant_artist: "授予作者权限",
+        admin_set_free: "设为免费",
+        admin_set_pro: "设为专业",
+        admin_report_message_placeholder: "给举报者的消息（可选）",
+        action_resolve: "处理",
+        action_delete: "删除",
+        action_mark_read: "标记已读",
+        message_auth_required: "需要完成认证设置。",
+        message_verify_needed: "请先验证邮箱。",
+        message_queue_single_auto: "自动下一个已开启，但队列只有一个视频。",
+        message_queue_single: "队列结束，可重播。",
+        message_no_subscribed_videos: "订阅中暂无视频。",
+        message_reports_failed: "无法加载举报。",
+        message_reports_empty: "暂无举报。",
+        message_select_csv: "请先选择 CSV 文件。",
+        message_import_failed: "导入失败。",
+        message_imported: "已导入：",
+        message_skipped: "已跳过：",
+        message_paste_sql: "请先粘贴 SQL。",
+        message_export_failed: "导出失败。",
+        message_profile_load_failed: "无法加载资料。",
+        message_profile_save_failed: "无法保存资料。",
+        message_profile_saved: "资料已保存。",
+        message_history_unavailable: "历史不可用。",
+        message_stats_unavailable: "统计不可用。",
+        message_settings_save_failed: "无法保存设置。",
+        message_no_topics: "未找到主题。",
+        message_no_history: "今天没有观看记录。",
+        message_report_failed: "举报失败。",
+        message_no_video_selected: "未选择视频。",
+        message_reason_short: "原因至少 5 个字符。",
+        message_report_thanks: "举报已提交，谢谢！",
+        message_no_updates: "暂无更新。",
+        status_buffering: "缓冲中",
+        status_error: "播放错误",
+        status_limit_reached: "已达上限",
+        status_empty: "暂无视频",
+        limit_title: "今天观看时间已用完",
+        limit_copy: "已达到每日限制。"
+      },
+      tr: {
+        search_label: "Ara",
+        search_placeholder: "Videoları ve kanalları ara",
+        ui_language_label: "Dil",
+        sidebar_subscribed: "Abonelikler",
+        sidebar_channels: "Kanallar",
+        status_loading: "Yükleniyor",
+        player_loading: "Oynatıcı yükleniyor...",
+        overlay_ready: "Oynatmaya hazır",
+        overlay_tap_start: "Başlatmak için dokun",
+        overlay_autoplay_note: "Otomatik oynatma engellenebilir. Başlat'a basın.",
+        overlay_complete: "Video tamamlandı",
+        overlay_next_prompt: "Sırada ne izleyelim?",
+        overlay_next_copy: "Devam etmek için bir seçim yapın.",
+        video_select: "Bir video seçin",
+        timeline_label: "Video zaman çizgisi",
+        timeline_seek: "Zaman çizgisinde gez",
+        quality_auto: "Otomatik",
+        captions_label: "Altyazı dili",
+        captions_off: "Altyazı kapalı",
+        feed_recommended: "Önerilen",
+        feed_filter_hint: "Sadece abonelikler",
+        feed_intro: "Çocuklar için taze seçimler",
+        feed_subscribed: "Yalnızca takip edilen kanallar",
+        feed_load_hint: "Daha fazla video aşağıda",
+        feed_load_more: "Daha fazla",
+        feed_viral: "Viral",
+        channel_title: "Kanal",
+        search_results: "Arama sonuçları:",
+        auth_welcome: "Sevimli Aile'e hoş geldiniz",
+        auth_subtitle: "İzlemeye başlamak için giriş yapın veya hesap oluşturun.",
+        auth_email: "E-posta",
+        auth_password: "Şifre",
+        auth_sign_in: "Giriş yap",
+        auth_new_email: "Yeni e-posta",
+        auth_new_password: "Yeni şifre",
+        auth_create_account: "Hesap oluştur",
+        auth_resend: "Doğrulama e-postasını tekrar gönder",
+        auth_forgot: "Şifremi unuttum",
+        auth_sign_out: "Çıkış yap",
+        upload_title: "YouTube videosu ekle",
+        upload_url: "YouTube URL",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "Diller",
+        upload_topics: "Konular (virgülle)",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "Video ekle",
+        upload_hint: "Mümkünse başlık YouTube'dan alınır.",
+        admin_title: "Yönetici paneli",
+        admin_reports: "Raporlar",
+        admin_import_hint: "Onaylı YouTube linklerini toplu içe aktar (CSV veya SQL).",
+        admin_csv_label: "CSV dosyası",
+        admin_import_csv: "CSV içe aktar",
+        admin_export_sql: "SQL indir",
+        admin_sql_label: "SQL içe aktarım (INSERT INTO videos)",
+        admin_sql_placeholder: "SQL çıktısını buraya yapıştır...",
+        admin_import_sql: "SQL içe aktar",
+        admin_grant_hint: "Video eklemek için sanatçı rolü verin.",
+        studio_title: "Stüdyo",
+        studio_profile: "Üretici profili",
+        studio_name: "Görünen ad",
+        studio_name_placeholder: "Üretici adı",
+        studio_slogan: "Kısa slogan",
+        studio_slogan_placeholder: "Eğlenceli slogan",
+        studio_avatar: "Profil görseli URL",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "Profili kaydet",
+        studio_stats: "İstatistiklerin",
+        settings_title: "Ebeveyn ayarları",
+        settings_languages: "Gösterilecek diller",
+        settings_topics: "Kontrol edilecek konular",
+        settings_topic_allow: "Yalnızca seçilenleri göster",
+        settings_topic_block: "Seçilenleri gizle",
+        settings_topic_search: "Konu ara",
+        settings_topic_placeholder: "Konuları ara",
+        settings_watch_limit: "Günlük izleme limiti (saat)",
+        settings_password: "Şifre ile onayla",
+        settings_save: "Ayarları kaydet",
+        settings_history: "Bugünün geçmişi",
+        report_title: "Videoyu bildir",
+        report_reason: "Sebep",
+        report_placeholder: "Sorunu yazın (en az 5 karakter)",
+        report_send: "Bildirimi gönder",
+        signout_title: "Çıkışı onayla",
+        updates_title: "Güncellemeler",
+        action_close: "Kapat",
+        lang_english: "İngilizce",
+        lang_russian: "Rusça",
+        lang_chinese: "Çince",
+        lang_turkish: "Türkçe",
+        lang_azerbaijani: "Azerice",
+        lang_arabic: "Arapça",
+        control_volume_down: "Sesi azalt",
+        control_volume_up: "Sesi artır",
+        control_report: "Bildir",
+        control_replay: "Tekrar",
+        control_next: "Sonraki video",
+        control_heart: "Kalp",
+        control_auto_next_off: "Oto sonraki kapalı",
+        control_auto_next_on: "Oto sonraki açık",
+        control_play: "Oynat",
+        control_pause: "Duraklat",
+        control_mute: "Sessize al",
+        control_unmute: "Sesi aç",
+        control_fullscreen: "Tam ekran",
+        control_exit_fullscreen: "Tam ekrandan çık",
+        control_seek_back: "30 sn geri",
+        control_seek_forward: "30 sn ileri",
+        control_theater: "Tiyatro",
+        control_mini: "Mini oynatıcı",
+        control_add_video: "Video ekle",
+        control_admin: "Yönetici",
+        control_studio: "Stüdyo",
+        control_settings: "Ayarlar",
+        control_updates: "Güncellemeler",
+        control_sign_in: "Giriş yap",
+        control_sign_out: "Çıkış yap",
+        control_subscribed_feed: "Abone akışı",
+        status_ready: "Hazır",
+        status_playing: "Oynatılıyor",
+        status_paused: "Duraklatıldı",
+        status_ended: "Bitti",
+        message_sign_in: "Lütfen giriş yapın.",
+        message_sign_in_first: "Önce giriş yapın.",
+        message_email_verified: "E-posta doğrulandı.",
+        message_verification_sent: "Doğrulama e-postası gönderildi.",
+        message_verification_failed: "Doğrulama e-postası gönderilemedi.",
+        message_verification_needed: "İzlemek için e-postayı doğrulayın.",
+        message_verification_prompt: "Doğrulama e-postası gönderildi. Devam etmek için doğrulayın.",
+        message_email_required: "E-posta gerekli.",
+        message_reset_sent: "Şifre sıfırlama e-postası gönderildi.",
+        message_reset_failed: "Şifre sıfırlama başarısız.",
+        message_auth_failed: "Firebase auth hazır değil.",
+        message_login_failed: "Giriş başarısız.",
+        message_register_failed: "Kayıt başarısız.",
+        message_password_required: "Şifre gerekli.",
+        message_password_check_failed: "Şifre kontrolü başarısız.",
+        message_youTube_required: "YouTube URL gerekli.",
+        message_add_video_failed: "Video eklenemedi.",
+        message_loading_stats: "Yükleniyor...",
+        message_no_channels: "Henüz kanal yok.",
+        message_no_subscriptions: "Henüz abonelik yok.",
+        message_channel_unavailable: "Kanal kullanılamıyor.",
+        message_no_channel_videos: "Bu kanalda video yok.",
+        message_no_videos: "Henüz video yok.",
+        message_no_viral: "Henüz viral video yok.",
+        message_fetch_viral_failed: "Viral videolar yüklenemedi.",
+        label_creator: "Yayıncı",
+        label_minutes: "dk",
+        label_views: "izlenme",
+        label_hearts: "kalp",
+        label_untitled: "Başlıksız",
+        label_videos: "video",
+        label_subs: "abone",
+        label_plan: "Plan:",
+        label_artists: "sanatçı",
+        label_artist_stats: "Sanatçı istatistikleri",
+        label_all_videos: "Tüm videolar",
+        label_your_videos: "Videoların",
+        label_subscribe: "Abone ol",
+        label_subscribed: "Abone",
+        label_unsubscribe: "Abonelikten çık",
+        label_reported_by: "Bildiren",
+        label_update: "Güncelleme",
+        label_read: "Okundu",
+        label_resolved: "Çözüldü",
+        label_auto_next: "Oto sonraki: ",
+        label_up_next: "Sıradaki: ",
+        control_dark_mode: "Koyu mod",
+        control_light_mode: "Açık mod",
+        control_start: "Videoyu başlat",
+        control_heart_loved: "Sevildi",
+        admin_grant_artist: "Sanatçı rolü ver",
+        admin_set_free: "Ücretsiz yap",
+        admin_set_pro: "Pro yap",
+        admin_report_message_placeholder: "Bildiren kişiye mesaj (isteğe bağlı)",
+        action_resolve: "Çöz",
+        action_delete: "Sil",
+        action_mark_read: "Okundu işaretle",
+        message_auth_required: "Kimlik doğrulama kurulumu gerekli.",
+        message_verify_needed: "Devam etmek için e-postayı doğrulayın.",
+        message_queue_single_auto: "Oto sonraki açık, ama sırada tek video var.",
+        message_queue_single: "Sıra bitti. Hazır olduğunda tekrar oynat.",
+        message_no_subscribed_videos: "Aboneliklerinde henüz video yok.",
+        message_reports_failed: "Raporlar yüklenemedi.",
+        message_reports_empty: "Henüz rapor yok.",
+        message_select_csv: "Önce bir CSV dosyası seçin.",
+        message_import_failed: "İçe aktarma başarısız.",
+        message_imported: "İçe aktarılan:",
+        message_skipped: "Atlanan:",
+        message_paste_sql: "Önce SQL yapıştırın.",
+        message_export_failed: "Dışa aktarma başarısız.",
+        message_profile_load_failed: "Profil yüklenemedi.",
+        message_profile_save_failed: "Profil kaydedilemedi.",
+        message_profile_saved: "Profil kaydedildi.",
+        message_history_unavailable: "Geçmiş kullanılamıyor.",
+        message_stats_unavailable: "İstatistikler kullanılamıyor.",
+        message_settings_save_failed: "Ayarlar kaydedilemedi.",
+        message_no_topics: "Konu bulunamadı.",
+        message_no_history: "Bugün izleme yok.",
+        message_report_failed: "Rapor gönderilemedi.",
+        message_no_video_selected: "Video seçilmedi.",
+        message_reason_short: "Neden en az 5 karakter olmalı.",
+        message_report_thanks: "Rapor gönderildi. Teşekkürler!",
+        message_no_updates: "Henüz güncelleme yok.",
+        status_buffering: "Arabellekte",
+        status_error: "Oynatma hatası",
+        status_limit_reached: "Limit aşıldı",
+        status_empty: "Video yok",
+        limit_title: "Bugünlük süre doldu",
+        limit_copy: "Günlük limit aşıldı."
+      },
+      az: {
+        search_label: "Axtar",
+        search_placeholder: "Video və kanalları axtarın",
+        ui_language_label: "Dil",
+        sidebar_subscribed: "Abunələr",
+        sidebar_channels: "Kanallar",
+        status_loading: "Yüklənir",
+        player_loading: "Pleyer yüklənir...",
+        overlay_ready: "Oynatma hazırdır",
+        overlay_tap_start: "Başlamaq üçün toxunun",
+        overlay_autoplay_note: "Avtomatik oynatma bloklana bilər. Başlat düyməsini basın.",
+        overlay_complete: "Video bitdi",
+        overlay_next_prompt: "Növbəti nə izləmək istəyirsiniz?",
+        overlay_next_copy: "Davam etmək üçün seçim edin.",
+        video_select: "Video seçin",
+        timeline_label: "Video zaman xətti",
+        timeline_seek: "Zaman xəttində irəli-geri",
+        quality_auto: "Avto",
+        captions_label: "Altyazı dili",
+        captions_off: "Altyazı söndür",
+        feed_recommended: "Tövsiyə olunan",
+        feed_filter_hint: "Yalnız abunələr",
+        feed_intro: "Uşaqlar üçün yeni seçimlər",
+        feed_subscribed: "Yalnız izlənən kanallar",
+        feed_load_hint: "Daha çox video aşağıda",
+        feed_load_more: "Daha çox",
+        feed_viral: "Viral",
+        channel_title: "Kanal",
+        search_results: "Axtarış nəticələri:",
+        auth_welcome: "Sevimli Aile-ə xoş gəldiniz",
+        auth_subtitle: "İzləmək üçün daxil olun və ya hesab yaradın.",
+        auth_email: "Email",
+        auth_password: "Şifrə",
+        auth_sign_in: "Daxil ol",
+        auth_new_email: "Yeni email",
+        auth_new_password: "Yeni şifrə",
+        auth_create_account: "Hesab yarat",
+        auth_resend: "Təsdiq emailini yenidən göndər",
+        auth_forgot: "Şifrəni unutdum",
+        auth_sign_out: "Çıxış",
+        upload_title: "YouTube videosu əlavə et",
+        upload_url: "YouTube URL",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "Dillər",
+        upload_topics: "Mövzular (vergüllə)",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "Video əlavə et",
+        upload_hint: "Mümkünsə başlıq YouTube-dan alınır.",
+        admin_title: "Admin idarəetmə",
+        admin_reports: "Şikayətlər",
+        admin_import_hint: "Təsdiqlənmiş YouTube linklərini toplu idxal et (CSV və ya SQL).",
+        admin_csv_label: "CSV faylı",
+        admin_import_csv: "CSV idxal et",
+        admin_export_sql: "SQL yüklə",
+        admin_sql_label: "SQL idxalı (INSERT INTO videos)",
+        admin_sql_placeholder: "SQL ixracını bura yapışdırın...",
+        admin_import_sql: "SQL idxal et",
+        admin_grant_hint: "Video əlavə etmək üçün artist rolunu verin.",
+        studio_title: "Studiya",
+        studio_profile: "Yaradıcı profili",
+        studio_name: "Görünən ad",
+        studio_name_placeholder: "Yaradıcı adı",
+        studio_slogan: "Qısa sloqan",
+        studio_slogan_placeholder: "Əyləncəli sloqan",
+        studio_avatar: "Profil şəkli URL",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "Profili yadda saxla",
+        studio_stats: "Statistikanız",
+        settings_title: "Valideyn ayarları",
+        settings_languages: "Göstəriləcək dillər",
+        settings_topics: "İdarə olunacaq mövzular",
+        settings_topic_allow: "Yalnız seçilənləri göstər",
+        settings_topic_block: "Seçilənləri gizlət",
+        settings_topic_search: "Mövzu axtar",
+        settings_topic_placeholder: "Mövzuları axtar",
+        settings_watch_limit: "Gündəlik izləmə limiti (saat)",
+        settings_password: "Şifrə ilə təsdiqlə",
+        settings_save: "Ayarları yadda saxla",
+        settings_history: "Bugünkü tarixçə",
+        report_title: "Videonu şikayət et",
+        report_reason: "Səbəb",
+        report_placeholder: "Problemi yazın (min 5 simvol)",
+        report_send: "Şikayəti göndər",
+        signout_title: "Çıxışı təsdiqlə",
+        updates_title: "Yeniliklər",
+        action_close: "Bağla",
+        lang_english: "İngilis",
+        lang_russian: "Rus",
+        lang_chinese: "Çin",
+        lang_turkish: "Türk",
+        lang_azerbaijani: "Azərbaycan",
+        lang_arabic: "Ərəb",
+        control_volume_down: "Səsi azalt",
+        control_volume_up: "Səsi artır",
+        control_report: "Şikayət",
+        control_replay: "Təkrar",
+        control_next: "Növbəti video",
+        control_heart: "Ürək",
+        control_auto_next_off: "Avto növbəti sönük",
+        control_auto_next_on: "Avto növbəti aktiv",
+        control_play: "Oynat",
+        control_pause: "Dayan",
+        control_mute: "Səsi bağla",
+        control_unmute: "Səsi aç",
+        control_fullscreen: "Tam ekran",
+        control_exit_fullscreen: "Tam ekrandan çıx",
+        control_seek_back: "30 san geri",
+        control_seek_forward: "30 san irəli",
+        control_theater: "Teatr",
+        control_mini: "Mini pleyer",
+        control_add_video: "Video əlavə et",
+        control_admin: "Admin",
+        control_studio: "Studiya",
+        control_settings: "Ayarlar",
+        control_updates: "Yeniliklər",
+        control_sign_in: "Daxil ol",
+        control_sign_out: "Çıxış",
+        control_subscribed_feed: "Abunə lentı",
+        status_ready: "Hazır",
+        status_playing: "Oynayır",
+        status_paused: "Dayandı",
+        status_ended: "Bitdi",
+        message_sign_in: "Xahiş olunur daxil olun.",
+        message_sign_in_first: "Əvvəlcə daxil olun.",
+        message_email_verified: "Email artıq təsdiqlənib.",
+        message_verification_sent: "Təsdiq emaili göndərildi.",
+        message_verification_failed: "Təsdiq emaili göndərilmədi.",
+        message_verification_needed: "İzləmək üçün emaili təsdiqləyin.",
+        message_verification_prompt: "Təsdiq emaili göndərildi. Davam etmək üçün təsdiqləyin.",
+        message_email_required: "Email tələb olunur.",
+        message_reset_sent: "Şifrə sıfırlama emaili göndərildi.",
+        message_reset_failed: "Şifrə sıfırlama alınmadı.",
+        message_auth_failed: "Firebase auth hazır deyil.",
+        message_login_failed: "Daxil olmaq alınmadı.",
+        message_register_failed: "Qeydiyyat alınmadı.",
+        message_password_required: "Şifrə tələb olunur.",
+        message_password_check_failed: "Şifrə yoxlaması uğursuz oldu.",
+        message_youTube_required: "YouTube linki tələb olunur.",
+        message_add_video_failed: "Video əlavə olunmadı.",
+        message_loading_stats: "Yüklənir...",
+        message_no_channels: "Hələ kanal yoxdur.",
+        message_no_subscriptions: "Hələ abunə yoxdur.",
+        message_channel_unavailable: "Kanal əlçatan deyil.",
+        message_no_channel_videos: "Bu kanalda video yoxdur.",
+        message_no_videos: "Hələ video yoxdur.",
+        message_no_viral: "Hələ viral video yoxdur.",
+        message_fetch_viral_failed: "Viral videolar yüklənmədi.",
+        label_creator: "Yaradıcı",
+        label_minutes: "dəq",
+        label_views: "baxış",
+        label_hearts: "ürək",
+        label_untitled: "Başlıqsız",
+        label_videos: "video",
+        label_subs: "abunə",
+        label_plan: "Plan:",
+        label_artists: "artist",
+        label_artist_stats: "Artist statistikası",
+        label_all_videos: "Bütün videolar",
+        label_your_videos: "Sənin videoların",
+        label_subscribe: "Abunə ol",
+        label_subscribed: "Abunə",
+        label_unsubscribe: "Abunəni dayandır",
+        label_reported_by: "Şikayət edən",
+        label_update: "Yeniləmə",
+        label_read: "Oxundu",
+        label_resolved: "Həll edildi",
+        label_auto_next: "Avto növbəti: ",
+        label_up_next: "Növbəti: ",
+        control_dark_mode: "Tünd rejim",
+        control_light_mode: "Açıq rejim",
+        control_start: "Videonu başladın",
+        control_heart_loved: "Sevildi",
+        admin_grant_artist: "Artist rolu ver",
+        admin_set_free: "Free et",
+        admin_set_pro: "Pro et",
+        admin_report_message_placeholder: "Şikayət edənə mesaj (istəyə bağlı)",
+        action_resolve: "Həll et",
+        action_delete: "Sil",
+        action_mark_read: "Oxundu işarələ",
+        message_auth_required: "Auth qurulması tələb olunur.",
+        message_verify_needed: "Davam etmək üçün emaili təsdiqləyin.",
+        message_queue_single_auto: "Avto növbəti aktivdir, amma sırada bir video var.",
+        message_queue_single: "Sıra burada bitir. Hazır olanda təkrar oynadın.",
+        message_no_subscribed_videos: "Abunələrdə hələ video yoxdur.",
+        message_reports_failed: "Şikayətlər yüklənmədi.",
+        message_reports_empty: "Hələ şikayət yoxdur.",
+        message_select_csv: "Əvvəlcə CSV faylı seçin.",
+        message_import_failed: "İdxal alınmadı.",
+        message_imported: "İdxal edildi:",
+        message_skipped: "Keçildi:",
+        message_paste_sql: "Əvvəlcə SQL yapışdırın.",
+        message_export_failed: "Eksport alınmadı.",
+        message_profile_load_failed: "Profil yüklənmədi.",
+        message_profile_save_failed: "Profil yadda saxlanmadı.",
+        message_profile_saved: "Profil yadda saxlanıldı.",
+        message_history_unavailable: "Tarixçə əlçatan deyil.",
+        message_stats_unavailable: "Statistika əlçatan deyil.",
+        message_settings_save_failed: "Ayarlar yadda saxlanmadı.",
+        message_no_topics: "Mövzu tapılmadı.",
+        message_no_history: "Bu gün baxış yoxdur.",
+        message_report_failed: "Şikayət göndərilmədi.",
+        message_no_video_selected: "Video seçilməyib.",
+        message_reason_short: "Səbəb ən az 5 simvol olmalıdır.",
+        message_report_thanks: "Şikayət göndərildi. Təşəkkürlər!",
+        message_no_updates: "Hələ yenilik yoxdur.",
+        status_buffering: "Yüklənir",
+        status_error: "Oynatma xətası",
+        status_limit_reached: "Limit doldu",
+        status_empty: "Video yoxdur",
+        limit_title: "Bu gün üçün vaxt bitdi",
+        limit_copy: "Gündəlik limit doldu."
+      },
+      ar: {
+        search_label: "بحث",
+        search_placeholder: "ابحث عن الفيديوهات والقنوات",
+        ui_language_label: "اللغة",
+        sidebar_subscribed: "المشتركات",
+        sidebar_channels: "القنوات",
+        status_loading: "جارٍ التحميل",
+        player_loading: "جارٍ تحميل المشغل...",
+        overlay_ready: "جاهز للتشغيل",
+        overlay_tap_start: "اضغط لبدء الفيديو",
+        overlay_autoplay_note: "قد يتم حظر التشغيل التلقائي. اضغط بدء.",
+        overlay_complete: "اكتمل الفيديو",
+        overlay_next_prompt: "ماذا تريد أن تشاهد بعد ذلك؟",
+        overlay_next_copy: "اختر إجراءً للمتابعة.",
+        video_select: "اختر فيديو",
+        timeline_label: "خط زمن الفيديو",
+        timeline_seek: "التحكم في خط الزمن",
+        quality_auto: "تلقائي",
+        captions_label: "لغة الترجمة",
+        captions_off: "الترجمة متوقفة",
+        feed_recommended: "موصى به",
+        feed_filter_hint: "المشتركات فقط",
+        feed_intro: "اختيارات جديدة للأطفال",
+        feed_subscribed: "القنوات التي تتابعها فقط",
+        feed_load_hint: "المزيد من الفيديوهات بالأسفل",
+        feed_load_more: "تحميل المزيد",
+        feed_viral: "شائع",
+        channel_title: "القناة",
+        search_results: "نتائج البحث عن",
+        auth_welcome: "مرحباً بك في Sevimli Aile",
+        auth_subtitle: "سجّل الدخول أو أنشئ حساباً لبدء المشاهدة.",
+        auth_email: "البريد الإلكتروني",
+        auth_password: "كلمة المرور",
+        auth_sign_in: "تسجيل الدخول",
+        auth_new_email: "بريد جديد",
+        auth_new_password: "كلمة مرور جديدة",
+        auth_create_account: "إنشاء حساب",
+        auth_resend: "إعادة إرسال التحقق",
+        auth_forgot: "نسيت كلمة المرور",
+        auth_sign_out: "تسجيل الخروج",
+        upload_title: "إضافة فيديو يوتيوب",
+        upload_url: "رابط يوتيوب",
+        upload_url_placeholder: "https://www.youtube.com/watch?v=...",
+        upload_languages: "اللغات",
+        upload_topics: "المواضيع (مفصولة بفواصل)",
+        upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_add: "إضافة فيديو",
+        upload_hint: "سيتم تعبئة العنوان تلقائياً من يوتيوب إن توفر.",
+        admin_title: "لوحة الإدارة",
+        admin_reports: "البلاغات",
+        admin_import_hint: "استيراد روابط يوتيوب المعتمدة (CSV أو SQL).",
+        admin_csv_label: "ملف CSV",
+        admin_import_csv: "استيراد CSV",
+        admin_export_sql: "تحميل SQL",
+        admin_sql_label: "استيراد SQL (INSERT INTO videos)",
+        admin_sql_placeholder: "الصق تصدير SQL هنا...",
+        admin_import_sql: "استيراد SQL",
+        admin_grant_hint: "امنح دور الفنان لإضافة فيديوهات.",
+        studio_title: "الاستوديو",
+        studio_profile: "ملف المبدع",
+        studio_name: "الاسم الظاهر",
+        studio_name_placeholder: "اسم المبدع",
+        studio_slogan: "شعار قصير",
+        studio_slogan_placeholder: "شعار ممتع",
+        studio_avatar: "رابط صورة الملف",
+        studio_avatar_placeholder: "https://...",
+        studio_save: "حفظ الملف",
+        studio_stats: "إحصاءاتك",
+        settings_title: "إعدادات الوالدين",
+        settings_languages: "اللغات المعروضة",
+        settings_topics: "المواضيع للتحكم",
+        settings_topic_allow: "عرض المحدد فقط",
+        settings_topic_block: "إخفاء المحدد",
+        settings_topic_search: "ابحث عن موضوع",
+        settings_topic_placeholder: "ابحث عن المواضيع",
+        settings_watch_limit: "حد المشاهدة اليومي (بالساعات)",
+        settings_password: "التأكيد بكلمة المرور",
+        settings_save: "حفظ الإعدادات",
+        settings_history: "سجل اليوم",
+        report_title: "الإبلاغ عن فيديو",
+        report_reason: "السبب",
+        report_placeholder: "اكتب المشكلة (حد أدنى 5 أحرف)",
+        report_send: "إرسال البلاغ",
+        signout_title: "تأكيد تسجيل الخروج",
+        updates_title: "التحديثات",
+        action_close: "إغلاق",
+        lang_english: "الإنجليزية",
+        lang_russian: "الروسية",
+        lang_chinese: "الصينية",
+        lang_turkish: "التركية",
+        lang_azerbaijani: "الأذربيجانية",
+        lang_arabic: "العربية",
+        control_volume_down: "خفض الصوت",
+        control_volume_up: "رفع الصوت",
+        control_report: "إبلاغ",
+        control_replay: "إعادة",
+        control_next: "الفيديو التالي",
+        control_heart: "قلب",
+        control_auto_next_off: "التشغيل التالي تلقائياً متوقف",
+        control_auto_next_on: "التشغيل التالي تلقائياً مفعل",
+        control_play: "تشغيل",
+        control_pause: "إيقاف مؤقت",
+        control_mute: "كتم",
+        control_unmute: "إلغاء الكتم",
+        control_fullscreen: "ملء الشاشة",
+        control_exit_fullscreen: "الخروج من ملء الشاشة",
+        control_seek_back: "للخلف 30 ثانية",
+        control_seek_forward: "للأمام 30 ثانية",
+        control_theater: "سينما",
+        control_mini: "مشغل مصغر",
+        control_add_video: "إضافة فيديو",
+        control_admin: "إدارة",
+        control_studio: "الاستوديو",
+        control_settings: "الإعدادات",
+        control_updates: "التحديثات",
+        control_sign_in: "تسجيل الدخول",
+        control_sign_out: "تسجيل الخروج",
+        control_subscribed_feed: "خلاصة المشتركين",
+        status_ready: "جاهز",
+        status_playing: "يعمل",
+        status_paused: "متوقف مؤقتاً",
+        status_ended: "انتهى",
+        message_sign_in: "يرجى تسجيل الدخول.",
+        message_sign_in_first: "يرجى تسجيل الدخول أولاً.",
+        message_email_verified: "البريد مؤكد بالفعل.",
+        message_verification_sent: "تم إرسال بريد التحقق.",
+        message_verification_failed: "تعذر إرسال بريد التحقق.",
+        message_verification_needed: "يرجى تأكيد البريد قبل المشاهدة.",
+        message_verification_prompt: "تم إرسال بريد التحقق، يرجى التأكيد للمتابعة.",
+        message_email_required: "البريد الإلكتروني مطلوب.",
+        message_reset_sent: "تم إرسال بريد إعادة تعيين كلمة المرور.",
+        message_reset_failed: "فشل إعادة تعيين كلمة المرور.",
+        message_auth_failed: "مصادقة Firebase غير جاهزة.",
+        message_login_failed: "فشل تسجيل الدخول.",
+        message_register_failed: "فشل التسجيل.",
+        message_password_required: "كلمة المرور مطلوبة.",
+        message_password_check_failed: "فشل التحقق من كلمة المرور.",
+        message_youTube_required: "رابط يوتيوب مطلوب.",
+        message_add_video_failed: "فشل إضافة الفيديو.",
+        message_loading_stats: "جارٍ التحميل...",
+        message_no_channels: "لا توجد قنوات بعد.",
+        message_no_subscriptions: "لا توجد اشتراكات بعد.",
+        message_channel_unavailable: "القناة غير متاحة.",
+        message_no_channel_videos: "لا توجد فيديوهات في هذه القناة بعد.",
+        message_no_videos: "لا توجد فيديوهات بعد.",
+        message_no_viral: "لا توجد فيديوهات شائعة بعد.",
+        message_fetch_viral_failed: "تعذر تحميل الفيديوهات الشائعة.",
+        label_creator: "المنشئ",
+        label_minutes: "دقيقة",
+        label_views: "مشاهدة",
+        label_hearts: "قلوب",
+        label_untitled: "بدون عنوان",
+        label_videos: "فيديوهات",
+        label_subs: "مشتركين",
+        label_plan: "الخطة:",
+        label_artists: "مبدعين",
+        label_artist_stats: "إحصاءات المبدعين",
+        label_all_videos: "كل الفيديوهات",
+        label_your_videos: "فيديوهاتك",
+        label_subscribe: "اشتراك",
+        label_subscribed: "مشترك",
+        label_unsubscribe: "إلغاء الاشتراك",
+        label_reported_by: "المبلّغ",
+        label_update: "تحديث",
+        label_read: "مقروء",
+        label_resolved: "تم الحل",
+        label_auto_next: "التالي تلقائياً: ",
+        label_up_next: "التالي: ",
+        control_dark_mode: "الوضع الداكن",
+        control_light_mode: "الوضع الفاتح",
+        control_start: "بدء الفيديو",
+        control_heart_loved: "أُعجب به",
+        admin_grant_artist: "منح دور فنان",
+        admin_set_free: "تعيين مجاني",
+        admin_set_pro: "تعيين برو",
+        admin_report_message_placeholder: "رسالة للمبلّغ (اختياري)",
+        action_resolve: "حل",
+        action_delete: "حذف",
+        action_mark_read: "وضع كمقروء",
+        message_auth_required: "يلزم إعداد المصادقة.",
+        message_verify_needed: "يرجى تأكيد البريد للمتابعة.",
+        message_queue_single_auto: "التالي تلقائياً مفعّل لكن هناك فيديو واحد فقط.",
+        message_queue_single: "انتهت القائمة. أعد التشغيل عند الاستعداد.",
+        message_no_subscribed_videos: "لا توجد فيديوهات ضمن الاشتراكات بعد.",
+        message_reports_failed: "تعذر تحميل البلاغات.",
+        message_reports_empty: "لا توجد بلاغات بعد.",
+        message_select_csv: "اختر ملف CSV أولاً.",
+        message_import_failed: "فشل الاستيراد.",
+        message_imported: "تم الاستيراد:",
+        message_skipped: "تم التخطي:",
+        message_paste_sql: "الصق SQL أولاً.",
+        message_export_failed: "فشل التصدير.",
+        message_profile_load_failed: "تعذر تحميل الملف.",
+        message_profile_save_failed: "تعذر حفظ الملف.",
+        message_profile_saved: "تم حفظ الملف.",
+        message_history_unavailable: "السجل غير متاح.",
+        message_stats_unavailable: "الإحصاءات غير متاحة.",
+        message_settings_save_failed: "تعذر حفظ الإعدادات.",
+        message_no_topics: "لم يتم العثور على مواضيع.",
+        message_no_history: "لا توجد مشاهدة اليوم.",
+        message_report_failed: "فشل إرسال البلاغ.",
+        message_no_video_selected: "لم يتم اختيار فيديو.",
+        message_reason_short: "يجب أن يكون السبب 5 أحرف على الأقل.",
+        message_report_thanks: "تم إرسال البلاغ. شكرًا لك!",
+        message_no_updates: "لا توجد تحديثات بعد.",
+        status_buffering: "جارٍ التخزين المؤقت",
+        status_error: "خطأ في التشغيل",
+        status_limit_reached: "تم الوصول للحد",
+        status_empty: "لا يوجد فيديو",
+        limit_title: "انتهى الوقت لهذا اليوم",
+        limit_copy: "تم الوصول إلى الحد اليومي."
+      }
+    };
+
+    function getUiLanguage() {
+      return localStorage.getItem("uiLang") || "en";
+    }
+
+    function t(key) {
+      const lang = getUiLanguage();
+      return (translations[lang] && translations[lang][key]) || translations.en[key] || key;
+    }
+
+    function applyTranslations() {
+      const lang = getUiLanguage();
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+      document.querySelectorAll("[data-i18n]").forEach((node) => {
+        node.textContent = t(node.getAttribute("data-i18n"));
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+        node.setAttribute("placeholder", t(node.getAttribute("data-i18n-placeholder")));
+      });
+      document.querySelectorAll("[data-i18n-aria]").forEach((node) => {
+        node.setAttribute("aria-label", t(node.getAttribute("data-i18n-aria")));
+      });
+      initControlIcons();
+      updateNextUp();
+      updateVideoMeta(currentVideo);
+      updateStatus(currentStatusKey);
+    }
+
+    function setUiLanguage(lang) {
+      const next = translations[lang] ? lang : "en";
+      localStorage.setItem("uiLang", next);
+      if (ui.uiLanguage) {
+        ui.uiLanguage.value = next;
+      }
+      applyTranslations();
+    }
+
+    function setButtonIcon(button, icon, labelKey, suffix) {
       const extra = suffix ? "<span class=\"count\">" + suffix + "</span>" : "";
       button.innerHTML = icon + extra;
-      if (label) {
+      if (labelKey) {
+        const label = t(labelKey);
         button.setAttribute("aria-label", label);
         button.title = label;
       }
@@ -1439,28 +2819,28 @@
     }
 
     function initControlIcons() {
-      setButtonIcon(ui.volumeDown, icons.minus, "Volume down");
-      setButtonIcon(ui.volumeUp, icons.plus, "Volume up");
-      setButtonIcon(ui.controlsReport, icons.report, "Report");
-      setButtonIcon(ui.controlsReplay, icons.replay, "Replay");
-      setButtonIcon(ui.controlsNext, icons.next, "Next video");
-      setButtonIcon(ui.controlsHeart, icons.heart, "Heart", "0");
-      setButtonIcon(ui.autoNextToggle, icons.autoNext, "Auto next off");
-      setButtonIcon(ui.playToggle, icons.play, "Play");
-      setButtonIcon(ui.muteToggle, icons.mute, "Mute");
-      setButtonIcon(ui.controlsFullscreen, icons.fullscreen, "Fullscreen");
-      setButtonIcon(ui.controlsSeekBack, icons.seekBack, "Back 30 seconds");
-      setButtonIcon(ui.controlsSeekForward, icons.seekForward, "Forward 30 seconds");
-      setButtonIcon(ui.viewTheater, icons.theater, "Theater");
-      setButtonIcon(ui.viewMini, icons.mini, "Mini player");
-      setButtonIcon(ui.uploadOpen, icons.upload, "Add video");
-      setButtonIcon(ui.adminOpen, icons.admin, "Admin");
-      setButtonIcon(ui.studioOpen, icons.studio, "Studio");
-      setButtonIcon(ui.settingsOpen, icons.settings, "Settings");
-      setButtonIcon(ui.notificationsOpen, icons.bell, "Updates");
-      setButtonIcon(ui.authOpen, icons.user, "Sign in");
-      setButtonIcon(ui.authLogout, icons.logout, "Sign out");
-      setButtonIcon(ui.filterSubscribed, icons.check, "Subscribed feed");
+      setButtonIcon(ui.volumeDown, icons.minus, "control_volume_down");
+      setButtonIcon(ui.volumeUp, icons.plus, "control_volume_up");
+      setButtonIcon(ui.controlsReport, icons.report, "control_report");
+      setButtonIcon(ui.controlsReplay, icons.replay, "control_replay");
+      setButtonIcon(ui.controlsNext, icons.next, "control_next");
+      setButtonIcon(ui.controlsHeart, icons.heart, "control_heart", "0");
+      setButtonIcon(ui.autoNextToggle, icons.autoNext, "control_auto_next_off");
+      setButtonIcon(ui.playToggle, icons.play, "control_play");
+      setButtonIcon(ui.muteToggle, icons.mute, "control_mute");
+      setButtonIcon(ui.controlsFullscreen, icons.fullscreen, "control_fullscreen");
+      setButtonIcon(ui.controlsSeekBack, icons.seekBack, "control_seek_back");
+      setButtonIcon(ui.controlsSeekForward, icons.seekForward, "control_seek_forward");
+      setButtonIcon(ui.viewTheater, icons.theater, "control_theater");
+      setButtonIcon(ui.viewMini, icons.mini, "control_mini");
+      setButtonIcon(ui.uploadOpen, icons.upload, "control_add_video");
+      setButtonIcon(ui.adminOpen, icons.admin, "control_admin");
+      setButtonIcon(ui.studioOpen, icons.studio, "control_studio");
+      setButtonIcon(ui.settingsOpen, icons.settings, "control_settings");
+      setButtonIcon(ui.notificationsOpen, icons.bell, "control_updates");
+      setButtonIcon(ui.authOpen, icons.user, "control_sign_in");
+      setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
+      setButtonIcon(ui.filterSubscribed, icons.check, "control_subscribed_feed");
     }
 
     let player = null;
@@ -1474,10 +2854,12 @@
     let currentUser = null;
     let pageOffset = 0;
     const pageLimit = 12;
+    const searchLimit = 10;
     let hasMore = true;
     let isFetching = false;
     let subscriptions = [];
     let currentVideo = null;
+    let currentStatusKey = "status_loading";
     let feedFilter = "all";
     let currentChannel = null;
     let firebaseAuth = null;
@@ -1490,7 +2872,7 @@
       setButtonIcon(
         ui.themeToggle,
         theme === "dark" ? icons.sun : icons.moon,
-        theme === "dark" ? "Light mode" : "Dark mode"
+        theme === "dark" ? "control_light_mode" : "control_dark_mode"
       );
       localStorage.setItem("theme", theme);
     }
@@ -1534,7 +2916,7 @@
     function apiFetch(path, options = {}) {
       const headers = options.headers || {};
       if (!token && path.startsWith("/api/") && path !== "/api/firebase-config") {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
       }
       if (token) {
         headers.Authorization = "Bearer " + token;
@@ -1595,12 +2977,12 @@
 
     function syncControlLabels() {
       if (!player || !isPlayerReady) {
-        setButtonIcon(ui.playToggle, icons.play, "Play");
-        setButtonIcon(ui.muteToggle, icons.mute, "Mute");
+        setButtonIcon(ui.playToggle, icons.play, "control_play");
+        setButtonIcon(ui.muteToggle, icons.mute, "control_mute");
         setButtonIcon(
           ui.autoNextToggle,
           icons.autoNext,
-          autoNextEnabled ? "Auto next on" : "Auto next off"
+          autoNextEnabled ? "control_auto_next_on" : "control_auto_next_off"
         );
         ui.autoNextToggle.classList.toggle("toggle-on", autoNextEnabled);
         ui.playToggle.disabled = true;
@@ -1608,25 +2990,39 @@
         ui.autoNextToggle.disabled = true;
         ui.seekBar.disabled = true;
         ui.qualitySelect.disabled = true;
+        if (ui.captionSelect) {
+          ui.captionSelect.disabled = true;
+        }
         syncVolumeDisplay();
         syncTimelineDisplay();
         return;
       }
       const state = player.getPlayerState ? player.getPlayerState() : null;
       const playing = state === YT.PlayerState.PLAYING;
-      setButtonIcon(ui.playToggle, playing ? icons.pause : icons.play, playing ? "Pause" : "Play");
+      setButtonIcon(
+        ui.playToggle,
+        playing ? icons.pause : icons.play,
+        playing ? "control_pause" : "control_play"
+      );
       const muted = player.isMuted && player.isMuted();
-      setButtonIcon(ui.muteToggle, muted ? icons.volume : icons.mute, muted ? "Unmute" : "Mute");
+      setButtonIcon(
+        ui.muteToggle,
+        muted ? icons.volume : icons.mute,
+        muted ? "control_unmute" : "control_mute"
+      );
       setButtonIcon(
         ui.autoNextToggle,
         icons.autoNext,
-        autoNextEnabled ? "Auto next on" : "Auto next off"
+        autoNextEnabled ? "control_auto_next_on" : "control_auto_next_off"
       );
       ui.autoNextToggle.classList.toggle("toggle-on", autoNextEnabled);
       ui.playToggle.disabled = false;
       ui.muteToggle.disabled = false;
       ui.autoNextToggle.disabled = false;
       ui.qualitySelect.disabled = false;
+      if (ui.captionSelect) {
+        ui.captionSelect.disabled = false;
+      }
       syncVolumeDisplay();
       syncTimelineDisplay();
     }
@@ -1636,20 +3032,40 @@
       setButtonIcon(
         ui.controlsFullscreen,
         isFull ? icons.exitFullscreen : icons.fullscreen,
-        isFull ? "Exit fullscreen" : "Fullscreen"
+        isFull ? "control_exit_fullscreen" : "control_fullscreen"
       );
       document.body.classList.toggle("fullscreen-mode", isFull);
       ui.controlsFullscreen.classList.toggle("fullscreen-exit", isFull);
     }
 
     function updateStatus(label) {
-      const title = videos[currentIndex] ? videos[currentIndex].title : "No video";
-      ui.statusChip.textContent = label + ": " + title;
+      currentStatusKey = label;
+      const title = videos[currentIndex] ? videos[currentIndex].title : t("message_no_videos");
+      ui.statusChip.textContent = t(label) + ": " + title;
+    }
+
+    function updateSearchContext(query) {
+      if (!ui.searchContext) {
+        return;
+      }
+      let text = "";
+      if (query) {
+        text = t("search_results") + " \"" + query + "\"";
+      } else if (feedFilter === "subscribed") {
+        text = t("feed_subscribed");
+      } else {
+        text = t("feed_intro");
+      }
+      ui.searchContext.textContent = text;
+    }
+
+    function getPageLimit(query) {
+      return query ? searchLimit : pageLimit;
     }
 
     function updateVideoMeta(video) {
       if (!video) {
-        ui.videoTitle.textContent = "Select a video";
+        ui.videoTitle.textContent = t("video_select");
         ui.videoStats.textContent = "";
         ui.channelName.textContent = "";
         ui.channelSlogan.textContent = "";
@@ -1659,16 +3075,25 @@
       const durationLabel = video.duration ? formatTime(video.duration) : "--:--";
       const views = video.views || 0;
       const hearts = video.hearts || 0;
-      ui.videoTitle.textContent = video.title || "Untitled";
-      ui.videoStats.textContent = views + " views · " + hearts + " hearts · " + durationLabel;
-      ui.channelName.textContent = video.channel_name || "Creator";
+      ui.videoTitle.textContent = video.title || t("label_untitled");
+      ui.videoStats.textContent =
+        views +
+        " " +
+        t("label_views") +
+        " · " +
+        hearts +
+        " " +
+        t("label_hearts") +
+        " · " +
+        durationLabel;
+      ui.channelName.textContent = video.channel_name || t("label_creator");
       ui.channelSlogan.textContent = video.channel_slogan || "";
       setAvatar(ui.channelAvatar, video.channel_avatar);
     }
 
     function updateHeartButton() {
       if (!currentVideo) {
-        setButtonIcon(ui.controlsHeart, icons.heart, "Heart", "0");
+        setButtonIcon(ui.controlsHeart, icons.heart, "control_heart", "0");
         ui.controlsHeart.disabled = true;
         ui.controlsReport.disabled = true;
         return;
@@ -1677,7 +3102,7 @@
       setButtonIcon(
         ui.controlsHeart,
         icons.heart,
-        currentVideo.liked ? "Loved" : "Heart",
+        currentVideo.liked ? "control_heart_loved" : "control_heart",
         String(count)
       );
       ui.controlsHeart.disabled = !currentUser;
@@ -1695,12 +3120,12 @@
     function updateNextUp() {
       if (videos.length < 2) {
         ui.nextUp.textContent = autoNextEnabled
-          ? "Auto next is on, but the queue has one video."
-          : "Queue ends here. Replay when ready.";
+          ? t("message_queue_single_auto")
+          : t("message_queue_single");
         return;
       }
       const nextIndex = (currentIndex + 1) % videos.length;
-      const prefix = autoNextEnabled ? "Auto next: " : "Up next: ";
+      const prefix = autoNextEnabled ? t("label_auto_next") : t("label_up_next");
       ui.nextUp.textContent = prefix + videos[nextIndex].title;
     }
 
@@ -1712,7 +3137,7 @@
       const video = videos[currentIndex];
       currentVideo = video;
       setOverlayState(true, false, false);
-      updateStatus("Loading");
+      updateStatus("status_loading");
       updateNextUp();
       updateHeartButton();
       updateVideoMeta(video);
@@ -1726,11 +3151,11 @@
       } else if (res.status === 403) {
         const data = await res.json();
         setOverlayState(false, false, false);
-        updateStatus("Limit reached");
+        updateStatus("status_limit_reached");
         ui.startLayer.classList.add("active");
         ui.startLayer.setAttribute("aria-hidden", "false");
-        ui.startLayer.querySelector("h2").textContent = "Time is up for today";
-        ui.startLayer.querySelector("p").textContent = data.error || "Daily limit reached.";
+        ui.startLayer.querySelector("h2").textContent = t("limit_title");
+        ui.startLayer.querySelector("p").textContent = data.error || t("limit_copy");
         if (player.pauseVideo) {
           player.pauseVideo();
         }
@@ -1772,7 +3197,7 @@
       const meta = document.createElement("div");
       meta.className = "card-meta";
       let channelNode;
-      const channelName = video.channel_name || "Creator";
+      const channelName = video.channel_name || t("label_creator");
       if (video.channel_role === "artist") {
         const channelButton = document.createElement("button");
         channelButton.type = "button";
@@ -1790,7 +3215,14 @@
       }
       const details = document.createElement("span");
       details.textContent =
-        " · " + (video.views || 0) + " views · " + (video.hearts || 0) + " hearts";
+        " · " +
+        (video.views || 0) +
+        " " +
+        t("label_views") +
+        " · " +
+        (video.hearts || 0) +
+        " " +
+        t("label_hearts");
       meta.appendChild(channelNode);
       meta.appendChild(details);
       body.appendChild(title);
@@ -1808,7 +3240,7 @@
       if (!list.length && !append) {
         const empty = document.createElement("div");
         empty.className = "empty-state";
-        empty.textContent = emptyMessage || "No videos yet. Add the first YouTube link.";
+        empty.textContent = emptyMessage || t("message_no_videos");
         container.appendChild(empty);
         return;
       }
@@ -1820,15 +3252,15 @@
     function renderRecommendations(list, append = false) {
       const message =
         feedFilter === "subscribed"
-          ? "No videos from your subscriptions yet."
-          : "No videos yet. Add the first YouTube link.";
+          ? t("message_no_subscribed_videos")
+          : t("message_no_videos");
       renderVideoGrid(list, ui.recommendations, append, message);
     }
 
     function renderChannels(channels) {
       ui.channelList.innerHTML = "";
       if (!channels.length) {
-        ui.channelList.textContent = "No channels yet.";
+        ui.channelList.textContent = t("message_no_channels");
         return;
       }
       channels.forEach((channel) => {
@@ -1839,12 +3271,16 @@
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
-          escapeHtml(channel.display_name || "Creator") +
+          escapeHtml(channel.display_name || t("label_creator")) +
           "</div><div class=\"card-meta\">" +
           escapeHtml(channel.videos) +
-          " videos · " +
+          " " +
+          t("label_videos") +
+          " · " +
           escapeHtml(channel.subscribers || 0) +
-          " subs</div></div>";
+          " " +
+          t("label_subs") +
+          "</div></div>";
         setAvatar(row.querySelector(".avatar"), channel.avatar_url);
         const actions = document.createElement("div");
         actions.className = "channel-actions";
@@ -1854,7 +3290,7 @@
         setButtonIcon(
           button,
           isSubscribed ? icons.check : icons.plus,
-          isSubscribed ? "Subscribed" : "Subscribe"
+          isSubscribed ? "label_subscribed" : "label_subscribe"
         );
         button.addEventListener("click", (event) => {
           event.stopPropagation();
@@ -1869,7 +3305,7 @@
     function renderSubscriptions() {
       ui.subscribedList.innerHTML = "";
       if (!subscriptions.length) {
-        ui.subscribedList.textContent = "No subscriptions yet.";
+        ui.subscribedList.textContent = t("message_no_subscriptions");
         return;
       }
       subscriptions.forEach((channel) => {
@@ -1879,17 +3315,19 @@
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
-          escapeHtml(channel.display_name || "Creator") +
+          escapeHtml(channel.display_name || t("label_creator")) +
           "</div><div class=\"card-meta\">" +
           escapeHtml(channel.subscribers || 0) +
-          " subs</div></div>";
+          " " +
+          t("label_subs") +
+          "</div></div>";
         setAvatar(row.querySelector(".avatar"), channel.avatar_url);
         const actions = document.createElement("div");
         actions.className = "channel-actions";
         const button = document.createElement("button");
         button.type = "button";
         button.className = "pill icon-button";
-        setButtonIcon(button, icons.minus, "Unsubscribe");
+        setButtonIcon(button, icons.minus, "label_unsubscribe");
         button.addEventListener("click", (event) => {
           event.stopPropagation();
           toggleSubscription(channel.id);
@@ -1902,7 +3340,7 @@
 
     function setFeedFilter(nextFilter) {
       if (nextFilter === "subscribed" && !currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       feedFilter = nextFilter;
@@ -1913,27 +3351,30 @@
 
     async function openChannel(channelId) {
       showChannelView(true);
-      ui.channelVideos.innerHTML = "Loading...";
+      ui.channelVideos.innerHTML = t("status_loading");
       const channelRes = await apiFetch("/api/channels/" + channelId);
       const channelData = await channelRes.json();
       if (!channelRes.ok || !channelData.channel) {
-        ui.channelVideos.textContent = "Channel unavailable.";
+        ui.channelVideos.textContent = t("message_channel_unavailable");
         return;
       }
       currentChannel = channelData.channel;
-      ui.channelTitle.textContent = currentChannel.display_name || "Creator";
+      ui.channelTitle.textContent = currentChannel.display_name || t("label_creator");
       ui.channelStats.textContent =
         currentChannel.videos +
-        " videos · " +
+        " " +
+        t("label_videos") +
+        " · " +
         currentChannel.subscribers +
-        " subs";
+        " " +
+        t("label_subs");
       ui.channelSloganView.textContent = currentChannel.slogan || "";
       const heroAvatar = ui.channelView.querySelector(".channel-hero .avatar");
       setAvatar(heroAvatar, currentChannel.avatar_url);
       setButtonIcon(
         ui.channelSubscribe,
         currentChannel.is_subscribed ? icons.check : icons.plus,
-        currentChannel.is_subscribed ? "Subscribed" : "Subscribe"
+        currentChannel.is_subscribed ? "label_subscribed" : "label_subscribe"
       );
       ui.channelSubscribe.disabled = Boolean(
         currentUser && String(currentUser.id) === String(currentChannel.id)
@@ -1945,18 +3386,18 @@
       const videosRes = await apiFetch("/api/videos?" + params.toString());
       const videosData = await videosRes.json();
       videos = videosData.videos || [];
-      renderVideoGrid(videos, ui.channelVideos, false, "No videos in this channel yet.");
+      renderVideoGrid(videos, ui.channelVideos, false, t("message_no_channel_videos"));
       if (videos.length) {
         loadVideo(0);
       } else {
         setOverlayState(false, false, false);
-        updateStatus("No video");
+        updateStatus("status_empty");
       }
     }
 
     async function toggleSubscription(channelId) {
       if (!currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       const res = await apiFetch("/api/subscriptions/" + channelId, { method: "POST" });
@@ -1984,7 +3425,8 @@
         hasMore = true;
       }
       const params = new URLSearchParams();
-      params.set("limit", String(pageLimit));
+      const limit = getPageLimit(query);
+      params.set("limit", String(limit));
       params.set("offset", String(pageOffset));
       if (query) {
         params.set("search", query);
@@ -1996,20 +3438,21 @@
       const data = await res.json();
       if (res.status === 401) {
         isFetching = false;
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       const batch = data.videos || [];
       hasMore = Boolean(data.hasMore);
       videos = reset ? batch : videos.concat(batch);
       renderRecommendations(batch, !reset);
+      updateSearchContext(query);
       updateNextUp();
       ui.loadMore.style.display = hasMore ? "inline-flex" : "none";
       if (reset && videos.length && player) {
         loadVideo(0);
       } else if (!videos.length) {
         setOverlayState(false, false, false);
-        updateStatus("No video");
+        updateStatus("status_empty");
         updateVideoMeta(null);
       }
       pageOffset += batch.length;
@@ -2023,10 +3466,10 @@
       const res = await apiFetch("/api/viral?limit=8");
       const data = await res.json();
       if (!res.ok) {
-        ui.viralGrid.textContent = "Unable to load viral videos.";
+        ui.viralGrid.textContent = t("message_fetch_viral_failed");
         return;
       }
-      renderVideoGrid(data.videos || [], ui.viralGrid, false, "No viral videos yet.");
+      renderVideoGrid(data.videos || [], ui.viralGrid, false, t("message_no_viral"));
     }
 
     async function fetchChannels() {
@@ -2055,8 +3498,8 @@
         const res = await fetch(API_BASE + "/api/firebase-config");
         const config = await res.json();
         if (!res.ok) {
-          ui.authMessage.textContent = config.error || "Firebase config missing.";
-          lockApp("Auth setup required.");
+          ui.authMessage.textContent = config.error || t("message_auth_failed");
+          lockApp(t("message_auth_required"));
           return;
         }
         firebase.initializeApp(config);
@@ -2070,7 +3513,7 @@
             updateAuthUI();
             renderSubscriptions();
             ui.verifyResend.style.display = "none";
-            lockApp("Please sign in to continue.");
+            lockApp(t("message_sign_in"));
             return;
           }
           if (!user.emailVerified) {
@@ -2078,7 +3521,7 @@
             currentUser = null;
             updateAuthUI();
             ui.verifyResend.style.display = "inline-flex";
-            lockApp("Verify your email to continue.");
+            lockApp(t("message_verify_needed"));
             return;
           }
           ui.verifyResend.style.display = "none";
@@ -2090,25 +3533,45 @@
           await fetchVideos("", true);
         });
       } catch (err) {
-        ui.authMessage.textContent = "Firebase init failed.";
-        lockApp("Auth setup required.");
+        ui.authMessage.textContent = t("message_auth_failed");
+        lockApp(t("message_auth_required"));
       }
     }
 
     async function resendVerification() {
       if (!firebaseUser) {
-        ui.authMessage.textContent = "Sign in first to resend verification.";
+        ui.authMessage.textContent = t("message_sign_in_first");
         return;
       }
       if (firebaseUser.emailVerified) {
-        ui.authMessage.textContent = "Email already verified.";
+        ui.authMessage.textContent = t("message_email_verified");
         return;
       }
       try {
         await firebaseUser.sendEmailVerification();
-        ui.authMessage.textContent = "Verification email sent.";
+        ui.authMessage.textContent = t("message_verification_sent");
       } catch (err) {
-        ui.authMessage.textContent = err.message || "Unable to send verification email.";
+        ui.authMessage.textContent = err.message || t("message_verification_failed");
+      }
+    }
+
+    async function sendPasswordReset() {
+      ui.authMessage.textContent = "";
+      if (!firebaseAuth) {
+        ui.authMessage.textContent = t("message_auth_failed");
+        return;
+      }
+      const emailInput = document.getElementById("login-email").value.trim();
+      const email = emailInput || (firebaseUser && firebaseUser.email) || "";
+      if (!email) {
+        ui.authMessage.textContent = t("message_email_required");
+        return;
+      }
+      try {
+        await firebaseAuth.sendPasswordResetEmail(email);
+        ui.authMessage.textContent = t("message_reset_sent");
+      } catch (err) {
+        ui.authMessage.textContent = err.message || t("message_reset_failed");
       }
     }
 
@@ -2125,12 +3588,12 @@
       event.preventDefault();
       ui.signoutMessage.textContent = "";
       if (!firebaseUser) {
-        ui.signoutMessage.textContent = "Sign in first.";
+        ui.signoutMessage.textContent = t("message_sign_in_first");
         return;
       }
       const password = document.getElementById("signout-password").value;
       if (!password) {
-        ui.signoutMessage.textContent = "Password required.";
+        ui.signoutMessage.textContent = t("message_password_required");
         return;
       }
       try {
@@ -2139,7 +3602,7 @@
         await firebaseAuth.signOut();
         closeModal(ui.signoutModal);
       } catch (err) {
-        ui.signoutMessage.textContent = err.message || "Password check failed.";
+        ui.signoutMessage.textContent = err.message || t("message_password_check_failed");
       }
     }
 
@@ -2156,7 +3619,7 @@
         currentUser = null;
         updateAuthUI();
         fetchSubscriptions();
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       const data = await res.json();
@@ -2195,7 +3658,7 @@
       event.preventDefault();
       ui.authMessage.textContent = "";
       if (!firebaseAuth) {
-        ui.authMessage.textContent = "Firebase auth not ready.";
+        ui.authMessage.textContent = t("message_auth_failed");
         return;
       }
       const email = document.getElementById("login-email").value.trim();
@@ -2203,12 +3666,12 @@
       try {
         const cred = await firebaseAuth.signInWithEmailAndPassword(email, password);
         if (!cred.user.emailVerified) {
-          ui.authMessage.textContent = "Verify your email before watching.";
+          ui.authMessage.textContent = t("message_verification_needed");
           await cred.user.sendEmailVerification();
           return;
         }
       } catch (err) {
-        ui.authMessage.textContent = err.message || "Login failed.";
+        ui.authMessage.textContent = err.message || t("message_login_failed");
       }
     }
 
@@ -2216,7 +3679,7 @@
       event.preventDefault();
       ui.authMessage.textContent = "";
       if (!firebaseAuth) {
-        ui.authMessage.textContent = "Firebase auth not ready.";
+        ui.authMessage.textContent = t("message_auth_failed");
         return;
       }
       const email = document.getElementById("register-email").value.trim();
@@ -2224,9 +3687,9 @@
       try {
         const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
         await cred.user.sendEmailVerification();
-        ui.authMessage.textContent = "Verification email sent. Please verify to continue.";
+        ui.authMessage.textContent = t("message_verification_prompt");
       } catch (err) {
-        ui.authMessage.textContent = err.message || "Registration failed.";
+        ui.authMessage.textContent = err.message || t("message_register_failed");
       }
     }
 
@@ -2235,17 +3698,20 @@
       ui.uploadMessage.textContent = "";
       const youtubeUrl = document.getElementById("upload-url").value.trim();
       if (!youtubeUrl) {
-        ui.uploadMessage.textContent = "YouTube URL required.";
+        ui.uploadMessage.textContent = t("message_youTube_required");
         return;
       }
       const payload = { youtubeUrl };
       if (currentUser && (currentUser.role === "admin" || currentUser.role === "artist")) {
-        const language = document.getElementById("upload-language").value;
+        const languageSelect = document.getElementById("upload-language");
+        const selectedLanguages = Array.from(languageSelect.selectedOptions).map((option) => option.value);
+        const language = selectedLanguages[0] || "unspecified";
         const topics = ui.uploadTopics.value
           .split(/[|,]/g)
           .map((topic) => topic.trim())
           .filter(Boolean);
         payload.language = language;
+        payload.languages = selectedLanguages;
         payload.topics = topics;
       }
       const res = await apiFetch("/api/videos", {
@@ -2255,7 +3721,7 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.uploadMessage.textContent = data.error || "Add video failed.";
+        ui.uploadMessage.textContent = data.error || t("message_add_video_failed");
         return;
       }
       ui.uploadForm.reset();
@@ -2268,15 +3734,15 @@
     }
 
     async function openAdmin() {
-      ui.adminList.innerHTML = "Loading...";
-      ui.adminReports.innerHTML = "Loading...";
+      ui.adminList.innerHTML = t("status_loading");
+      ui.adminReports.innerHTML = t("status_loading");
       const [usersRes, reportsRes] = await Promise.all([apiFetch("/api/users"), apiFetch("/api/reports")]);
       const data = await usersRes.json();
       ui.adminList.innerHTML = "";
       (data.users || []).forEach((user) => {
         const row = document.createElement("div");
         row.className = "channel";
-        const buttonLabel = user.role === "user" ? "Grant artist" : user.role;
+        const buttonLabel = user.role === "user" ? t("admin_grant_artist") : user.role;
         const button = document.createElement("button");
         button.type = "button";
         button.className = "ghost";
@@ -2301,13 +3767,15 @@
           " · " +
           (user.firebase_uid ? "UID: " + escapeHtml(user.firebase_uid) : "UID: -") +
           " · " +
-          "Plan: " +
+          t("label_plan") +
+          " " +
           escapeHtml(user.plan || "free") +
           "</div></div>";
         const planButton = document.createElement("button");
         planButton.type = "button";
         planButton.className = "pill";
-        planButton.textContent = (user.plan || "free") === "pro" ? "Set Free" : "Set Pro";
+        planButton.textContent =
+          (user.plan || "free") === "pro" ? t("admin_set_free") : t("admin_set_pro");
         planButton.addEventListener("click", async () => {
           const nextPlan = (user.plan || "free") === "pro" ? "free" : "pro";
           const planRes = await apiFetch("/api/admin/plan", {
@@ -2326,9 +3794,9 @@
       const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
       ui.adminReports.innerHTML = "";
       if (!reportsRes.ok) {
-        ui.adminReports.textContent = "Unable to load reports.";
+        ui.adminReports.textContent = t("message_reports_failed");
       } else if (!reportsData.reports || !reportsData.reports.length) {
-        ui.adminReports.textContent = "No reports yet.";
+        ui.adminReports.textContent = t("message_reports_empty");
       } else {
         reportsData.reports.forEach((report) => {
           const row = document.createElement("div");
@@ -2343,7 +3811,7 @@
           const meta = document.createElement("div");
           meta.className = "card-meta";
           meta.textContent =
-            "Reported by " + report.reporter + " · " + report.reason + " · " + report.status;
+            t("label_reported_by") + " " + report.reporter + " · " + report.reason + " · " + report.status;
           info.appendChild(title);
           info.appendChild(meta);
           const actions = document.createElement("div");
@@ -2351,12 +3819,12 @@
           const input = document.createElement("input");
           input.type = "text";
           input.className = "report-input";
-          input.placeholder = "Message to reporter (optional)";
+          input.placeholder = t("admin_report_message_placeholder");
           input.disabled = report.status === "resolved";
           const button = document.createElement("button");
           button.type = "button";
           button.className = "ghost";
-          button.textContent = report.status === "resolved" ? "Resolved" : "Resolve";
+          button.textContent = report.status === "resolved" ? t("label_resolved") : t("action_resolve");
           button.disabled = report.status === "resolved";
           button.addEventListener("click", async () => {
             const res = await apiFetch("/api/reports/" + report.id + "/resolve", {
@@ -2383,7 +3851,7 @@
       ui.adminImportMessage.textContent = "";
       const file = ui.adminCsv.files[0];
       if (!file) {
-        ui.adminImportMessage.textContent = "Select a CSV file first.";
+        ui.adminImportMessage.textContent = t("message_select_csv");
         return;
       }
       const text = await file.text();
@@ -2394,10 +3862,11 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.adminImportMessage.textContent = data.error || "Import failed.";
+        ui.adminImportMessage.textContent = data.error || t("message_import_failed");
         return;
       }
-      ui.adminImportMessage.textContent = "Imported: " + data.inserted + ", Skipped: " + data.skipped.length;
+      ui.adminImportMessage.textContent =
+        t("message_imported") + " " + data.inserted + ", " + t("message_skipped") + " " + data.skipped.length;
       ui.adminCsv.value = "";
       fetchVideos(ui.searchInput.value.trim(), true);
     }
@@ -2406,7 +3875,7 @@
       ui.adminImportMessage.textContent = "";
       const sql = ui.adminSql.value.trim();
       if (!sql) {
-        ui.adminImportMessage.textContent = "Paste SQL first.";
+        ui.adminImportMessage.textContent = t("message_paste_sql");
         return;
       }
       const res = await apiFetch("/api/admin/import-sql", {
@@ -2416,10 +3885,11 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.adminImportMessage.textContent = data.error || "Import failed.";
+        ui.adminImportMessage.textContent = data.error || t("message_import_failed");
         return;
       }
-      ui.adminImportMessage.textContent = "Imported: " + data.inserted + ", Skipped: " + data.skipped.length;
+      ui.adminImportMessage.textContent =
+        t("message_imported") + " " + data.inserted + ", " + t("message_skipped") + " " + data.skipped.length;
       ui.adminSql.value = "";
       fetchVideos(ui.searchInput.value.trim(), true);
     }
@@ -2427,7 +3897,7 @@
     async function exportSql() {
       const res = await apiFetch("/api/admin/export-sql");
       if (!res.ok) {
-        ui.adminImportMessage.textContent = "Export failed.";
+        ui.adminImportMessage.textContent = t("message_export_failed");
         return;
       }
       const text = await res.text();
@@ -2441,7 +3911,7 @@
     }
 
     async function openStudio() {
-      ui.statsSummary.textContent = "Loading...";
+      ui.statsSummary.textContent = t("message_loading_stats");
       ui.artistStats.innerHTML = "";
       ui.manageList.innerHTML = "";
       ui.profileMessage.textContent = "";
@@ -2457,23 +3927,34 @@
         if (statsData.totals.users) {
           ui.statsSummary.textContent =
             statsData.totals.videos +
-            " videos · " +
+            " " +
+            t("label_videos") +
+            " · " +
             statsData.totals.views +
-            " views · " +
+            " " +
+            t("label_views") +
+            " · " +
             statsData.totals.artists +
-            " artists";
+            " " +
+            t("label_artists");
         } else {
           ui.statsSummary.textContent =
-            statsData.totals.videos + " videos · " + statsData.totals.views + " views";
+            statsData.totals.videos +
+            " " +
+            t("label_videos") +
+            " · " +
+            statsData.totals.views +
+            " " +
+            t("label_views");
         }
       } else {
-        ui.statsSummary.textContent = "Stats unavailable.";
+        ui.statsSummary.textContent = t("message_stats_unavailable");
       }
 
       if (statsData.artists && statsData.artists.length) {
         const title = document.createElement("div");
         title.className = "card-meta";
-        title.textContent = "Artist stats";
+        title.textContent = t("label_artist_stats");
         ui.artistStats.appendChild(title);
         statsData.artists.forEach((artist) => {
           const row = document.createElement("div");
@@ -2484,9 +3965,13 @@
             escapeHtml(artist.email) +
             "</div><div class=\"card-meta\">" +
             escapeHtml(artist.videos) +
-            " videos · " +
+            " " +
+            t("label_videos") +
+            " · " +
             escapeHtml(artist.views) +
-            " views</div></div>";
+            " " +
+            t("label_views") +
+            "</div></div>";
           ui.artistStats.appendChild(row);
         });
       }
@@ -2496,7 +3981,8 @@
       if (videosRes.ok && videosData.videos && videosData.videos.length) {
         const title = document.createElement("div");
         title.className = "card-meta";
-        title.textContent = currentUser && currentUser.role === "admin" ? "All videos" : "Your videos";
+        title.textContent =
+          currentUser && currentUser.role === "admin" ? t("label_all_videos") : t("label_your_videos");
         ui.manageList.appendChild(title);
         videosData.videos.forEach((video) => {
           const row = document.createElement("div");
@@ -2504,7 +3990,7 @@
           const button = document.createElement("button");
           button.type = "button";
           button.className = "ghost";
-          button.textContent = "Delete";
+          button.textContent = t("action_delete");
           button.addEventListener("click", async () => {
             const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
             if (res.ok) {
@@ -2520,12 +4006,14 @@
             escapeHtml(video.channel || "") +
             " · " +
             escapeHtml(video.views || 0) +
-            " views</div></div>";
+            " " +
+            t("label_views") +
+            "</div></div>";
           row.appendChild(button);
           ui.manageList.appendChild(row);
         });
       } else {
-        ui.manageList.textContent = "No videos yet.";
+        ui.manageList.textContent = t("message_no_videos");
       }
       openModal(ui.studioModal);
     }
@@ -2534,7 +4022,7 @@
       const res = await apiFetch("/api/profile");
       const data = await res.json();
       if (!res.ok) {
-        ui.profileMessage.textContent = data.error || "Unable to load profile.";
+        ui.profileMessage.textContent = data.error || t("message_profile_load_failed");
         return;
       }
       ui.profileName.value = data.profile?.display_name || "";
@@ -2555,16 +4043,16 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.profileMessage.textContent = data.error || "Unable to save profile.";
+        ui.profileMessage.textContent = data.error || t("message_profile_save_failed");
         return;
       }
-      ui.profileMessage.textContent = "Profile saved.";
+      ui.profileMessage.textContent = t("message_profile_saved");
       fetchChannels();
     }
 
     async function openSettings() {
       if (!currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       if (currentUser.plan !== "pro" || currentUser.role !== "user") {
@@ -2572,7 +4060,7 @@
       }
       ui.settingsMessage.textContent = "";
       ui.settingsForm.reset();
-      ui.historyList.innerHTML = "Loading...";
+      ui.historyList.innerHTML = t("status_loading");
       settingsSelectedTopics = new Set();
       const res = await apiFetch("/api/settings");
       const data = await res.json();
@@ -2620,7 +4108,7 @@
       if (!filtered.length) {
         const empty = document.createElement("div");
         empty.className = "card-meta";
-        empty.textContent = "No topics found.";
+        empty.textContent = t("message_no_topics");
         ui.settingsTopics.appendChild(empty);
         return;
       }
@@ -2649,11 +4137,11 @@
       const data = await res.json();
       ui.historyList.innerHTML = "";
       if (!res.ok) {
-        ui.historyList.textContent = data.error || "History unavailable.";
+        ui.historyList.textContent = data.error || t("message_history_unavailable");
         return;
       }
       if (!data.history || !data.history.length) {
-        ui.historyList.textContent = "No watches today.";
+        ui.historyList.textContent = t("message_no_history");
         return;
       }
       data.history.forEach((item) => {
@@ -2676,12 +4164,12 @@
       event.preventDefault();
       ui.settingsMessage.textContent = "";
       if (!firebaseUser) {
-        ui.settingsMessage.textContent = "Sign in first.";
+        ui.settingsMessage.textContent = t("message_sign_in_first");
         return;
       }
       const password = document.getElementById("settings-password").value;
       if (!password) {
-        ui.settingsMessage.textContent = "Password required.";
+        ui.settingsMessage.textContent = t("message_password_required");
         return;
       }
       try {
@@ -2689,7 +4177,7 @@
         await firebaseUser.reauthenticateWithCredential(credential);
         token = await firebaseUser.getIdToken(true);
       } catch (err) {
-        ui.settingsMessage.textContent = err.message || "Password check failed.";
+        ui.settingsMessage.textContent = err.message || t("message_password_check_failed");
         return;
       }
       const languages = Array.from(
@@ -2708,7 +4196,7 @@
       });
       if (!res.ok) {
         const data = await res.json();
-        ui.settingsMessage.textContent = data.error || "Unable to save settings.";
+        ui.settingsMessage.textContent = data.error || t("message_settings_save_failed");
         return;
       }
       closeModal(ui.settingsModal);
@@ -2717,7 +4205,7 @@
 
     function openReport() {
       if (!currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       ui.reportMessage.textContent = "";
@@ -2728,12 +4216,12 @@
     async function submitReport(event) {
       event.preventDefault();
       if (!currentVideo) {
-        ui.reportMessage.textContent = "No video selected.";
+        ui.reportMessage.textContent = t("message_no_video_selected");
         return;
       }
       const reason = document.getElementById("report-reason").value.trim();
       if (reason.length < 5) {
-        ui.reportMessage.textContent = "Reason must be at least 5 characters.";
+        ui.reportMessage.textContent = t("message_reason_short");
         return;
       }
       const res = await apiFetch("/api/reports", {
@@ -2743,24 +4231,24 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.reportMessage.textContent = data.error || "Report failed.";
+        ui.reportMessage.textContent = data.error || t("message_report_failed");
         return;
       }
-      ui.reportMessage.textContent = "Report submitted. Thank you!";
+      ui.reportMessage.textContent = t("message_report_thanks");
       setTimeout(() => closeModal(ui.reportModal), 900);
     }
 
     async function openNotifications() {
       if (!currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
-      ui.notificationsList.innerHTML = "Loading...";
+      ui.notificationsList.innerHTML = t("status_loading");
       const res = await apiFetch("/api/notifications");
       const data = await res.json();
       ui.notificationsList.innerHTML = "";
       if (!res.ok || !data.notifications || !data.notifications.length) {
-        ui.notificationsList.textContent = "No updates yet.";
+        ui.notificationsList.textContent = t("message_no_updates");
         openModal(ui.notificationsModal);
         return;
       }
@@ -2769,7 +4257,9 @@
         row.className = "channel";
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
-          "<div><div class=\"channel-name\">Update</div><div class=\"card-meta\">" +
+          "<div><div class=\"channel-name\">" +
+          t("label_update") +
+          "</div><div class=\"card-meta\">" +
           escapeHtml(note.message) +
           "</div></div>";
         const actions = document.createElement("div");
@@ -2777,7 +4267,7 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "pill";
-        button.textContent = note.read_at ? "Read" : "Mark read";
+        button.textContent = note.read_at ? t("label_read") : t("action_mark_read");
         button.disabled = Boolean(note.read_at);
         button.addEventListener("click", async () => {
           await apiFetch("/api/notifications/" + note.id + "/read", { method: "POST" });
@@ -2815,11 +4305,12 @@
 
     function onPlayerReady() {
       isPlayerReady = true;
-      updateStatus("Ready");
+      updateStatus("status_ready");
       setOverlayState(false, true, false);
       attemptAutoplay();
       syncControlLabels();
       startTicker();
+      setCaptions();
       if (videos.length) {
         loadVideo(0);
       }
@@ -2827,7 +4318,7 @@
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED) {
-        updateStatus("Ended");
+        updateStatus("status_ended");
         if (autoNextEnabled) {
           loadNextVideo();
         } else {
@@ -2835,17 +4326,17 @@
         }
       } else if (event.data === YT.PlayerState.PLAYING) {
         setOverlayState(false, false, false);
-        updateStatus("Playing");
+        updateStatus("status_playing");
       } else if (event.data === YT.PlayerState.PAUSED) {
-        updateStatus("Paused");
+        updateStatus("status_paused");
       } else if (event.data === YT.PlayerState.BUFFERING) {
-        updateStatus("Buffering");
+        updateStatus("status_buffering");
       }
       syncControlLabels();
     }
 
     function onPlayerError() {
-      updateStatus("Playback error");
+      updateStatus("status_error");
       setOverlayState(false, false, false);
     }
 
@@ -2938,6 +4429,33 @@
       player.setPlaybackQuality(value);
     }
 
+    function setCaptions() {
+      if (!player) {
+        return;
+      }
+      const value = ui.captionSelect ? ui.captionSelect.value : "off";
+      if (value === "off") {
+        if (player.unloadModule) {
+          player.unloadModule("captions");
+        }
+        return;
+      }
+      const languageMap = {
+        english: "en",
+        russian: "ru",
+        chinese: "zh",
+        turkish: "tr",
+        azerbaijani: "az",
+        arabic: "ar"
+      };
+      if (player.loadModule) {
+        player.loadModule("captions");
+      }
+      if (player.setOption) {
+        player.setOption("captions", "track", { languageCode: languageMap[value] || "en" });
+      }
+    }
+
     function seekBy(seconds) {
       if (!player || !player.getCurrentTime || !player.seekTo) {
         return;
@@ -2951,7 +4469,7 @@
 
     async function toggleHeart() {
       if (!currentUser) {
-        lockApp("Please sign in to continue.");
+        lockApp(t("message_sign_in"));
         return;
       }
       if (!currentVideo) {
@@ -2972,6 +4490,7 @@
       event.preventDefault();
       showChannelView(false);
       fetchVideos(ui.searchInput.value.trim(), true);
+      ui.feedView.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
     ui.themeToggle.addEventListener("click", () => {
@@ -2999,7 +4518,7 @@
       toggleSubscription(currentChannel.id);
     });
 
-    ui.authOpen.addEventListener("click", () => lockApp("Please sign in to continue."));
+    ui.authOpen.addEventListener("click", () => lockApp(t("message_sign_in")));
     ui.authLogout.addEventListener("click", openSignout);
     ui.uploadOpen.addEventListener("click", () => openModal(ui.uploadModal));
     ui.adminOpen.addEventListener("click", openAdmin);
@@ -3026,6 +4545,15 @@
     ui.autoNextToggle.addEventListener("click", toggleAutoNext);
     ui.controlsFullscreen.addEventListener("click", toggleFullscreen);
     ui.qualitySelect.addEventListener("change", setQuality);
+    if (ui.captionSelect) {
+      ui.captionSelect.addEventListener("change", setCaptions);
+    }
+    if (ui.uiLanguage) {
+      ui.uiLanguage.addEventListener("change", (event) => setUiLanguage(event.target.value));
+    }
+    if (ui.forgotPassword) {
+      ui.forgotPassword.addEventListener("click", sendPasswordReset);
+    }
     ui.controlsSeekBack.addEventListener("click", () => seekBy(-30));
     ui.controlsSeekForward.addEventListener("click", () => seekBy(30));
     ui.controlsHeart.addEventListener("click", toggleHeart);
@@ -3059,10 +4587,10 @@
 
     document.addEventListener("fullscreenchange", updateFullscreenButton);
 
+    setUiLanguage(getUiLanguage());
     const storedTheme = localStorage.getItem("theme") || "light";
     setTheme(storedTheme);
     setView("default");
-    initControlIcons();
     updateFullscreenButton();
 
     ui.loadMore.addEventListener("click", () => {
@@ -3071,7 +4599,7 @@
       }
     });
 
-    lockApp("Please sign in to continue.");
+    lockApp(t("message_sign_in"));
     initFirebase();
 
     function onYouTubeIframeAPIReady() {

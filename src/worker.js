@@ -48,7 +48,21 @@ function normalizeLanguages(input) {
   if (Array.isArray(input)) {
     return input.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
   }
-  return [];
+  const raw = String(input).trim();
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+      }
+    } catch (err) {
+      // Fall through to delimiter parsing.
+    }
+  }
+  return raw
+    .split(/[|,]/g)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 function parseCsv(text) {
@@ -502,8 +516,14 @@ export default {
         binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
       }
       if (allowedLanguages.length) {
-        where += " AND videos.language IN (" + allowedLanguages.map(() => "?").join(",") + ")";
-        binds.push(...allowedLanguages);
+        const list = allowedLanguages.map(() => "?").join(",");
+        where +=
+          " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+          list +
+          ")) OR videos.language IN (" +
+          list +
+          "))";
+        binds.push(...allowedLanguages, ...allowedLanguages);
       }
       if (allowedTopics.length) {
         const inList = allowedTopics.map(() => "?").join(",");
@@ -532,7 +552,8 @@ export default {
       const hasMore = rows.length > limit;
       const videos = rows.slice(0, limit).map((row) => ({
         ...row,
-        topics: row.topics ? JSON.parse(row.topics) : []
+        topics: row.topics ? JSON.parse(row.topics) : [],
+        languages: row.languages ? JSON.parse(row.languages) : []
       }));
       return jsonResponse({ videos, hasMore }, 200, withCors({}, origin));
     }
@@ -571,12 +592,24 @@ export default {
       if (!youtubeId) return jsonResponse({ error: "Valid YouTube URL required." }, 400, withCors({}, origin));
       const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
       const language = (body.language || "unspecified").toLowerCase();
+      const languages = normalizeLanguages(body.languages);
+      const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
       await env.DB.prepare(
-        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
-          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
+          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
       )
-        .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+        .bind(
+          meta.title,
+          youtubeUrl,
+          youtubeId,
+          user.id,
+          meta.duration || 0,
+          language,
+          JSON.stringify(storedLanguages),
+          JSON.stringify(topics),
+          nowIso()
+        )
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -838,18 +871,29 @@ export default {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
       const result = await env.DB.prepare(
-        "SELECT youtube_url, language, topics FROM videos ORDER BY created_at DESC"
+        "SELECT youtube_url, language, languages, topics FROM videos ORDER BY created_at DESC"
       ).all();
       const lines = (result.results || []).map((row) => {
         const safeUrl = String(row.youtube_url || "").replace(/'/g, "''");
         const safeLanguage = String(row.language || "unspecified").replace(/'/g, "''");
+        let languages = safeLanguage ? [safeLanguage] : [];
+        if (row.languages) {
+          try {
+            languages = JSON.parse(row.languages);
+          } catch (err) {
+            languages = safeLanguage ? [safeLanguage] : [];
+          }
+        }
+        const safeLanguages = JSON.stringify(languages).replace(/'/g, "''");
         const topics = row.topics ? JSON.parse(row.topics).join("|") : "";
         const safeTopics = String(topics).replace(/'/g, "''");
         return (
-          "INSERT INTO videos (youtube_url, language, topics) VALUES ('" +
+          "INSERT INTO videos (youtube_url, language, languages, topics) VALUES ('" +
           safeUrl +
           "', '" +
           safeLanguage +
+          "', '" +
+          safeLanguages +
           "', '" +
           safeTopics +
           "');"
@@ -887,13 +931,26 @@ export default {
           continue;
         }
         const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
-        const language = String(row.language || row.lang || "unspecified").toLowerCase();
+        const languages = normalizeLanguages(row.languages || row.language || row.lang);
+        const language =
+          languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
+        const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
         const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
         )
-          .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+          .bind(
+            meta.title,
+            youtubeUrl,
+            youtubeId,
+            user.id,
+            meta.duration || 0,
+            language,
+            JSON.stringify(storedLanguages),
+            JSON.stringify(topics),
+            nowIso()
+          )
           .run();
         inserted.push(result.meta.last_row_id);
       }
@@ -924,13 +981,26 @@ export default {
           continue;
         }
         const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
-        const language = String(row.language || row.lang || "unspecified").toLowerCase();
+        const languages = normalizeLanguages(row.languages || row.language || row.lang);
+        const language =
+          languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
+        const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
         const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)"
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
         )
-          .bind(meta.title, youtubeUrl, youtubeId, user.id, meta.duration || 0, language, JSON.stringify(topics), nowIso())
+          .bind(
+            meta.title,
+            youtubeUrl,
+            youtubeId,
+            user.id,
+            meta.duration || 0,
+            language,
+            JSON.stringify(storedLanguages),
+            JSON.stringify(topics),
+            nowIso()
+          )
           .run();
         inserted.push(result.meta.last_row_id);
       }
