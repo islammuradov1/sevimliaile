@@ -479,7 +479,7 @@
 
     .pill {
       border: 1.5px solid var(--stroke);
-      background: #fff;
+      background: linear-gradient(135deg, var(--bg-alt), var(--bg-soft));
       color: var(--ink);
       border-radius: 999px;
       padding: 8px 12px;
@@ -5343,7 +5343,7 @@
     }
 
     async function fetchChannelsPage(query, reset = false) {
-      if (channelsFetching || !currentUser) {
+      if (channelsFetching) {
         return;
       }
       channelsFetching = true;
@@ -5354,6 +5354,12 @@
         ui.channelsPageList.innerHTML = t("status_loading");
       }
       setPageView("channels");
+      if (!currentUser) {
+        ui.channelsPageList.textContent = t("message_sign_in");
+        ui.channelsLoadMore.style.display = "none";
+        channelsFetching = false;
+        return;
+      }
       const params = new URLSearchParams();
       params.set("limit", "24");
       params.set("offset", String(channelsOffset));
