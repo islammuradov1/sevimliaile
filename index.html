@@ -169,10 +169,10 @@
       grid-template-columns: auto 1fr auto;
       gap: 16px;
       align-items: center;
-      padding: 18px clamp(16px, 3vw, 32px);
-      background: rgba(255, 255, 255, 0.88);
+      padding: 12px clamp(16px, 3vw, 32px);
+      background: rgba(255, 255, 255, 0.95);
       border-bottom: 2px solid var(--stroke);
-      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      border-radius: 0;
       backdrop-filter: blur(8px);
     }
 
@@ -183,15 +183,15 @@
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-weight: 700;
       letter-spacing: 0.03em;
     }
 
     .logo-image {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       object-fit: contain;
       background: #fff6d1;
       border: 2px solid var(--stroke);
@@ -215,6 +215,9 @@
       padding: 8px 10px;
       border-radius: 999px;
       box-shadow: 0 10px 20px rgba(255, 210, 111, 0.15);
+      max-width: 640px;
+      width: 100%;
+      justify-self: center;
     }
 
     .search input {
@@ -251,6 +254,7 @@
       gap: 12px;
       align-items: center;
       flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .admin-nav {
@@ -296,9 +300,10 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
+      grid-template-columns: 240px minmax(0, 1fr);
       gap: 24px;
-      padding: 24px clamp(16px, 3vw, 32px) 220px;
+      padding: 16px clamp(16px, 3vw, 32px) 200px;
+      align-items: start;
     }
 
     body[data-view="search"] .layout,
@@ -368,13 +373,17 @@
       display: grid;
       gap: 16px;
       align-content: start;
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 120px);
+      overflow: auto;
     }
 
     .sidebar-section {
       background: var(--bg-alt);
       border: 2px solid var(--stroke);
       border-radius: var(--radius-md);
-      padding: 16px;
+      padding: 12px;
       box-shadow: var(--shadow);
     }
 
@@ -435,6 +444,9 @@
     main {
       display: grid;
       gap: 24px;
+      max-width: 1280px;
+      width: 100%;
+      justify-self: center;
     }
 
     .section-head {
@@ -447,7 +459,8 @@
     .section-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .section-hint,
@@ -492,6 +505,8 @@
       padding: 12px;
       display: grid;
       gap: 14px;
+      max-width: 1280px;
+      margin: 0 auto;
       transition: transform 0.3s ease, width 0.3s ease;
       position: relative;
     }
@@ -1138,6 +1153,15 @@
       .top-actions {
         justify-content: flex-start;
         gap: 8px;
+      }
+
+      aside {
+        display: none;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+        padding-bottom: 240px;
       }
 
       .admin-nav {
