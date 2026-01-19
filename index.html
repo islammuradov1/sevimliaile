@@ -1405,6 +1405,59 @@
       gap: 14px;
     }
 
+    .settings-card {
+      width: min(960px, 96vw);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 243, 233, 0.95));
+      border: 1.5px solid var(--stroke);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    body[data-theme="dark"] .settings-card {
+      background: linear-gradient(135deg, #1c1734, #0f0c1f);
+      border-color: #2d2746;
+    }
+
+    .settings-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      gap: 18px;
+    }
+
+    .settings-main,
+    .settings-side {
+      display: grid;
+      gap: 12px;
+    }
+
+    .settings-chips,
+    .settings-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .settings-chips .pill,
+    .settings-pills .pill {
+      padding: 8px 12px;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .settings-section {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px dashed var(--stroke);
+      border-radius: var(--radius-md);
+      background: var(--bg-soft);
+    }
+
+    @media (max-width: 840px) {
+      .settings-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .admin-modal {
       width: min(960px, 100%);
       max-height: 90vh;
@@ -2293,45 +2346,61 @@
   </div>
 
   <div class="modal" id="settings-modal" aria-hidden="true">
-    <div class="modal-card">
-      <h2 data-i18n="settings_title">Parent settings</h2>
-      <form class="form-grid" id="settings-form">
-        <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
-        <label><input type="checkbox" name="settings-language" value="english"> <span data-i18n="lang_english">English</span></label>
-        <label><input type="checkbox" name="settings-language" value="russian"> <span data-i18n="lang_russian">Russian</span></label>
-        <label><input type="checkbox" name="settings-language" value="chinese"> <span data-i18n="lang_chinese">Chinese</span></label>
-        <label><input type="checkbox" name="settings-language" value="azerbaijani"> <span data-i18n="lang_azerbaijani">Azerbaijani</span></label>
-        <label><input type="checkbox" name="settings-language" value="turkish"> <span data-i18n="lang_turkish">Turkish</span></label>
-        <label><input type="checkbox" name="settings-language" value="arabic"> <span data-i18n="lang_arabic">Arabic</span></label>
-        <div class="card-meta" data-i18n="settings_topics">Topics to control</div>
-        <label><input type="radio" name="topic-mode" value="allow" checked> <span data-i18n="settings_topic_allow">Allow only selected</span></label>
-        <label><input type="radio" name="topic-mode" value="block"> <span data-i18n="settings_topic_block">Hide selected</span></label>
-        <label for="topic-search" data-i18n="settings_topic_search">Find topic</label>
-        <input id="topic-search" name="topic-search" type="search" placeholder="Search topics" data-i18n-placeholder="settings_topic_placeholder">
-        <div id="settings-topics" class="form-grid topic-list"></div>
-        <div class="card-meta" data-i18n="settings_channels">Channels to control</div>
-        <label><input type="radio" name="channel-mode" value="allow" checked> <span data-i18n="settings_channel_allow">Allow only selected</span></label>
-        <label><input type="radio" name="channel-mode" value="block"> <span data-i18n="settings_channel_block">Hide selected</span></label>
-        <label for="channel-search" data-i18n="settings_channel_search">Find channel</label>
-        <input id="channel-search" name="channel-search" type="search" placeholder="Search channels" data-i18n-placeholder="settings_channel_placeholder">
-        <div id="settings-channels" class="form-grid topic-list"></div>
-        <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
-        <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
-        <label for="settings-password" data-i18n="settings_password">Confirm with your password</label>
-        <input id="settings-password" name="settings-password" type="password" autocomplete="current-password" required>
-        <div class="form-actions">
-          <button class="ghost" type="button" data-close="settings-modal" data-i18n="action_close">Close</button>
-          <button class="primary" type="submit" data-i18n="settings_save">Save settings</button>
+    <div class="modal-card settings-card">
+      <div class="settings-layout">
+        <div class="settings-main">
+          <h2 data-i18n="settings_title">Parent settings</h2>
+          <form class="form-grid" id="settings-form">
+            <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
+            <div class="settings-chips">
+              <label class="pill"><input type="checkbox" name="settings-language" value="english"> <span data-i18n="lang_english">English</span></label>
+              <label class="pill"><input type="checkbox" name="settings-language" value="russian"> <span data-i18n="lang_russian">Russian</span></label>
+              <label class="pill"><input type="checkbox" name="settings-language" value="chinese"> <span data-i18n="lang_chinese">Chinese</span></label>
+              <label class="pill"><input type="checkbox" name="settings-language" value="azerbaijani"> <span data-i18n="lang_azerbaijani">Azerbaijani</span></label>
+              <label class="pill"><input type="checkbox" name="settings-language" value="turkish"> <span data-i18n="lang_turkish">Turkish</span></label>
+              <label class="pill"><input type="checkbox" name="settings-language" value="arabic"> <span data-i18n="lang_arabic">Arabic</span></label>
+            </div>
+            <div class="settings-section">
+              <div class="card-meta" data-i18n="settings_topics">Topics to control</div>
+              <div class="settings-pills">
+                <label class="pill"><input type="radio" name="topic-mode" value="allow" checked> <span data-i18n="settings_topic_allow">Allow only selected</span></label>
+                <label class="pill"><input type="radio" name="topic-mode" value="block"> <span data-i18n="settings_topic_block">Hide selected</span></label>
+              </div>
+              <label for="topic-search" data-i18n="settings_topic_search">Find topic</label>
+              <input id="topic-search" name="topic-search" type="search" placeholder="Search topics" data-i18n-placeholder="settings_topic_placeholder">
+              <div id="settings-topics" class="form-grid topic-list"></div>
+            </div>
+            <div class="settings-section">
+              <div class="card-meta" data-i18n="settings_channels">Channels to control</div>
+              <div class="settings-pills">
+                <label class="pill"><input type="radio" name="channel-mode" value="allow" checked> <span data-i18n="settings_channel_allow">Allow only selected</span></label>
+                <label class="pill"><input type="radio" name="channel-mode" value="block"> <span data-i18n="settings_channel_block">Hide selected</span></label>
+              </div>
+              <label for="channel-search" data-i18n="settings_channel_search">Find channel</label>
+              <input id="channel-search" name="channel-search" type="search" placeholder="Search channels" data-i18n-placeholder="settings_channel_placeholder">
+              <div id="settings-channels" class="form-grid topic-list"></div>
+            </div>
+            <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
+            <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
+            <label for="settings-password" data-i18n="settings_password">Confirm with your password</label>
+            <input id="settings-password" name="settings-password" type="password" autocomplete="current-password" required>
+            <div class="form-actions">
+              <button class="ghost" type="button" data-close="settings-modal" data-i18n="action_close">Close</button>
+              <button class="primary" type="submit" data-i18n="settings_save">Save settings</button>
+            </div>
+          </form>
         </div>
-      </form>
-      <div class="card-meta" data-i18n="settings_history">Today's history</div>
-      <div class="form-grid" id="history-list"></div>
-      <div class="card-meta" id="settings-message"></div>
+        <div class="settings-side">
+          <div class="card-meta" data-i18n="settings_history">Today's history</div>
+          <div class="form-grid" id="history-list"></div>
+          <div class="card-meta" id="settings-message"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="modal" id="settings-auth-modal" aria-hidden="true">
-    <div class="modal-card">
+    <div class="modal-card settings-card">
       <h2 data-i18n="settings_unlock_title">Unlock settings</h2>
       <p class="card-meta" data-i18n="settings_unlock_copy">Enter your password to open parent settings.</p>
       <form class="form-grid" id="settings-auth-form">
