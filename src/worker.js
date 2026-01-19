@@ -222,6 +222,44 @@ async function fetchYouTubeMeta(env, youtubeId, youtubeUrl) {
   return { title: title || "Untitled video", duration: duration || 0 };
 }
 
+function safeJsonArray(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+async function loadUserSettings(env, userId) {
+  try {
+    const settings = await env.DB.prepare(
+      "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
+    )
+      .bind(userId)
+      .first();
+    return {
+      allowedLanguages: safeJsonArray(settings?.allowed_languages),
+      allowedTopics: safeJsonArray(settings?.allowed_topics),
+      allowedChannels: safeJsonArray(settings?.allowed_channels),
+      topicMode: settings?.topic_mode || "allow",
+      channelMode: settings?.channel_mode || "allow",
+      maxDailyMinutes: settings?.max_daily_minutes || 0
+    };
+  } catch (err) {
+    return {
+      allowedLanguages: [],
+      allowedTopics: [],
+      allowedChannels: [],
+      topicMode: "allow",
+      channelMode: "allow",
+      maxDailyMinutes: 0
+    };
+  }
+}
+
 async function verifyFirebaseToken(env, token) {
   if (!env.FIREBASE_API_KEY) return null;
   const response = await fetch(
@@ -291,33 +329,34 @@ function requireRole(user, role) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const origin = env.FRONTEND_ORIGIN || "*";
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: withCors({}, origin) });
-    }
-    let path = url.pathname.replace(/^\/api/, "");
-    if (path.length > 1 && path.endsWith("/")) {
-      path = path.slice(0, -1);
-    }
-    const user = await auth(request, env);
-    if (!user) {
-      if (path === "/firebase-config") {
-        if (!env.FIREBASE_API_KEY || !env.FIREBASE_AUTH_DOMAIN || !env.FIREBASE_PROJECT_ID || !env.FIREBASE_APP_ID) {
-          return jsonResponse({ error: "Firebase config missing." }, 500, withCors({}, origin));
-        }
-        return jsonResponse(
-          {
-            apiKey: env.FIREBASE_API_KEY,
-            authDomain: env.FIREBASE_AUTH_DOMAIN,
-            projectId: env.FIREBASE_PROJECT_ID,
-            appId: env.FIREBASE_APP_ID
-          },
-          200,
-          withCors({}, origin)
-        );
+    const origin = request.headers.get("Origin") || env.FRONTEND_ORIGIN || "*";
+    try {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { status: 204, headers: withCors({}, origin) });
       }
-      return jsonResponse({ error: "Unauthorized" }, 401, withCors({}, origin));
-    }
+      let path = url.pathname.replace(/^\/api/, "");
+      if (path.length > 1 && path.endsWith("/")) {
+        path = path.slice(0, -1);
+      }
+      const user = await auth(request, env);
+      if (!user) {
+        if (path === "/firebase-config") {
+          if (!env.FIREBASE_API_KEY || !env.FIREBASE_AUTH_DOMAIN || !env.FIREBASE_PROJECT_ID || !env.FIREBASE_APP_ID) {
+            return jsonResponse({ error: "Firebase config missing." }, 500, withCors({}, origin));
+          }
+          return jsonResponse(
+            {
+              apiKey: env.FIREBASE_API_KEY,
+              authDomain: env.FIREBASE_AUTH_DOMAIN,
+              projectId: env.FIREBASE_PROJECT_ID,
+              appId: env.FIREBASE_APP_ID
+            },
+            200,
+            withCors({}, origin)
+          );
+        }
+        return jsonResponse({ error: "Unauthorized" }, 401, withCors({}, origin));
+      }
 
     if (path === "/me" && request.method === "GET") {
       const current = await env.DB.prepare(
@@ -357,28 +396,16 @@ export default {
       if (user.plan !== "pro") {
         return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
       }
-      const settings = await env.DB.prepare(
-        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
-      )
-        .bind(user.id)
-        .first();
-      const data = settings || {
-        allowed_languages: "[]",
-        allowed_topics: "[]",
-        allowed_channels: "[]",
-        topic_mode: "allow",
-        channel_mode: "allow",
-        max_daily_minutes: 0
-      };
+      const data = await loadUserSettings(env, user.id);
       return jsonResponse(
         {
           settings: {
-            allowed_languages: JSON.parse(data.allowed_languages || "[]"),
-            allowed_topics: JSON.parse(data.allowed_topics || "[]"),
-            allowed_channels: JSON.parse(data.allowed_channels || "[]"),
-            topic_mode: data.topic_mode || "allow",
-            channel_mode: data.channel_mode || "allow",
-            max_daily_minutes: data.max_daily_minutes || 0
+            allowed_languages: data.allowedLanguages,
+            allowed_topics: data.allowedTopics,
+            allowed_channels: data.allowedChannels,
+            topic_mode: data.topicMode,
+            channel_mode: data.channelMode,
+            max_daily_minutes: data.maxDailyMinutes
           }
         },
         200,
@@ -433,13 +460,9 @@ export default {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const showAll = url.searchParams.get("all") === "1";
-      const settings = await env.DB.prepare(
-        "SELECT allowed_channels, channel_mode FROM user_settings WHERE user_id = ?"
-      )
-        .bind(user.id)
-        .first();
-      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
-      const channelMode = settings?.channel_mode || "allow";
+      const settings = await loadUserSettings(env, user.id);
+      const allowedChannels = settings.allowedChannels;
+      const channelMode = settings.channelMode;
       let where = "WHERE users.role = 'artist'";
       const binds = [];
       if (search) {
@@ -488,13 +511,9 @@ export default {
 
     if (path.startsWith("/channels/") && request.method === "GET") {
       const channelId = path.split("/")[2];
-      const settings = await env.DB.prepare(
-        "SELECT allowed_channels, channel_mode FROM user_settings WHERE user_id = ?"
-      )
-        .bind(user.id)
-        .first();
-      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
-      const channelMode = settings?.channel_mode || "allow";
+      const settings = await loadUserSettings(env, user.id);
+      const allowedChannels = settings.allowedChannels;
+      const channelMode = settings.channelMode;
       if (allowedChannels.length) {
         const channelIdNum = parseInt(channelId, 10);
         const isAllowed = allowedChannels.includes(channelIdNum);
@@ -610,16 +629,12 @@ export default {
       const onlySubscribed = url.searchParams.get("subscribed") === "1";
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
-      const settings = await env.DB.prepare(
-        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = ?"
-      )
-        .bind(user.id)
-        .first();
-      const allowedLanguages = settings ? JSON.parse(settings.allowed_languages || "[]") : [];
-      const allowedTopics = settings ? JSON.parse(settings.allowed_topics || "[]") : [];
-      const topicMode = settings?.topic_mode || "allow";
-      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
-      const channelMode = settings?.channel_mode || "allow";
+      const settings = await loadUserSettings(env, user.id);
+      const allowedLanguages = settings.allowedLanguages;
+      const allowedTopics = settings.allowedTopics;
+      const topicMode = settings.topicMode;
+      const allowedChannels = settings.allowedChannels;
+      const channelMode = settings.channelMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (onlySubscribed) {
@@ -683,8 +698,8 @@ export default {
       const hasMore = rows.length > limit;
       const videos = rows.slice(0, limit).map((row) => ({
         ...row,
-        topics: row.topics ? JSON.parse(row.topics) : [],
-        languages: row.languages ? JSON.parse(row.languages) : []
+        topics: safeJsonArray(row.topics),
+        languages: safeJsonArray(row.languages)
       }));
       return jsonResponse({ videos, hasMore }, 200, withCors({}, origin));
     }
@@ -809,12 +824,8 @@ export default {
       const videoId = path.split("/")[2];
       await env.DB.prepare("UPDATE videos SET views = views + 1 WHERE id = ?").bind(videoId).run();
       if (user.plan === "pro") {
-        const settings = await env.DB.prepare(
-          "SELECT max_daily_minutes FROM user_settings WHERE user_id = ?"
-        )
-          .bind(user.id)
-          .first();
-        const maxMinutes = settings?.max_daily_minutes || 0;
+        const settings = await loadUserSettings(env, user.id);
+        const maxMinutes = settings.maxDailyMinutes || 0;
         if (maxMinutes > 0) {
           const now = new Date();
           const start = new Date(now);
@@ -998,16 +1009,12 @@ export default {
 
     if (path === "/viral" && request.method === "GET") {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
-      const settings = await env.DB.prepare(
-        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = ?"
-      )
-        .bind(user.id)
-        .first();
-      const allowedLanguages = settings ? JSON.parse(settings.allowed_languages || "[]") : [];
-      const allowedTopics = settings ? JSON.parse(settings.allowed_topics || "[]") : [];
-      const topicMode = settings?.topic_mode || "allow";
-      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
-      const channelMode = settings?.channel_mode || "allow";
+      const settings = await loadUserSettings(env, user.id);
+      const allowedLanguages = settings.allowedLanguages;
+      const allowedTopics = settings.allowedTopics;
+      const topicMode = settings.topicMode;
+      const allowedChannels = settings.allowedChannels;
+      const channelMode = settings.channelMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (allowedChannels.length) {
@@ -1055,8 +1062,8 @@ export default {
         .all();
       const videos = (result.results || []).map((row) => ({
         ...row,
-        topics: row.topics ? JSON.parse(row.topics) : [],
-        languages: row.languages ? JSON.parse(row.languages) : []
+        topics: safeJsonArray(row.topics),
+        languages: safeJsonArray(row.languages)
       }));
       return jsonResponse({ videos }, 200, withCors({}, origin));
     }
@@ -1244,6 +1251,9 @@ export default {
       return jsonResponse({ inserted: inserted.length, skipped }, 200, withCors({}, origin));
     }
 
-    return jsonResponse({ error: "Not found" }, 404, withCors({}, origin));
+      return jsonResponse({ error: "Not found" }, 404, withCors({}, origin));
+    } catch (err) {
+      return jsonResponse({ error: "Server error." }, 500, withCors({}, origin));
+    }
   }
 };

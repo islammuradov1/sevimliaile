@@ -116,7 +116,7 @@
     .auth-gate {
       display: none;
       place-items: center;
-      padding: 40px 20px;
+      padding: 32px 20px;
       min-height: 100vh;
     }
 
@@ -150,6 +150,10 @@
 
     body.locked header,
     body.locked .layout {
+      display: none;
+    }
+
+    body.locked .app {
       display: none;
     }
 
@@ -337,6 +341,17 @@
       display: none;
     }
 
+    body[data-view="search"] #player-area,
+    body[data-view="channels"] #player-area,
+    body[data-view="admin-overview"] #player-area,
+    body[data-view="admin-users"] #player-area,
+    body[data-view="admin-channels"] #player-area,
+    body[data-view="admin-videos"] #player-area,
+    body[data-view="admin-reports"] #player-area,
+    body[data-view="admin-imports"] #player-area {
+      display: none;
+    }
+
     body[data-view="feed"] #search-view,
     body[data-view="feed"] #channels-page,
     body[data-view="feed"] #admin-overview-page,
@@ -477,6 +492,7 @@
       display: grid;
       gap: 14px;
       transition: transform 0.3s ease, width 0.3s ease;
+      position: relative;
     }
 
     .player-meta {
@@ -514,6 +530,30 @@
       font-size: 1rem;
       padding: 10px 18px;
       border-radius: 999px;
+    }
+
+    .tech-panel-wrap {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .tech-panel {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 2px dashed var(--stroke);
+      background: var(--bg-soft);
+    }
+
+    .tech-panel.collapsed {
+      display: none;
+    }
+
+    .tech-panel .control-row {
+      gap: 6px;
     }
 
     .quality-select {
@@ -1131,6 +1171,11 @@
       .auth-card {
         width: min(92vw, 520px);
       }
+
+      .tech-panel-wrap {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
 
     @media (max-width: 720px) {
@@ -1302,6 +1347,40 @@
             </div>
           </div>
 
+          <div class="tech-panel-wrap">
+            <button class="pill icon-button tech-panel-toggle" id="tech-panel-toggle" type="button" aria-label="Toggle player tools" data-i18n-aria="tech_panel_toggle"></button>
+            <div class="tech-panel" id="tech-panel">
+              <div class="control-row">
+                <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+                <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
+                <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
+                <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
+              </div>
+              <div class="control-row">
+                <select class="quality-select" id="quality-select" aria-label="Playback quality">
+                  <option value="default" data-i18n="quality_auto">Auto</option>
+                  <option value="tiny">144p</option>
+                  <option value="small">240p</option>
+                  <option value="medium">360p</option>
+                  <option value="large">480p</option>
+                  <option value="hd720">720p</option>
+                  <option value="hd1080">1080p</option>
+                  <option value="hd1440">2K</option>
+                  <option value="hd2160">4K</option>
+                </select>
+                <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
+                  <option value="off" data-i18n="captions_off">Captions off</option>
+                  <option value="english" data-i18n="lang_english">English</option>
+                  <option value="russian" data-i18n="lang_russian">Russian</option>
+                  <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+                  <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+                  <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+                  <option value="arabic" data-i18n="lang_arabic">Arabic</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="control-dock" id="control-dock">
             <button class="pill icon-button control-dock-toggle" id="controls-toggle" type="button" aria-label="Hide controls" data-i18n-aria="controls_hide"></button>
             <div class="control-dock-inner" id="control-dock-inner">
@@ -1329,30 +1408,6 @@
                   <div class="control-row control-row--secondary">
                     <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
                     <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
-                    <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
-                    <select class="quality-select" id="quality-select" aria-label="Playback quality">
-                      <option value="default" data-i18n="quality_auto">Auto</option>
-                      <option value="tiny">144p</option>
-                      <option value="small">240p</option>
-                      <option value="medium">360p</option>
-                      <option value="large">480p</option>
-                      <option value="hd720">720p</option>
-                      <option value="hd1080">1080p</option>
-                      <option value="hd1440">2K</option>
-                      <option value="hd2160">4K</option>
-                    </select>
-                    <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
-                      <option value="off" data-i18n="captions_off">Captions off</option>
-                      <option value="english" data-i18n="lang_english">English</option>
-                      <option value="russian" data-i18n="lang_russian">Russian</option>
-                      <option value="chinese" data-i18n="lang_chinese">Chinese</option>
-                      <option value="turkish" data-i18n="lang_turkish">Turkish</option>
-                      <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
-                      <option value="arabic" data-i18n="lang_arabic">Arabic</option>
-                    </select>
-                    <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
-                    <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
-                    <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
                   </div>
                   <div class="control-row control-row--emote">
                     <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
@@ -1865,6 +1920,8 @@
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
       playerArea: document.getElementById("player-area"),
+      techPanelToggle: document.getElementById("tech-panel-toggle"),
+      techPanel: document.getElementById("tech-panel"),
       controlDock: document.getElementById("control-dock"),
       controlsToggle: document.getElementById("controls-toggle"),
       searchForm: document.getElementById("search-form"),
@@ -2127,6 +2184,7 @@
         sidebar_show: "Show sidebar",
         controls_hide: "Hide controls",
         controls_show: "Show controls",
+        tech_panel_toggle: "Toggle player tools",
         search_placeholder: "Search videos and channels",
         ui_language_label: "Language",
         sidebar_subscribed: "Subscribed",
@@ -2400,6 +2458,7 @@
         sidebar_show: "Показать боковую панель",
         controls_hide: "Скрыть управление",
         controls_show: "Показать управление",
+        tech_panel_toggle: "Панель инструментов",
         search_placeholder: "Поиск видео и каналов",
         ui_language_label: "Язык",
         sidebar_subscribed: "Подписки",
@@ -2673,6 +2732,7 @@
         sidebar_show: "显示侧边栏",
         controls_hide: "隐藏控制栏",
         controls_show: "显示控制栏",
+        tech_panel_toggle: "切换播放器工具",
         search_placeholder: "搜索视频和频道",
         ui_language_label: "语言",
         sidebar_subscribed: "已订阅",
@@ -2946,6 +3006,7 @@
         sidebar_show: "Kenar çubuğunu göster",
         controls_hide: "Kontrolleri gizle",
         controls_show: "Kontrolleri göster",
+        tech_panel_toggle: "Oynatıcı araçları",
         search_placeholder: "Videoları ve kanalları ara",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abonelikler",
@@ -3219,6 +3280,7 @@
         sidebar_show: "Yan paneli göstər",
         controls_hide: "İdarələri gizlət",
         controls_show: "İdarələri göstər",
+        tech_panel_toggle: "Pleyer alətləri",
         search_placeholder: "Video və kanalları axtarın",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abunələr",
@@ -3492,6 +3554,7 @@
         sidebar_show: "إظهار الشريط الجانبي",
         controls_hide: "إخفاء عناصر التحكم",
         controls_show: "إظهار عناصر التحكم",
+        tech_panel_toggle: "أدوات المشغل",
         search_placeholder: "ابحث عن الفيديوهات والقنوات",
         ui_language_label: "اللغة",
         sidebar_subscribed: "المشتركات",
@@ -3847,6 +3910,7 @@
       setButtonIcon(ui.controlsToggle, icons.dockHide, "controls_hide");
       setButtonIcon(ui.viewTheater, icons.theater, "control_theater");
       setButtonIcon(ui.viewMini, icons.mini, "control_mini");
+      setButtonIcon(ui.techPanelToggle, icons.settings, "tech_panel_toggle");
       setButtonIcon(ui.uploadOpen, icons.upload, "control_add_video");
       setButtonIcon(ui.adminOpen, icons.admin, "control_admin");
       setButtonIcon(ui.adminVideosOpen, icons.admin, "admin_videos_open");
@@ -3919,6 +3983,7 @@
     let adminChannelsPageFetching = false;
     let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
     let sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    let techPanelCollapsed = localStorage.getItem("techPanelCollapsed") === "true";
     let settingsUnlockedAt = 0;
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
     const PLAYER_RELOAD_TIMEOUT_MS = 12000;
@@ -3964,6 +4029,15 @@
       setButtonIcon(ui.sidebarToggle, icons.bars, sidebarCollapsed ? "sidebar_show" : "sidebar_toggle");
       setButtonIcon(ui.sidebarToggleTab, icons.bars, "sidebar_show");
       localStorage.setItem("sidebarCollapsed", String(sidebarCollapsed));
+    }
+
+    function setTechPanelCollapsed(collapsed) {
+      techPanelCollapsed = Boolean(collapsed);
+      if (ui.techPanel) {
+        ui.techPanel.classList.toggle("collapsed", techPanelCollapsed);
+      }
+      setButtonIcon(ui.techPanelToggle, icons.settings, "tech_panel_toggle");
+      localStorage.setItem("techPanelCollapsed", String(techPanelCollapsed));
     }
 
     function schedulePlayerReload() {
@@ -6542,6 +6616,7 @@
 
     ui.viewTheater.addEventListener("click", () => setView("theater"));
     ui.viewMini.addEventListener("click", () => setView("mini"));
+    ui.techPanelToggle.addEventListener("click", () => setTechPanelCollapsed(!techPanelCollapsed));
     ui.controlsToggle.addEventListener("click", () => setDockCollapsed(!dockCollapsed));
     ui.sidebarToggle.addEventListener("click", () => setSidebarCollapsed(!sidebarCollapsed));
     ui.sidebarToggleTab.addEventListener("click", () => setSidebarCollapsed(false));
@@ -6715,6 +6790,7 @@
     setView("default");
     setDockCollapsed(dockCollapsed);
     setSidebarCollapsed(sidebarCollapsed);
+    setTechPanelCollapsed(techPanelCollapsed);
     updateFullscreenButton();
 
     ui.loadMore.addEventListener("click", () => {
