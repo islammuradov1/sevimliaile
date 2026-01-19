@@ -297,10 +297,17 @@
     }
 
     .top-nav button.active {
-      background: #fff;
+      background: var(--bg-alt);
       color: var(--ink);
       box-shadow: 0 10px 24px rgba(255, 75, 58, 0.18);
       border: 1px solid var(--stroke);
+    }
+
+    body[data-theme="dark"] .top-nav button.active {
+      background: var(--bg-soft);
+      color: var(--ink);
+      box-shadow: 0 10px 24px rgba(79, 201, 255, 0.2);
+      border-color: var(--stroke);
     }
 
     .logo {
@@ -516,7 +523,7 @@
       grid-template-columns: 1fr;
     }
 
-    body[data-view="feed"] aside {
+    body[data-view="feed"] .layout > aside {
       display: none;
     }
 
@@ -531,14 +538,14 @@
       grid-template-columns: 1fr;
     }
 
-    body[data-view="search"] aside,
-    body[data-view="channels"] aside,
-    body[data-view="admin-overview"] aside,
-    body[data-view="admin-users"] aside,
-    body[data-view="admin-channels"] aside,
-    body[data-view="admin-videos"] aside,
-    body[data-view="admin-reports"] aside,
-    body[data-view="admin-imports"] aside {
+    body[data-view="search"] .layout > aside,
+    body[data-view="channels"] .layout > aside,
+    body[data-view="admin-overview"] .layout > aside,
+    body[data-view="admin-users"] .layout > aside,
+    body[data-view="admin-channels"] .layout > aside,
+    body[data-view="admin-videos"] .layout > aside,
+    body[data-view="admin-reports"] .layout > aside,
+    body[data-view="admin-imports"] .layout > aside {
       display: none;
     }
 
@@ -575,6 +582,10 @@
     body[data-view="channels"] .search-row,
     body[data-view="channel"] .search-row {
       display: none;
+    }
+
+    body[data-view="channels"] main > section:not(#channels-page) {
+      display: none !important;
     }
 
     body[data-view="feed"] #search-view,
