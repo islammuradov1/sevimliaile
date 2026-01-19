@@ -81,6 +81,19 @@
       scroll-padding-bottom: 200px;
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(520px at 20% 20%, rgba(255, 163, 102, 0.18), transparent 60%),
+        radial-gradient(420px at 80% 10%, rgba(27, 200, 255, 0.16), transparent 60%),
+        url("logo.png") center center / 420px 420px no-repeat;
+      filter: blur(22px);
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: -1;
+    }
+
     body[data-theme="dark"] {
       background:
         radial-gradient(1200px 720px at 12% 12%, rgba(255, 140, 110, 0.26) 0%, transparent 60%),
@@ -621,7 +634,8 @@
       display: none !important;
     }
 
-    body[data-view="channel"] main > section:not(#channel-view) {
+    body[data-view="channel"] main > section:not(#channel-view),
+    body[data-view="watch"] main > section:not(#channel-view):not(#player-area) {
       display: none !important;
     }
 
@@ -813,13 +827,13 @@
     }
 
     .player-area {
-      background: var(--bg-alt);
-      border: 1.5px solid var(--stroke);
+      background: transparent;
+      border: none;
       border-radius: var(--radius-lg);
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
-      padding: 12px;
+      box-shadow: none;
+      padding: 0;
       display: grid;
-      gap: 14px;
+      gap: 10px;
       width: 100%;
       max-width: 100%;
       margin: 0 auto;
@@ -1204,7 +1218,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 18px;
     }
 
@@ -1361,6 +1375,19 @@
       top: -6px;
       right: -6px;
       font-size: 0.9rem;
+    }
+
+    .fullscreen-exit-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      display: none;
+      box-shadow: var(--shadow);
+    }
+
+    .fullscreen-exit-btn.visible {
+      display: inline-flex;
     }
 
     .icon-button .count {
@@ -1894,6 +1921,12 @@
                 <div class="card-meta" id="next-up"></div>
               </div>
             </div>
+            <button class="pill icon-button fullscreen-exit-btn" id="fullscreen-exit-btn" type="button" aria-label="Exit fullscreen">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 5v2H6v3H4V5h5zm6 0h5v5h-2V7h-3V5zM4 14h2v3h3v2H4v-5zm14 0h2v5h-5v-2h3v-3z"/>
+              </svg>
+              <span>Exit</span>
+            </button>
           </div>
 
           <div class="player-meta">
@@ -2564,6 +2597,7 @@
       channelBack: document.getElementById("channel-back"),
       channelSubscribe: document.getElementById("channel-subscribe"),
       playerHost: document.getElementById("player"),
+      playerShell: document.getElementById("player-shell"),
       videoTitle: document.getElementById("video-title"),
       videoStats: document.getElementById("video-stats"),
       channelAvatar: document.getElementById("channel-avatar"),
@@ -2681,7 +2715,8 @@
       contactModal: document.getElementById("contact-modal"),
       signoutModal: document.getElementById("signout-modal"),
       signoutForm: document.getElementById("signout-form"),
-      signoutMessage: document.getElementById("signout-message")
+      signoutMessage: document.getElementById("signout-message"),
+      fullscreenExitBtn: document.getElementById("fullscreen-exit-btn")
     };
 
     const icons = {
@@ -4529,8 +4564,8 @@
     let token = "";
     let currentUser = null;
     let pageOffset = 0;
-    const pageLimit = 12;
-    const searchLimit = 10;
+    const pageLimit = 32;
+    const searchLimit = 20;
     let hasMore = true;
     let isFetching = false;
     let subscriptions = [];
@@ -4680,6 +4715,7 @@
     function setPageView(view) {
       const showFeed = view === "feed";
       const showChannel = view === "channel";
+      const showWatch = view === "watch";
       const showSearch = view === "search";
       const showChannels = view === "channels";
       const showAdminOverview = view === "admin-overview";
@@ -4732,6 +4768,9 @@
       }
       if (showFeed) {
         updateSearchContext(ui.searchInput.value.trim());
+      }
+      if (showWatch) {
+        updateSearchContext("");
       }
       if (view === "channels") {
         navFocus = "channels";
@@ -4892,6 +4931,9 @@
       );
       document.body.classList.toggle("fullscreen-mode", isFull);
       ui.controlsFullscreen.classList.toggle("fullscreen-exit", isFull);
+      if (ui.fullscreenExitBtn) {
+        ui.fullscreenExitBtn.classList.toggle("visible", isFull);
+      }
     }
 
     function updateStatus(label) {
@@ -4990,8 +5032,9 @@
       if (!videos.length || !player) {
         return;
       }
-      if (document.body.getAttribute("data-view") !== "feed") {
-        navigateTo("/", { replace: true });
+      const currentView = document.body.getAttribute("data-view");
+      if (currentView !== "feed" && currentView !== "watch") {
+        navigateTo("/watch/" + videos[index].id, { replace: true });
       }
       currentIndex = (index + videos.length) % videos.length;
       const video = videos[currentIndex];
@@ -5121,11 +5164,7 @@
           ? t("message_no_subscribed_videos")
           : t("message_no_videos");
       renderVideoGrid(list, ui.recommendations, append, message, (video) => {
-        navigateTo("/", { replace: true });
-        const index = videos.findIndex((item) => item.id === video.id);
-        if (index >= 0) {
-          loadVideo(index);
-        }
+        navigateTo("/watch/" + video.id);
       });
     }
 
@@ -5309,11 +5348,7 @@
         false,
         t("message_no_channel_videos"),
         (video) => {
-          navigateTo("/", { replace: true });
-          const index = videos.findIndex((item) => item.id === video.id);
-          if (index >= 0) {
-            loadVideo(index);
-          }
+          navigateTo("/watch/" + video.id);
         }
       );
       if (videos.length) {
@@ -5430,10 +5465,7 @@
         !reset,
         t("message_no_videos"),
         (video) => {
-          navigateTo("/", { replace: true });
-          videos = [video];
-          currentIndex = 0;
-          loadVideo(0);
+          navigateTo("/watch/" + video.id);
         }
       );
       const searchLoadMoreWrap = ui.searchLoadMore.parentElement;
@@ -5472,7 +5504,7 @@
       }
       videos = [data.video];
       currentIndex = 0;
-      navigateTo("/", { replace: true });
+      setPageView("watch");
       loadVideo(0);
     }
 
@@ -5498,6 +5530,10 @@
       updateNotificationBadge(hasUnread);
     }
 
+    async function openWatch(videoId) {
+      await playVideoById(videoId);
+    }
+
     async function loadSearchFallback() {
       if (!currentUser) {
         return;
@@ -5511,10 +5547,7 @@
       if (recRes.ok) {
         const recData = await recRes.json();
         renderVideoGrid(recData.videos || [], ui.searchFallbackRecommended, false, t("message_no_videos"), (video) => {
-          navigateTo("/", { replace: true });
-          videos = [video];
-          currentIndex = 0;
-          loadVideo(0);
+          navigateTo("/watch/" + video.id);
         });
       } else {
         ui.searchFallbackRecommended.textContent = t("message_no_videos");
@@ -5522,15 +5555,7 @@
       if (viralRes.ok) {
         const viralData = await viralRes.json();
         renderVideoGrid(viralData.videos || [], ui.searchFallbackViral, false, t("message_no_viral"), (video) => {
-          navigateTo("/", { replace: true });
-          const index = videos.findIndex((item) => item.id === video.id);
-          if (index >= 0) {
-            loadVideo(index);
-          } else {
-            videos = [video];
-            currentIndex = 0;
-            loadVideo(0);
-          }
+          navigateTo("/watch/" + video.id);
         });
       } else {
         ui.searchFallbackViral.textContent = t("message_no_viral");
@@ -7364,6 +7389,12 @@
     if (ui.settingsBar) {
       ui.settingsBar.addEventListener("click", openSettings);
     }
+    if (ui.playerShell) {
+      ui.playerShell.addEventListener("dblclick", togglePlay);
+    }
+    if (ui.fullscreenExitBtn) {
+      ui.fullscreenExitBtn.addEventListener("click", toggleFullscreen);
+    }
 
     ui.themeToggle.addEventListener("click", () => {
       const current = document.body.getAttribute("data-theme") || "light";
@@ -7683,6 +7714,14 @@
         const channelId = parts[1];
         if (channelId) {
           openChannel(channelId, true);
+          return;
+        }
+      }
+      if (path.startsWith("/watch/")) {
+        const parts = path.split("/").filter(Boolean);
+        const videoId = parts[1];
+        if (videoId) {
+          openWatch(videoId);
           return;
         }
       }

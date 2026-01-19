@@ -128,6 +128,8 @@ async function initDb() {
       allowed_languages TEXT[],
       allowed_topics TEXT[],
       topic_mode TEXT NOT NULL DEFAULT 'allow',
+      allowed_channels INTEGER[],
+      channel_mode TEXT NOT NULL DEFAULT 'allow',
       max_daily_minutes INTEGER NOT NULL DEFAULT 0,
       updated_at TIMESTAMPTZ NOT NULL
     );
@@ -158,6 +160,8 @@ async function initDb() {
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS language TEXT");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS topics TEXT[]");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS topic_mode TEXT NOT NULL DEFAULT 'allow'");
+  await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS allowed_channels INTEGER[]");
+  await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS channel_mode TEXT NOT NULL DEFAULT 'allow'");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS max_daily_minutes INTEGER NOT NULL DEFAULT 0");
   await pool.query("ALTER TABLE view_history ADD COLUMN IF NOT EXISTS watch_seconds INTEGER NOT NULL DEFAULT 0");
 }
@@ -542,20 +546,33 @@ app.post("/api/settings", auth, requireRecentAuth(), async (req, res) => {
   if (req.user.plan !== "pro") {
     return res.status(403).json({ error: "Settings available on pro plan only." });
   }
-  const { languages, topics, topicMode, maxDailyMinutes } = req.body || {};
+  const { languages, topics, channels, topicMode, channelMode, maxDailyMinutes } = req.body || {};
   const finalLanguages = Array.isArray(languages)
     ? languages.map((lang) => String(lang).trim().toLowerCase()).filter(Boolean)
     : [];
   const finalTopics = Array.isArray(topics)
     ? topics.map((topic) => String(topic).trim().toLowerCase()).filter(Boolean)
     : [];
+  const finalChannels = Array.isArray(channels)
+    ? channels.map((id) => parseInt(id, 10)).filter((id) => Number.isFinite(id))
+    : [];
   const finalTopicMode = topicMode === "block" ? "block" : "allow";
+  const finalChannelMode = channelMode === "block" ? "block" : "allow";
   const finalMaxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(maxDailyMinutes || "0", 10)));
   await pool.query(
-    "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, topic_mode, max_daily_minutes, updated_at) " +
-      "VALUES ($1, $2, $3, $4, $5, $6) " +
-      "ON CONFLICT (user_id) DO UPDATE SET allowed_languages = $2, allowed_topics = $3, topic_mode = $4, max_daily_minutes = $5, updated_at = $6",
-    [req.user.id, finalLanguages, finalTopics, finalTopicMode, finalMaxDailyMinutes, nowIso()]
+    "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes, updated_at) " +
+      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) " +
+      "ON CONFLICT (user_id) DO UPDATE SET allowed_languages = $2, allowed_topics = $3, allowed_channels = $4, topic_mode = $5, channel_mode = $6, max_daily_minutes = $7, updated_at = $8",
+    [
+      req.user.id,
+      finalLanguages,
+      finalTopics,
+      finalChannels,
+      finalTopicMode,
+      finalChannelMode,
+      finalMaxDailyMinutes,
+      nowIso()
+    ]
   );
   res.json({ success: true });
 });
@@ -690,12 +707,14 @@ app.get("/api/videos", auth, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit || "30", 10), 100);
   const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
   const settingsResult = await pool.query(
-    "SELECT allowed_languages, allowed_topics, topic_mode FROM user_settings WHERE user_id = $1",
+    "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = $1",
     [req.user.id]
   );
   const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
   const allowedTopics = settingsResult.rows[0]?.allowed_topics || [];
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
+  const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
+  const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
   const params = [];
   let where = "WHERE videos.youtube_id IS NOT NULL";
   if (onlySubscribed) {
@@ -725,6 +744,14 @@ app.get("/api/videos", auth, async (req, res) => {
       where += " AND COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length;
     }
   }
+  if (allowedChannels.length) {
+    params.push(allowedChannels);
+    if (channelMode === "block") {
+      where += " AND videos.owner_id <> ALL($" + params.length + ")";
+    } else {
+      where += " AND videos.owner_id = ANY($" + params.length + ")";
+    }
+  }
   const limitParam = params.length + 1;
   const offsetParam = params.length + 2;
   const likedParam = params.length + 3;
@@ -748,12 +775,45 @@ app.get("/api/videos", auth, async (req, res) => {
 });
 
 app.get("/api/videos/:id", auth, async (req, res) => {
+  const settingsResult = await pool.query(
+    "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = $1",
+    [req.user.id]
+  );
+  const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
+  const allowedTopics = settingsResult.rows[0]?.allowed_topics || [];
+  const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
+  const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
+  const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
   const result = await pool.query(
     "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = $1 AND videos.youtube_id IS NOT NULL",
     [req.params.id]
   );
   if (result.rowCount === 0) {
     return res.status(404).json({ error: "Video not found." });
+  }
+  const video = result.rows[0];
+  if (allowedLanguages.length && !allowedLanguages.includes((video.language || "").toLowerCase())) {
+    return res.status(403).json({ error: "Blocked by language settings." });
+  }
+  if (allowedChannels.length) {
+    const isAllowedChannel = allowedChannels.includes(Number(video.owner_id));
+    if (channelMode === "allow" && !isAllowedChannel) {
+      return res.status(403).json({ error: "Blocked by channel settings." });
+    }
+    if (channelMode === "block" && isAllowedChannel) {
+      return res.status(403).json({ error: "Blocked by channel settings." });
+    }
+  }
+  if (allowedTopics.length) {
+    const hasTopic = (video.topics || []).some((topic) =>
+      allowedTopics.includes(String(topic || "").toLowerCase())
+    );
+    if (topicMode === "allow" && !hasTopic) {
+      return res.status(403).json({ error: "Blocked by topic settings." });
+    }
+    if (topicMode === "block" && hasTopic) {
+      return res.status(403).json({ error: "Blocked by topic settings." });
+    }
   }
   res.json({ video: result.rows[0] });
 });
