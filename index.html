@@ -23,6 +23,7 @@
       --radius-lg: 32px;
       --radius-md: 22px;
       --radius-sm: 16px;
+      --drawer-width: 320px;
       --font-base: "Baloo 2", "Comic Neue", "Comic Sans MS", system-ui, sans-serif;
       --font-title: "Fredoka", "Baloo 2", system-ui, sans-serif;
       --font-accent: "Bubblegum Sans", "Baloo 2", system-ui, sans-serif;
@@ -190,6 +191,67 @@
       margin: 0 auto;
     }
 
+    .drawer-toggle {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+      color: #1c1a2a;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 25;
+    }
+
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .action-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(var(--drawer-width), 90vw);
+      height: 100vh;
+      background: var(--bg-alt);
+      border-left: 1.5px solid var(--stroke);
+      box-shadow: -12px 0 30px rgba(0, 0, 0, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 30;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .action-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--stroke);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .drawer-scroll {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
     .topbar-left {
       display: flex;
       align-items: center;
@@ -206,11 +268,10 @@
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       justify-content: flex-end;
-      flex-direction: column;
-      align-items: flex-end;
-      min-width: 320px;
+      flex-direction: row;
+      min-width: 160px;
     }
 
     .top-nav {
@@ -338,7 +399,9 @@
       gap: 10px;
       align-items: center;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      align-items: stretch;
+      width: 100%;
     }
 
     .search-hint {
@@ -1521,47 +1584,63 @@
         </div>
         <div class="topbar-center"></div>
         <div class="topbar-right">
-          <div class="account-chip" id="account-chip" aria-live="polite">
-            <div class="account-avatar" id="account-avatar">K</div>
-            <div class="account-meta">
-              <div class="account-name" id="account-name">Guest</div>
-              <div class="account-plan" id="account-plan">Not signed in</div>
-            </div>
-          </div>
-          <div class="top-actions">
-            <div class="lang-select">
-              <label class="sr-only" for="ui-language" data-i18n="ui_language_label">Language</label>
-              <select id="ui-language" name="ui-language" aria-label="App language" data-i18n-aria="ui_language_label">
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-                <option value="zh">中文</option>
-                <option value="tr">Türkçe</option>
-                <option value="az">Azərbaycan</option>
-                <option value="ar">العربية</option>
-              </select>
-            </div>
-            <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
-            <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
-            <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
-            <div class="admin-nav" id="admin-nav">
-              <button class="pill icon-button" id="admin-overview-open" type="button" aria-label="Admin overview" data-i18n-aria="admin_overview"></button>
-              <button class="pill icon-button" id="admin-users-open" type="button" aria-label="Admin users" data-i18n-aria="admin_users"></button>
-              <button class="pill icon-button" id="admin-channels-open" type="button" aria-label="Admin channels" data-i18n-aria="admin_channels"></button>
-              <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
-              <button class="pill icon-button" id="admin-reports-open" type="button" aria-label="Admin reports" data-i18n-aria="admin_reports"></button>
-              <button class="pill icon-button" id="admin-imports-open" type="button" aria-label="Admin imports" data-i18n-aria="admin_imports"></button>
-            </div>
-            <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
-            <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
-            <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
-            <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
-            <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
-            <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
-            <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
-          </div>
+          <button class="pill icon-button drawer-toggle" id="drawer-toggle" type="button" aria-expanded="false" aria-controls="action-drawer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+            <span>Menu</span>
+          </button>
         </div>
       </div>
     </header>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <aside class="action-drawer" id="action-drawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div class="account-chip" id="account-chip" aria-live="polite">
+          <div class="account-avatar" id="account-avatar">K</div>
+          <div class="account-meta">
+            <div class="account-name" id="account-name">Guest</div>
+            <div class="account-plan" id="account-plan">Not signed in</div>
+          </div>
+        </div>
+        <button class="pill icon-button" id="drawer-close" type="button" aria-label="Close menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 6 6 18m0-12 12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="drawer-scroll">
+        <div class="lang-select">
+          <label class="sr-only" for="ui-language" data-i18n="ui_language_label">Language</label>
+          <select id="ui-language" name="ui-language" aria-label="App language" data-i18n-aria="ui_language_label">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+            <option value="tr">Türkçe</option>
+            <option value="az">Azərbaycan</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+        <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
+        <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
+        <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
+        <div class="admin-nav" id="admin-nav">
+          <button class="pill icon-button" id="admin-overview-open" type="button" aria-label="Admin overview" data-i18n-aria="admin_overview"></button>
+          <button class="pill icon-button" id="admin-users-open" type="button" aria-label="Admin users" data-i18n-aria="admin_users"></button>
+          <button class="pill icon-button" id="admin-channels-open" type="button" aria-label="Admin channels" data-i18n-aria="admin_channels"></button>
+          <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
+          <button class="pill icon-button" id="admin-reports-open" type="button" aria-label="Admin reports" data-i18n-aria="admin_reports"></button>
+          <button class="pill icon-button" id="admin-imports-open" type="button" aria-label="Admin imports" data-i18n-aria="admin_imports"></button>
+        </div>
+        <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
+        <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
+        <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
+        <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
+        <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
+        <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
+        <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
+      </div>
+    </aside>
     <div class="search-row">
       <form class="search" id="search-form" role="search">
         <label class="sr-only" for="search-input" data-i18n="search_label">Search</label>
@@ -2246,6 +2325,10 @@
       heroIdentity: document.getElementById("hero-identity"),
       heroPlay: document.getElementById("hero-play"),
       heroChannels: document.getElementById("hero-channels"),
+      drawerToggle: document.getElementById("drawer-toggle"),
+      drawerClose: document.getElementById("drawer-close"),
+      actionDrawer: document.getElementById("action-drawer"),
+      drawerOverlay: document.getElementById("drawer-overlay"),
       themeToggle: document.getElementById("theme-toggle"),
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
@@ -4358,6 +4441,31 @@
       }
       setButtonIcon(ui.techPanelToggle, icons.settings, "tech_panel_toggle");
       localStorage.setItem("techPanelCollapsed", String(techPanelCollapsed));
+    }
+
+    function openDrawer() {
+      if (!ui.actionDrawer || !ui.drawerOverlay || !ui.drawerToggle) return;
+      ui.actionDrawer.classList.add("open");
+      ui.actionDrawer.setAttribute("aria-hidden", "false");
+      ui.drawerOverlay.classList.add("active");
+      ui.drawerToggle.setAttribute("aria-expanded", "true");
+    }
+
+    function closeDrawer() {
+      if (!ui.actionDrawer || !ui.drawerOverlay || !ui.drawerToggle) return;
+      ui.actionDrawer.classList.remove("open");
+      ui.actionDrawer.setAttribute("aria-hidden", "true");
+      ui.drawerOverlay.classList.remove("active");
+      ui.drawerToggle.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleDrawer() {
+      if (!ui.actionDrawer) return;
+      if (ui.actionDrawer.classList.contains("open")) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
     }
 
     function setPrimaryNav(view) {
@@ -6973,6 +7081,16 @@
       const path = query ? "/search?q=" + encodeURIComponent(query) : "/search";
       navigateTo(path);
     });
+
+    if (ui.drawerToggle) {
+      ui.drawerToggle.addEventListener("click", toggleDrawer);
+    }
+    if (ui.drawerClose) {
+      ui.drawerClose.addEventListener("click", closeDrawer);
+    }
+    if (ui.drawerOverlay) {
+      ui.drawerOverlay.addEventListener("click", closeDrawer);
+    }
 
     ui.themeToggle.addEventListener("click", () => {
       const current = document.body.getAttribute("data-theme") || "light";
