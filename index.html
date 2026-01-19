@@ -77,6 +77,8 @@
         repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.26) 0 2px, transparent 2px 6px);
       color: var(--ink);
       min-height: 100vh;
+      scroll-padding-top: 140px;
+      scroll-padding-bottom: 200px;
     }
 
     body[data-theme="dark"] {
@@ -263,37 +265,6 @@
 
     .drawer-scroll .icon-button {
       justify-content: flex-start;
-    }
-
-    .drawer-player {
-      padding: 12px;
-      border-radius: var(--radius-md);
-      border: 1px dashed var(--stroke);
-      background: var(--bg-soft);
-      display: grid;
-      gap: 10px;
-    }
-
-    .drawer-player-title {
-      font-weight: 800;
-      color: var(--ink);
-    }
-
-    .drawer-player-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .drawer-player-grid .icon-button {
-      justify-content: flex-start;
-      gap: 10px;
-      width: 100%;
-    }
-
-    .drawer-icon svg {
-      width: 18px;
-      height: 18px;
     }
 
     .topbar-left {
@@ -835,6 +806,8 @@
       width: 100%;
       max-width: 100%;
       margin: 0 auto;
+      scroll-margin-top: 140px;
+      scroll-margin-bottom: 200px;
       transition: transform 0.3s ease, width 0.3s ease;
       position: relative;
     }
@@ -874,30 +847,6 @@
       font-size: 1rem;
       padding: 10px 18px;
       border-radius: 999px;
-    }
-
-    .tech-panel-wrap {
-      display: flex;
-      justify-content: flex-end;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .tech-panel {
-      display: grid;
-      gap: 8px;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      border: 2px dashed var(--stroke);
-      background: var(--bg-soft);
-    }
-
-    .tech-panel.collapsed {
-      display: none;
-    }
-
-    .tech-panel .control-row {
-      gap: 6px;
     }
 
     .quality-select {
@@ -950,6 +899,7 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       cursor: default;
+      max-height: calc(100vh - 260px);
     }
 
     #player {
@@ -1049,11 +999,11 @@
 
     .controls {
       display: grid;
-      gap: 14px;
+      gap: 10px;
       background: var(--bg-soft);
-      border: 2px solid var(--stroke);
+      border: 1.5px solid var(--stroke);
       border-radius: var(--radius-md);
-      padding: 14px;
+      padding: 12px;
     }
 
     .control-dock {
@@ -1162,6 +1112,65 @@
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
+    }
+
+    .control-row .icon-button {
+      flex: 1 1 100px;
+      flex-direction: column;
+      align-items: center;
+      min-width: 90px;
+      text-align: center;
+    }
+
+    .control-row .icon-button svg {
+      margin-bottom: 4px;
+    }
+
+    .control-row .icon-button::after {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.7rem;
+      line-height: 1.1;
+      color: rgba(255, 255, 255, 0.85);
+      letter-spacing: 0.01em;
+    }
+
+    body[data-theme="light"] .control-row .icon-button::after {
+      color: var(--ink);
+      opacity: 0.8;
+    }
+
+    .control-group .ghost {
+      background: linear-gradient(135deg, #1d86ff, #63b7ff);
+      color: #f7fbff;
+      border: none;
+      box-shadow: 0 10px 18px rgba(29, 134, 255, 0.2);
+    }
+
+    #controls-report {
+      background: linear-gradient(135deg, #ff3b30, #ff6b63);
+      color: #fff7ef;
+      border: none;
+      box-shadow: 0 10px 18px rgba(255, 59, 48, 0.3);
+    }
+
+    .control-row--secondary .icon-button,
+    .control-row--emote .icon-button {
+      flex: 1 1 140px;
+    }
+
+    .volume-readout {
+      flex: 0 0 auto;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    body[data-theme="dark"] .volume-readout {
+      color: #f7f3ff;
+    }
+
+    .control-row--modes {
+      justify-content: flex-start;
     }
 
     .volume-readout {
@@ -1577,6 +1586,10 @@
         padding-bottom: 260px;
       }
 
+      .player-ratio {
+        max-height: calc(100vh - 220px);
+      }
+
       .channel {
         grid-template-columns: auto 1fr;
       }
@@ -1702,35 +1715,6 @@
         <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
         <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
         <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
-        <div class="drawer-player">
-          <div class="drawer-player-title">Video controls</div>
-          <div class="drawer-player-grid">
-            <button class="pill icon-button" id="drawer-play" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Play / Pause</span>
-            </button>
-            <button class="pill icon-button" id="drawer-mute" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Mute</span>
-            </button>
-            <button class="pill icon-button" id="drawer-volume-down" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Vol -</span>
-            </button>
-            <button class="pill icon-button" id="drawer-volume-up" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Vol +</span>
-            </button>
-            <button class="pill icon-button" id="drawer-theater" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Theater</span>
-            </button>
-            <button class="pill icon-button" id="drawer-mini" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Mini</span>
-            </button>
-            <button class="pill icon-button" id="drawer-fullscreen" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Fullscreen</span>
-            </button>
-            <button class="pill icon-button" id="drawer-auto-next" type="button">
-              <span class="drawer-icon" aria-hidden="true"></span><span>Auto next</span>
-            </button>
-          </div>
-        </div>
       </div>
     </aside>
     <div class="search-row">
@@ -1838,40 +1822,6 @@
             </div>
           </div>
 
-          <div class="tech-panel-wrap">
-            <button class="pill icon-button tech-panel-toggle" id="tech-panel-toggle" type="button" aria-label="Toggle player tools" data-i18n-aria="tech_panel_toggle"></button>
-            <div class="tech-panel" id="tech-panel">
-              <div class="control-row">
-                <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
-                <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
-                <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
-                <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
-              </div>
-              <div class="control-row">
-                <select class="quality-select" id="quality-select" aria-label="Playback quality">
-                  <option value="default" data-i18n="quality_auto">Auto</option>
-                  <option value="tiny">144p</option>
-                  <option value="small">240p</option>
-                  <option value="medium">360p</option>
-                  <option value="large">480p</option>
-                  <option value="hd720">720p</option>
-                  <option value="hd1080">1080p</option>
-                  <option value="hd1440">2K</option>
-                  <option value="hd2160">4K</option>
-                </select>
-                <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
-                  <option value="off" data-i18n="captions_off">Captions off</option>
-                  <option value="english" data-i18n="lang_english">English</option>
-                  <option value="russian" data-i18n="lang_russian">Russian</option>
-                  <option value="chinese" data-i18n="lang_chinese">Chinese</option>
-                  <option value="turkish" data-i18n="lang_turkish">Turkish</option>
-                  <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
-                  <option value="arabic" data-i18n="lang_arabic">Arabic</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
           <div class="control-dock" id="control-dock">
             <button class="pill icon-button control-dock-toggle" id="controls-toggle" type="button" aria-label="Hide controls" data-i18n-aria="controls_hide"></button>
             <div class="control-dock-inner" id="control-dock-inner">
@@ -1887,6 +1837,32 @@
                   <span class="time-label" id="time-duration">0:00</span>
                 </div>
                 <div class="control-group">
+                  <div class="control-row control-row--modes">
+                    <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+                    <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
+                    <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
+                    <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
+                    <select class="quality-select" id="quality-select" aria-label="Playback quality">
+                      <option value="default" data-i18n="quality_auto">Auto</option>
+                      <option value="tiny">144p</option>
+                      <option value="small">240p</option>
+                      <option value="medium">360p</option>
+                      <option value="large">480p</option>
+                      <option value="hd720">720p</option>
+                      <option value="hd1080">1080p</option>
+                      <option value="hd1440">2K</option>
+                      <option value="hd2160">4K</option>
+                    </select>
+                    <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
+                      <option value="off" data-i18n="captions_off">Captions off</option>
+                      <option value="english" data-i18n="lang_english">English</option>
+                      <option value="russian" data-i18n="lang_russian">Russian</option>
+                      <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+                      <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+                      <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+                      <option value="arabic" data-i18n="lang_arabic">Arabic</option>
+                    </select>
+                  </div>
                   <div class="control-row">
                     <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
                     <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
@@ -2422,20 +2398,10 @@
       drawerClose: document.getElementById("drawer-close"),
       actionDrawer: document.getElementById("action-drawer"),
       drawerOverlay: document.getElementById("drawer-overlay"),
-      drawerPlay: document.getElementById("drawer-play"),
-      drawerMute: document.getElementById("drawer-mute"),
-      drawerVolumeDown: document.getElementById("drawer-volume-down"),
-      drawerVolumeUp: document.getElementById("drawer-volume-up"),
-      drawerTheater: document.getElementById("drawer-theater"),
-      drawerMini: document.getElementById("drawer-mini"),
-      drawerFullscreen: document.getElementById("drawer-fullscreen"),
-      drawerAutoNext: document.getElementById("drawer-auto-next"),
       themeToggle: document.getElementById("theme-toggle"),
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
       playerArea: document.getElementById("player-area"),
-      techPanelToggle: document.getElementById("tech-panel-toggle"),
-      techPanel: document.getElementById("tech-panel"),
       controlDock: document.getElementById("control-dock"),
       controlsToggle: document.getElementById("controls-toggle"),
       searchForm: document.getElementById("search-form"),
@@ -4382,6 +4348,7 @@
         const label = t(labelKey);
         button.setAttribute("aria-label", label);
         button.title = label;
+        button.setAttribute("data-label", label);
       }
     }
 
@@ -4424,7 +4391,6 @@
       setButtonIcon(ui.controlsToggle, icons.dockHide, "controls_hide");
       setButtonIcon(ui.viewTheater, icons.theater, "control_theater");
       setButtonIcon(ui.viewMini, icons.mini, "control_mini");
-      setButtonIcon(ui.techPanelToggle, icons.settings, "tech_panel_toggle");
       setButtonIcon(ui.uploadOpen, icons.upload, "control_add_video");
       setButtonIcon(ui.adminOpen, icons.admin, "control_admin");
       setButtonIcon(ui.adminVideosOpen, icons.admin, "admin_videos_open");
@@ -4441,14 +4407,6 @@
       setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
       setButtonIcon(ui.filterSubscribed, icons.check, "control_subscribed_feed");
       setButtonIcon(ui.channelsPageOpen, icons.channels, "channels_open");
-      setButtonIcon(ui.drawerPlay, icons.play, "control_play");
-      setButtonIcon(ui.drawerMute, icons.mute, "control_mute");
-      setButtonIcon(ui.drawerVolumeDown, icons.minus, "control_volume_down");
-      setButtonIcon(ui.drawerVolumeUp, icons.plus, "control_volume_up");
-      setButtonIcon(ui.drawerTheater, icons.theater, "control_theater");
-      setButtonIcon(ui.drawerMini, icons.mini, "control_mini");
-      setButtonIcon(ui.drawerFullscreen, icons.fullscreen, "control_fullscreen");
-      setButtonIcon(ui.drawerAutoNext, icons.autoNext, "control_auto_next_off");
     }
 
     let player = null;
@@ -4503,7 +4461,6 @@
     let adminChannelsPageHasMore = true;
     let adminChannelsPageFetching = false;
     let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
-    let techPanelCollapsed = localStorage.getItem("techPanelCollapsed") === "true";
     let navFocus = "home";
     let settingsUnlockedAt = 0;
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
@@ -4542,15 +4499,6 @@
         dockCollapsed ? "controls_show" : "controls_hide"
       );
       localStorage.setItem("dockCollapsed", String(dockCollapsed));
-    }
-
-    function setTechPanelCollapsed(collapsed) {
-      techPanelCollapsed = Boolean(collapsed);
-      if (ui.techPanel) {
-        ui.techPanel.classList.toggle("collapsed", techPanelCollapsed);
-      }
-      setButtonIcon(ui.techPanelToggle, icons.settings, "tech_panel_toggle");
-      localStorage.setItem("techPanelCollapsed", String(techPanelCollapsed));
     }
 
     function openDrawer() {
@@ -7220,30 +7168,6 @@
     if (ui.settingsBar) {
       ui.settingsBar.addEventListener("click", openSettings);
     }
-    if (ui.drawerPlay) {
-      ui.drawerPlay.addEventListener("click", togglePlay);
-    }
-    if (ui.drawerMute) {
-      ui.drawerMute.addEventListener("click", toggleMute);
-    }
-    if (ui.drawerVolumeDown) {
-      ui.drawerVolumeDown.addEventListener("click", () => changeVolume(-10));
-    }
-    if (ui.drawerVolumeUp) {
-      ui.drawerVolumeUp.addEventListener("click", () => changeVolume(10));
-    }
-    if (ui.drawerTheater) {
-      ui.drawerTheater.addEventListener("click", () => setView("theater"));
-    }
-    if (ui.drawerMini) {
-      ui.drawerMini.addEventListener("click", () => setView("mini"));
-    }
-    if (ui.drawerFullscreen) {
-      ui.drawerFullscreen.addEventListener("click", toggleFullscreen);
-    }
-    if (ui.drawerAutoNext) {
-      ui.drawerAutoNext.addEventListener("click", toggleAutoNext);
-    }
 
     ui.themeToggle.addEventListener("click", () => {
       const current = document.body.getAttribute("data-theme") || "light";
@@ -7253,7 +7177,6 @@
 
     ui.viewTheater.addEventListener("click", () => setView("theater"));
     ui.viewMini.addEventListener("click", () => setView("mini"));
-    ui.techPanelToggle.addEventListener("click", () => setTechPanelCollapsed(!techPanelCollapsed));
     ui.controlsToggle.addEventListener("click", () => setDockCollapsed(!dockCollapsed));
     ui.filterSubscribed.addEventListener("click", () => {
       setFeedFilter(feedFilter === "subscribed" ? "all" : "subscribed");
@@ -7478,7 +7401,6 @@
     setTheme(storedTheme);
     setView("default");
     setDockCollapsed(dockCollapsed);
-    setTechPanelCollapsed(techPanelCollapsed);
     updateFullscreenButton();
 
     ui.loadMore.addEventListener("click", () => {
