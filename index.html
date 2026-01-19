@@ -276,6 +276,18 @@
       padding: 24px clamp(16px, 3vw, 32px) 48px;
     }
 
+    body[data-view="search"] .layout,
+    body[data-view="channels"] .layout,
+    body[data-view="admin-videos"] .layout {
+      grid-template-columns: 1fr;
+    }
+
+    body[data-view="search"] aside,
+    body[data-view="channels"] aside,
+    body[data-view="admin-videos"] aside {
+      display: none;
+    }
+
     aside {
       display: grid;
       gap: 16px;
@@ -1206,6 +1218,15 @@
           <div class="section-actions">
             <span class="section-hint" data-i18n="channels_search_hint">Find a channel</span>
             <input id="channels-search" type="search" placeholder="Search channels" data-i18n-placeholder="channels_search_placeholder">
+            <select id="channels-sort" class="pill" aria-label="Sort channels" data-i18n-aria="channels_sort">
+              <option value="popular" data-i18n="channels_sort_popular">Most popular</option>
+              <option value="videos" data-i18n="channels_sort_videos">Most videos</option>
+              <option value="name" data-i18n="channels_sort_name">A-Z</option>
+            </select>
+            <label class="pill">
+              <input type="checkbox" id="channels-filter-subscribed">
+              <span data-i18n="channels_filter_subscribed">Subscribed only</span>
+            </label>
           </div>
           <div class="form-grid" id="channels-page-list"></div>
           <div class="load-more">
@@ -1532,6 +1553,8 @@
       channelsPage: document.getElementById("channels-page"),
       channelsPageList: document.getElementById("channels-page-list"),
       channelsSearch: document.getElementById("channels-search"),
+      channelsSort: document.getElementById("channels-sort"),
+      channelsFilterSubscribed: document.getElementById("channels-filter-subscribed"),
       channelsLoadMore: document.getElementById("channels-load-more"),
       channelsBack: document.getElementById("channels-back"),
       subscribedList: document.getElementById("subscribed-list"),
@@ -1757,6 +1780,11 @@
         channels_back: "Back to feed",
         channels_search_hint: "Find a channel",
         channels_search_placeholder: "Search channels",
+        channels_sort: "Sort channels",
+        channels_sort_popular: "Most popular",
+        channels_sort_videos: "Most videos",
+        channels_sort_name: "A-Z",
+        channels_filter_subscribed: "Subscribed only",
         auth_welcome: "Welcome to Sevimli Aile",
         auth_subtitle: "Log in or create an account to start watching.",
         auth_email: "Email",
@@ -2001,6 +2029,11 @@
         channels_back: "Назад к ленте",
         channels_search_hint: "Найти канал",
         channels_search_placeholder: "Поиск каналов",
+        channels_sort: "Сортировка каналов",
+        channels_sort_popular: "Самые популярные",
+        channels_sort_videos: "Больше видео",
+        channels_sort_name: "А-Я",
+        channels_filter_subscribed: "Только подписки",
         auth_welcome: "Добро пожаловать в Sevimli Aile",
         auth_subtitle: "Войдите или создайте аккаунт, чтобы смотреть.",
         auth_email: "Эл. почта",
@@ -2245,6 +2278,11 @@
         channels_back: "返回首页",
         channels_search_hint: "查找频道",
         channels_search_placeholder: "搜索频道",
+        channels_sort: "排序频道",
+        channels_sort_popular: "最受欢迎",
+        channels_sort_videos: "最多视频",
+        channels_sort_name: "按名称",
+        channels_filter_subscribed: "仅订阅",
         auth_welcome: "欢迎来到 Sevimli Aile",
         auth_subtitle: "登录或注册即可观看。",
         auth_email: "邮箱",
@@ -2489,6 +2527,11 @@
         channels_back: "Akışa dön",
         channels_search_hint: "Kanal bul",
         channels_search_placeholder: "Kanal ara",
+        channels_sort: "Kanalları sırala",
+        channels_sort_popular: "En popüler",
+        channels_sort_videos: "En çok video",
+        channels_sort_name: "A-Z",
+        channels_filter_subscribed: "Sadece abonelikler",
         auth_welcome: "Sevimli Aile'e hoş geldiniz",
         auth_subtitle: "İzlemeye başlamak için giriş yapın veya hesap oluşturun.",
         auth_email: "E-posta",
@@ -2733,6 +2776,11 @@
         channels_back: "Lentə qayıt",
         channels_search_hint: "Kanal tap",
         channels_search_placeholder: "Kanal axtar",
+        channels_sort: "Kanalları sırala",
+        channels_sort_popular: "Ən populyar",
+        channels_sort_videos: "Ən çox video",
+        channels_sort_name: "A-Z",
+        channels_filter_subscribed: "Yalnız abunələr",
         auth_welcome: "Sevimli Aile-ə xoş gəldiniz",
         auth_subtitle: "İzləmək üçün daxil olun və ya hesab yaradın.",
         auth_email: "Email",
@@ -2977,6 +3025,11 @@
         channels_back: "العودة للرئيسية",
         channels_search_hint: "ابحث عن قناة",
         channels_search_placeholder: "ابحث عن القنوات",
+        channels_sort: "ترتيب القنوات",
+        channels_sort_popular: "الأكثر شعبية",
+        channels_sort_videos: "الأكثر فيديوهات",
+        channels_sort_name: "حسب الاسم",
+        channels_filter_subscribed: "المشتركات فقط",
         auth_welcome: "مرحباً بك في Sevimli Aile",
         auth_subtitle: "سجّل الدخول أو أنشئ حساباً لبدء المشاهدة.",
         auth_email: "البريد الإلكتروني",
@@ -3310,6 +3363,7 @@
     let channelsOffset = 0;
     let channelsHasMore = true;
     let channelsFetching = false;
+    let channelsData = [];
     let firebaseAuth = null;
     let firebaseUser = null;
     let availableTopics = [];
@@ -3377,6 +3431,7 @@
       if (showFeed) {
         updateSearchContext(ui.searchInput.value.trim());
       }
+      document.body.setAttribute("data-view", view);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -3801,12 +3856,36 @@
     function renderChannelsPage(list, append = false) {
       if (!append) {
         ui.channelsPageList.innerHTML = "";
+        channelsData = [];
       }
       if (!list.length && !append) {
         ui.channelsPageList.textContent = t("message_no_channels");
         return;
       }
-      list.forEach((channel) => {
+      channelsData = channelsData.concat(list);
+      applyChannelsFilters();
+    }
+
+    function applyChannelsFilters() {
+      const sort = ui.channelsSort.value;
+      const onlySubscribed = ui.channelsFilterSubscribed.checked;
+      let filtered = channelsData.slice();
+      if (onlySubscribed) {
+        filtered = filtered.filter((channel) => channel.is_subscribed);
+      }
+      if (sort === "videos") {
+        filtered.sort((a, b) => (b.videos || 0) - (a.videos || 0));
+      } else if (sort === "name") {
+        filtered.sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
+      } else {
+        filtered.sort((a, b) => (b.subscribers || 0) - (a.subscribers || 0));
+      }
+      ui.channelsPageList.innerHTML = "";
+      if (!filtered.length) {
+        ui.channelsPageList.textContent = t("message_no_channels");
+        return;
+      }
+      filtered.forEach((channel) => {
         ui.channelsPageList.appendChild(createChannelRow(channel));
       });
     }
@@ -4022,6 +4101,7 @@
         (video) => {
           setPageView("feed");
           videos = [video];
+          currentIndex = 0;
           loadVideo(0);
         }
       );
@@ -5556,6 +5636,8 @@
     ui.channelsOpen.addEventListener("click", () => fetchChannelsPage("", true));
     ui.channelsBack.addEventListener("click", () => setPageView("feed"));
     ui.channelsSearch.addEventListener("input", () => fetchChannelsPage(ui.channelsSearch.value, true));
+    ui.channelsSort.addEventListener("change", applyChannelsFilters);
+    ui.channelsFilterSubscribed.addEventListener("change", applyChannelsFilters);
     ui.channelsLoadMore.addEventListener("click", () => {
       if (channelsHasMore) {
         fetchChannelsPage(channelsQuery, false);
