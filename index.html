@@ -397,6 +397,19 @@
       fill: currentColor;
     }
 
+    body[data-theme="dark"] .search {
+      background: #1f1a34;
+      border-color: #2d2746;
+    }
+
+    body[data-theme="dark"] .search input {
+      color: var(--ink);
+    }
+
+    body[data-theme="dark"] .search input::placeholder {
+      color: rgba(247, 243, 255, 0.7);
+    }
+
     .search-row {
       padding: 10px clamp(16px, 3vw, 32px) 18px;
       background: transparent;
@@ -1195,17 +1208,17 @@
       display: grid;
       grid-template-rows: auto 1fr;
       background: var(--bg-alt);
-      border: 1.5px solid var(--stroke);
-      border-radius: var(--radius-md);
+      border: 1px solid var(--stroke);
+      border-radius: 14px;
       overflow: hidden;
       cursor: pointer;
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.05);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     .video-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.07);
     }
 
     .search-grid {
@@ -1235,6 +1248,7 @@
       background-size: cover;
       background-position: center;
       position: relative;
+      border-bottom: 1px solid var(--stroke);
     }
 
     .thumb span {
@@ -1328,12 +1342,21 @@
       padding: 10px 14px;
       min-width: 44px;
       min-height: 44px;
+      position: relative;
     }
 
     .icon-button svg {
       width: 20px;
       height: 20px;
       fill: currentColor;
+    }
+
+    .icon-button.has-unread::after {
+      content: "🍎";
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      font-size: 0.9rem;
     }
 
     .icon-button .count {
@@ -4352,6 +4375,13 @@
       }
     }
 
+    function updateNotificationBadge(hasUnread) {
+      if (!ui.notificationsOpen) {
+        return;
+      }
+      ui.notificationsOpen.classList.toggle("has-unread", Boolean(hasUnread));
+    }
+
     function escapeHtml(value) {
       return String(value || "")
         .replace(/&/g, "&amp;")
@@ -4913,8 +4943,19 @@
       }
     }
 
-    function loadNextVideo() {
-      loadVideo(currentIndex + 1);
+    async function loadNextVideo() {
+      const targetIndex = currentIndex + 1;
+      if (targetIndex < videos.length) {
+        loadVideo(targetIndex);
+        return;
+      }
+      if (hasMore) {
+        const prevLength = videos.length;
+        await fetchVideos(ui.searchInput.value.trim(), false);
+        if (videos.length > prevLength) {
+          loadVideo(prevLength);
+        }
+      }
     }
 
     function showChannelView(visible) {
@@ -5338,6 +5379,39 @@
       searchFetching = false;
     }
 
+    async function playReportedVideo(report) {
+      if (!report || !report.video_id) {
+        return;
+      }
+      const res = await apiFetch("/api/videos/" + report.video_id);
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      if (!data || !data.video) {
+        return;
+      }
+      videos = [data.video];
+      currentIndex = 0;
+      navigateTo("/", { replace: true });
+      loadVideo(0);
+    }
+
+    async function refreshNotificationBadge() {
+      if (!currentUser) {
+        updateNotificationBadge(false);
+        return;
+      }
+      const res = await apiFetch("/api/notifications");
+      if (!res.ok) {
+        updateNotificationBadge(false);
+        return;
+      }
+      const data = await res.json();
+      const hasUnread = data.notifications && data.notifications.some((note) => !note.read_at);
+      updateNotificationBadge(hasUnread);
+    }
+
     async function loadSearchFallback() {
       if (!currentUser) {
         return;
@@ -5576,6 +5650,7 @@
         currentUser = null;
         updateAuthUI();
         fetchSubscriptions();
+        updateNotificationBadge(false);
         return;
       }
       const res = await apiFetch("/api/me");
@@ -5584,6 +5659,7 @@
         currentUser = null;
         updateAuthUI();
         fetchSubscriptions();
+        updateNotificationBadge(false);
         lockApp(t("message_sign_in"));
         return;
       }
@@ -5593,6 +5669,7 @@
       fetchSubscriptions();
       unlockApp();
       handleRoute();
+      refreshNotificationBadge();
     }
 
     function updateAuthUI() {
@@ -5607,12 +5684,8 @@
       ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
       ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
-      ui.settingsBar.style.display =
-        currentUser && currentUser.plan === "pro" && currentUser.role === "user" ? "inline-flex" : "none";
-      ui.settingsOpen.style.display =
-        currentUser && currentUser.plan === "pro" && currentUser.role === "user"
-          ? "inline-flex"
-          : "none";
+      ui.settingsBar.style.display = currentUser ? "inline-flex" : "none";
+      ui.settingsOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.notificationsOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.uploadMetadata.style.display =
         currentUser && (currentUser.role === "admin" || currentUser.role === "artist")
@@ -6138,6 +6211,21 @@
         info.appendChild(meta);
         const actions = document.createElement("div");
         actions.className = "channel-actions";
+        const viewBtn = document.createElement("button");
+        viewBtn.type = "button";
+        viewBtn.className = "ghost";
+        viewBtn.textContent = t("control_play");
+        viewBtn.addEventListener("click", () => playReportedVideo(report));
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "ghost";
+        deleteBtn.textContent = t("action_delete");
+        deleteBtn.addEventListener("click", async () => {
+          const res = await apiFetch("/api/videos/" + report.video_id, { method: "DELETE" });
+          if (res.ok) {
+            refreshAdminView();
+          }
+        });
         const input = document.createElement("input");
         input.type = "text";
         input.className = "report-input";
@@ -6158,6 +6246,8 @@
             refreshAdminView();
           }
         });
+        actions.appendChild(viewBtn);
+        actions.appendChild(deleteBtn);
         actions.appendChild(input);
         actions.appendChild(button);
         row.appendChild(avatar);
@@ -6606,9 +6696,6 @@
         lockApp(t("message_sign_in"));
         return;
       }
-      if (currentUser.plan !== "pro" || currentUser.role !== "user") {
-        return;
-      }
       ui.settingsAuthMessage.textContent = "";
       ui.settingsAuthForm.reset();
       openModal(ui.settingsAuthModal);
@@ -6908,10 +6995,13 @@
       const data = await res.json();
       ui.notificationsList.innerHTML = "";
       if (!res.ok || !data.notifications || !data.notifications.length) {
+        updateNotificationBadge(false);
         ui.notificationsList.textContent = t("message_no_updates");
         openModal(ui.notificationsModal);
         return;
       }
+      const hasUnread = data.notifications.some((note) => !note.read_at);
+      updateNotificationBadge(hasUnread);
       data.notifications.forEach((note) => {
         const row = document.createElement("div");
         row.className = "channel";
