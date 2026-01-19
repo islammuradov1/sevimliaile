@@ -241,6 +241,7 @@ async function loadUserSettings(env, userId) {
       .bind(userId)
       .first();
     return {
+      hasSettings: Boolean(settings),
       allowedLanguages: safeJsonArray(settings?.allowed_languages),
       allowedTopics: safeJsonArray(settings?.allowed_topics),
       allowedChannels: safeJsonArray(settings?.allowed_channels),
@@ -250,6 +251,7 @@ async function loadUserSettings(env, userId) {
     };
   } catch (err) {
     return {
+      hasSettings: false,
       allowedLanguages: [],
       allowedTopics: [],
       allowedChannels: [],
@@ -461,6 +463,7 @@ export default {
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const showAll = url.searchParams.get("all") === "1";
       const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedChannels = settings.allowedChannels;
       const channelMode = settings.channelMode;
       let where = "WHERE users.role = 'artist'";
@@ -469,7 +472,7 @@ export default {
         where += " AND (users.display_name LIKE ? OR users.slogan LIKE ?)";
         binds.push("%" + search + "%", "%" + search + "%");
       }
-      if (!showAll) {
+      if (!showAll && applyFilters && allowedChannels.length) {
         if (allowedChannels.length) {
           const list = allowedChannels.map(() => "?").join(",");
           if (channelMode === "block") {
@@ -478,8 +481,6 @@ export default {
             where += " AND users.id IN (" + list + ")";
           }
           binds.push(...allowedChannels);
-        } else if (channelMode === "allow") {
-          where += " AND 1=0";
         }
       }
       const result = await env.DB.prepare(
@@ -512,16 +513,15 @@ export default {
     if (path.startsWith("/channels/") && request.method === "GET") {
       const channelId = path.split("/")[2];
       const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedChannels = settings.allowedChannels;
       const channelMode = settings.channelMode;
-      if (allowedChannels.length) {
-        const channelIdNum = parseInt(channelId, 10);
-        const isAllowed = allowedChannels.includes(channelIdNum);
-        if ((channelMode === "allow" && !isAllowed) || (channelMode === "block" && isAllowed)) {
-          return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
-        }
-      } else if (channelMode === "allow") {
-        return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
+      if (applyFilters && allowedChannels.length) {
+          const channelIdNum = parseInt(channelId, 10);
+          const isAllowed = allowedChannels.includes(channelIdNum);
+          if ((channelMode === "allow" && !isAllowed) || (channelMode === "block" && isAllowed)) {
+            return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
+          }
       }
       const channel = await env.DB.prepare(
         "SELECT users.id, users.role, " +
@@ -630,6 +630,7 @@ export default {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedLanguages = settings.allowedLanguages;
       const allowedTopics = settings.allowedTopics;
       const topicMode = settings.topicMode;
@@ -650,37 +651,37 @@ export default {
           " AND (videos.title LIKE ? OR users.display_name LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
         binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
       }
-      if (allowedChannels.length) {
-        const list = allowedChannels.map(() => "?").join(",");
-        if (channelMode === "block") {
-          where += " AND videos.owner_id NOT IN (" + list + ")";
-        } else {
-          where += " AND videos.owner_id IN (" + list + ")";
-        }
-        binds.push(...allowedChannels);
-      } else if (channelMode === "allow") {
-        where += " AND 1=0";
+      if (applyFilters && allowedChannels.length) {
+          const list = allowedChannels.map(() => "?").join(",");
+          if (channelMode === "block") {
+            where += " AND videos.owner_id NOT IN (" + list + ")";
+          } else {
+            where += " AND videos.owner_id IN (" + list + ")";
+          }
+          binds.push(...allowedChannels);
       }
-      if (allowedLanguages.length) {
-        const list = allowedLanguages.map(() => "?").join(",");
-        where +=
-          " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
-          list +
-          ")) OR videos.language IN (" +
-          list +
-          "))";
-        binds.push(...allowedLanguages, ...allowedLanguages);
-      }
-      if (allowedTopics.length) {
-        const inList = allowedTopics.map(() => "?").join(",");
-        if (topicMode === "block") {
+      if (applyFilters) {
+        if (allowedLanguages.length) {
+          const list = allowedLanguages.map(() => "?").join(",");
           where +=
-            " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
-        } else {
-          where +=
-            " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+            " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+            list +
+            ")) OR videos.language IN (" +
+            list +
+            "))";
+          binds.push(...allowedLanguages, ...allowedLanguages);
         }
-        binds.push(...allowedTopics);
+        if (allowedTopics.length) {
+          const inList = allowedTopics.map(() => "?").join(",");
+          if (topicMode === "block") {
+            where +=
+              " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+          } else {
+            where +=
+              " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+          }
+          binds.push(...allowedTopics);
+        }
       }
       const query =
         "SELECT videos.*, " +
@@ -1010,6 +1011,7 @@ export default {
     if (path === "/viral" && request.method === "GET") {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
       const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedLanguages = settings.allowedLanguages;
       const allowedTopics = settings.allowedTopics;
       const topicMode = settings.topicMode;
@@ -1017,37 +1019,37 @@ export default {
       const channelMode = settings.channelMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
-      if (allowedChannels.length) {
-        const list = allowedChannels.map(() => "?").join(",");
-        if (channelMode === "block") {
-          where += " AND videos.owner_id NOT IN (" + list + ")";
-        } else {
-          where += " AND videos.owner_id IN (" + list + ")";
-        }
-        binds.push(...allowedChannels);
-      } else if (channelMode === "allow") {
-        where += " AND 1=0";
+      if (applyFilters && allowedChannels.length) {
+          const list = allowedChannels.map(() => "?").join(",");
+          if (channelMode === "block") {
+            where += " AND videos.owner_id NOT IN (" + list + ")";
+          } else {
+            where += " AND videos.owner_id IN (" + list + ")";
+          }
+          binds.push(...allowedChannels);
       }
-      if (allowedLanguages.length) {
-        const list = allowedLanguages.map(() => "?").join(",");
-        where +=
-          " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
-          list +
-          ")) OR videos.language IN (" +
-          list +
-          "))";
-        binds.push(...allowedLanguages, ...allowedLanguages);
-      }
-      if (allowedTopics.length) {
-        const inList = allowedTopics.map(() => "?").join(",");
-        if (topicMode === "block") {
+      if (applyFilters) {
+        if (allowedLanguages.length) {
+          const list = allowedLanguages.map(() => "?").join(",");
           where +=
-            " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
-        } else {
-          where +=
-            " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+            " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+            list +
+            ")) OR videos.language IN (" +
+            list +
+            "))";
+          binds.push(...allowedLanguages, ...allowedLanguages);
         }
-        binds.push(...allowedTopics);
+        if (allowedTopics.length) {
+          const inList = allowedTopics.map(() => "?").join(",");
+          if (topicMode === "block") {
+            where +=
+              " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+          } else {
+            where +=
+              " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+          }
+          binds.push(...allowedTopics);
+        }
       }
       const result = await env.DB.prepare(
         "SELECT videos.*, " +
@@ -1253,6 +1255,16 @@ export default {
 
       return jsonResponse({ error: "Not found" }, 404, withCors({}, origin));
     } catch (err) {
+      const message = err && err.message ? String(err.message) : "Unknown error";
+      console.error("Worker error", {
+        path: url.pathname,
+        method: request.method,
+        message,
+        stack: err && err.stack ? String(err.stack) : ""
+      });
+      if (message.toLowerCase().includes("no such table")) {
+        return jsonResponse({ error: "Database not ready. Run migrations." }, 500, withCors({}, origin));
+      }
       return jsonResponse({ error: "Server error." }, 500, withCors({}, origin));
     }
   }

@@ -248,7 +248,7 @@
 
     .top-actions {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -274,10 +274,11 @@
       background: var(--bg-alt);
       color: var(--ink);
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 8px 12px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
+      min-height: 40px;
     }
 
     .contact-button {
@@ -751,26 +752,6 @@
       display: none;
     }
 
-    .sidebar-toggle-tab {
-      position: fixed;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 35;
-      display: none;
-    }
-
-    body.sidebar-collapsed .sidebar-toggle-tab {
-      display: inline-flex;
-    }
-
-    body.sidebar-collapsed aside {
-      display: none;
-    }
-
-    body.sidebar-collapsed .layout {
-      grid-template-columns: 1fr;
-    }
 
     .control-group {
       display: grid;
@@ -968,13 +949,14 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 6px 10px;
-      min-width: 40px;
+      padding: 8px 12px;
+      min-width: 44px;
+      min-height: 40px;
     }
 
     .icon-button svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       fill: currentColor;
     }
 
@@ -1253,7 +1235,6 @@
             <option value="ar">العربية</option>
           </select>
         </div>
-        <button class="pill icon-button" id="sidebar-toggle" type="button" aria-label="Toggle sidebar" data-i18n-aria="sidebar_toggle"></button>
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
         <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
         <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
@@ -1632,7 +1613,6 @@
         </section>
       </main>
     </div>
-    <button class="pill icon-button sidebar-toggle-tab" id="sidebar-toggle-tab" type="button" aria-label="Show sidebar" data-i18n-aria="sidebar_show"></button>
   </div>
 
   <section class="auth-gate" id="auth-gate">
@@ -1915,8 +1895,6 @@
   <script>
     const ui = {
       themeToggle: document.getElementById("theme-toggle"),
-      sidebarToggle: document.getElementById("sidebar-toggle"),
-      sidebarToggleTab: document.getElementById("sidebar-toggle-tab"),
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
       playerArea: document.getElementById("player-area"),
@@ -3926,8 +3904,6 @@
       setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
       setButtonIcon(ui.filterSubscribed, icons.check, "control_subscribed_feed");
       setButtonIcon(ui.channelsPageOpen, icons.channels, "channels_open");
-      setButtonIcon(ui.sidebarToggle, icons.bars, "sidebar_toggle");
-      setButtonIcon(ui.sidebarToggleTab, icons.bars, "sidebar_show");
     }
 
     let player = null;
@@ -3982,7 +3958,6 @@
     let adminChannelsPageHasMore = true;
     let adminChannelsPageFetching = false;
     let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
-    let sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
     let techPanelCollapsed = localStorage.getItem("techPanelCollapsed") === "true";
     let settingsUnlockedAt = 0;
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
@@ -4021,14 +3996,6 @@
         dockCollapsed ? "controls_show" : "controls_hide"
       );
       localStorage.setItem("dockCollapsed", String(dockCollapsed));
-    }
-
-    function setSidebarCollapsed(collapsed) {
-      sidebarCollapsed = Boolean(collapsed);
-      document.body.classList.toggle("sidebar-collapsed", sidebarCollapsed);
-      setButtonIcon(ui.sidebarToggle, icons.bars, sidebarCollapsed ? "sidebar_show" : "sidebar_toggle");
-      setButtonIcon(ui.sidebarToggleTab, icons.bars, "sidebar_show");
-      localStorage.setItem("sidebarCollapsed", String(sidebarCollapsed));
     }
 
     function setTechPanelCollapsed(collapsed) {
@@ -6618,8 +6585,6 @@
     ui.viewMini.addEventListener("click", () => setView("mini"));
     ui.techPanelToggle.addEventListener("click", () => setTechPanelCollapsed(!techPanelCollapsed));
     ui.controlsToggle.addEventListener("click", () => setDockCollapsed(!dockCollapsed));
-    ui.sidebarToggle.addEventListener("click", () => setSidebarCollapsed(!sidebarCollapsed));
-    ui.sidebarToggleTab.addEventListener("click", () => setSidebarCollapsed(false));
     ui.filterSubscribed.addEventListener("click", () => {
       setFeedFilter(feedFilter === "subscribed" ? "all" : "subscribed");
     });
@@ -6789,7 +6754,6 @@
     setTheme(storedTheme);
     setView("default");
     setDockCollapsed(dockCollapsed);
-    setSidebarCollapsed(sidebarCollapsed);
     setTechPanelCollapsed(techPanelCollapsed);
     updateFullscreenButton();
 
