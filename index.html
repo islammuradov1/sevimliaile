@@ -621,6 +621,10 @@
       display: none !important;
     }
 
+    body[data-view="channel"] main > section:not(#channel-view) {
+      display: none !important;
+    }
+
     body[data-view="feed"] #search-view,
     body[data-view="feed"] #channels-page,
     body[data-view="feed"] #admin-overview-page,
@@ -5684,8 +5688,8 @@
       ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
       ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
-      ui.settingsBar.style.display = currentUser ? "inline-flex" : "none";
-      ui.settingsOpen.style.display = currentUser ? "inline-flex" : "none";
+      ui.settingsBar.style.display = "inline-flex";
+      ui.settingsOpen.style.display = "inline-flex";
       ui.notificationsOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.uploadMetadata.style.display =
         currentUser && (currentUser.role === "admin" || currentUser.role === "artist")
