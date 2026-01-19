@@ -29,6 +29,10 @@
       --font-accent: "Bubblegum Sans", "Baloo 2", system-ui, sans-serif;
     }
 
+    body.drawer-open {
+      overflow: hidden;
+    }
+
     body[data-theme="dark"] {
       --bg: #0f0b1f;
       --bg-alt: #181531;
@@ -218,7 +222,7 @@
       right: 0;
       width: min(var(--drawer-width), 90vw);
       height: 100vh;
-      background: var(--bg-alt);
+      background: var(--bg);
       border-left: 1.5px solid var(--stroke);
       box-shadow: -12px 0 30px rgba(0, 0, 0, 0.12);
       transform: translateX(100%);
@@ -250,6 +254,46 @@
       display: grid;
       gap: 10px;
       overflow-y: auto;
+    }
+
+    .drawer-scroll .pill {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .drawer-scroll .icon-button {
+      justify-content: flex-start;
+    }
+
+    .drawer-player {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--stroke);
+      background: var(--bg-soft);
+      display: grid;
+      gap: 10px;
+    }
+
+    .drawer-player-title {
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .drawer-player-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .drawer-player-grid .icon-button {
+      justify-content: flex-start;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .drawer-icon svg {
+      width: 18px;
+      height: 18px;
     }
 
     .topbar-left {
@@ -509,6 +553,11 @@
       color: #fffaf5;
       border-color: transparent;
       box-shadow: 0 12px 26px rgba(255, 75, 58, 0.2);
+    }
+
+    body[data-theme="dark"] .pill {
+      background: linear-gradient(135deg, var(--bg-alt), var(--bg-soft));
+      color: var(--ink);
     }
 
     .layout {
@@ -1595,6 +1644,9 @@
         </div>
         <div class="topbar-center"></div>
         <div class="topbar-right">
+          <button class="pill icon-button" id="settings-bar" type="button" aria-label="Settings (pro)">
+            Settings
+          </button>
           <button class="pill icon-button drawer-toggle" id="drawer-toggle" type="button" aria-expanded="false" aria-controls="action-drawer">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -1650,6 +1702,35 @@
         <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
         <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
         <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
+        <div class="drawer-player">
+          <div class="drawer-player-title">Video controls</div>
+          <div class="drawer-player-grid">
+            <button class="pill icon-button" id="drawer-play" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Play / Pause</span>
+            </button>
+            <button class="pill icon-button" id="drawer-mute" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Mute</span>
+            </button>
+            <button class="pill icon-button" id="drawer-volume-down" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Vol -</span>
+            </button>
+            <button class="pill icon-button" id="drawer-volume-up" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Vol +</span>
+            </button>
+            <button class="pill icon-button" id="drawer-theater" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Theater</span>
+            </button>
+            <button class="pill icon-button" id="drawer-mini" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Mini</span>
+            </button>
+            <button class="pill icon-button" id="drawer-fullscreen" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Fullscreen</span>
+            </button>
+            <button class="pill icon-button" id="drawer-auto-next" type="button">
+              <span class="drawer-icon" aria-hidden="true"></span><span>Auto next</span>
+            </button>
+          </div>
+        </div>
       </div>
     </aside>
     <div class="search-row">
@@ -2336,10 +2417,19 @@
       heroIdentity: document.getElementById("hero-identity"),
       heroPlay: document.getElementById("hero-play"),
       heroChannels: document.getElementById("hero-channels"),
+      settingsBar: document.getElementById("settings-bar"),
       drawerToggle: document.getElementById("drawer-toggle"),
       drawerClose: document.getElementById("drawer-close"),
       actionDrawer: document.getElementById("action-drawer"),
       drawerOverlay: document.getElementById("drawer-overlay"),
+      drawerPlay: document.getElementById("drawer-play"),
+      drawerMute: document.getElementById("drawer-mute"),
+      drawerVolumeDown: document.getElementById("drawer-volume-down"),
+      drawerVolumeUp: document.getElementById("drawer-volume-up"),
+      drawerTheater: document.getElementById("drawer-theater"),
+      drawerMini: document.getElementById("drawer-mini"),
+      drawerFullscreen: document.getElementById("drawer-fullscreen"),
+      drawerAutoNext: document.getElementById("drawer-auto-next"),
       themeToggle: document.getElementById("theme-toggle"),
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
@@ -4345,11 +4435,20 @@
       setButtonIcon(ui.adminImportsOpen, icons.imports, "admin_imports");
       setButtonIcon(ui.studioOpen, icons.studio, "control_studio");
       setButtonIcon(ui.settingsOpen, icons.settings, "control_settings");
+      setButtonIcon(ui.settingsBar, icons.settings, "control_settings");
       setButtonIcon(ui.notificationsOpen, icons.bell, "control_updates");
       setButtonIcon(ui.authOpen, icons.user, "control_sign_in");
       setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
       setButtonIcon(ui.filterSubscribed, icons.check, "control_subscribed_feed");
       setButtonIcon(ui.channelsPageOpen, icons.channels, "channels_open");
+      setButtonIcon(ui.drawerPlay, icons.play, "control_play");
+      setButtonIcon(ui.drawerMute, icons.mute, "control_mute");
+      setButtonIcon(ui.drawerVolumeDown, icons.minus, "control_volume_down");
+      setButtonIcon(ui.drawerVolumeUp, icons.plus, "control_volume_up");
+      setButtonIcon(ui.drawerTheater, icons.theater, "control_theater");
+      setButtonIcon(ui.drawerMini, icons.mini, "control_mini");
+      setButtonIcon(ui.drawerFullscreen, icons.fullscreen, "control_fullscreen");
+      setButtonIcon(ui.drawerAutoNext, icons.autoNext, "control_auto_next_off");
     }
 
     let player = null;
@@ -4456,10 +4555,12 @@
 
     function openDrawer() {
       if (!ui.actionDrawer || !ui.drawerOverlay || !ui.drawerToggle) return;
+      ui.actionDrawer.style.display = "grid";
       ui.actionDrawer.classList.add("open");
       ui.actionDrawer.setAttribute("aria-hidden", "false");
       ui.drawerOverlay.classList.add("active");
       ui.drawerToggle.setAttribute("aria-expanded", "true");
+      document.body.classList.add("drawer-open");
     }
 
     function closeDrawer() {
@@ -4468,6 +4569,12 @@
       ui.actionDrawer.setAttribute("aria-hidden", "true");
       ui.drawerOverlay.classList.remove("active");
       ui.drawerToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("drawer-open");
+      setTimeout(() => {
+        if (!ui.actionDrawer.classList.contains("open")) {
+          ui.actionDrawer.style.display = "grid";
+        }
+      }, 250);
     }
 
     function toggleDrawer() {
@@ -5552,6 +5659,8 @@
       ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
       ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
+      ui.settingsBar.style.display =
+        currentUser && currentUser.plan === "pro" && currentUser.role === "user" ? "inline-flex" : "none";
       ui.settingsOpen.style.display =
         currentUser && currentUser.plan === "pro" && currentUser.role === "user"
           ? "inline-flex"
@@ -7107,6 +7216,33 @@
     }
     if (ui.drawerOverlay) {
       ui.drawerOverlay.addEventListener("click", closeDrawer);
+    }
+    if (ui.settingsBar) {
+      ui.settingsBar.addEventListener("click", openSettings);
+    }
+    if (ui.drawerPlay) {
+      ui.drawerPlay.addEventListener("click", togglePlay);
+    }
+    if (ui.drawerMute) {
+      ui.drawerMute.addEventListener("click", toggleMute);
+    }
+    if (ui.drawerVolumeDown) {
+      ui.drawerVolumeDown.addEventListener("click", () => changeVolume(-10));
+    }
+    if (ui.drawerVolumeUp) {
+      ui.drawerVolumeUp.addEventListener("click", () => changeVolume(10));
+    }
+    if (ui.drawerTheater) {
+      ui.drawerTheater.addEventListener("click", () => setView("theater"));
+    }
+    if (ui.drawerMini) {
+      ui.drawerMini.addEventListener("click", () => setView("mini"));
+    }
+    if (ui.drawerFullscreen) {
+      ui.drawerFullscreen.addEventListener("click", toggleFullscreen);
+    }
+    if (ui.drawerAutoNext) {
+      ui.drawerAutoNext.addEventListener("click", toggleAutoNext);
     }
 
     ui.themeToggle.addEventListener("click", () => {
