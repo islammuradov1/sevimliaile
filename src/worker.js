@@ -43,6 +43,16 @@ function normalizeTopics(input) {
     .filter(Boolean);
 }
 
+function normalizeChannelIds(input) {
+  if (!input) return [];
+  const values = Array.isArray(input) ? input : [input];
+  const ids = values
+    .flat()
+    .map((value) => parseInt(String(value), 10))
+    .filter((value) => Number.isFinite(value));
+  return Array.from(new Set(ids));
+}
+
 function normalizeLanguages(input) {
   if (!input) return [];
   if (Array.isArray(input)) {
@@ -344,16 +354,20 @@ export default {
     }
 
     if (path === "/settings" && request.method === "GET") {
-      if (user.plan !== "pro") return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      if (user.plan !== "pro") {
+        return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      }
       const settings = await env.DB.prepare(
-        "SELECT allowed_languages, allowed_topics, topic_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
+        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
       )
         .bind(user.id)
         .first();
       const data = settings || {
         allowed_languages: "[]",
         allowed_topics: "[]",
+        allowed_channels: "[]",
         topic_mode: "allow",
+        channel_mode: "allow",
         max_daily_minutes: 0
       };
       return jsonResponse(
@@ -361,7 +375,9 @@ export default {
           settings: {
             allowed_languages: JSON.parse(data.allowed_languages || "[]"),
             allowed_topics: JSON.parse(data.allowed_topics || "[]"),
+            allowed_channels: JSON.parse(data.allowed_channels || "[]"),
             topic_mode: data.topic_mode || "allow",
+            channel_mode: data.channel_mode || "allow",
             max_daily_minutes: data.max_daily_minutes || 0
           }
         },
@@ -371,18 +387,31 @@ export default {
     }
 
     if (path === "/settings" && request.method === "POST") {
-      if (user.plan !== "pro") return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      if (user.plan !== "pro") {
+        return jsonResponse({ error: "Settings available on pro plan only." }, 403, withCors({}, origin));
+      }
       const body = await parseJson(request);
       const languages = normalizeLanguages(body.languages);
       const topics = normalizeTopics(body.topics);
+      const channels = normalizeChannelIds(body.channels);
       const topicMode = body.topicMode === "block" ? "block" : "allow";
+      const channelMode = body.channelMode === "block" ? "block" : "allow";
       const maxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(body.maxDailyMinutes || "0", 10)));
       await env.DB.prepare(
-        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, topic_mode, max_daily_minutes, updated_at) " +
-          "VALUES (?, ?, ?, ?, ?, ?) " +
-          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, topic_mode = excluded.topic_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
+        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes, updated_at) " +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
+          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, allowed_channels = excluded.allowed_channels, topic_mode = excluded.topic_mode, channel_mode = excluded.channel_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
       )
-        .bind(user.id, JSON.stringify(languages), JSON.stringify(topics), topicMode, maxDailyMinutes, nowIso())
+        .bind(
+          user.id,
+          JSON.stringify(languages),
+          JSON.stringify(topics),
+          JSON.stringify(channels),
+          topicMode,
+          channelMode,
+          maxDailyMinutes,
+          nowIso()
+        )
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -403,11 +432,32 @@ export default {
       const search = url.searchParams.get("search") || "";
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      const showAll = url.searchParams.get("all") === "1";
+      const settings = await env.DB.prepare(
+        "SELECT allowed_channels, channel_mode FROM user_settings WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
+      const channelMode = settings?.channel_mode || "allow";
       let where = "WHERE users.role = 'artist'";
       const binds = [];
       if (search) {
         where += " AND (users.display_name LIKE ? OR users.slogan LIKE ?)";
         binds.push("%" + search + "%", "%" + search + "%");
+      }
+      if (!showAll) {
+        if (allowedChannels.length) {
+          const list = allowedChannels.map(() => "?").join(",");
+          if (channelMode === "block") {
+            where += " AND users.id NOT IN (" + list + ")";
+          } else {
+            where += " AND users.id IN (" + list + ")";
+          }
+          binds.push(...allowedChannels);
+        } else if (channelMode === "allow") {
+          where += " AND 1=0";
+        }
       }
       const result = await env.DB.prepare(
         "SELECT users.id, users.role, " +
@@ -438,6 +488,22 @@ export default {
 
     if (path.startsWith("/channels/") && request.method === "GET") {
       const channelId = path.split("/")[2];
+      const settings = await env.DB.prepare(
+        "SELECT allowed_channels, channel_mode FROM user_settings WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
+      const channelMode = settings?.channel_mode || "allow";
+      if (allowedChannels.length) {
+        const channelIdNum = parseInt(channelId, 10);
+        const isAllowed = allowedChannels.includes(channelIdNum);
+        if ((channelMode === "allow" && !isAllowed) || (channelMode === "block" && isAllowed)) {
+          return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
+        }
+      } else if (channelMode === "allow") {
+        return jsonResponse({ error: "Channel not found." }, 404, withCors({}, origin));
+      }
       const channel = await env.DB.prepare(
         "SELECT users.id, users.role, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as display_name, " +
@@ -545,13 +611,15 @@ export default {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const settings = await env.DB.prepare(
-        "SELECT allowed_languages, allowed_topics, topic_mode FROM user_settings WHERE user_id = ?"
+        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = ?"
       )
         .bind(user.id)
         .first();
       const allowedLanguages = settings ? JSON.parse(settings.allowed_languages || "[]") : [];
       const allowedTopics = settings ? JSON.parse(settings.allowed_topics || "[]") : [];
       const topicMode = settings?.topic_mode || "allow";
+      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
+      const channelMode = settings?.channel_mode || "allow";
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (onlySubscribed) {
@@ -566,6 +634,17 @@ export default {
         where +=
           " AND (videos.title LIKE ? OR users.display_name LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
         binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
+      }
+      if (allowedChannels.length) {
+        const list = allowedChannels.map(() => "?").join(",");
+        if (channelMode === "block") {
+          where += " AND videos.owner_id NOT IN (" + list + ")";
+        } else {
+          where += " AND videos.owner_id IN (" + list + ")";
+        }
+        binds.push(...allowedChannels);
+      } else if (channelMode === "allow") {
+        where += " AND 1=0";
       }
       if (allowedLanguages.length) {
         const list = allowedLanguages.map(() => "?").join(",");
@@ -919,19 +998,65 @@ export default {
 
     if (path === "/viral" && request.method === "GET") {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
+      const settings = await env.DB.prepare(
+        "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .first();
+      const allowedLanguages = settings ? JSON.parse(settings.allowed_languages || "[]") : [];
+      const allowedTopics = settings ? JSON.parse(settings.allowed_topics || "[]") : [];
+      const topicMode = settings?.topic_mode || "allow";
+      const allowedChannels = settings ? JSON.parse(settings.allowed_channels || "[]") : [];
+      const channelMode = settings?.channel_mode || "allow";
+      let where = "WHERE videos.youtube_id IS NOT NULL";
+      const binds = [];
+      if (allowedChannels.length) {
+        const list = allowedChannels.map(() => "?").join(",");
+        if (channelMode === "block") {
+          where += " AND videos.owner_id NOT IN (" + list + ")";
+        } else {
+          where += " AND videos.owner_id IN (" + list + ")";
+        }
+        binds.push(...allowedChannels);
+      } else if (channelMode === "allow") {
+        where += " AND 1=0";
+      }
+      if (allowedLanguages.length) {
+        const list = allowedLanguages.map(() => "?").join(",");
+        where +=
+          " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+          list +
+          ")) OR videos.language IN (" +
+          list +
+          "))";
+        binds.push(...allowedLanguages, ...allowedLanguages);
+      }
+      if (allowedTopics.length) {
+        const inList = allowedTopics.map(() => "?").join(",");
+        if (topicMode === "block") {
+          where +=
+            " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+        } else {
+          where +=
+            " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+        }
+        binds.push(...allowedTopics);
+      }
       const result = await env.DB.prepare(
         "SELECT videos.*, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
           "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
           "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
           "FROM videos JOIN users ON videos.owner_id = users.id " +
-          "ORDER BY videos.views DESC, hearts DESC LIMIT ?"
+          where +
+          " ORDER BY videos.views DESC, hearts DESC LIMIT ?"
       )
-        .bind(limit)
+        .bind(...binds, limit)
         .all();
       const videos = (result.results || []).map((row) => ({
         ...row,
-        topics: row.topics ? JSON.parse(row.topics) : []
+        topics: row.topics ? JSON.parse(row.topics) : [],
+        languages: row.languages ? JSON.parse(row.languages) : []
       }));
       return jsonResponse({ videos }, 200, withCors({}, origin));
     }

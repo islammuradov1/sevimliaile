@@ -131,6 +131,19 @@
       gap: 14px;
     }
 
+    .auth-card form {
+      background: var(--bg-soft);
+      border: 2px dashed var(--stroke);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .auth-card .form-actions {
+      justify-content: flex-start;
+    }
+
     #verify-resend {
       display: none;
     }
@@ -236,6 +249,12 @@
       flex-wrap: wrap;
     }
 
+    .admin-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .lang-select select {
       border-radius: 999px;
       border: 2px solid var(--stroke);
@@ -274,18 +293,28 @@
       display: grid;
       grid-template-columns: 220px minmax(0, 1fr);
       gap: 24px;
-      padding: 24px clamp(16px, 3vw, 32px) 48px;
+      padding: 24px clamp(16px, 3vw, 32px) 220px;
     }
 
     body[data-view="search"] .layout,
     body[data-view="channels"] .layout,
-    body[data-view="admin-videos"] .layout {
+    body[data-view="admin-overview"] .layout,
+    body[data-view="admin-users"] .layout,
+    body[data-view="admin-channels"] .layout,
+    body[data-view="admin-videos"] .layout,
+    body[data-view="admin-reports"] .layout,
+    body[data-view="admin-imports"] .layout {
       grid-template-columns: 1fr;
     }
 
     body[data-view="search"] aside,
     body[data-view="channels"] aside,
-    body[data-view="admin-videos"] aside {
+    body[data-view="admin-overview"] aside,
+    body[data-view="admin-users"] aside,
+    body[data-view="admin-channels"] aside,
+    body[data-view="admin-videos"] aside,
+    body[data-view="admin-reports"] aside,
+    body[data-view="admin-imports"] aside {
       display: none;
     }
 
@@ -293,14 +322,29 @@
     body[data-view="search"] #viral-view,
     body[data-view="channels"] #feed-view,
     body[data-view="channels"] #viral-view,
+    body[data-view="admin-overview"] #feed-view,
+    body[data-view="admin-overview"] #viral-view,
+    body[data-view="admin-users"] #feed-view,
+    body[data-view="admin-users"] #viral-view,
+    body[data-view="admin-channels"] #feed-view,
+    body[data-view="admin-channels"] #viral-view,
     body[data-view="admin-videos"] #feed-view,
-    body[data-view="admin-videos"] #viral-view {
+    body[data-view="admin-videos"] #viral-view,
+    body[data-view="admin-reports"] #feed-view,
+    body[data-view="admin-reports"] #viral-view,
+    body[data-view="admin-imports"] #feed-view,
+    body[data-view="admin-imports"] #viral-view {
       display: none;
     }
 
     body[data-view="feed"] #search-view,
     body[data-view="feed"] #channels-page,
-    body[data-view="feed"] #admin-videos-page {
+    body[data-view="feed"] #admin-overview-page,
+    body[data-view="feed"] #admin-users-page,
+    body[data-view="feed"] #admin-channels-page,
+    body[data-view="feed"] #admin-videos-page,
+    body[data-view="feed"] #admin-reports-page,
+    body[data-view="feed"] #admin-imports-page {
       display: none;
     }
 
@@ -626,6 +670,66 @@
       border: 2px solid var(--stroke);
       border-radius: var(--radius-md);
       padding: 14px;
+    }
+
+    .control-dock {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(1120px, calc(100% - 32px));
+      z-index: 40;
+      display: grid;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .control-dock-inner {
+      display: grid;
+      gap: 12px;
+      background: var(--bg-alt);
+      border: 2px solid var(--stroke);
+      border-radius: calc(var(--radius-lg) + 8px);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      pointer-events: auto;
+    }
+
+    .control-dock-toggle {
+      justify-self: end;
+      pointer-events: auto;
+    }
+
+    .control-dock.collapsed {
+      left: auto;
+      right: 16px;
+      transform: none;
+      width: auto;
+    }
+
+    .control-dock.collapsed .control-dock-inner {
+      display: none;
+    }
+
+    .sidebar-toggle-tab {
+      position: fixed;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 35;
+      display: none;
+    }
+
+    body.sidebar-collapsed .sidebar-toggle-tab {
+      display: inline-flex;
+    }
+
+    body.sidebar-collapsed aside {
+      display: none;
+    }
+
+    body.sidebar-collapsed .layout {
+      grid-template-columns: 1fr;
     }
 
     .control-group {
@@ -999,9 +1103,43 @@
       }
     }
 
+    @media (max-width: 900px) {
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .search,
+      .top-actions {
+        width: 100%;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .admin-nav {
+        flex-wrap: wrap;
+      }
+
+      .modal-card {
+        width: min(92vw, 520px);
+        max-height: 90vh;
+        overflow: auto;
+      }
+
+      .auth-card {
+        width: min(92vw, 520px);
+      }
+    }
+
     @media (max-width: 720px) {
       header {
         grid-template-columns: 1fr;
+      }
+
+      .layout {
+        padding-bottom: 260px;
       }
 
       .channel {
@@ -1011,6 +1149,33 @@
       .channel-actions {
         grid-column: 1 / -1;
         justify-content: flex-start;
+      }
+
+      .control-dock {
+        width: calc(100% - 24px);
+        bottom: 12px;
+      }
+
+      .control-dock-inner {
+        padding: 10px;
+      }
+
+      .control-row {
+        gap: 6px;
+      }
+
+      .controls {
+        padding: 10px;
+      }
+
+      .timeline {
+        grid-template-columns: 42px 1fr 42px;
+        gap: 8px;
+      }
+
+      .quality-select {
+        width: 100%;
+        max-width: 100%;
       }
     }
   </style>
@@ -1043,13 +1208,20 @@
             <option value="ar">العربية</option>
           </select>
         </div>
+        <button class="pill icon-button" id="sidebar-toggle" type="button" aria-label="Toggle sidebar" data-i18n-aria="sidebar_toggle"></button>
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
         <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
-        <button class="pill icon-button" id="view-theater" type="button" aria-label="Theater"></button>
-        <button class="pill icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
+        <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
+        <div class="admin-nav" id="admin-nav">
+          <button class="pill icon-button" id="admin-overview-open" type="button" aria-label="Admin overview" data-i18n-aria="admin_overview"></button>
+          <button class="pill icon-button" id="admin-users-open" type="button" aria-label="Admin users" data-i18n-aria="admin_users"></button>
+          <button class="pill icon-button" id="admin-channels-open" type="button" aria-label="Admin channels" data-i18n-aria="admin_channels"></button>
+          <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
+          <button class="pill icon-button" id="admin-reports-open" type="button" aria-label="Admin reports" data-i18n-aria="admin_reports"></button>
+          <button class="pill icon-button" id="admin-imports-open" type="button" aria-label="Admin imports" data-i18n-aria="admin_imports"></button>
+        </div>
         <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
         <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
-        <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
         <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
         <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
         <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
@@ -1130,56 +1302,63 @@
             </div>
           </div>
 
-          <div class="heart-row">
-            <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
-          </div>
+          <div class="control-dock" id="control-dock">
+            <button class="pill icon-button control-dock-toggle" id="controls-toggle" type="button" aria-label="Hide controls" data-i18n-aria="controls_hide"></button>
+            <div class="control-dock-inner" id="control-dock-inner">
+              <div class="heart-row">
+                <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
+              </div>
 
-          <div class="controls">
-            <div class="timeline">
-              <label class="sr-only" for="seek-bar" data-i18n="timeline_label">Video timeline</label>
-              <span class="time-label" id="time-current">0:00</span>
-              <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline" data-i18n-aria="timeline_seek">
-              <span class="time-label" id="time-duration">0:00</span>
-            </div>
-            <div class="control-group">
-              <div class="control-row">
-                <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
-                <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
-                <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
-                <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
-                <span class="volume-readout" id="volume-level">100%</span>
-                <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
-                <button class="ghost icon-button" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
+              <div class="controls">
+                <div class="timeline">
+                  <label class="sr-only" for="seek-bar" data-i18n="timeline_label">Video timeline</label>
+                  <span class="time-label" id="time-current">0:00</span>
+                  <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline" data-i18n-aria="timeline_seek">
+                  <span class="time-label" id="time-duration">0:00</span>
+                </div>
+                <div class="control-group">
+                  <div class="control-row">
+                    <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
+                    <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
+                    <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
+                    <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
+                    <span class="volume-readout" id="volume-level">100%</span>
+                    <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
+                    <button class="ghost icon-button" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
+                  </div>
+                  <div class="control-row control-row--secondary">
+                    <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
+                    <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
+                    <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+                    <select class="quality-select" id="quality-select" aria-label="Playback quality">
+                      <option value="default" data-i18n="quality_auto">Auto</option>
+                      <option value="tiny">144p</option>
+                      <option value="small">240p</option>
+                      <option value="medium">360p</option>
+                      <option value="large">480p</option>
+                      <option value="hd720">720p</option>
+                      <option value="hd1080">1080p</option>
+                      <option value="hd1440">2K</option>
+                      <option value="hd2160">4K</option>
+                    </select>
+                    <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
+                      <option value="off" data-i18n="captions_off">Captions off</option>
+                      <option value="english" data-i18n="lang_english">English</option>
+                      <option value="russian" data-i18n="lang_russian">Russian</option>
+                      <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+                      <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+                      <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+                      <option value="arabic" data-i18n="lang_arabic">Arabic</option>
+                    </select>
+                    <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
+                    <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
+                    <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
+                  </div>
+                  <div class="control-row control-row--emote">
+                    <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
+                  </div>
+                </div>
               </div>
-              <div class="control-row control-row--secondary">
-                <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
-                <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
-                <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
-                <select class="quality-select" id="quality-select" aria-label="Playback quality">
-                  <option value="default" data-i18n="quality_auto">Auto</option>
-                  <option value="tiny">144p</option>
-                  <option value="small">240p</option>
-                  <option value="medium">360p</option>
-                  <option value="large">480p</option>
-                  <option value="hd720">720p</option>
-                  <option value="hd1080">1080p</option>
-                  <option value="hd1440">2K</option>
-                  <option value="hd2160">4K</option>
-                </select>
-                <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
-                  <option value="off" data-i18n="captions_off">Captions off</option>
-                  <option value="english" data-i18n="lang_english">English</option>
-                  <option value="russian" data-i18n="lang_russian">Russian</option>
-                  <option value="chinese" data-i18n="lang_chinese">Chinese</option>
-                  <option value="turkish" data-i18n="lang_turkish">Turkish</option>
-                  <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
-                  <option value="arabic" data-i18n="lang_arabic">Arabic</option>
-                </select>
-                <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
-              </div>
-            </div>
-            <div class="control-row control-row--emote">
-              <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
             </div>
           </div>
         </section>
@@ -1216,6 +1395,17 @@
           </div>
           <div class="section-sub" id="search-title"></div>
           <div class="grid" id="search-grid"></div>
+          <div class="empty-state hidden" id="search-empty" data-i18n="search_no_results">No results found.</div>
+          <div class="recommendations hidden" id="search-fallback">
+            <div class="section-head">
+              <h3 data-i18n="search_fallback_recommended">Recommended</h3>
+            </div>
+            <div class="grid" id="search-fallback-recommended"></div>
+            <div class="section-head">
+              <h3 data-i18n="search_fallback_viral">Viral</h3>
+            </div>
+            <div class="grid" id="search-fallback-viral"></div>
+          </div>
           <div class="load-more">
             <div class="card-meta" data-i18n="feed_load_hint">More videos below</div>
             <button class="ghost" id="search-load-more" type="button" data-i18n="feed_load_more">Load more</button>
@@ -1250,6 +1440,56 @@
           </div>
         </section>
 
+        <section class="recommendations hidden" id="admin-overview-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_overview_title">Admin overview</h2>
+            <button class="pill icon-button" id="admin-overview-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="form-grid" id="admin-overview-page-list"></div>
+        </section>
+
+        <section class="recommendations hidden" id="admin-users-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_users_title">Admin users</h2>
+            <button class="pill icon-button" id="admin-users-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="section-actions">
+            <span class="section-hint" data-i18n="admin_users_hint">Search users</span>
+            <input id="admin-users-search-page" type="search" placeholder="Search users" data-i18n-placeholder="admin_users_search">
+          </div>
+          <div class="form-grid" id="admin-users-page-list"></div>
+          <div class="load-more">
+            <button class="ghost" id="admin-users-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
+        <section class="recommendations hidden" id="admin-channels-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_channels_title">Admin channels</h2>
+            <button class="pill icon-button" id="admin-channels-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="section-actions">
+            <span class="section-hint" data-i18n="admin_channels_hint">Artists and channels</span>
+            <input id="admin-channels-search-page" type="search" placeholder="Search channels" data-i18n-placeholder="admin_channels_search">
+          </div>
+          <div class="form-grid" id="admin-channels-page-list"></div>
+          <div class="load-more">
+            <button class="ghost" id="admin-channels-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
         <section class="recommendations hidden" id="admin-videos-page" aria-hidden="true">
           <div class="section-head">
             <h2 data-i18n="admin_videos_page_title">Admin videos</h2>
@@ -1266,6 +1506,44 @@
           <div class="form-grid" id="admin-videos-page-list"></div>
           <div class="load-more">
             <button class="ghost" id="admin-videos-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
+        <section class="recommendations hidden" id="admin-reports-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_reports_title">Admin reports</h2>
+            <button class="pill icon-button" id="admin-reports-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="form-grid" id="admin-reports-page-list"></div>
+        </section>
+
+        <section class="recommendations hidden" id="admin-imports-page" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="admin_imports_title">Admin imports</h2>
+            <button class="pill icon-button" id="admin-imports-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="admin-tools">
+            <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
+            <label class="card-meta" for="admin-csv-page" data-i18n="admin_csv_label">CSV file</label>
+            <input id="admin-csv-page" name="admin-csv-page" type="file" accept=".csv,text/csv">
+            <div class="form-actions">
+              <button class="ghost" type="button" id="admin-import-csv-page" data-i18n="admin_import_csv">Import CSV</button>
+              <button class="ghost" type="button" id="admin-export-sql-page" data-i18n="admin_export_sql">Download SQL</button>
+            </div>
+            <label class="card-meta" for="admin-sql-page" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
+            <textarea id="admin-sql-page" name="admin-sql-page" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
+            <div class="form-actions">
+              <button class="ghost" type="button" id="admin-import-sql-page" data-i18n="admin_import_sql">Import SQL</button>
+            </div>
+            <div class="card-meta" id="admin-import-message-page"></div>
           </div>
         </section>
 
@@ -1299,6 +1577,7 @@
         </section>
       </main>
     </div>
+    <button class="pill icon-button sidebar-toggle-tab" id="sidebar-toggle-tab" type="button" aria-label="Show sidebar" data-i18n-aria="sidebar_show"></button>
   </div>
 
   <section class="auth-gate" id="auth-gate">
@@ -1482,6 +1761,12 @@
         <label for="topic-search" data-i18n="settings_topic_search">Find topic</label>
         <input id="topic-search" name="topic-search" type="search" placeholder="Search topics" data-i18n-placeholder="settings_topic_placeholder">
         <div id="settings-topics" class="form-grid topic-list"></div>
+        <div class="card-meta" data-i18n="settings_channels">Channels to control</div>
+        <label><input type="radio" name="channel-mode" value="allow" checked> <span data-i18n="settings_channel_allow">Allow only selected</span></label>
+        <label><input type="radio" name="channel-mode" value="block"> <span data-i18n="settings_channel_block">Hide selected</span></label>
+        <label for="channel-search" data-i18n="settings_channel_search">Find channel</label>
+        <input id="channel-search" name="channel-search" type="search" placeholder="Search channels" data-i18n-placeholder="settings_channel_placeholder">
+        <div id="settings-channels" class="form-grid topic-list"></div>
         <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
         <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
         <label for="settings-password" data-i18n="settings_password">Confirm with your password</label>
@@ -1494,6 +1779,22 @@
       <div class="card-meta" data-i18n="settings_history">Today's history</div>
       <div class="form-grid" id="history-list"></div>
       <div class="card-meta" id="settings-message"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="settings-auth-modal" aria-hidden="true">
+    <div class="modal-card">
+      <h2 data-i18n="settings_unlock_title">Unlock settings</h2>
+      <p class="card-meta" data-i18n="settings_unlock_copy">Enter your password to open parent settings.</p>
+      <form class="form-grid" id="settings-auth-form">
+        <label for="settings-auth-password" data-i18n="settings_password">Confirm with your password</label>
+        <input id="settings-auth-password" name="settings-auth-password" type="password" autocomplete="current-password" required>
+        <div class="form-actions">
+          <button class="ghost" type="button" data-close="settings-auth-modal" data-i18n="action_close">Close</button>
+          <button class="primary" type="submit" data-i18n="action_continue">Continue</button>
+        </div>
+      </form>
+      <div class="card-meta" id="settings-auth-message"></div>
     </div>
   </div>
 
@@ -1559,9 +1860,13 @@
   <script>
     const ui = {
       themeToggle: document.getElementById("theme-toggle"),
+      sidebarToggle: document.getElementById("sidebar-toggle"),
+      sidebarToggleTab: document.getElementById("sidebar-toggle-tab"),
       viewTheater: document.getElementById("view-theater"),
       viewMini: document.getElementById("view-mini"),
       playerArea: document.getElementById("player-area"),
+      controlDock: document.getElementById("control-dock"),
+      controlsToggle: document.getElementById("controls-toggle"),
       searchForm: document.getElementById("search-form"),
       searchInput: document.getElementById("search-input"),
       channelList: document.getElementById("channel-list"),
@@ -1578,6 +1883,10 @@
       loadMore: document.getElementById("load-more"),
       searchView: document.getElementById("search-view"),
       searchGrid: document.getElementById("search-grid"),
+      searchEmpty: document.getElementById("search-empty"),
+      searchFallback: document.getElementById("search-fallback"),
+      searchFallbackRecommended: document.getElementById("search-fallback-recommended"),
+      searchFallbackViral: document.getElementById("search-fallback-viral"),
       searchLoadMore: document.getElementById("search-load-more"),
       searchTitle: document.getElementById("search-title"),
       searchBack: document.getElementById("search-back"),
@@ -1586,11 +1895,29 @@
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
       channelView: document.getElementById("channel-view"),
+      adminOverviewPage: document.getElementById("admin-overview-page"),
+      adminOverviewPageList: document.getElementById("admin-overview-page-list"),
+      adminOverviewBack: document.getElementById("admin-overview-back"),
+      adminUsersPage: document.getElementById("admin-users-page"),
+      adminUsersPageList: document.getElementById("admin-users-page-list"),
+      adminUsersSearchPage: document.getElementById("admin-users-search-page"),
+      adminUsersLoadMore: document.getElementById("admin-users-load-more"),
+      adminUsersBack: document.getElementById("admin-users-back"),
+      adminChannelsPage: document.getElementById("admin-channels-page"),
+      adminChannelsPageList: document.getElementById("admin-channels-page-list"),
+      adminChannelsSearchPage: document.getElementById("admin-channels-search-page"),
+      adminChannelsLoadMore: document.getElementById("admin-channels-load-more"),
+      adminChannelsBack: document.getElementById("admin-channels-back"),
       adminVideosPage: document.getElementById("admin-videos-page"),
       adminVideosPageList: document.getElementById("admin-videos-page-list"),
       adminVideosSearchPage: document.getElementById("admin-videos-search"),
       adminVideosLoadMore: document.getElementById("admin-videos-load-more"),
       adminVideosBack: document.getElementById("admin-videos-back"),
+      adminReportsPage: document.getElementById("admin-reports-page"),
+      adminReportsPageList: document.getElementById("admin-reports-page-list"),
+      adminReportsBack: document.getElementById("admin-reports-back"),
+      adminImportsPage: document.getElementById("admin-imports-page"),
+      adminImportsBack: document.getElementById("admin-imports-back"),
       channelTitle: document.getElementById("channel-title"),
       channelStats: document.getElementById("channel-stats"),
       channelSloganView: document.getElementById("channel-slogan-view"),
@@ -1621,11 +1948,19 @@
       uploadModal: document.getElementById("upload-modal"),
       adminModal: document.getElementById("admin-modal"),
       settingsModal: document.getElementById("settings-modal"),
+      settingsAuthModal: document.getElementById("settings-auth-modal"),
       authOpen: document.getElementById("auth-open"),
       authLogout: document.getElementById("auth-logout"),
       uploadOpen: document.getElementById("upload-open"),
       adminOpen: document.getElementById("admin-open"),
+      adminNav: document.getElementById("admin-nav"),
+      adminOverviewOpen: document.getElementById("admin-overview-open"),
+      adminUsersOpen: document.getElementById("admin-users-open"),
+      adminChannelsOpen: document.getElementById("admin-channels-open"),
+      adminReportsOpen: document.getElementById("admin-reports-open"),
+      adminImportsOpen: document.getElementById("admin-imports-open"),
       adminVideosOpen: document.getElementById("admin-videos-open"),
+      channelsPageOpen: document.getElementById("channels-page-open"),
       studioOpen: document.getElementById("studio-open"),
       settingsOpen: document.getElementById("settings-open"),
       notificationsOpen: document.getElementById("notifications-open"),
@@ -1636,16 +1971,22 @@
       forgotPassword: document.getElementById("forgot-password"),
       uploadForm: document.getElementById("upload-form"),
       settingsForm: document.getElementById("settings-form"),
+      settingsAuthForm: document.getElementById("settings-auth-form"),
       reportForm: document.getElementById("report-form"),
       authMessage: document.getElementById("auth-message"),
       uploadMessage: document.getElementById("upload-message"),
       settingsMessage: document.getElementById("settings-message"),
+      settingsAuthMessage: document.getElementById("settings-auth-message"),
       historyList: document.getElementById("history-list"),
       settingsTopicSearch: document.getElementById("topic-search"),
       settingsTopics: document.getElementById("settings-topics"),
+      settingsChannelSearch: document.getElementById("channel-search"),
+      settingsChannels: document.getElementById("settings-channels"),
       uploadTopics: document.getElementById("upload-topics"),
       topicsList: document.getElementById("topics-list"),
       maxWatch: document.getElementById("max-watch"),
+      settingsPassword: document.getElementById("settings-password"),
+      settingsAuthPassword: document.getElementById("settings-auth-password"),
       viralGrid: document.getElementById("viral-grid"),
       profileForm: document.getElementById("profile-form"),
       profileMessage: document.getElementById("profile-message"),
@@ -1677,6 +2018,12 @@
       adminImportSql: document.getElementById("admin-import-sql"),
       adminExportSql: document.getElementById("admin-export-sql"),
       adminImportMessage: document.getElementById("admin-import-message"),
+      adminCsvPage: document.getElementById("admin-csv-page"),
+      adminSqlPage: document.getElementById("admin-sql-page"),
+      adminImportCsvPage: document.getElementById("admin-import-csv-page"),
+      adminImportSqlPage: document.getElementById("admin-import-sql-page"),
+      adminExportSqlPage: document.getElementById("admin-export-sql-page"),
+      adminImportMessagePage: document.getElementById("admin-import-message-page"),
       adminReports: document.getElementById("admin-reports"),
       uiLanguage: document.getElementById("ui-language"),
       controlsHeart: document.getElementById("controls-heart"),
@@ -1731,6 +2078,20 @@
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 5h18v12H3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M7 19h10\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>",
       mini:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 6h16v12H4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M12 12h6v4h-6z\"/></svg>",
+      bars:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M4 12h16M4 17h16\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      dockHide:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 14l6-6 6 6\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      dockShow:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 10l6 6 6-6\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      users:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z\"/></svg>",
+      channels:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 6h16v3H4zM4 11h10v3H4zM4 16h16v3H4z\"/></svg>",
+      reports:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3 2 21h20L12 3zm0 6v5m0 4h.01\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+      imports:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3v10m0 0-4-4m4 4 4-4M5 19h14\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
       upload:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 16V5m0 0-4 4m4-4 4 4M5 19h14\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
       admin:
@@ -1762,18 +2123,22 @@
     const translations = {
       en: {
         search_label: "Search",
+        sidebar_toggle: "Toggle sidebar",
+        sidebar_show: "Show sidebar",
+        controls_hide: "Hide controls",
+        controls_show: "Show controls",
         search_placeholder: "Search videos and channels",
         ui_language_label: "Language",
         sidebar_subscribed: "Subscribed",
         sidebar_channels: "Channels",
         status_loading: "Loading",
-        player_loading: "Loading player...",
+        player_loading: "Preparing the player...",
         overlay_ready: "Ready to play",
-        overlay_tap_start: "Tap to start the video",
-        overlay_autoplay_note: "Autoplay is often blocked. Press start to begin.",
-        overlay_complete: "Video complete",
-        overlay_next_prompt: "What do you want to watch next?",
-        overlay_next_copy: "Choose an action to keep the flow going.",
+        overlay_tap_start: "Tap play to start",
+        overlay_autoplay_note: "Autoplay can be blocked. Tap play to begin.",
+        overlay_complete: "All done!",
+        overlay_next_prompt: "Watch another one?",
+        overlay_next_copy: "Replay or pick the next video.",
         video_select: "Select a video",
         timeline_label: "Video timeline",
         timeline_seek: "Seek video timeline",
@@ -1791,6 +2156,9 @@
         search_results: "Results for",
         search_title: "Search results",
         search_back: "Back to feed",
+        search_no_results: "No matches. Try another word.",
+        search_fallback_recommended: "Recommended",
+        search_fallback_viral: "Viral",
         channels_open: "All channels",
         channels_title: "Channels",
         channels_back: "Back to feed",
@@ -1801,8 +2169,8 @@
         channels_sort_videos: "Most videos",
         channels_sort_name: "A-Z",
         channels_filter_subscribed: "Subscribed only",
-        auth_welcome: "Welcome to Sevimli Aile",
-        auth_subtitle: "Log in or create an account to start watching.",
+        auth_welcome: "Welcome, parents!",
+        auth_subtitle: "Create a safe, happy space for kids. Sign in or make an account to begin.",
         auth_email: "Email",
         auth_password: "Password",
         auth_sign_in: "Sign in",
@@ -1812,6 +2180,8 @@
         auth_resend: "Resend verification email",
         auth_forgot: "Forgot password",
         auth_sign_out: "Sign out",
+        settings_unlock_title: "Parent check",
+        settings_unlock_copy: "Enter your password to open parent controls.",
         upload_title: "Add YouTube video",
         upload_url: "YouTube URL",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -1821,6 +2191,15 @@
         upload_add: "Add video",
         upload_hint: "Title will auto-fill from YouTube when available.",
         admin_title: "Admin controls",
+        admin_overview: "Admin overview",
+        admin_users: "Admin users",
+        admin_channels: "Admin channels",
+        admin_imports: "Admin imports",
+        admin_overview_title: "Admin overview",
+        admin_users_title: "Admin users",
+        admin_channels_title: "Admin channels",
+        admin_reports_title: "Admin reports",
+        admin_imports_title: "Admin imports",
         admin_reports: "Reports",
         admin_import_hint: "Bulk import approved YouTube links (CSV or SQL).",
         admin_csv_label: "CSV file",
@@ -1840,13 +2219,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "Save profile",
         studio_stats: "Your stats",
-        settings_title: "Parent settings",
+        settings_title: "Parent controls",
         settings_languages: "Languages to show",
         settings_topics: "Topics to control",
         settings_topic_allow: "Allow only selected",
         settings_topic_block: "Hide selected",
         settings_topic_search: "Find topic",
         settings_topic_placeholder: "Search topics",
+        settings_channels: "Channels to control",
+        settings_channel_allow: "Allow only selected",
+        settings_channel_block: "Hide selected",
+        settings_channel_search: "Find channel",
+        settings_channel_placeholder: "Search channels",
         settings_watch_limit: "Daily watch limit (hours)",
         settings_password: "Confirm with your password",
         settings_save: "Save settings",
@@ -1858,6 +2242,7 @@
         signout_title: "Confirm sign out",
         updates_title: "Updates",
         action_close: "Close",
+        action_continue: "Continue",
         lang_english: "English",
         lang_russian: "Russian",
         lang_chinese: "Chinese",
@@ -2011,18 +2396,22 @@
       },
       ru: {
         search_label: "Поиск",
+        sidebar_toggle: "Скрыть боковую панель",
+        sidebar_show: "Показать боковую панель",
+        controls_hide: "Скрыть управление",
+        controls_show: "Показать управление",
         search_placeholder: "Поиск видео и каналов",
         ui_language_label: "Язык",
         sidebar_subscribed: "Подписки",
         sidebar_channels: "Каналы",
         status_loading: "Загрузка",
-        player_loading: "Загрузка плеера...",
+        player_loading: "Готовим плеер...",
         overlay_ready: "Готово к воспроизведению",
-        overlay_tap_start: "Нажмите, чтобы начать видео",
-        overlay_autoplay_note: "Автовоспроизведение часто блокируется. Нажмите старт.",
-        overlay_complete: "Видео завершено",
-        overlay_next_prompt: "Что хотите посмотреть дальше?",
-        overlay_next_copy: "Выберите действие, чтобы продолжить.",
+        overlay_tap_start: "Нажмите «пуск»",
+        overlay_autoplay_note: "Автовоспроизведение может быть отключено. Нажмите «пуск».",
+        overlay_complete: "Готово!",
+        overlay_next_prompt: "Смотреть ещё?",
+        overlay_next_copy: "Повторить или включить следующее.",
         video_select: "Выберите видео",
         timeline_label: "Шкала видео",
         timeline_seek: "Перемотка по шкале",
@@ -2040,6 +2429,9 @@
         search_results: "Результаты для",
         search_title: "Результаты поиска",
         search_back: "Назад к ленте",
+        search_no_results: "Ничего не найдено. Попробуйте другое слово.",
+        search_fallback_recommended: "Рекомендуемое",
+        search_fallback_viral: "Популярное",
         channels_open: "Все каналы",
         channels_title: "Каналы",
         channels_back: "Назад к ленте",
@@ -2050,8 +2442,8 @@
         channels_sort_videos: "Больше видео",
         channels_sort_name: "А-Я",
         channels_filter_subscribed: "Только подписки",
-        auth_welcome: "Добро пожаловать в Sevimli Aile",
-        auth_subtitle: "Войдите или создайте аккаунт, чтобы смотреть.",
+        auth_welcome: "Здравствуйте, родители!",
+        auth_subtitle: "Создайте безопасное пространство для ребёнка. Войдите или зарегистрируйтесь.",
         auth_email: "Эл. почта",
         auth_password: "Пароль",
         auth_sign_in: "Войти",
@@ -2061,6 +2453,8 @@
         auth_resend: "Повторить письмо",
         auth_forgot: "Забыли пароль",
         auth_sign_out: "Выйти",
+        settings_unlock_title: "Проверка родителя",
+        settings_unlock_copy: "Введите пароль, чтобы открыть родительский контроль.",
         upload_title: "Добавить видео YouTube",
         upload_url: "Ссылка YouTube",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -2070,6 +2464,15 @@
         upload_add: "Добавить видео",
         upload_hint: "Название подставится из YouTube при наличии.",
         admin_title: "Панель администратора",
+        admin_overview: "Обзор",
+        admin_users: "Пользователи",
+        admin_channels: "Каналы",
+        admin_imports: "Импорт",
+        admin_overview_title: "Обзор администратора",
+        admin_users_title: "Пользователи администратора",
+        admin_channels_title: "Каналы администратора",
+        admin_reports_title: "Жалобы администратора",
+        admin_imports_title: "Импорт администратора",
         admin_reports: "Жалобы",
         admin_import_hint: "Импорт одобренных ссылок YouTube (CSV или SQL).",
         admin_csv_label: "CSV файл",
@@ -2089,13 +2492,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "Сохранить профиль",
         studio_stats: "Ваша статистика",
-        settings_title: "Родительские настройки",
+        settings_title: "Родительский контроль",
         settings_languages: "Показываемые языки",
         settings_topics: "Темы для контроля",
         settings_topic_allow: "Показывать только выбранные",
         settings_topic_block: "Скрыть выбранные",
         settings_topic_search: "Найти тему",
         settings_topic_placeholder: "Поиск тем",
+        settings_channels: "Каналы для контроля",
+        settings_channel_allow: "Показывать только выбранные",
+        settings_channel_block: "Скрыть выбранные",
+        settings_channel_search: "Найти канал",
+        settings_channel_placeholder: "Поиск каналов",
         settings_watch_limit: "Лимит просмотра в день (часы)",
         settings_password: "Подтвердите паролем",
         settings_save: "Сохранить",
@@ -2107,6 +2515,7 @@
         signout_title: "Подтвердите выход",
         updates_title: "Обновления",
         action_close: "Закрыть",
+        action_continue: "Продолжить",
         lang_english: "Английский",
         lang_russian: "Русский",
         lang_chinese: "Китайский",
@@ -2260,18 +2669,22 @@
       },
       zh: {
         search_label: "搜索",
+        sidebar_toggle: "切换侧边栏",
+        sidebar_show: "显示侧边栏",
+        controls_hide: "隐藏控制栏",
+        controls_show: "显示控制栏",
         search_placeholder: "搜索视频和频道",
         ui_language_label: "语言",
         sidebar_subscribed: "已订阅",
         sidebar_channels: "频道",
         status_loading: "加载中",
-        player_loading: "播放器加载中...",
+        player_loading: "正在准备播放器...",
         overlay_ready: "准备播放",
-        overlay_tap_start: "点击开始播放",
-        overlay_autoplay_note: "自动播放常被拦截，请点击开始。",
-        overlay_complete: "视频结束",
-        overlay_next_prompt: "接下来想看什么？",
-        overlay_next_copy: "选择一个操作继续观看。",
+        overlay_tap_start: "点击播放开始",
+        overlay_autoplay_note: "自动播放可能被阻止，请点击播放。",
+        overlay_complete: "播放结束！",
+        overlay_next_prompt: "要再看一个吗？",
+        overlay_next_copy: "重播或播放下一个。",
         video_select: "请选择一个视频",
         timeline_label: "视频时间轴",
         timeline_seek: "拖动时间轴",
@@ -2289,6 +2702,9 @@
         search_results: "搜索结果：",
         search_title: "搜索结果",
         search_back: "返回首页",
+        search_no_results: "没有找到结果，请换个词试试。",
+        search_fallback_recommended: "推荐",
+        search_fallback_viral: "热门",
         channels_open: "全部频道",
         channels_title: "频道",
         channels_back: "返回首页",
@@ -2299,8 +2715,8 @@
         channels_sort_videos: "最多视频",
         channels_sort_name: "按名称",
         channels_filter_subscribed: "仅订阅",
-        auth_welcome: "欢迎来到 Sevimli Aile",
-        auth_subtitle: "登录或注册即可观看。",
+        auth_welcome: "家长您好！",
+        auth_subtitle: "为孩子创建安全的空间。登录或注册开始使用。",
         auth_email: "邮箱",
         auth_password: "密码",
         auth_sign_in: "登录",
@@ -2310,6 +2726,8 @@
         auth_resend: "重新发送验证邮件",
         auth_forgot: "忘记密码",
         auth_sign_out: "退出登录",
+        settings_unlock_title: "家长确认",
+        settings_unlock_copy: "输入密码以打开家长控制。",
         upload_title: "添加 YouTube 视频",
         upload_url: "YouTube 链接",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -2319,6 +2737,15 @@
         upload_add: "添加视频",
         upload_hint: "如可用，标题将自动从 YouTube 获取。",
         admin_title: "管理员控制台",
+        admin_overview: "管理员概览",
+        admin_users: "管理员用户",
+        admin_channels: "管理员频道",
+        admin_imports: "管理员导入",
+        admin_overview_title: "管理员概览",
+        admin_users_title: "管理员用户",
+        admin_channels_title: "管理员频道",
+        admin_reports_title: "管理员举报",
+        admin_imports_title: "管理员导入",
         admin_reports: "举报",
         admin_import_hint: "批量导入已批准的 YouTube 链接（CSV 或 SQL）。",
         admin_csv_label: "CSV 文件",
@@ -2338,13 +2765,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "保存资料",
         studio_stats: "你的数据",
-        settings_title: "家长设置",
+        settings_title: "家长控制",
         settings_languages: "显示语言",
         settings_topics: "主题控制",
         settings_topic_allow: "仅显示所选",
         settings_topic_block: "隐藏所选",
         settings_topic_search: "查找主题",
         settings_topic_placeholder: "搜索主题",
+        settings_channels: "频道控制",
+        settings_channel_allow: "仅显示所选",
+        settings_channel_block: "隐藏所选",
+        settings_channel_search: "查找频道",
+        settings_channel_placeholder: "搜索频道",
         settings_watch_limit: "每日观看时长（小时）",
         settings_password: "用密码确认",
         settings_save: "保存设置",
@@ -2356,6 +2788,7 @@
         signout_title: "确认退出",
         updates_title: "通知",
         action_close: "关闭",
+        action_continue: "继续",
         lang_english: "英语",
         lang_russian: "俄语",
         lang_chinese: "中文",
@@ -2509,18 +2942,22 @@
       },
       tr: {
         search_label: "Ara",
+        sidebar_toggle: "Kenar çubuğunu değiştir",
+        sidebar_show: "Kenar çubuğunu göster",
+        controls_hide: "Kontrolleri gizle",
+        controls_show: "Kontrolleri göster",
         search_placeholder: "Videoları ve kanalları ara",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abonelikler",
         sidebar_channels: "Kanallar",
         status_loading: "Yükleniyor",
-        player_loading: "Oynatıcı yükleniyor...",
+        player_loading: "Oynatıcı hazırlanıyor...",
         overlay_ready: "Oynatmaya hazır",
-        overlay_tap_start: "Başlatmak için dokun",
-        overlay_autoplay_note: "Otomatik oynatma engellenebilir. Başlat'a basın.",
-        overlay_complete: "Video tamamlandı",
-        overlay_next_prompt: "Sırada ne izleyelim?",
-        overlay_next_copy: "Devam etmek için bir seçim yapın.",
+        overlay_tap_start: "Başlatmak için dokunun",
+        overlay_autoplay_note: "Otomatik oynatma engellenebilir. Dokunarak başlatın.",
+        overlay_complete: "Bitti!",
+        overlay_next_prompt: "Bir tane daha izleyelim mi?",
+        overlay_next_copy: "Tekrar oynat veya sonraki videoyu aç.",
         video_select: "Bir video seçin",
         timeline_label: "Video zaman çizgisi",
         timeline_seek: "Zaman çizgisinde gez",
@@ -2538,6 +2975,9 @@
         search_results: "Arama sonuçları:",
         search_title: "Arama sonuçları",
         search_back: "Akışa dön",
+        search_no_results: "Sonuç bulunamadı. Başka bir kelime deneyin.",
+        search_fallback_recommended: "Önerilen",
+        search_fallback_viral: "Popüler",
         channels_open: "Tüm kanallar",
         channels_title: "Kanallar",
         channels_back: "Akışa dön",
@@ -2548,8 +2988,8 @@
         channels_sort_videos: "En çok video",
         channels_sort_name: "A-Z",
         channels_filter_subscribed: "Sadece abonelikler",
-        auth_welcome: "Sevimli Aile'e hoş geldiniz",
-        auth_subtitle: "İzlemeye başlamak için giriş yapın veya hesap oluşturun.",
+        auth_welcome: "Ebeveynler, hoş geldiniz!",
+        auth_subtitle: "Çocuklar için güvenli bir alan oluşturun. Giriş yapın ya da hesap açın.",
         auth_email: "E-posta",
         auth_password: "Şifre",
         auth_sign_in: "Giriş yap",
@@ -2559,6 +2999,8 @@
         auth_resend: "Doğrulama e-postasını tekrar gönder",
         auth_forgot: "Şifremi unuttum",
         auth_sign_out: "Çıkış yap",
+        settings_unlock_title: "Ebeveyn doğrulaması",
+        settings_unlock_copy: "Ebeveyn kontrollerini açmak için şifre girin.",
         upload_title: "YouTube videosu ekle",
         upload_url: "YouTube URL",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -2568,6 +3010,15 @@
         upload_add: "Video ekle",
         upload_hint: "Mümkünse başlık YouTube'dan alınır.",
         admin_title: "Yönetici paneli",
+        admin_overview: "Yönetici özet",
+        admin_users: "Yönetici kullanıcılar",
+        admin_channels: "Yönetici kanallar",
+        admin_imports: "Yönetici içe aktarma",
+        admin_overview_title: "Yönetici özet",
+        admin_users_title: "Yönetici kullanıcılar",
+        admin_channels_title: "Yönetici kanallar",
+        admin_reports_title: "Yönetici raporları",
+        admin_imports_title: "Yönetici içe aktarma",
         admin_reports: "Raporlar",
         admin_import_hint: "Onaylı YouTube linklerini toplu içe aktar (CSV veya SQL).",
         admin_csv_label: "CSV dosyası",
@@ -2587,13 +3038,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "Profili kaydet",
         studio_stats: "İstatistiklerin",
-        settings_title: "Ebeveyn ayarları",
+        settings_title: "Ebeveyn kontrolleri",
         settings_languages: "Gösterilecek diller",
         settings_topics: "Kontrol edilecek konular",
         settings_topic_allow: "Yalnızca seçilenleri göster",
         settings_topic_block: "Seçilenleri gizle",
         settings_topic_search: "Konu ara",
         settings_topic_placeholder: "Konuları ara",
+        settings_channels: "Kontrol edilecek kanallar",
+        settings_channel_allow: "Yalnızca seçilenleri göster",
+        settings_channel_block: "Seçilenleri gizle",
+        settings_channel_search: "Kanal ara",
+        settings_channel_placeholder: "Kanalları ara",
         settings_watch_limit: "Günlük izleme limiti (saat)",
         settings_password: "Şifre ile onayla",
         settings_save: "Ayarları kaydet",
@@ -2605,6 +3061,7 @@
         signout_title: "Çıkışı onayla",
         updates_title: "Güncellemeler",
         action_close: "Kapat",
+        action_continue: "Devam",
         lang_english: "İngilizce",
         lang_russian: "Rusça",
         lang_chinese: "Çince",
@@ -2758,18 +3215,22 @@
       },
       az: {
         search_label: "Axtar",
+        sidebar_toggle: "Yan paneli dəyiş",
+        sidebar_show: "Yan paneli göstər",
+        controls_hide: "İdarələri gizlət",
+        controls_show: "İdarələri göstər",
         search_placeholder: "Video və kanalları axtarın",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abunələr",
         sidebar_channels: "Kanallar",
         status_loading: "Yüklənir",
-        player_loading: "Pleyer yüklənir...",
+        player_loading: "Pleyer hazırlanır...",
         overlay_ready: "Oynatma hazırdır",
         overlay_tap_start: "Başlamaq üçün toxunun",
-        overlay_autoplay_note: "Avtomatik oynatma bloklana bilər. Başlat düyməsini basın.",
-        overlay_complete: "Video bitdi",
-        overlay_next_prompt: "Növbəti nə izləmək istəyirsiniz?",
-        overlay_next_copy: "Davam etmək üçün seçim edin.",
+        overlay_autoplay_note: "Avtomatik oynatma bloklana bilər. Toxunaraq başladın.",
+        overlay_complete: "Bitdi!",
+        overlay_next_prompt: "Birini də izləyək?",
+        overlay_next_copy: "Təkrar et və ya növbəti videonu aç.",
         video_select: "Video seçin",
         timeline_label: "Video zaman xətti",
         timeline_seek: "Zaman xəttində irəli-geri",
@@ -2787,6 +3248,9 @@
         search_results: "Axtarış nəticələri:",
         search_title: "Axtarış nəticələri",
         search_back: "Lentə qayıt",
+        search_no_results: "Nəticə tapılmadı. Başqa söz yoxlayın.",
+        search_fallback_recommended: "Tövsiyə olunan",
+        search_fallback_viral: "Viral",
         channels_open: "Bütün kanallar",
         channels_title: "Kanallar",
         channels_back: "Lentə qayıt",
@@ -2797,8 +3261,8 @@
         channels_sort_videos: "Ən çox video",
         channels_sort_name: "A-Z",
         channels_filter_subscribed: "Yalnız abunələr",
-        auth_welcome: "Sevimli Aile-ə xoş gəldiniz",
-        auth_subtitle: "İzləmək üçün daxil olun və ya hesab yaradın.",
+        auth_welcome: "Valideynlər, xoş gəldiniz!",
+        auth_subtitle: "Uşaqlar üçün təhlükəsiz məkan yaradın. Daxil olun və ya hesab yaradın.",
         auth_email: "Email",
         auth_password: "Şifrə",
         auth_sign_in: "Daxil ol",
@@ -2808,6 +3272,8 @@
         auth_resend: "Təsdiq emailini yenidən göndər",
         auth_forgot: "Şifrəni unutdum",
         auth_sign_out: "Çıxış",
+        settings_unlock_title: "Valideyn təsdiqi",
+        settings_unlock_copy: "Valideyn nəzarətini açmaq üçün şifrəni daxil edin.",
         upload_title: "YouTube videosu əlavə et",
         upload_url: "YouTube URL",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -2817,6 +3283,15 @@
         upload_add: "Video əlavə et",
         upload_hint: "Mümkünsə başlıq YouTube-dan alınır.",
         admin_title: "Admin idarəetmə",
+        admin_overview: "Admin ümumi baxış",
+        admin_users: "Admin istifadəçilər",
+        admin_channels: "Admin kanallar",
+        admin_imports: "Admin idxal",
+        admin_overview_title: "Admin ümumi baxış",
+        admin_users_title: "Admin istifadəçilər",
+        admin_channels_title: "Admin kanallar",
+        admin_reports_title: "Admin şikayətləri",
+        admin_imports_title: "Admin idxal",
         admin_reports: "Şikayətlər",
         admin_import_hint: "Təsdiqlənmiş YouTube linklərini toplu idxal et (CSV və ya SQL).",
         admin_csv_label: "CSV faylı",
@@ -2836,13 +3311,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "Profili yadda saxla",
         studio_stats: "Statistikanız",
-        settings_title: "Valideyn ayarları",
+        settings_title: "Valideyn nəzarəti",
         settings_languages: "Göstəriləcək dillər",
         settings_topics: "İdarə olunacaq mövzular",
         settings_topic_allow: "Yalnız seçilənləri göstər",
         settings_topic_block: "Seçilənləri gizlət",
         settings_topic_search: "Mövzu axtar",
         settings_topic_placeholder: "Mövzuları axtar",
+        settings_channels: "İdarə olunacaq kanallar",
+        settings_channel_allow: "Yalnız seçilənləri göstər",
+        settings_channel_block: "Seçilənləri gizlət",
+        settings_channel_search: "Kanal tap",
+        settings_channel_placeholder: "Kanalları axtar",
         settings_watch_limit: "Gündəlik izləmə limiti (saat)",
         settings_password: "Şifrə ilə təsdiqlə",
         settings_save: "Ayarları yadda saxla",
@@ -2854,6 +3334,7 @@
         signout_title: "Çıxışı təsdiqlə",
         updates_title: "Yeniliklər",
         action_close: "Bağla",
+        action_continue: "Davam et",
         lang_english: "İngilis",
         lang_russian: "Rus",
         lang_chinese: "Çin",
@@ -3007,18 +3488,22 @@
       },
       ar: {
         search_label: "بحث",
+        sidebar_toggle: "تبديل الشريط الجانبي",
+        sidebar_show: "إظهار الشريط الجانبي",
+        controls_hide: "إخفاء عناصر التحكم",
+        controls_show: "إظهار عناصر التحكم",
         search_placeholder: "ابحث عن الفيديوهات والقنوات",
         ui_language_label: "اللغة",
         sidebar_subscribed: "المشتركات",
         sidebar_channels: "القنوات",
         status_loading: "جارٍ التحميل",
-        player_loading: "جارٍ تحميل المشغل...",
+        player_loading: "جارٍ تجهيز المشغل...",
         overlay_ready: "جاهز للتشغيل",
-        overlay_tap_start: "اضغط لبدء الفيديو",
-        overlay_autoplay_note: "قد يتم حظر التشغيل التلقائي. اضغط بدء.",
-        overlay_complete: "اكتمل الفيديو",
-        overlay_next_prompt: "ماذا تريد أن تشاهد بعد ذلك؟",
-        overlay_next_copy: "اختر إجراءً للمتابعة.",
+        overlay_tap_start: "اضغط تشغيل للبدء",
+        overlay_autoplay_note: "قد يتم حظر التشغيل التلقائي. اضغط تشغيل للبدء.",
+        overlay_complete: "انتهى!",
+        overlay_next_prompt: "هل نُشاهد واحداً آخر؟",
+        overlay_next_copy: "أعد التشغيل أو افتح التالي.",
         video_select: "اختر فيديو",
         timeline_label: "خط زمن الفيديو",
         timeline_seek: "التحكم في خط الزمن",
@@ -3036,6 +3521,9 @@
         search_results: "نتائج البحث عن",
         search_title: "نتائج البحث",
         search_back: "العودة للرئيسية",
+        search_no_results: "لا توجد نتائج. جرّب كلمة أخرى.",
+        search_fallback_recommended: "موصى به",
+        search_fallback_viral: "شائع",
         channels_open: "كل القنوات",
         channels_title: "القنوات",
         channels_back: "العودة للرئيسية",
@@ -3046,8 +3534,8 @@
         channels_sort_videos: "الأكثر فيديوهات",
         channels_sort_name: "حسب الاسم",
         channels_filter_subscribed: "المشتركات فقط",
-        auth_welcome: "مرحباً بك في Sevimli Aile",
-        auth_subtitle: "سجّل الدخول أو أنشئ حساباً لبدء المشاهدة.",
+        auth_welcome: "أهلاً بالأهل!",
+        auth_subtitle: "أنشئ مساحة آمنة للأطفال. سجّل الدخول أو أنشئ حساباً.",
         auth_email: "البريد الإلكتروني",
         auth_password: "كلمة المرور",
         auth_sign_in: "تسجيل الدخول",
@@ -3057,6 +3545,8 @@
         auth_resend: "إعادة إرسال التحقق",
         auth_forgot: "نسيت كلمة المرور",
         auth_sign_out: "تسجيل الخروج",
+        settings_unlock_title: "تحقق الوالدين",
+        settings_unlock_copy: "أدخل كلمة المرور لفتح رقابة الوالدين.",
         upload_title: "إضافة فيديو يوتيوب",
         upload_url: "رابط يوتيوب",
         upload_url_placeholder: "https://www.youtube.com/watch?v=...",
@@ -3066,6 +3556,15 @@
         upload_add: "إضافة فيديو",
         upload_hint: "سيتم تعبئة العنوان تلقائياً من يوتيوب إن توفر.",
         admin_title: "لوحة الإدارة",
+        admin_overview: "نظرة عامة للإدارة",
+        admin_users: "مستخدمو الإدارة",
+        admin_channels: "قنوات الإدارة",
+        admin_imports: "استيراد الإدارة",
+        admin_overview_title: "نظرة عامة للإدارة",
+        admin_users_title: "مستخدمو الإدارة",
+        admin_channels_title: "قنوات الإدارة",
+        admin_reports_title: "بلاغات الإدارة",
+        admin_imports_title: "استيراد الإدارة",
         admin_reports: "البلاغات",
         admin_import_hint: "استيراد روابط يوتيوب المعتمدة (CSV أو SQL).",
         admin_csv_label: "ملف CSV",
@@ -3085,13 +3584,18 @@
         studio_avatar_placeholder: "https://...",
         studio_save: "حفظ الملف",
         studio_stats: "إحصاءاتك",
-        settings_title: "إعدادات الوالدين",
+        settings_title: "رقابة الوالدين",
         settings_languages: "اللغات المعروضة",
         settings_topics: "المواضيع للتحكم",
         settings_topic_allow: "عرض المحدد فقط",
         settings_topic_block: "إخفاء المحدد",
         settings_topic_search: "ابحث عن موضوع",
         settings_topic_placeholder: "ابحث عن المواضيع",
+        settings_channels: "القنوات للتحكم",
+        settings_channel_allow: "عرض المحدد فقط",
+        settings_channel_block: "إخفاء المحدد",
+        settings_channel_search: "ابحث عن قناة",
+        settings_channel_placeholder: "ابحث عن القنوات",
         settings_watch_limit: "حد المشاهدة اليومي (بالساعات)",
         settings_password: "التأكيد بكلمة المرور",
         settings_save: "حفظ الإعدادات",
@@ -3103,6 +3607,7 @@
         signout_title: "تأكيد تسجيل الخروج",
         updates_title: "التحديثات",
         action_close: "إغلاق",
+        action_continue: "متابعة",
         lang_english: "الإنجليزية",
         lang_russian: "الروسية",
         lang_chinese: "الصينية",
@@ -3339,22 +3844,32 @@
       setButtonIcon(ui.controlsFullscreen, icons.fullscreen, "control_fullscreen");
       setButtonIcon(ui.controlsSeekBack, icons.seekBack, "control_seek_back");
       setButtonIcon(ui.controlsSeekForward, icons.seekForward, "control_seek_forward");
+      setButtonIcon(ui.controlsToggle, icons.dockHide, "controls_hide");
       setButtonIcon(ui.viewTheater, icons.theater, "control_theater");
       setButtonIcon(ui.viewMini, icons.mini, "control_mini");
       setButtonIcon(ui.uploadOpen, icons.upload, "control_add_video");
       setButtonIcon(ui.adminOpen, icons.admin, "control_admin");
       setButtonIcon(ui.adminVideosOpen, icons.admin, "admin_videos_open");
+      setButtonIcon(ui.adminOverviewOpen, icons.admin, "admin_overview");
+      setButtonIcon(ui.adminUsersOpen, icons.users, "admin_users");
+      setButtonIcon(ui.adminChannelsOpen, icons.channels, "admin_channels");
+      setButtonIcon(ui.adminReportsOpen, icons.reports, "admin_reports");
+      setButtonIcon(ui.adminImportsOpen, icons.imports, "admin_imports");
       setButtonIcon(ui.studioOpen, icons.studio, "control_studio");
       setButtonIcon(ui.settingsOpen, icons.settings, "control_settings");
       setButtonIcon(ui.notificationsOpen, icons.bell, "control_updates");
       setButtonIcon(ui.authOpen, icons.user, "control_sign_in");
       setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
       setButtonIcon(ui.filterSubscribed, icons.check, "control_subscribed_feed");
+      setButtonIcon(ui.channelsPageOpen, icons.channels, "channels_open");
+      setButtonIcon(ui.sidebarToggle, icons.bars, "sidebar_toggle");
+      setButtonIcon(ui.sidebarToggleTab, icons.bars, "sidebar_show");
     }
 
     let player = null;
     let isPlayerReady = false;
     let timeTicker = null;
+    let playerReloadTimer = null;
     let videos = [];
     let currentIndex = 0;
     let autoNextEnabled = false;
@@ -3384,6 +3899,8 @@
     let firebaseUser = null;
     let availableTopics = [];
     let settingsSelectedTopics = new Set();
+    let settingsAvailableChannels = [];
+    let settingsSelectedChannels = new Set();
     let adminUsersData = [];
     let adminChannelsData = [];
     let adminVideosData = [];
@@ -3391,6 +3908,21 @@
     let adminVideosOffset = 0;
     let adminVideosHasMore = true;
     let adminVideosFetching = false;
+    let adminVideosOwnerId = "";
+    let adminUsersPageQuery = "";
+    let adminUsersPageOffset = 0;
+    let adminUsersPageHasMore = true;
+    let adminUsersPageFetching = false;
+    let adminChannelsPageQuery = "";
+    let adminChannelsPageOffset = 0;
+    let adminChannelsPageHasMore = true;
+    let adminChannelsPageFetching = false;
+    let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
+    let sidebarCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    let settingsUnlockedAt = 0;
+    const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
+    const PLAYER_RELOAD_TIMEOUT_MS = 12000;
+    const PLAYER_RELOAD_KEY = "playerReloads";
 
     function setTheme(theme) {
       const next = theme || "light";
@@ -3415,12 +3947,53 @@
       }
     }
 
+    function setDockCollapsed(collapsed) {
+      dockCollapsed = Boolean(collapsed);
+      ui.controlDock.classList.toggle("collapsed", dockCollapsed);
+      setButtonIcon(
+        ui.controlsToggle,
+        dockCollapsed ? icons.dockShow : icons.dockHide,
+        dockCollapsed ? "controls_show" : "controls_hide"
+      );
+      localStorage.setItem("dockCollapsed", String(dockCollapsed));
+    }
+
+    function setSidebarCollapsed(collapsed) {
+      sidebarCollapsed = Boolean(collapsed);
+      document.body.classList.toggle("sidebar-collapsed", sidebarCollapsed);
+      setButtonIcon(ui.sidebarToggle, icons.bars, sidebarCollapsed ? "sidebar_show" : "sidebar_toggle");
+      setButtonIcon(ui.sidebarToggleTab, icons.bars, "sidebar_show");
+      localStorage.setItem("sidebarCollapsed", String(sidebarCollapsed));
+    }
+
+    function schedulePlayerReload() {
+      if (playerReloadTimer) {
+        clearTimeout(playerReloadTimer);
+      }
+      playerReloadTimer = setTimeout(() => {
+        if (isPlayerReady) {
+          return;
+        }
+        const count = Number(sessionStorage.getItem(PLAYER_RELOAD_KEY) || "0");
+        if (count >= 1) {
+          return;
+        }
+        sessionStorage.setItem(PLAYER_RELOAD_KEY, String(count + 1));
+        window.location.reload();
+      }, PLAYER_RELOAD_TIMEOUT_MS);
+    }
+
     function setPageView(view) {
       const showFeed = view === "feed";
       const showChannel = view === "channel";
       const showSearch = view === "search";
       const showChannels = view === "channels";
+      const showAdminOverview = view === "admin-overview";
+      const showAdminUsers = view === "admin-users";
+      const showAdminChannels = view === "admin-channels";
       const showAdminVideos = view === "admin-videos";
+      const showAdminReports = view === "admin-reports";
+      const showAdminImports = view === "admin-imports";
       ui.feedView.classList.toggle("hidden", !showFeed);
       ui.feedView.setAttribute("aria-hidden", String(!showFeed));
       ui.viralView.classList.toggle("hidden", !showFeed);
@@ -3431,9 +4004,28 @@
       ui.searchView.setAttribute("aria-hidden", String(!showSearch));
       ui.channelsPage.classList.toggle("hidden", !showChannels);
       ui.channelsPage.setAttribute("aria-hidden", String(!showChannels));
+      ui.adminOverviewPage.classList.toggle("hidden", !showAdminOverview);
+      ui.adminOverviewPage.setAttribute("aria-hidden", String(!showAdminOverview));
+      ui.adminUsersPage.classList.toggle("hidden", !showAdminUsers);
+      ui.adminUsersPage.setAttribute("aria-hidden", String(!showAdminUsers));
+      ui.adminChannelsPage.classList.toggle("hidden", !showAdminChannels);
+      ui.adminChannelsPage.setAttribute("aria-hidden", String(!showAdminChannels));
       ui.adminVideosPage.classList.toggle("hidden", !showAdminVideos);
       ui.adminVideosPage.setAttribute("aria-hidden", String(!showAdminVideos));
-      const hidePlayer = showChannel || showSearch || showChannels || showAdminVideos;
+      ui.adminReportsPage.classList.toggle("hidden", !showAdminReports);
+      ui.adminReportsPage.setAttribute("aria-hidden", String(!showAdminReports));
+      ui.adminImportsPage.classList.toggle("hidden", !showAdminImports);
+      ui.adminImportsPage.setAttribute("aria-hidden", String(!showAdminImports));
+      const hidePlayer =
+        showChannel ||
+        showSearch ||
+        showChannels ||
+        showAdminOverview ||
+        showAdminUsers ||
+        showAdminChannels ||
+        showAdminVideos ||
+        showAdminReports ||
+        showAdminImports;
       ui.playerArea.classList.toggle("hidden", hidePlayer);
       ui.playerArea.style.display = hidePlayer ? "none" : "grid";
       if (hidePlayer && player && player.pauseVideo) {
@@ -4101,6 +4693,8 @@
         searchHasMore = true;
         searchQuery = trimmed;
         ui.searchGrid.innerHTML = t("status_loading");
+        ui.searchEmpty.classList.add("hidden");
+        ui.searchFallback.classList.add("hidden");
       }
       setPageView("search");
       ui.searchTitle.textContent = t("search_results") + " \"" + searchQuery + "\"";
@@ -4128,9 +4722,65 @@
           loadVideo(0);
         }
       );
-      ui.searchLoadMore.style.display = searchHasMore ? "inline-flex" : "none";
+      const searchLoadMoreWrap = ui.searchLoadMore.parentElement;
+      if (reset && batch.length === 0) {
+        ui.searchGrid.innerHTML = "";
+        ui.searchEmpty.classList.remove("hidden");
+        ui.searchFallback.classList.remove("hidden");
+        await loadSearchFallback();
+        ui.searchLoadMore.style.display = "none";
+        if (searchLoadMoreWrap) {
+          searchLoadMoreWrap.style.display = "none";
+        }
+      } else {
+        ui.searchEmpty.classList.add("hidden");
+        ui.searchFallback.classList.add("hidden");
+        ui.searchLoadMore.style.display = searchHasMore ? "inline-flex" : "none";
+        if (searchLoadMoreWrap) {
+          searchLoadMoreWrap.style.display = "grid";
+        }
+      }
       searchOffset += batch.length;
       searchFetching = false;
+    }
+
+    async function loadSearchFallback() {
+      if (!currentUser) {
+        return;
+      }
+      ui.searchFallbackRecommended.innerHTML = t("status_loading");
+      ui.searchFallbackViral.innerHTML = t("status_loading");
+      const [recRes, viralRes] = await Promise.all([
+        apiFetch("/api/videos?limit=8&offset=0"),
+        apiFetch("/api/viral?limit=8")
+      ]);
+      if (recRes.ok) {
+        const recData = await recRes.json();
+        renderVideoGrid(recData.videos || [], ui.searchFallbackRecommended, false, t("message_no_videos"), (video) => {
+          navigateTo("/", { replace: true });
+          videos = [video];
+          currentIndex = 0;
+          loadVideo(0);
+        });
+      } else {
+        ui.searchFallbackRecommended.textContent = t("message_no_videos");
+      }
+      if (viralRes.ok) {
+        const viralData = await viralRes.json();
+        renderVideoGrid(viralData.videos || [], ui.searchFallbackViral, false, t("message_no_viral"), (video) => {
+          navigateTo("/", { replace: true });
+          const index = videos.findIndex((item) => item.id === video.id);
+          if (index >= 0) {
+            loadVideo(index);
+          } else {
+            videos = [video];
+            currentIndex = 0;
+            loadVideo(0);
+          }
+        });
+      } else {
+        ui.searchFallbackViral.textContent = t("message_no_viral");
+      }
     }
 
     async function fetchViral() {
@@ -4342,17 +4992,20 @@
       updateAuthUI();
       fetchSubscriptions();
       unlockApp();
+      handleRoute();
     }
 
     function updateAuthUI() {
+      const isAdmin = currentUser && currentUser.role === "admin";
       ui.authLogout.style.display = currentUser ? "inline-flex" : "none";
       ui.authOpen.style.display = currentUser ? "none" : "inline-flex";
       ui.uploadOpen.style.display =
         currentUser && (currentUser.role === "artist" || currentUser.role === "admin")
           ? "inline-flex"
           : "none";
-      ui.adminOpen.style.display = currentUser && currentUser.role === "admin" ? "inline-flex" : "none";
-      ui.adminVideosOpen.style.display = currentUser && currentUser.role === "admin" ? "inline-flex" : "none";
+      ui.adminOpen.style.display = "none";
+      ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
+      ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.settingsOpen.style.display =
         currentUser && currentUser.plan === "pro" && currentUser.role === "user"
@@ -4502,6 +5155,25 @@
       ui.adminList.innerHTML = "";
       const statsData = statsRes.ok ? await statsRes.json() : null;
       ui.adminStats.innerHTML = "";
+      renderAdminStats(statsData, ui.adminStats);
+      const users = data.users || [];
+      adminUsersData = users;
+      adminChannelsData = users.filter((user) => user.role === "artist");
+      adminVideosData = videosData.videos || [];
+      renderAdminUsers(adminUsersData);
+      renderAdminChannels(adminChannelsData);
+      renderAdminVideos(adminVideosData);
+      const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
+      if (!reportsRes.ok) {
+        ui.adminReports.textContent = t("message_reports_failed");
+      } else {
+        renderAdminReports(reportsData.reports || [], ui.adminReports);
+      }
+      openModal(ui.adminModal);
+      setAdminTab("overview");
+    }
+
+    function renderAdminStats(statsData, container) {
       if (statsData && statsData.totals) {
         const summary = document.createElement("div");
         summary.className = "card-meta";
@@ -4517,7 +5189,7 @@
           statsData.totals.artists +
           " " +
           t("label_artists");
-        ui.adminStats.appendChild(summary);
+        container.appendChild(summary);
         (statsData.artists || []).forEach((artist) => {
           const row = document.createElement("div");
           row.className = "channel";
@@ -4534,77 +5206,17 @@
             " " +
             t("label_views") +
             "</div></div>";
-          ui.adminStats.appendChild(row);
+          container.appendChild(row);
         });
       } else {
-        ui.adminStats.textContent = t("message_stats_unavailable");
+        container.textContent = t("message_stats_unavailable");
       }
-      const users = data.users || [];
-      adminUsersData = users;
-      adminChannelsData = users.filter((user) => user.role === "artist");
-      adminVideosData = videosData.videos || [];
-      renderAdminUsers(adminUsersData);
-      renderAdminChannels(adminChannelsData);
-      renderAdminVideos(adminVideosData);
-      const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
-      ui.adminReports.innerHTML = "";
-      if (!reportsRes.ok) {
-        ui.adminReports.textContent = t("message_reports_failed");
-      } else if (!reportsData.reports || !reportsData.reports.length) {
-        ui.adminReports.textContent = t("message_reports_empty");
-      } else {
-        reportsData.reports.forEach((report) => {
-          const row = document.createElement("div");
-          row.className = "channel";
-          const avatar = document.createElement("span");
-          avatar.className = "avatar";
-          avatar.setAttribute("aria-hidden", "true");
-          const info = document.createElement("div");
-          const title = document.createElement("div");
-          title.className = "channel-name";
-          title.textContent = report.video_title;
-          const meta = document.createElement("div");
-          meta.className = "card-meta";
-          meta.textContent =
-            t("label_reported_by") + " " + report.reporter + " · " + report.reason + " · " + report.status;
-          info.appendChild(title);
-          info.appendChild(meta);
-          const actions = document.createElement("div");
-          actions.className = "channel-actions";
-          const input = document.createElement("input");
-          input.type = "text";
-          input.className = "report-input";
-          input.placeholder = t("admin_report_message_placeholder");
-          input.disabled = report.status === "resolved";
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "ghost";
-          button.textContent = report.status === "resolved" ? t("label_resolved") : t("action_resolve");
-          button.disabled = report.status === "resolved";
-          button.addEventListener("click", async () => {
-            const res = await apiFetch("/api/reports/" + report.id + "/resolve", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: input.value.trim() })
-            });
-            if (res.ok) {
-              openAdmin();
-            }
-          });
-          actions.appendChild(input);
-          actions.appendChild(button);
-          row.appendChild(avatar);
-          row.appendChild(info);
-          row.appendChild(actions);
-          ui.adminReports.appendChild(row);
-        });
-      }
-      openModal(ui.adminModal);
-      setAdminTab("overview");
     }
 
-    function renderAdminUsers(list) {
-      ui.adminList.innerHTML = "";
+    function renderAdminUsers(list, container = ui.adminList, append = false) {
+      if (!append) {
+        container.innerHTML = "";
+      }
       list.forEach((user) => {
         const row = document.createElement("div");
         row.className = "channel";
@@ -4627,7 +5239,7 @@
             body: JSON.stringify({ userId: user.id, role: nextRole })
           });
           if (grantRes.ok) {
-            openAdmin();
+            refreshAdminView();
           }
         });
         row.innerHTML =
@@ -4656,17 +5268,19 @@
             body: JSON.stringify({ userId: user.id, plan: nextPlan })
           });
           if (planRes.ok) {
-            openAdmin();
+            refreshAdminView();
           }
         });
         row.appendChild(button);
         row.appendChild(planButton);
-        ui.adminList.appendChild(row);
+        container.appendChild(row);
       });
     }
 
-    function renderAdminChannels(list) {
-      ui.adminChannelsList.innerHTML = "";
+    function renderAdminChannels(list, container = ui.adminChannelsList, append = false) {
+      if (!append) {
+        container.innerHTML = "";
+      }
       list.forEach((user) => {
         const row = document.createElement("div");
         row.className = "channel";
@@ -4691,7 +5305,7 @@
             body: JSON.stringify({ userId: user.id, role: "user" })
           });
           if (res.ok) {
-            openAdmin();
+            refreshAdminView();
           }
         });
         const viewVideos = document.createElement("button");
@@ -4699,17 +5313,12 @@
         viewVideos.className = "pill";
         viewVideos.textContent = t("admin_view_videos");
         viewVideos.addEventListener("click", async () => {
-          ui.adminVideoSearch.value = "";
-          const res = await apiFetch("/api/videos/manage?ownerId=" + user.id);
-          const data = await res.json();
-          adminVideosData = data.videos || [];
-          renderAdminVideos(adminVideosData);
-          setAdminTab("videos");
+          navigateTo("/admin/videos?owner=" + user.id);
         });
         actions.appendChild(viewVideos);
         actions.appendChild(revoke);
         row.appendChild(actions);
-        ui.adminChannelsList.appendChild(row);
+        container.appendChild(row);
       });
     }
 
@@ -4774,7 +5383,7 @@
             body: JSON.stringify({ title: titleInput.value.trim(), language, topics })
           });
           if (res.ok) {
-            openAdmin();
+            refreshAdminView();
           }
         });
         const delBtn = document.createElement("button");
@@ -4784,7 +5393,7 @@
         delBtn.addEventListener("click", async () => {
           const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
           if (res.ok) {
-            openAdmin();
+            refreshAdminView();
           }
         });
         actions.appendChild(saveBtn);
@@ -4883,6 +5492,59 @@
       });
     }
 
+    function renderAdminReports(reports, container) {
+      container.innerHTML = "";
+      if (!reports.length) {
+        container.textContent = t("message_reports_empty");
+        return;
+      }
+      reports.forEach((report) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        const avatar = document.createElement("span");
+        avatar.className = "avatar";
+        avatar.setAttribute("aria-hidden", "true");
+        const info = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "channel-name";
+        title.textContent = report.video_title;
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+        meta.textContent =
+          t("label_reported_by") + " " + report.reporter + " · " + report.reason + " · " + report.status;
+        info.appendChild(title);
+        info.appendChild(meta);
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "report-input";
+        input.placeholder = t("admin_report_message_placeholder");
+        input.disabled = report.status === "resolved";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "ghost";
+        button.textContent = report.status === "resolved" ? t("label_resolved") : t("action_resolve");
+        button.disabled = report.status === "resolved";
+        button.addEventListener("click", async () => {
+          const res = await apiFetch("/api/reports/" + report.id + "/resolve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: input.value.trim() })
+          });
+          if (res.ok) {
+            refreshAdminView();
+          }
+        });
+        actions.appendChild(input);
+        actions.appendChild(button);
+        row.appendChild(avatar);
+        row.appendChild(info);
+        row.appendChild(actions);
+        container.appendChild(row);
+      });
+    }
+
     async function fetchAdminVideosPage(query, reset = false) {
       if (adminVideosFetching || !currentUser || currentUser.role !== "admin") {
         return;
@@ -4901,6 +5563,9 @@
       if (adminVideosQuery) {
         params.set("search", adminVideosQuery);
       }
+      if (adminVideosOwnerId) {
+        params.set("ownerId", adminVideosOwnerId);
+      }
       const res = await apiFetch("/api/videos/manage?" + params.toString());
       const data = await res.json();
       if (!res.ok) {
@@ -4913,6 +5578,140 @@
       ui.adminVideosLoadMore.style.display = adminVideosHasMore ? "inline-flex" : "none";
       adminVideosOffset += batch.length;
       adminVideosFetching = false;
+    }
+
+    async function fetchAdminOverviewPage() {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      ui.adminOverviewPageList.innerHTML = t("status_loading");
+      setPageView("admin-overview");
+      const res = await apiFetch("/api/stats");
+      if (!res.ok) {
+        ui.adminOverviewPageList.textContent = t("message_stats_unavailable");
+        return;
+      }
+      const data = await res.json();
+      ui.adminOverviewPageList.innerHTML = "";
+      renderAdminStats(data, ui.adminOverviewPageList);
+    }
+
+    async function fetchAdminUsersPage(query, reset = false) {
+      if (adminUsersPageFetching || !currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      adminUsersPageFetching = true;
+      if (reset) {
+        adminUsersPageOffset = 0;
+        adminUsersPageHasMore = true;
+        adminUsersPageQuery = query.trim();
+        ui.adminUsersPageList.innerHTML = t("status_loading");
+      }
+      setPageView("admin-users");
+      const params = new URLSearchParams();
+      params.set("limit", "40");
+      params.set("offset", String(adminUsersPageOffset));
+      if (adminUsersPageQuery) {
+        params.set("search", adminUsersPageQuery);
+      }
+      const res = await apiFetch("/api/users?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        adminUsersPageFetching = false;
+        return;
+      }
+      const batch = data.users || [];
+      adminUsersPageHasMore = Boolean(data.hasMore);
+      renderAdminUsers(batch, ui.adminUsersPageList, !reset);
+      ui.adminUsersLoadMore.style.display = adminUsersPageHasMore ? "inline-flex" : "none";
+      adminUsersPageOffset += batch.length;
+      adminUsersPageFetching = false;
+    }
+
+    async function fetchAdminChannelsPage(query, reset = false) {
+      if (adminChannelsPageFetching || !currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      adminChannelsPageFetching = true;
+      if (reset) {
+        adminChannelsPageOffset = 0;
+        adminChannelsPageHasMore = true;
+        adminChannelsPageQuery = query.trim();
+        ui.adminChannelsPageList.innerHTML = t("status_loading");
+      }
+      setPageView("admin-channels");
+      const params = new URLSearchParams();
+      params.set("limit", "40");
+      params.set("offset", String(adminChannelsPageOffset));
+      params.set("role", "artist");
+      if (adminChannelsPageQuery) {
+        params.set("search", adminChannelsPageQuery);
+      }
+      const res = await apiFetch("/api/users?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        adminChannelsPageFetching = false;
+        return;
+      }
+      const batch = data.users || [];
+      adminChannelsPageHasMore = Boolean(data.hasMore);
+      renderAdminChannels(batch, ui.adminChannelsPageList, !reset);
+      ui.adminChannelsLoadMore.style.display = adminChannelsPageHasMore ? "inline-flex" : "none";
+      adminChannelsPageOffset += batch.length;
+      adminChannelsPageFetching = false;
+    }
+
+    async function fetchAdminReportsPage() {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      ui.adminReportsPageList.innerHTML = t("status_loading");
+      setPageView("admin-reports");
+      const res = await apiFetch("/api/reports");
+      if (!res.ok) {
+        ui.adminReportsPageList.textContent = t("message_reports_failed");
+        return;
+      }
+      const data = await res.json();
+      renderAdminReports(data.reports || [], ui.adminReportsPageList);
+    }
+
+    function openAdminImportsPage() {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      setPageView("admin-imports");
+    }
+
+    function refreshAdminView() {
+      const view = document.body.getAttribute("data-view");
+      if (view === "admin-overview") {
+        fetchAdminOverviewPage();
+        return;
+      }
+      if (view === "admin-users") {
+        fetchAdminUsersPage(adminUsersPageQuery, true);
+        return;
+      }
+      if (view === "admin-channels") {
+        fetchAdminChannelsPage(adminChannelsPageQuery, true);
+        return;
+      }
+      if (view === "admin-videos") {
+        fetchAdminVideosPage(adminVideosQuery, true);
+        return;
+      }
+      if (view === "admin-reports") {
+        fetchAdminReportsPage();
+        return;
+      }
+      if (view === "admin-imports") {
+        openAdminImportsPage();
+        return;
+      }
+      if (ui.adminModal.classList.contains("active")) {
+        openAdmin();
+      }
     }
 
     function setAdminTab(tab) {
@@ -4973,11 +5772,13 @@
       renderAdminVideos(adminVideosData);
     }
 
-    async function importCsv() {
-      ui.adminImportMessage.textContent = "";
-      const file = ui.adminCsv.files[0];
+    async function importCsv(elements = {}) {
+      const csvInput = elements.csv || ui.adminCsv;
+      const message = elements.message || ui.adminImportMessage;
+      message.textContent = "";
+      const file = csvInput.files[0];
       if (!file) {
-        ui.adminImportMessage.textContent = t("message_select_csv");
+        message.textContent = t("message_select_csv");
         return;
       }
       const text = await file.text();
@@ -4988,20 +5789,22 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.adminImportMessage.textContent = data.error || t("message_import_failed");
+        message.textContent = data.error || t("message_import_failed");
         return;
       }
-      ui.adminImportMessage.textContent =
+      message.textContent =
         t("message_imported") + " " + data.inserted + ", " + t("message_skipped") + " " + data.skipped.length;
-      ui.adminCsv.value = "";
+      csvInput.value = "";
       fetchVideos(ui.searchInput.value.trim(), true);
     }
 
-    async function importSql() {
-      ui.adminImportMessage.textContent = "";
-      const sql = ui.adminSql.value.trim();
+    async function importSql(elements = {}) {
+      const sqlInput = elements.sql || ui.adminSql;
+      const message = elements.message || ui.adminImportMessage;
+      message.textContent = "";
+      const sql = sqlInput.value.trim();
       if (!sql) {
-        ui.adminImportMessage.textContent = t("message_paste_sql");
+        message.textContent = t("message_paste_sql");
         return;
       }
       const res = await apiFetch("/api/admin/import-sql", {
@@ -5011,19 +5814,19 @@
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.adminImportMessage.textContent = data.error || t("message_import_failed");
+        message.textContent = data.error || t("message_import_failed");
         return;
       }
-      ui.adminImportMessage.textContent =
+      message.textContent =
         t("message_imported") + " " + data.inserted + ", " + t("message_skipped") + " " + data.skipped.length;
-      ui.adminSql.value = "";
+      sqlInput.value = "";
       fetchVideos(ui.searchInput.value.trim(), true);
     }
 
-    async function exportSql() {
+    async function exportSql(messageTarget = ui.adminImportMessage) {
       const res = await apiFetch("/api/admin/export-sql");
       if (!res.ok) {
-        ui.adminImportMessage.textContent = t("message_export_failed");
+        messageTarget.textContent = t("message_export_failed");
         return;
       }
       const text = await res.text();
@@ -5184,6 +5987,12 @@
       if (currentUser.plan !== "pro" || currentUser.role !== "user") {
         return;
       }
+      ui.settingsAuthMessage.textContent = "";
+      ui.settingsAuthForm.reset();
+      openModal(ui.settingsAuthModal);
+    }
+
+    async function openSettingsForm() {
       ui.settingsMessage.textContent = "";
       ui.settingsForm.reset();
       ui.historyList.innerHTML = t("status_loading");
@@ -5193,19 +6002,53 @@
       if (res.ok && data.settings) {
         const languages = new Set(data.settings.allowed_languages || []);
         const topics = new Set(data.settings.allowed_topics || []);
+        const channels = new Set((data.settings.allowed_channels || []).map(String));
         const mode = data.settings.topic_mode === "block" ? "block" : "allow";
+        const channelMode = data.settings.channel_mode === "block" ? "block" : "allow";
         document.querySelectorAll("input[name='topic-mode']").forEach((input) => {
           input.checked = input.value === mode;
+        });
+        document.querySelectorAll("input[name='channel-mode']").forEach((input) => {
+          input.checked = input.value === channelMode;
         });
         document.querySelectorAll("input[name='settings-language']").forEach((input) => {
           input.checked = languages.has(input.value);
         });
         settingsSelectedTopics = topics;
+        settingsSelectedChannels = channels;
         ui.maxWatch.value = Math.round((data.settings.max_daily_minutes || 0) / 60);
       }
+      const unlocked = Date.now() - settingsUnlockedAt < SETTINGS_UNLOCK_MS;
+      ui.settingsPassword.required = !unlocked;
+      ui.settingsPassword.value = "";
       await fetchTopics();
+      await fetchSettingsChannels("");
       await loadHistory();
       openModal(ui.settingsModal);
+    }
+
+    async function confirmSettingsAuth(event) {
+      event.preventDefault();
+      if (!firebaseUser) {
+        ui.settingsAuthMessage.textContent = t("message_sign_in_first");
+        return;
+      }
+      const password = ui.settingsAuthPassword.value;
+      if (!password) {
+        ui.settingsAuthMessage.textContent = t("message_password_required");
+        return;
+      }
+      try {
+        const credential = firebase.auth.EmailAuthProvider.credential(firebaseUser.email, password);
+        await firebaseUser.reauthenticateWithCredential(credential);
+        token = await firebaseUser.getIdToken(true);
+        settingsUnlockedAt = Date.now();
+      } catch (err) {
+        ui.settingsAuthMessage.textContent = err.message || t("message_password_check_failed");
+        return;
+      }
+      closeModal(ui.settingsAuthModal);
+      openSettingsForm();
     }
 
     async function fetchTopics() {
@@ -5258,6 +6101,69 @@
       });
     }
 
+    async function fetchSettingsChannels(query) {
+      if (!currentUser) {
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("limit", "100");
+      params.set("offset", "0");
+      params.set("all", "1");
+      if (query) {
+        params.set("search", query);
+      }
+      const res = await apiFetch("/api/channels?" + params.toString());
+      const data = await res.json();
+      settingsAvailableChannels = Array.isArray(data.channels) ? data.channels : [];
+      renderSettingsChannels(settingsSelectedChannels);
+    }
+
+    function renderSettingsChannels(selectedChannels) {
+      const filter = ui.settingsChannelSearch.value.trim().toLowerCase();
+      ui.settingsChannels.innerHTML = "";
+      const filtered = settingsAvailableChannels.filter((channel) =>
+        String(channel.display_name || "").toLowerCase().includes(filter)
+      );
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = t("message_no_channels");
+        ui.settingsChannels.appendChild(empty);
+        return;
+      }
+      filtered.forEach((channel) => {
+        const label = document.createElement("label");
+        label.className = "channel";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.name = "settings-channel";
+        input.value = channel.id;
+        input.checked = selectedChannels.has(String(channel.id));
+        input.addEventListener("change", () => {
+          if (input.checked) {
+            selectedChannels.add(String(channel.id));
+          } else {
+            selectedChannels.delete(String(channel.id));
+          }
+        });
+        const avatar = document.createElement("span");
+        avatar.className = "avatar";
+        avatar.setAttribute("aria-hidden", "true");
+        setAvatar(avatar, channel.avatar_url);
+        const info = document.createElement("div");
+        info.innerHTML =
+          "<div class=\"channel-name\">" +
+          escapeHtml(channel.display_name || t("label_creator")) +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(channel.slogan || "") +
+          "</div>";
+        label.appendChild(input);
+        label.appendChild(avatar);
+        label.appendChild(info);
+        ui.settingsChannels.appendChild(label);
+      });
+    }
+
     async function loadHistory() {
       const res = await apiFetch("/api/history");
       const data = await res.json();
@@ -5293,24 +6199,30 @@
         ui.settingsMessage.textContent = t("message_sign_in_first");
         return;
       }
-      const password = document.getElementById("settings-password").value;
-      if (!password) {
-        ui.settingsMessage.textContent = t("message_password_required");
-        return;
-      }
-      try {
-        const credential = firebase.auth.EmailAuthProvider.credential(firebaseUser.email, password);
-        await firebaseUser.reauthenticateWithCredential(credential);
-        token = await firebaseUser.getIdToken(true);
-      } catch (err) {
-        ui.settingsMessage.textContent = err.message || t("message_password_check_failed");
-        return;
+      const unlocked = Date.now() - settingsUnlockedAt < SETTINGS_UNLOCK_MS;
+      const password = ui.settingsPassword.value;
+      if (!unlocked) {
+        if (!password) {
+          ui.settingsMessage.textContent = t("message_password_required");
+          return;
+        }
+        try {
+          const credential = firebase.auth.EmailAuthProvider.credential(firebaseUser.email, password);
+          await firebaseUser.reauthenticateWithCredential(credential);
+          token = await firebaseUser.getIdToken(true);
+          settingsUnlockedAt = Date.now();
+        } catch (err) {
+          ui.settingsMessage.textContent = err.message || t("message_password_check_failed");
+          return;
+        }
       }
       const languages = Array.from(
         document.querySelectorAll("input[name='settings-language']:checked")
       ).map((input) => input.value);
       const topics = Array.from(settingsSelectedTopics);
       const topicMode = document.querySelector("input[name='topic-mode']:checked").value;
+      const channels = Array.from(settingsSelectedChannels);
+      const channelMode = document.querySelector("input[name='channel-mode']:checked").value;
       const maxDailyMinutes = Math.max(
         0,
         Math.min(24 * 60, parseInt(ui.maxWatch.value || "0", 10) * 60)
@@ -5318,7 +6230,7 @@
       const res = await apiFetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ languages, topics, topicMode, maxDailyMinutes })
+        body: JSON.stringify({ languages, topics, topicMode, channels, channelMode, maxDailyMinutes })
       });
       if (!res.ok) {
         const data = await res.json();
@@ -5431,6 +6343,9 @@
 
     function onPlayerReady() {
       isPlayerReady = true;
+      if (playerReloadTimer) {
+        clearTimeout(playerReloadTimer);
+      }
       updateStatus("status_ready");
       setOverlayState(false, true, false);
       attemptAutoplay();
@@ -5627,11 +6542,17 @@
 
     ui.viewTheater.addEventListener("click", () => setView("theater"));
     ui.viewMini.addEventListener("click", () => setView("mini"));
+    ui.controlsToggle.addEventListener("click", () => setDockCollapsed(!dockCollapsed));
+    ui.sidebarToggle.addEventListener("click", () => setSidebarCollapsed(!sidebarCollapsed));
+    ui.sidebarToggleTab.addEventListener("click", () => setSidebarCollapsed(false));
     ui.filterSubscribed.addEventListener("click", () => {
       setFeedFilter(feedFilter === "subscribed" ? "all" : "subscribed");
     });
     ui.settingsTopicSearch.addEventListener("input", () => {
       renderTopicsList(settingsSelectedTopics);
+    });
+    ui.settingsChannelSearch.addEventListener("input", () => {
+      fetchSettingsChannels(ui.settingsChannelSearch.value.trim());
     });
     ui.channelBack.addEventListener("click", () => {
       currentChannel = null;
@@ -5652,13 +6573,21 @@
     ui.authOpen.addEventListener("click", () => lockApp(t("message_sign_in")));
     ui.authLogout.addEventListener("click", openSignout);
     ui.uploadOpen.addEventListener("click", () => openModal(ui.uploadModal));
-    ui.adminOpen.addEventListener("click", openAdmin);
+    ui.adminOpen.addEventListener("click", () => navigateTo("/admin"));
+    ui.adminOverviewOpen.addEventListener("click", () => navigateTo("/admin"));
+    ui.adminUsersOpen.addEventListener("click", () => navigateTo("/admin/users"));
+    ui.adminChannelsOpen.addEventListener("click", () => navigateTo("/admin/channels"));
+    ui.adminReportsOpen.addEventListener("click", () => navigateTo("/admin/reports"));
+    ui.adminImportsOpen.addEventListener("click", () => navigateTo("/admin/imports"));
     ui.studioOpen.addEventListener("click", openStudio);
     ui.settingsOpen.addEventListener("click", openSettings);
     ui.notificationsOpen.addEventListener("click", openNotifications);
     ui.channelsOpen.addEventListener("click", () => navigateTo("/channels"));
+    ui.channelsPageOpen.addEventListener("click", () => navigateTo("/channels"));
     ui.channelsBack.addEventListener("click", () => navigateTo("/"));
-    ui.channelsSearch.addEventListener("input", () => fetchChannelsPage(ui.channelsSearch.value, true));
+    ui.channelsSearch.addEventListener("input", () =>
+      navigateTo("/channels?q=" + encodeURIComponent(ui.channelsSearch.value.trim()), { replace: true })
+    );
     ui.channelsSort.addEventListener("change", applyChannelsFilters);
     ui.channelsFilterSubscribed.addEventListener("change", applyChannelsFilters);
     ui.channelsLoadMore.addEventListener("click", () => {
@@ -5668,7 +6597,7 @@
     });
     ui.adminVideosBack.addEventListener("click", () => navigateTo("/"));
     ui.adminVideosSearchPage.addEventListener("input", () =>
-      fetchAdminVideosPage(ui.adminVideosSearchPage.value, true)
+      navigateTo("/admin/videos?q=" + encodeURIComponent(ui.adminVideosSearchPage.value.trim()), { replace: true })
     );
     ui.adminVideosLoadMore.addEventListener("click", () => {
       if (adminVideosHasMore) {
@@ -5676,10 +6605,38 @@
       }
     });
     ui.adminVideosOpen.addEventListener("click", () => navigateTo("/admin/videos"));
+    ui.adminOverviewBack.addEventListener("click", () => navigateTo("/"));
+    ui.adminUsersBack.addEventListener("click", () => navigateTo("/"));
+    ui.adminChannelsBack.addEventListener("click", () => navigateTo("/"));
+    ui.adminReportsBack.addEventListener("click", () => navigateTo("/"));
+    ui.adminImportsBack.addEventListener("click", () => navigateTo("/"));
+    ui.adminUsersSearchPage.addEventListener("input", () =>
+      navigateTo("/admin/users?q=" + encodeURIComponent(ui.adminUsersSearchPage.value.trim()), { replace: true })
+    );
+    ui.adminChannelsSearchPage.addEventListener("input", () =>
+      navigateTo("/admin/channels?q=" + encodeURIComponent(ui.adminChannelsSearchPage.value.trim()), { replace: true })
+    );
+    ui.adminUsersLoadMore.addEventListener("click", () => {
+      if (adminUsersPageHasMore) {
+        fetchAdminUsersPage(adminUsersPageQuery, false);
+      }
+    });
+    ui.adminChannelsLoadMore.addEventListener("click", () => {
+      if (adminChannelsPageHasMore) {
+        fetchAdminChannelsPage(adminChannelsPageQuery, false);
+      }
+    });
     ui.contactOpen.addEventListener("click", () => openModal(ui.contactModal));
     ui.adminImportCsv.addEventListener("click", importCsv);
     ui.adminImportSql.addEventListener("click", importSql);
     ui.adminExportSql.addEventListener("click", exportSql);
+    ui.adminImportCsvPage.addEventListener("click", () =>
+      importCsv({ csv: ui.adminCsvPage, message: ui.adminImportMessagePage })
+    );
+    ui.adminImportSqlPage.addEventListener("click", () =>
+      importSql({ sql: ui.adminSqlPage, message: ui.adminImportMessagePage })
+    );
+    ui.adminExportSqlPage.addEventListener("click", () => exportSql(ui.adminImportMessagePage));
     ui.adminUserSearch.addEventListener("input", () =>
       fetchAdminUsersRemote(ui.adminUserSearch.value.trim(), "")
     );
@@ -5698,6 +6655,7 @@
     ui.verifyResend.addEventListener("click", resendVerification);
     ui.uploadForm.addEventListener("submit", handleUpload);
     ui.settingsForm.addEventListener("submit", saveSettings);
+    ui.settingsAuthForm.addEventListener("submit", confirmSettingsAuth);
     ui.profileForm.addEventListener("submit", saveProfile);
     ui.signoutForm.addEventListener("submit", confirmSignout);
     ui.reportForm.addEventListener("submit", submitReport);
@@ -5755,6 +6713,8 @@
     const storedTheme = localStorage.getItem("theme") || "light";
     setTheme(storedTheme);
     setView("default");
+    setDockCollapsed(dockCollapsed);
+    setSidebarCollapsed(sidebarCollapsed);
     updateFullscreenButton();
 
     ui.loadMore.addEventListener("click", () => {
@@ -5796,10 +6756,44 @@
         fetchSearchResults(query, true);
         return;
       }
+      if (path.startsWith("/admin") && !currentUser) {
+        setPageView("feed");
+        return;
+      }
+      if (path.startsWith("/admin") && currentUser && currentUser.role !== "admin") {
+        window.history.replaceState({}, "", "/");
+        setPageView("feed");
+        return;
+      }
+      if (path === "/admin" || path === "/admin/overview") {
+        fetchAdminOverviewPage();
+        return;
+      }
+      if (path === "/admin/users") {
+        const query = params.get("q") || "";
+        ui.adminUsersSearchPage.value = query;
+        fetchAdminUsersPage(query, true);
+        return;
+      }
+      if (path === "/admin/channels") {
+        const query = params.get("q") || "";
+        ui.adminChannelsSearchPage.value = query;
+        fetchAdminChannelsPage(query, true);
+        return;
+      }
       if (path === "/admin/videos") {
         const query = params.get("q") || "";
+        adminVideosOwnerId = params.get("owner") || "";
         ui.adminVideosSearchPage.value = query;
         fetchAdminVideosPage(query, true);
+        return;
+      }
+      if (path === "/admin/reports") {
+        fetchAdminReportsPage();
+        return;
+      }
+      if (path === "/admin/imports") {
+        openAdminImportsPage();
         return;
       }
       if (path.startsWith("/channel/")) {
@@ -5837,6 +6831,7 @@
           onError: onPlayerError
         }
       });
+      schedulePlayerReload();
     }
   </script>
 </body>
