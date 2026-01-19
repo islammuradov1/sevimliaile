@@ -1429,6 +1429,12 @@
       gap: 12px;
     }
 
+    #history-list {
+      max-height: 340px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
     .settings-chips,
     .settings-pills {
       display: flex;
@@ -5452,11 +5458,11 @@
       searchFetching = false;
     }
 
-    async function playReportedVideo(report) {
-      if (!report || !report.video_id) {
+    async function playVideoById(videoId) {
+      if (!videoId) {
         return;
       }
-      const res = await apiFetch("/api/videos/" + report.video_id);
+      const res = await apiFetch("/api/videos/" + videoId);
       if (!res.ok) {
         return;
       }
@@ -5468,6 +5474,13 @@
       currentIndex = 0;
       navigateTo("/", { replace: true });
       loadVideo(0);
+    }
+
+    async function playReportedVideo(report) {
+      if (!report || !report.video_id) {
+        return;
+      }
+      playVideoById(report.video_id);
     }
 
     async function refreshNotificationBadge() {
@@ -6970,6 +6983,26 @@
           " · " +
           new Date(item.watched_at).toLocaleTimeString() +
           "</div></div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const playBtn = document.createElement("button");
+        playBtn.type = "button";
+        playBtn.className = "ghost";
+        playBtn.textContent = t("control_play");
+        playBtn.addEventListener("click", () => playVideoById(item.video_id));
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "ghost";
+        deleteBtn.textContent = t("action_delete");
+        deleteBtn.addEventListener("click", async () => {
+          const del = await apiFetch("/api/history/" + item.id, { method: "DELETE" });
+          if (del.ok) {
+            loadHistory();
+          }
+        });
+        actions.appendChild(playBtn);
+        actions.appendChild(deleteBtn);
+        row.appendChild(actions);
         ui.historyList.appendChild(row);
       });
     }

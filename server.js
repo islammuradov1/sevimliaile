@@ -574,7 +574,7 @@ app.get("/api/history", auth, async (req, res) => {
   const end = new Date(date);
   end.setHours(23, 59, 59, 999);
   const result = await pool.query(
-    "SELECT view_history.watched_at, videos.title, videos.youtube_id, users.email as channel " +
+    "SELECT view_history.id, view_history.video_id, view_history.watched_at, videos.title, videos.youtube_id, users.email as channel " +
       "FROM view_history JOIN videos ON view_history.video_id = videos.id " +
       "JOIN users ON videos.owner_id = users.id " +
       "WHERE view_history.user_id = $1 AND view_history.watched_at BETWEEN $2 AND $3 " +
@@ -582,6 +582,20 @@ app.get("/api/history", auth, async (req, res) => {
     [req.user.id, start.toISOString(), end.toISOString()]
   );
   res.json({ history: result.rows });
+});
+
+app.delete("/api/history/:id", auth, async (req, res) => {
+  if (req.user.plan !== "pro") {
+    return res.status(403).json({ error: "History available on pro plan only." });
+  }
+  const result = await pool.query("DELETE FROM view_history WHERE id = $1 AND user_id = $2", [
+    req.params.id,
+    req.user.id
+  ]);
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  res.json({ ok: true });
 });
 
 app.get("/api/topics", auth, async (_req, res) => {
