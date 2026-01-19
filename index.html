@@ -48,12 +48,12 @@
       --bg-soft: #ffe4f5;
       --ink: #2b1830;
       --muted: #8d6a8b;
-      --stroke: #ffc6ea;
-      --accent: #ff3ea5;
-      --accent-2: #00c2ff;
+      --stroke: #ff9dd6;
+      --accent: #ff2f92;
+      --accent-2: #00b3ff;
       --accent-3: #ffd400;
-      --accent-4: #5bff9a;
-      --shadow: 0 22px 44px rgba(55, 20, 58, 0.2);
+      --accent-4: #37e980;
+      --shadow: 0 24px 48px rgba(55, 20, 58, 0.25);
     }
 
     * {
@@ -88,11 +88,12 @@
 
     body[data-theme="party"] {
       background:
-        radial-gradient(6px 6px at 12% 18%, rgba(255, 107, 183, 0.28) 40%, transparent 45%),
-        radial-gradient(6px 6px at 80% 14%, rgba(50, 201, 255, 0.22) 40%, transparent 45%),
-        radial-gradient(6px 6px at 75% 75%, rgba(123, 255, 178, 0.18) 40%, transparent 45%),
-        radial-gradient(700px 500px at 15% 20%, rgba(255, 211, 106, 0.3) 0%, transparent 60%),
-        radial-gradient(700px 500px at 85% 70%, rgba(255, 107, 183, 0.25) 0%, transparent 60%),
+        radial-gradient(10px 10px at 12% 18%, rgba(255, 47, 146, 0.28) 40%, transparent 45%),
+        radial-gradient(10px 10px at 80% 14%, rgba(0, 179, 255, 0.22) 40%, transparent 45%),
+        radial-gradient(10px 10px at 75% 75%, rgba(55, 233, 128, 0.2) 40%, transparent 45%),
+        radial-gradient(850px 560px at 15% 20%, rgba(255, 211, 0, 0.3) 0%, transparent 60%),
+        radial-gradient(820px 560px at 85% 70%, rgba(255, 47, 146, 0.26) 0%, transparent 60%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.55) 100%),
         var(--bg);
     }
 
@@ -171,9 +172,9 @@
     }
 
     .logo-image {
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
       object-fit: contain;
       background: #fff6d1;
       border: 2px solid var(--stroke);
@@ -285,6 +286,21 @@
     body[data-view="search"] aside,
     body[data-view="channels"] aside,
     body[data-view="admin-videos"] aside {
+      display: none;
+    }
+
+    body[data-view="search"] #feed-view,
+    body[data-view="search"] #viral-view,
+    body[data-view="channels"] #feed-view,
+    body[data-view="channels"] #viral-view,
+    body[data-view="admin-videos"] #feed-view,
+    body[data-view="admin-videos"] #viral-view {
+      display: none;
+    }
+
+    body[data-view="feed"] #search-view,
+    body[data-view="feed"] #channels-page,
+    body[data-view="feed"] #admin-videos-page {
       display: none;
     }
 
@@ -3679,6 +3695,9 @@
       if (!videos.length || !player) {
         return;
       }
+      if (document.body.getAttribute("data-view") !== "feed") {
+        navigateTo("/", { replace: true });
+      }
       currentIndex = (index + videos.length) % videos.length;
       const video = videos[currentIndex];
       currentVideo = video;
@@ -3746,7 +3765,7 @@
         channelButton.textContent = channelName;
         channelButton.addEventListener("click", (event) => {
           event.stopPropagation();
-          openChannel(video.owner_id);
+          navigateTo("/channel/" + video.owner_id);
         });
         channelNode = channelButton;
       } else {
@@ -3796,7 +3815,7 @@
           ? t("message_no_subscribed_videos")
           : t("message_no_videos");
       renderVideoGrid(list, ui.recommendations, append, message, (video) => {
-        setPageView("feed");
+        navigateTo("/", { replace: true });
         const index = videos.findIndex((item) => item.id === video.id);
         if (index >= 0) {
           loadVideo(index);
@@ -3808,7 +3827,7 @@
       const isSubscribed = channel.is_subscribed;
       const row = document.createElement("div");
       row.className = "channel";
-      row.addEventListener("click", () => openChannel(channel.id));
+      row.addEventListener("click", () => navigateTo("/channel/" + channel.id));
       row.innerHTML =
         "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
         "<div><div class=\"channel-name\">" +
@@ -3899,7 +3918,7 @@
       subscriptions.forEach((channel) => {
         const row = document.createElement("div");
         row.className = "channel";
-        row.addEventListener("click", () => openChannel(channel.id));
+        row.addEventListener("click", () => navigateTo("/channel/" + channel.id));
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
@@ -3937,7 +3956,11 @@
       fetchVideos(ui.searchInput.value.trim(), true);
     }
 
-    async function openChannel(channelId) {
+    async function openChannel(channelId, fromRoute = false) {
+      if (!fromRoute) {
+        navigateTo("/channel/" + channelId);
+        return;
+      }
       showChannelView(true);
       ui.channelVideos.innerHTML = t("status_loading");
       const channelRes = await apiFetch("/api/channels/" + channelId);
@@ -3980,7 +4003,7 @@
         false,
         t("message_no_channel_videos"),
         (video) => {
-          setPageView("feed");
+          navigateTo("/", { replace: true });
           const index = videos.findIndex((item) => item.id === video.id);
           if (index >= 0) {
             loadVideo(index);
@@ -4007,7 +4030,7 @@
       await fetchSubscriptions();
       await fetchChannels();
       if (currentChannel && String(currentChannel.id) === String(channelId)) {
-        await openChannel(channelId);
+        await openChannel(channelId, true);
       }
     }
 
@@ -4069,7 +4092,7 @@
       }
       const trimmed = query.trim();
       if (!trimmed) {
-        setPageView("feed");
+        navigateTo("/", { replace: true });
         return;
       }
       searchFetching = true;
@@ -4099,7 +4122,7 @@
         !reset,
         t("message_no_videos"),
         (video) => {
-          setPageView("feed");
+          navigateTo("/", { replace: true });
           videos = [video];
           currentIndex = 0;
           loadVideo(0);
@@ -4121,7 +4144,7 @@
         return;
       }
       renderVideoGrid(data.videos || [], ui.viralGrid, false, t("message_no_viral"), (video) => {
-        setPageView("feed");
+        navigateTo("/", { replace: true });
         const index = videos.findIndex((item) => item.id === video.id);
         if (index >= 0) {
           loadVideo(index);
@@ -5592,12 +5615,8 @@
     ui.searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const query = ui.searchInput.value.trim();
-      setPageView("search");
-      ui.searchTitle.textContent = query
-        ? t("search_results") + " \"" + query + "\""
-        : t("search_title");
-      ui.searchGrid.innerHTML = t("status_loading");
-      fetchSearchResults(query, true);
+      const path = query ? "/search?q=" + encodeURIComponent(query) : "/search";
+      navigateTo(path);
     });
 
     ui.themeToggle.addEventListener("click", () => {
@@ -5617,7 +5636,11 @@
     ui.channelBack.addEventListener("click", () => {
       currentChannel = null;
       showChannelView(false);
-      fetchVideos(ui.searchInput.value.trim(), true);
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        navigateTo("/", { replace: true });
+      }
     });
     ui.channelSubscribe.addEventListener("click", () => {
       if (!currentChannel) {
@@ -5633,8 +5656,8 @@
     ui.studioOpen.addEventListener("click", openStudio);
     ui.settingsOpen.addEventListener("click", openSettings);
     ui.notificationsOpen.addEventListener("click", openNotifications);
-    ui.channelsOpen.addEventListener("click", () => fetchChannelsPage("", true));
-    ui.channelsBack.addEventListener("click", () => setPageView("feed"));
+    ui.channelsOpen.addEventListener("click", () => navigateTo("/channels"));
+    ui.channelsBack.addEventListener("click", () => navigateTo("/"));
     ui.channelsSearch.addEventListener("input", () => fetchChannelsPage(ui.channelsSearch.value, true));
     ui.channelsSort.addEventListener("change", applyChannelsFilters);
     ui.channelsFilterSubscribed.addEventListener("change", applyChannelsFilters);
@@ -5643,7 +5666,7 @@
         fetchChannelsPage(channelsQuery, false);
       }
     });
-    ui.adminVideosBack.addEventListener("click", () => setPageView("feed"));
+    ui.adminVideosBack.addEventListener("click", () => navigateTo("/"));
     ui.adminVideosSearchPage.addEventListener("input", () =>
       fetchAdminVideosPage(ui.adminVideosSearchPage.value, true)
     );
@@ -5652,7 +5675,7 @@
         fetchAdminVideosPage(adminVideosQuery, false);
       }
     });
-    ui.adminVideosOpen.addEventListener("click", () => fetchAdminVideosPage("", true));
+    ui.adminVideosOpen.addEventListener("click", () => navigateTo("/admin/videos"));
     ui.contactOpen.addEventListener("click", () => openModal(ui.contactModal));
     ui.adminImportCsv.addEventListener("click", importCsv);
     ui.adminImportSql.addEventListener("click", importSql);
@@ -5745,11 +5768,56 @@
       }
     });
     ui.searchBack.addEventListener("click", () => {
-      setPageView("feed");
+      navigateTo("/");
     });
+
+    function navigateTo(path, options = {}) {
+      const target = path || "/";
+      if (options.replace) {
+        window.history.replaceState({}, "", target);
+      } else {
+        window.history.pushState({}, "", target);
+      }
+      handleRoute();
+    }
+
+    function handleRoute() {
+      const path = window.location.pathname || "/";
+      const params = new URLSearchParams(window.location.search);
+      if (path === "/channels") {
+        const query = params.get("q") || "";
+        ui.channelsSearch.value = query;
+        fetchChannelsPage(query, true);
+        return;
+      }
+      if (path === "/search") {
+        const query = params.get("q") || "";
+        ui.searchInput.value = query;
+        fetchSearchResults(query, true);
+        return;
+      }
+      if (path === "/admin/videos") {
+        const query = params.get("q") || "";
+        ui.adminVideosSearchPage.value = query;
+        fetchAdminVideosPage(query, true);
+        return;
+      }
+      if (path.startsWith("/channel/")) {
+        const parts = path.split("/").filter(Boolean);
+        const channelId = parts[1];
+        if (channelId) {
+          openChannel(channelId, true);
+          return;
+        }
+      }
+      setPageView("feed");
+    }
+
+    window.addEventListener("popstate", handleRoute);
 
     lockApp(t("message_sign_in"));
     initFirebase();
+    handleRoute();
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player("player", {
