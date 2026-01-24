@@ -2,14 +2,13 @@ const JSON_HEADERS = { "Content-Type": "application/json" };
 const SCHEMA_TTL_MS = 5 * 60 * 1000;
 const schemaCache = {};
 const GAME_REWARDS = {
-  fruit: 8,
   memory: 12,
   find: 6,
-  math: 10
+  math: 2
 };
 const GAME_DAILY_LIMIT = 5;
 const GAME_DAILY_POINT_LIMIT = 120;
-const GAME_MIN_INTERVAL_MS = 5000;
+const GAME_MIN_INTERVAL_MS = 1200;
 const PRO_REDEEM_COST = 500;
 const PRO_REDEEM_DAYS = 30;
 const gameWinBuckets = new Map();
@@ -787,6 +786,23 @@ export default {
       );
     }
 
+    if (path === "/leaderboard" && request.method === "GET") {
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
+      const result = await env.DB.prepare(
+        "SELECT id, display_name, email, points, created_at FROM users WHERE role != 'admin' ORDER BY points DESC, created_at ASC LIMIT ?"
+      )
+        .bind(limit)
+        .all();
+      const leaders = (result.results || []).map((row) => ({
+        id: row.id,
+        display_name: row.display_name || "",
+        name: row.display_name || (row.email ? row.email.split("@")[0] : ""),
+        email: row.email || "",
+        points: Number(row.points || 0)
+      }));
+      return jsonResponse({ leaders }, 200, withCors({}, origin));
+    }
+
     if (path === "/ads" && request.method === "GET") {
       const slot = String(url.searchParams.get("slot") || "").trim().toLowerCase();
       const binds = [];
@@ -1207,6 +1223,11 @@ export default {
       const search = url.searchParams.get("search") || "";
       const channelId = url.searchParams.get("channelId") || "";
       const onlySubscribed = url.searchParams.get("subscribed") === "1";
+      const since = url.searchParams.get("since") || "";
+      const languageFilter = url.searchParams.get("languages") || "";
+      const religionFilter = url.searchParams.get("religion") || "";
+      const topicFilter = url.searchParams.get("topic") || "";
+      const lengthFilter = url.searchParams.get("length") || "";
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "30", 10), 100);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const settings = await loadUserSettings(env, user.id);
@@ -1235,8 +1256,103 @@ export default {
       }
       if (search) {
         where +=
-          " AND (videos.title LIKE ? OR users.display_name LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
-        binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
+          " AND (videos.title LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
+        binds.push("%" + search + "%", "%" + search + "%");
+      }
+      if (since && since !== "all") {
+        const now = new Date();
+        const start = new Date(now);
+        if (since === "today") {
+          start.setHours(0, 0, 0, 0);
+        } else if (since === "week") {
+          start.setDate(now.getDate() - 7);
+        } else if (since === "month") {
+          start.setMonth(now.getMonth() - 1);
+        } else if (since === "year") {
+          start.setFullYear(now.getFullYear() - 1);
+        } else {
+          start.setTime(Number.NaN);
+        }
+        if (!Number.isNaN(start.getTime())) {
+          where += " AND videos.created_at >= ?";
+          binds.push(start.toISOString());
+        }
+      }
+      const languageList = parseList(languageFilter).map((value) => String(value).toLowerCase());
+      if (languageList.length) {
+        const list = languageList.map(() => "?").join(",");
+        where +=
+          " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+          list +
+          ")) OR videos.language IN (" +
+          list +
+          "))";
+        binds.push(...languageList, ...languageList);
+      }
+      const topicQuery = String(topicFilter || "").trim().toLowerCase();
+      if (topicQuery) {
+        where += " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE lower(value) LIKE ?)";
+        binds.push("%" + topicQuery + "%");
+      }
+      const lengthValue = String(lengthFilter || "").trim().toLowerCase();
+      if (lengthValue) {
+        if (lengthValue === "short") {
+          where += " AND videos.duration > 0 AND videos.duration < 240";
+        } else if (lengthValue === "medium") {
+          where += " AND videos.duration >= 240 AND videos.duration <= 1200";
+        } else if (lengthValue === "long") {
+          where += " AND videos.duration > 1200";
+        }
+      }
+      const religionValue = String(religionFilter || "").trim().toLowerCase();
+      if (religionValue) {
+        const base = normalizeReligion(religionValue);
+        if (base === "none") {
+          const clauses = [];
+          if (hasReligions) {
+            clauses.push(
+              "(json_array_length(videos.religions) IS NULL OR json_array_length(videos.religions) = 0)"
+            );
+          }
+          if (hasReligion) {
+            clauses.push("COALESCE(videos.religion, 'none') = 'none'");
+          }
+          if (clauses.length) {
+            where += " AND (" + clauses.join(" OR ") + ")";
+          }
+        } else {
+          const detailList = Object.keys(RELIGION_DETAIL_BASE).filter(
+            (detail) => RELIGION_DETAIL_BASE[detail] === base
+          );
+          const clauses = [];
+          if (hasReligions) {
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religions) WHERE value = ?)"
+            );
+            binds.push(base);
+          }
+          if (hasReligion) {
+            clauses.push("COALESCE(videos.religion, 'none') = ?");
+            binds.push(base);
+          }
+          if (detailList.length && hasReligionDetails) {
+            const list = detailList.map(() => "?").join(",");
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religion_details) WHERE value IN (" +
+                list +
+                "))"
+            );
+            binds.push(...detailList);
+          }
+          if (detailList.length && hasReligionDetail) {
+            const list = detailList.map(() => "?").join(",");
+            clauses.push("COALESCE(videos.religion_detail, '') IN (" + list + ")");
+            binds.push(...detailList);
+          }
+          if (clauses.length) {
+            where += " AND (" + clauses.join(" OR ") + ")";
+          }
+        }
       }
       if (applyFilters && allowedChannels.length && channelMode !== "off") {
           const list = allowedChannels.map(() => "?").join(",");

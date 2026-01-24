@@ -165,6 +165,7 @@ const ui = {
       gamesFindNext: document.getElementById("games-find-next"),
       gamesMathLevels: document.querySelectorAll("[data-math-level]"),
       gamesMathQuestion: document.getElementById("games-math-question"),
+      gamesMathProgress: document.getElementById("games-math-progress"),
       gamesMathAnswer: document.getElementById("games-math-answer"),
       gamesMathSubmit: document.getElementById("games-math-submit"),
       gamesMathNext: document.getElementById("games-math-next"),
@@ -405,29 +406,22 @@ const ui = {
 
     const GAME_CATALOG = [
       {
-        id: "fruit",
-        aliases: ["1"],
-        icon: "🍓",
-        titleKey: "games_fruit_title",
-        subtitleKey: "games_fruit_instruction"
-      },
-      {
         id: "memory",
-        aliases: ["2"],
+        aliases: ["1"],
         icon: "🧠",
         titleKey: "games_memory_title",
         subtitleKey: "games_memory_instruction"
       },
       {
         id: "find",
-        aliases: ["3"],
+        aliases: ["2"],
         icon: "🔍",
         titleKey: "games_find_title",
         subtitleKey: "games_find_instruction"
       },
       {
         id: "math",
-        aliases: ["4"],
+        aliases: ["3"],
         icon: "➕",
         titleKey: "games_math_title",
         subtitleKey: "games_math_instruction"
@@ -452,7 +446,7 @@ const ui = {
         controls_hide: "Hide controls",
         controls_show: "Show controls",
         tech_panel_toggle: "Toggle player tools",
-        search_placeholder: "Search videos and channels",
+        search_placeholder: "Search videos",
         filter_label_day: "Day",
         filter_day_all: "All the time",
         filter_day_today: "Today",
@@ -498,16 +492,20 @@ const ui = {
         games_find_status_try: "Oops, try again.",
         games_find_next: "Next round",
         games_math_title: "Math Mission",
-        games_math_instruction: "Choose a level and solve the question.",
+        games_math_instruction: "Pick a level and answer 5 questions.",
         games_math_easy: "Easy",
         games_math_medium: "Medium",
         games_math_hard: "Hard",
         games_math_placeholder: "Type the answer",
         games_math_submit: "Check",
-        games_math_next: "Next",
-        games_math_status_ready: "Pick a level to start.",
-        games_math_status_correct: "Correct! 🎉",
-        games_math_status_wrong: "Not quite, try again.",
+        games_math_next: "Skip",
+        games_math_status_choose: "Pick a level to start.",
+        games_math_status_question: "Solve it!",
+        games_math_status_correct: "Correct! Answer: {answer}",
+        games_math_status_wrong: "Answer: {answer}",
+        games_math_status_skip: "Skipped. Answer: {answer}",
+        games_math_status_done: "Great job! {correct}/{total} correct.",
+        games_math_pick_level: "Pick a level to start",
         games_points_label: "Points",
         games_points_note: "Win games to earn points for Pro time.",
         games_redeem: "Get 1 month Pro",
@@ -517,6 +515,12 @@ const ui = {
         games_redeem_success: "Pro unlocked for 1 month 🎉",
         games_points_earned: "You earned {points} points!",
         games_points_limit: "Daily points limit reached. Try again tomorrow.",
+        games_leaderboard_title: "Leaderboard",
+        games_leaderboard_note: "Top kids by points.",
+        games_leaderboard_name: "Kid",
+        games_leaderboard_points: "Points",
+        games_leaderboard_empty: "No scores yet.",
+        games_leaderboard_kid: "Kid",
         games_scoreboard_title: "لوحة النقاط",
         games_scoreboard_note: "آخر نشاط للنقاط.",
         games_scoreboard_type: "النوع",
@@ -921,7 +925,7 @@ const ui = {
         controls_hide: "Скрыть управление",
         controls_show: "Показать управление",
         tech_panel_toggle: "Панель инструментов",
-        search_placeholder: "Поиск видео и каналов",
+        search_placeholder: "Поиск видео",
         filter_label_day: "День",
         filter_day_all: "Всё время",
         filter_day_today: "Сегодня",
@@ -966,6 +970,27 @@ const ui = {
         games_find_status_good: "Да! Вы нашли его! 🎉",
         games_find_status_try: "Ой, попробуйте снова.",
         games_find_next: "Следующий раунд",
+        games_math_title: "Математическая миссия",
+        games_math_instruction: "Выберите уровень и ответьте на 5 вопросов.",
+        games_math_easy: "Легко",
+        games_math_medium: "Средне",
+        games_math_hard: "Сложно",
+        games_math_placeholder: "Введите ответ",
+        games_math_submit: "Проверить",
+        games_math_next: "Пропустить",
+        games_math_status_choose: "Выберите уровень, чтобы начать.",
+        games_math_status_question: "Решай!",
+        games_math_status_correct: "Верно! Ответ: {answer}",
+        games_math_status_wrong: "Ответ: {answer}",
+        games_math_status_skip: "Пропуск. Ответ: {answer}",
+        games_math_status_done: "Отлично! {correct}/{total} верных.",
+        games_math_pick_level: "Выберите уровень",
+        games_leaderboard_title: "Таблица лидеров",
+        games_leaderboard_note: "Дети с самыми высокими очками.",
+        games_leaderboard_name: "Ребенок",
+        games_leaderboard_points: "Очки",
+        games_leaderboard_empty: "Пока нет очков.",
+        games_leaderboard_kid: "Ребенок",
         games_fruit_aria: "Поле фруктового совпадения",
         games_memory_aria: "Поле игры на память",
         games_find_aria: "Поле «Найди фрукт»",
@@ -1294,7 +1319,7 @@ const ui = {
         controls_hide: "隐藏控制栏",
         controls_show: "显示控制栏",
         tech_panel_toggle: "切换播放器工具",
-        search_placeholder: "搜索视频和频道",
+        search_placeholder: "搜索视频",
         filter_label_day: "日期",
         filter_day_all: "所有时间",
         filter_day_today: "今天",
@@ -1339,6 +1364,27 @@ const ui = {
         games_find_status_good: "对啦！找到了！🎉",
         games_find_status_try: "哎呀，再试一次。",
         games_find_next: "下一轮",
+        games_math_title: "数学任务",
+        games_math_instruction: "选择难度并回答 5 道题。",
+        games_math_easy: "简单",
+        games_math_medium: "中等",
+        games_math_hard: "困难",
+        games_math_placeholder: "输入答案",
+        games_math_submit: "检查",
+        games_math_next: "跳过",
+        games_math_status_choose: "请选择难度开始。",
+        games_math_status_question: "开始解题！",
+        games_math_status_correct: "答对了！答案：{answer}",
+        games_math_status_wrong: "答案：{answer}",
+        games_math_status_skip: "已跳过。答案：{answer}",
+        games_math_status_done: "太棒了！{correct}/{total} 题正确。",
+        games_math_pick_level: "请选择难度",
+        games_leaderboard_title: "排行榜",
+        games_leaderboard_note: "积分最高的孩子。",
+        games_leaderboard_name: "孩子",
+        games_leaderboard_points: "积分",
+        games_leaderboard_empty: "暂无积分。",
+        games_leaderboard_kid: "孩子",
         games_fruit_aria: "水果配对棋盘",
         games_memory_aria: "记忆翻翻乐棋盘",
         games_find_aria: "找水果棋盘",
@@ -1667,7 +1713,7 @@ const ui = {
         controls_hide: "Kontrolleri gizle",
         controls_show: "Kontrolleri göster",
         tech_panel_toggle: "Oynatıcı araçları",
-        search_placeholder: "Videoları ve kanalları ara",
+        search_placeholder: "Videoları ara",
         filter_label_day: "Gün",
         filter_day_all: "Tüm zamanlar",
         filter_day_today: "Bugün",
@@ -1712,6 +1758,27 @@ const ui = {
         games_find_status_good: "Evet! Buldun! 🎉",
         games_find_status_try: "Olmadı, tekrar dene.",
         games_find_next: "Yeni tur",
+        games_math_title: "Matematik Görevi",
+        games_math_instruction: "Seviye seç ve 5 soruyu cevapla.",
+        games_math_easy: "Kolay",
+        games_math_medium: "Orta",
+        games_math_hard: "Zor",
+        games_math_placeholder: "Cevabı yaz",
+        games_math_submit: "Kontrol et",
+        games_math_next: "Atla",
+        games_math_status_choose: "Başlamak için seviye seç.",
+        games_math_status_question: "Çöz bakalım!",
+        games_math_status_correct: "Doğru! Cevap: {answer}",
+        games_math_status_wrong: "Cevap: {answer}",
+        games_math_status_skip: "Atlandı. Cevap: {answer}",
+        games_math_status_done: "Harika! {correct}/{total} doğru.",
+        games_math_pick_level: "Seviye seç",
+        games_leaderboard_title: "Liderlik Tablosu",
+        games_leaderboard_note: "En çok puanı olan çocuklar.",
+        games_leaderboard_name: "Çocuk",
+        games_leaderboard_points: "Puan",
+        games_leaderboard_empty: "Henüz puan yok.",
+        games_leaderboard_kid: "Çocuk",
         games_fruit_aria: "Meyve eşleşme tahtası",
         games_memory_aria: "Hafıza oyunu tahtası",
         games_find_aria: "Meyveyi bul tahtası",
@@ -2040,7 +2107,7 @@ const ui = {
         controls_hide: "İdarələri gizlət",
         controls_show: "İdarələri göstər",
         tech_panel_toggle: "Pleyer alətləri",
-        search_placeholder: "Video və kanalları axtarın",
+        search_placeholder: "Video axtarın",
         filter_label_day: "Gün",
         filter_day_all: "Bütün zamanlar",
         filter_day_today: "Bugün",
@@ -2085,6 +2152,27 @@ const ui = {
         games_find_status_good: "Bəli! Tapdın! 🎉",
         games_find_status_try: "Olmadı, yenə dene.",
         games_find_next: "Növbəti tur",
+        games_math_title: "Riyaziyyat Missiyası",
+        games_math_instruction: "Səviyyə seç və 5 sualı cavabla.",
+        games_math_easy: "Asan",
+        games_math_medium: "Orta",
+        games_math_hard: "Çətin",
+        games_math_placeholder: "Cavabı yaz",
+        games_math_submit: "Yoxla",
+        games_math_next: "Keç",
+        games_math_status_choose: "Başlamaq üçün səviyyə seç.",
+        games_math_status_question: "Həll et!",
+        games_math_status_correct: "Düzdür! Cavab: {answer}",
+        games_math_status_wrong: "Cavab: {answer}",
+        games_math_status_skip: "Keçildi. Cavab: {answer}",
+        games_math_status_done: "Əla! {correct}/{total} düz.",
+        games_math_pick_level: "Səviyyə seç",
+        games_leaderboard_title: "Xal liderləri",
+        games_leaderboard_note: "Ən çox xal toplayan uşaqlar.",
+        games_leaderboard_name: "Uşaq",
+        games_leaderboard_points: "Xal",
+        games_leaderboard_empty: "Hələ xal yoxdur.",
+        games_leaderboard_kid: "Uşaq",
         games_fruit_aria: "Meyvə uyğunlaşdırma lövhəsi",
         games_memory_aria: "Yaddaş oyunu lövhəsi",
         games_find_aria: "Meyvəni tap lövhəsi",
@@ -2413,7 +2501,7 @@ const ui = {
         controls_hide: "إخفاء عناصر التحكم",
         controls_show: "إظهار عناصر التحكم",
         tech_panel_toggle: "أدوات المشغل",
-        search_placeholder: "ابحث عن الفيديوهات والقنوات",
+        search_placeholder: "ابحث عن الفيديوهات",
         filter_label_day: "اليوم",
         filter_day_all: "كل الأوقات",
         filter_day_today: "اليوم",
@@ -2458,6 +2546,27 @@ const ui = {
         games_find_status_good: "نعم! وجدتها! 🎉",
         games_find_status_try: "اوه، حاول مرة اخرى.",
         games_find_next: "جولة جديدة",
+        games_math_title: "مهمة الرياضيات",
+        games_math_instruction: "اختر المستوى وأجب على 5 أسئلة.",
+        games_math_easy: "سهل",
+        games_math_medium: "متوسط",
+        games_math_hard: "صعب",
+        games_math_placeholder: "اكتب الإجابة",
+        games_math_submit: "تحقق",
+        games_math_next: "تخطي",
+        games_math_status_choose: "اختر مستوى للبدء.",
+        games_math_status_question: "حلّها!",
+        games_math_status_correct: "صحيح! الإجابة: {answer}",
+        games_math_status_wrong: "الإجابة: {answer}",
+        games_math_status_skip: "تم التخطي. الإجابة: {answer}",
+        games_math_status_done: "رائع! {correct}/{total} صحيح.",
+        games_math_pick_level: "اختر مستوى",
+        games_leaderboard_title: "لوحة المتصدرين",
+        games_leaderboard_note: "الأطفال الأعلى نقاطًا.",
+        games_leaderboard_name: "الطفل",
+        games_leaderboard_points: "النقاط",
+        games_leaderboard_empty: "لا توجد نقاط بعد.",
+        games_leaderboard_kid: "الطفل",
         games_fruit_aria: "لوحة مطابقة الفواكه",
         games_memory_aria: "لوحة لعبة الذاكرة",
         games_find_aria: "لوحة اعثر على الفاكهة",
@@ -3115,10 +3224,9 @@ const ui = {
     const MEMORY_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
     const FIND_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
     const GAME_REWARDS = {
-      fruit: 8,
       memory: 12,
       find: 6,
-      math: 10
+      math: 2
     };
     const PRO_REDEEM_COST = 500;
 
@@ -3154,11 +3262,15 @@ const ui = {
     };
 
     const mathGameState = {
-      level: "easy",
+      level: "",
       question: "",
       answer: 0,
-      statusKey: "games_math_status_ready",
-      awarded: false
+      statusKey: "games_math_status_choose",
+      statusVars: {},
+      totalQuestions: 5,
+      questionIndex: 0,
+      correctCount: 0,
+      pending: false
     };
 
     function setTheme() {
@@ -3422,16 +3534,9 @@ const ui = {
       }
     }
 
-    async function fetchPointsLedger() {
+    async function fetchPointsSummary() {
       if (!currentUser) {
-        if (ui.gamesScoreboardBody) {
-          ui.gamesScoreboardBody.innerHTML =
-            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
-        }
-        if (ui.gamesScoreboardBodyDetail) {
-          ui.gamesScoreboardBodyDetail.innerHTML =
-            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
-        }
+        updatePointsUI();
         return;
       }
       const res = await apiFetch("/api/points");
@@ -3439,46 +3544,44 @@ const ui = {
         return;
       }
       const data = await res.json();
-      const entries = data.events || [];
       if (typeof data.points === "number" && currentUser) {
         currentUser.points = data.points;
       }
-      const render = (target) => {
-        if (!target) {
-          return;
-        }
-        if (!entries.length) {
-          target.innerHTML =
-            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
-          return;
-        }
-        target.innerHTML = "";
-        entries.forEach((entry) => {
-          const row = document.createElement("tr");
-          const type =
-            entry.type === "redeem_pro" ? t("games_score_type_redeem") : t("games_score_type_win");
-          const points = Number(entry.points || 0);
-          const pointsCell =
-            (points >= 0 ? "+" : "") +
-            points +
-            " pts";
-          const time = entry.created_at ? new Date(entry.created_at).toLocaleString() : "";
-          row.innerHTML =
-            "<td>" +
-            escapeHtml(type) +
-            "</td><td class=\"" +
-            (points >= 0 ? "score-positive" : "score-negative") +
-            "\">" +
-            escapeHtml(pointsCell) +
-            "</td><td>" +
-            escapeHtml(time) +
-            "</td>";
-          target.appendChild(row);
-        });
-      };
-      render(ui.gamesScoreboardBody);
-      render(ui.gamesScoreboardBodyDetail);
       updatePointsUI();
+    }
+
+    async function fetchLeaderboard() {
+      if (!ui.gamesScoreboardBody) {
+        return;
+      }
+      if (!currentUser) {
+        ui.gamesScoreboardBody.innerHTML =
+          "<tr><td colspan=\"2\" class=\"card-meta\">" + t("games_leaderboard_empty") + "</td></tr>";
+        return;
+      }
+      const res = await apiFetch("/api/leaderboard");
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      const leaders = data.leaders || [];
+      if (!leaders.length) {
+        ui.gamesScoreboardBody.innerHTML =
+          "<tr><td colspan=\"2\" class=\"card-meta\">" + t("games_leaderboard_empty") + "</td></tr>";
+        return;
+      }
+      ui.gamesScoreboardBody.innerHTML = "";
+      leaders.forEach((entry) => {
+        const row = document.createElement("tr");
+        const name = entry.display_name || entry.name || entry.email || t("games_leaderboard_kid");
+        row.innerHTML =
+          "<td>" +
+          escapeHtml(name) +
+          "</td><td class=\"score-positive\">" +
+          escapeHtml(String(entry.points || 0)) +
+          "</td>";
+        ui.gamesScoreboardBody.appendChild(row);
+      });
     }
 
     function sendAdView(adId, durationSeconds) {
@@ -3612,7 +3715,8 @@ const ui = {
             t("games_points_earned").replace("{points}", String(data.awardedPoints))
           );
         }
-        fetchPointsLedger();
+        fetchPointsSummary();
+        fetchLeaderboard();
       } catch (err) {
         setGamesMessage("");
       }
@@ -3639,7 +3743,8 @@ const ui = {
           currentUser.plan = data.plan;
         }
         updateAuthUI();
-        fetchPointsLedger();
+        fetchPointsSummary();
+        fetchLeaderboard();
         setGamesMessage(t("games_redeem_success"));
       } catch (err) {
         setGamesMessage("");
@@ -4028,9 +4133,43 @@ const ui = {
       });
     }
 
+    function setMathStatus(key, vars) {
+      mathGameState.statusKey = key;
+      mathGameState.statusVars = vars || {};
+      updateMathStatus();
+    }
+
     function updateMathStatus() {
-      if (ui.gamesMathStatus) {
-        ui.gamesMathStatus.textContent = t(mathGameState.statusKey);
+      if (!ui.gamesMathStatus) {
+        return;
+      }
+      let text = t(mathGameState.statusKey);
+      if (mathGameState.statusVars) {
+        Object.keys(mathGameState.statusVars).forEach((key) => {
+          text = text.replace("{" + key + "}", String(mathGameState.statusVars[key]));
+        });
+      }
+      ui.gamesMathStatus.textContent = text;
+    }
+
+    function updateMathProgress() {
+      if (!ui.gamesMathProgress) {
+        return;
+      }
+      const current = mathGameState.questionIndex;
+      const total = mathGameState.totalQuestions;
+      ui.gamesMathProgress.textContent = current + " / " + total;
+    }
+
+    function setMathControlsEnabled(enabled) {
+      if (ui.gamesMathAnswer) {
+        ui.gamesMathAnswer.disabled = !enabled;
+      }
+      if (ui.gamesMathSubmit) {
+        ui.gamesMathSubmit.disabled = !enabled;
+      }
+      if (ui.gamesMathNext) {
+        ui.gamesMathNext.disabled = !enabled;
       }
     }
 
@@ -4092,49 +4231,101 @@ const ui = {
       }
       mathGameState.question = text;
       mathGameState.answer = answer;
-      mathGameState.awarded = false;
-      mathGameState.statusKey = "games_math_status_ready";
       if (ui.gamesMathQuestion) {
         ui.gamesMathQuestion.textContent = text;
+        ui.gamesMathQuestion.classList.remove("answer-reveal");
       }
       if (ui.gamesMathAnswer) {
         ui.gamesMathAnswer.value = "";
       }
-      updateMathStatus();
+      updateMathProgress();
+      setMathControlsEnabled(true);
+      setMathStatus("games_math_status_question");
     }
 
     function setMathLevel(level) {
-      mathGameState.level = level;
       if (ui.gamesMathLevels && ui.gamesMathLevels.length) {
         ui.gamesMathLevels.forEach((button) => {
           button.classList.toggle("active", button.dataset.mathLevel === level);
         });
       }
-      buildMathQuestion(level);
+      startMathRound(level);
+    }
+
+    function startMathRound(level) {
+      mathGameState.level = level;
+      mathGameState.questionIndex = 0;
+      mathGameState.correctCount = 0;
+      mathGameState.pending = false;
+      nextMathQuestion();
+    }
+
+    function nextMathQuestion() {
+      if (mathGameState.questionIndex >= mathGameState.totalQuestions) {
+        endMathRound();
+        return;
+      }
+      mathGameState.questionIndex += 1;
+      buildMathQuestion(mathGameState.level);
+    }
+
+    function revealMathAnswer(correct, skipped) {
+      if (mathGameState.pending) {
+        return;
+      }
+      mathGameState.pending = true;
+      if (correct) {
+        mathGameState.correctCount += 1;
+        awardGameWin("math");
+        setMathStatus("games_math_status_correct", { answer: mathGameState.answer });
+      } else if (skipped) {
+        setMathStatus("games_math_status_skip", { answer: mathGameState.answer });
+      } else {
+        setMathStatus("games_math_status_wrong", { answer: mathGameState.answer });
+      }
+      setMathControlsEnabled(false);
+      if (ui.gamesMathQuestion) {
+        ui.gamesMathQuestion.classList.add("answer-reveal");
+      }
+      window.setTimeout(() => {
+        mathGameState.pending = false;
+        if (mathGameState.questionIndex >= mathGameState.totalQuestions) {
+          endMathRound();
+        } else {
+          nextMathQuestion();
+        }
+      }, 1200);
+    }
+
+    function endMathRound() {
+      setMathControlsEnabled(false);
+      setMathStatus("games_math_status_done", {
+        correct: mathGameState.correctCount,
+        total: mathGameState.totalQuestions
+      });
+      if (ui.gamesMathQuestion) {
+        ui.gamesMathQuestion.textContent = t("games_math_pick_level");
+        ui.gamesMathQuestion.classList.remove("answer-reveal");
+      }
+      if (ui.gamesMathAnswer) {
+        ui.gamesMathAnswer.value = "";
+      }
+      updateMathProgress();
+      mathGameState.level = "";
     }
 
     function checkMathAnswer() {
-      if (!ui.gamesMathAnswer) {
+      if (!ui.gamesMathAnswer || !mathGameState.level) {
         return;
       }
       const raw = ui.gamesMathAnswer.value.trim().replace(",", ".");
       const value = Number(raw);
       if (!Number.isFinite(value)) {
-        mathGameState.statusKey = "games_math_status_wrong";
-        updateMathStatus();
+        setMathStatus("games_math_status_wrong", { answer: mathGameState.answer });
         return;
       }
       const correct = Math.abs(value - mathGameState.answer) < 0.01;
-      if (correct) {
-        mathGameState.statusKey = "games_math_status_correct";
-        if (!mathGameState.awarded) {
-          mathGameState.awarded = true;
-          awardGameWin("math");
-        }
-      } else {
-        mathGameState.statusKey = "games_math_status_wrong";
-      }
-      updateMathStatus();
+      revealMathAnswer(correct, false);
     }
 
     function initMathGame() {
@@ -4158,10 +4349,19 @@ const ui = {
       }
       if (ui.gamesMathNext) {
         ui.gamesMathNext.addEventListener("click", () => {
-          buildMathQuestion(mathGameState.level);
+          if (!mathGameState.level) {
+            setMathStatus("games_math_status_choose");
+            return;
+          }
+          revealMathAnswer(false, true);
         });
       }
-      setMathLevel(mathGameState.level);
+      setMathControlsEnabled(false);
+      if (ui.gamesMathQuestion) {
+        ui.gamesMathQuestion.textContent = t("games_math_pick_level");
+      }
+      updateMathProgress();
+      setMathStatus("games_math_status_choose");
     }
 
     function syncGamesCopy() {
@@ -4172,6 +4372,9 @@ const ui = {
       updateMemoryStatus();
       updateFindStatus();
       updateMathStatus();
+      if (!mathGameState.level && ui.gamesMathQuestion) {
+        ui.gamesMathQuestion.textContent = t("games_math_pick_level");
+      }
       updateFindPrompt();
       renderFruitGrid();
       renderMemoryGrid();
@@ -4213,7 +4416,8 @@ const ui = {
       }
       syncGamesCopy();
       fetchAds("games");
-      fetchPointsLedger();
+      fetchPointsSummary();
+      fetchLeaderboard();
     }
 
     function renderGameCatalog() {
@@ -5470,11 +5674,17 @@ const ui = {
         updateStatus("status_limit_reached");
         return;
       }
+      if (res.status === 404) {
+        showErrorPage("error_not_found");
+        return;
+      }
       if (!res.ok) {
+        showErrorPage("error_message");
         return;
       }
       const data = await res.json();
       if (!data || !data.video) {
+        showErrorPage("error_not_found");
         return;
       }
       videos = [data.video];
@@ -5538,7 +5748,7 @@ const ui = {
     }
 
     async function fetchViral() {
-      if (!currentUser) {
+      if (!currentUser || !ui.viralGrid) {
         return;
       }
       const res = await apiFetch("/api/viral?limit=8");
@@ -5780,7 +5990,8 @@ const ui = {
       const data = await res.json();
       currentUser = data.user;
       updateAuthUI();
-      fetchPointsLedger();
+      fetchPointsSummary();
+      fetchLeaderboard();
       fetchSubscriptions();
       unlockApp();
       handleRoute();
@@ -8274,6 +8485,28 @@ const ui = {
       ui.searchFilterClear.addEventListener("click", () => {
         resetSearchFilters();
         handleSearchFilterChange();
+      });
+    }
+    const searchFilterChips = document.querySelectorAll(".search-filters .filter-chip");
+    if (searchFilterChips.length) {
+      searchFilterChips.forEach((chip) => {
+        chip.addEventListener("toggle", () => {
+          if (!chip.open) {
+            return;
+          }
+          searchFilterChips.forEach((other) => {
+            if (other !== chip) {
+              other.removeAttribute("open");
+            }
+          });
+        });
+      });
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!target || target.closest(".search-filters")) {
+          return;
+        }
+        searchFilterChips.forEach((chip) => chip.removeAttribute("open"));
       });
     }
     if (ui.gamesBack) {

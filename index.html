@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#ff6b4a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="apple-touch-icon" href="/logo.png">
   <title>Sevimli Aile - Video Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Bubblegum+Sans&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/styles.css">
 
 </head>
 <body data-theme="light" class="locked">
@@ -20,7 +20,7 @@
       <div class="topbar">
         <div class="topbar-left">
           <div class="logo">
-            <img src="logo.png" alt="Sevimli Aile logo" class="logo-image">
+            <img src="/logo.png" alt="Sevimli Aile logo" class="logo-image">
             <span>Sevimli Aile</span>
           </div>
           <nav class="top-nav" aria-label="Primary navigation">
@@ -285,57 +285,68 @@
             </button>
           </div>
           <div class="search-filters hidden" id="search-filters">
-            <div class="filter-row">
-              <div class="filter-item">
-                <label for="search-filter-day" data-i18n="filter_label_day">Day</label>
-                <select id="search-filter-day" aria-label="Day filter">
-                  <option value="all" data-i18n="filter_day_all">All time</option>
-                  <option value="today" data-i18n="filter_day_today">Today</option>
-                  <option value="week" data-i18n="filter_day_week">This week</option>
-                  <option value="month" data-i18n="filter_day_month">This month</option>
-                  <option value="year" data-i18n="filter_day_year">This year</option>
-                </select>
-              </div>
-              <div class="filter-item">
-                <label for="search-filter-language" data-i18n="filter_label_language">Language</label>
-                <select id="search-filter-language" multiple size="3" aria-label="Language filter">
-                  <option value="en" data-i18n="lang_english">English</option>
-                  <option value="ru" data-i18n="lang_russian">Русский</option>
-                  <option value="zh" data-i18n="lang_chinese">中文</option>
-                  <option value="tr" data-i18n="lang_turkish">Türkçe</option>
-                  <option value="az" data-i18n="lang_azerbaijani">Azərbaycan</option>
-                  <option value="ar" data-i18n="lang_arabic">العربية</option>
-                </select>
-              </div>
-              <div class="filter-item">
-                <label for="search-filter-religion" data-i18n="filter_label_religion">Religion</label>
-                <select id="search-filter-religion" aria-label="Religion filter">
-                  <option value="" data-i18n="filter_religion_all">All religions</option>
-                  <option value="islam" data-i18n="religion_islam">Islam</option>
-                  <option value="christian" data-i18n="religion_christian">Christian</option>
-                  <option value="jews" data-i18n="religion_jews">Jews</option>
-                  <option value="buddist" data-i18n="religion_buddist">Buddist</option>
-                  <option value="none" data-i18n="religion_none">No religion</option>
-                </select>
-              </div>
-            </div>
-            <div class="filter-row">
-              <div class="filter-item">
-                <label for="search-filter-topic" data-i18n="filter_label_topic">Topic</label>
-                <input type="text" id="search-filter-topic" placeholder="Type a topic" data-i18n-placeholder="filter_topic_placeholder">
-              </div>
-              <div class="filter-item">
-                <label for="search-filter-length" data-i18n="filter_label_length">Length</label>
-                <select id="search-filter-length" aria-label="Length filter">
-                  <option value="" data-i18n="filter_length_all">All lengths</option>
-                  <option value="short" data-i18n="filter_length_short">Short (&lt;4 min)</option>
-                  <option value="medium" data-i18n="filter_length_medium">Medium (4-20 min)</option>
-                  <option value="long" data-i18n="filter_length_long">Long (&gt;20 min)</option>
-                </select>
-              </div>
-              <div class="filter-item filter-actions">
-                <button class="ghost" id="search-filter-clear" type="button" data-i18n="filter_clear">Clear filters</button>
-              </div>
+            <div class="filter-bar">
+              <details class="filter-chip" data-filter="day">
+                <summary data-i18n="filter_label_day">Day</summary>
+                <div class="filter-panel">
+                  <label for="search-filter-day" data-i18n="filter_label_day">Day</label>
+                  <select id="search-filter-day" aria-label="Day filter">
+                    <option value="all" data-i18n="filter_day_all">All time</option>
+                    <option value="today" data-i18n="filter_day_today">Today</option>
+                    <option value="week" data-i18n="filter_day_week">This week</option>
+                    <option value="month" data-i18n="filter_day_month">This month</option>
+                    <option value="year" data-i18n="filter_day_year">This year</option>
+                  </select>
+                </div>
+              </details>
+              <details class="filter-chip" data-filter="language">
+                <summary data-i18n="filter_label_language">Language</summary>
+                <div class="filter-panel">
+                  <label for="search-filter-language" data-i18n="filter_label_language">Language</label>
+                  <select id="search-filter-language" multiple size="6" aria-label="Language filter">
+                    <option value="en" data-i18n="lang_english">English</option>
+                    <option value="ru" data-i18n="lang_russian">Русский</option>
+                    <option value="zh" data-i18n="lang_chinese">中文</option>
+                    <option value="tr" data-i18n="lang_turkish">Türkçe</option>
+                    <option value="az" data-i18n="lang_azerbaijani">Azərbaycan</option>
+                    <option value="ar" data-i18n="lang_arabic">العربية</option>
+                  </select>
+                </div>
+              </details>
+              <details class="filter-chip" data-filter="religion">
+                <summary data-i18n="filter_label_religion">Religion</summary>
+                <div class="filter-panel">
+                  <label for="search-filter-religion" data-i18n="filter_label_religion">Religion</label>
+                  <select id="search-filter-religion" aria-label="Religion filter">
+                    <option value="" data-i18n="filter_religion_all">All religions</option>
+                    <option value="islam" data-i18n="religion_islam">Islam</option>
+                    <option value="christian" data-i18n="religion_christian">Christian</option>
+                    <option value="jews" data-i18n="religion_jews">Jews</option>
+                    <option value="buddist" data-i18n="religion_buddist">Buddist</option>
+                    <option value="none" data-i18n="religion_none">No religion</option>
+                  </select>
+                </div>
+              </details>
+              <details class="filter-chip" data-filter="topic">
+                <summary data-i18n="filter_label_topic">Topic</summary>
+                <div class="filter-panel">
+                  <label for="search-filter-topic" data-i18n="filter_label_topic">Topic</label>
+                  <input type="text" id="search-filter-topic" placeholder="Type a topic" data-i18n-placeholder="filter_topic_placeholder">
+                </div>
+              </details>
+              <details class="filter-chip" data-filter="length">
+                <summary data-i18n="filter_label_length">Length</summary>
+                <div class="filter-panel">
+                  <label for="search-filter-length" data-i18n="filter_label_length">Length</label>
+                  <select id="search-filter-length" aria-label="Length filter">
+                    <option value="" data-i18n="filter_length_all">All lengths</option>
+                    <option value="short" data-i18n="filter_length_short">Short (&lt;4 min)</option>
+                    <option value="medium" data-i18n="filter_length_medium">Medium (4-20 min)</option>
+                    <option value="long" data-i18n="filter_length_long">Long (&gt;20 min)</option>
+                  </select>
+                </div>
+              </details>
+              <button class="pill ghost filter-clear" id="search-filter-clear" type="button" data-i18n="filter_clear">Clear filters</button>
             </div>
           </div>
           <div class="section-sub" id="search-title"></div>
@@ -546,12 +557,6 @@
           </div>
         </section>
 
-        <section class="recommendations" id="viral-view">
-          <div class="section-head">
-            <h2 data-i18n="feed_viral">Viral</h2>
-          </div>
-          <div class="grid" id="viral-grid"></div>
-        </section>
 
         <section class="request-view hidden" id="request-view" aria-hidden="true">
           <div class="section-head">
@@ -590,7 +595,7 @@
               <p class="card-meta" data-i18n="games_subtitle">Quick emoji games for kids.</p>
             </div>
             <div class="games-brand">
-              <img src="logo.png" alt="Sevimli Aile logo">
+              <img src="/logo.png" alt="Sevimli Aile logo">
             </div>
           </div>
           <div class="games-points" id="games-points">
@@ -606,21 +611,20 @@
           </div>
           <div class="scoreboard" id="games-scoreboard">
             <div class="scoreboard-head">
-              <h3 data-i18n="games_scoreboard_title">Scoreboard</h3>
-              <span class="card-meta" data-i18n="games_scoreboard_note">Latest points activity.</span>
+              <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
+              <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
             </div>
             <div class="scoreboard-table">
               <table>
                 <thead>
                   <tr>
-                    <th data-i18n="games_scoreboard_type">Type</th>
-                    <th data-i18n="games_scoreboard_points">Points</th>
-                    <th data-i18n="games_scoreboard_time">When</th>
+                    <th data-i18n="games_leaderboard_name">Kid</th>
+                    <th data-i18n="games_leaderboard_points">Points</th>
                   </tr>
                 </thead>
                 <tbody id="games-scoreboard-body">
                   <tr>
-                    <td colspan="3" class="card-meta" data-i18n="games_scoreboard_empty">No activity yet.</td>
+                    <td colspan="2" class="card-meta" data-i18n="games_leaderboard_empty">No scores yet.</td>
                   </tr>
                 </tbody>
               </table>
@@ -653,42 +657,8 @@
               <span class="card-meta" id="games-redeem-message-detail" aria-live="polite"></span>
             </div>
           </div>
-          <div class="scoreboard" id="games-scoreboard-detail">
-            <div class="scoreboard-head">
-              <h3 data-i18n="games_scoreboard_title">Scoreboard</h3>
-              <span class="card-meta" data-i18n="games_scoreboard_note">Latest points activity.</span>
-            </div>
-            <div class="scoreboard-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th data-i18n="games_scoreboard_type">Type</th>
-                    <th data-i18n="games_scoreboard_points">Points</th>
-                    <th data-i18n="games_scoreboard_time">When</th>
-                  </tr>
-                </thead>
-                <tbody id="games-scoreboard-body-detail">
-                  <tr>
-                    <td colspan="3" class="card-meta" data-i18n="games_scoreboard_empty">No activity yet.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
           <div class="ad-slot" id="games-ad-slot-detail" aria-label="Game ads"></div>
           <div class="games-detail-board">
-            <article class="game-card hidden" data-game="fruit" aria-labelledby="game-fruit-title">
-              <div class="game-head">
-                <h3 id="game-fruit-title" data-i18n="games_fruit_title">Fruit Match</h3>
-                <p class="card-meta" data-i18n="games_fruit_instruction">Swap neighbors to make 3 in a row.</p>
-              </div>
-              <div class="game-grid grid-3" id="games-fruit-grid" role="grid" data-i18n-aria="games_fruit_aria"></div>
-              <div class="game-status" id="games-fruit-status" role="status" aria-live="polite"></div>
-              <div class="game-actions">
-                <button class="ghost" id="games-fruit-shuffle" type="button" data-i18n="games_shuffle">Shuffle</button>
-                <button class="pill" id="games-fruit-retry" type="button" data-i18n="games_try_again">Try again</button>
-              </div>
-            </article>
             <article class="game-card hidden" data-game="memory" aria-labelledby="game-memory-title">
               <div class="game-head">
                 <h3 id="game-memory-title" data-i18n="games_memory_title">Memory Flip</h3>
@@ -724,6 +694,7 @@
               </div>
               <div class="math-card">
                 <div class="math-question" id="games-math-question">1 + 1 = ?</div>
+                <div class="math-progress" id="games-math-progress">0 / 5</div>
                 <input class="math-input" id="games-math-answer" type="text" inputmode="decimal" placeholder="Type the answer" data-i18n-placeholder="games_math_placeholder">
                 <div class="math-actions">
                   <button class="pill" id="games-math-submit" type="button" data-i18n="games_math_submit">Check</button>
@@ -1104,6 +1075,6 @@
     window.__API_BASE__ = "https://sevimli-aile-api.imuradov18193.workers.dev";
   </script>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="app.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>

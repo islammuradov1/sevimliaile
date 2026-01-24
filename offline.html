@@ -76,12 +76,14 @@
       }
 
       select {
-        padding: 8px 12px;
-        border-radius: var(--radius-sm);
-        border: 1px solid rgba(15, 23, 42, 0.15);
-        background: #fff;
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 2px solid rgba(47, 126, 230, 0.35);
+        background: linear-gradient(135deg, #ffffff, #e7f2ff);
         font-family: inherit;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 0.95rem;
+        box-shadow: 0 10px 18px rgba(47, 126, 230, 0.18);
       }
 
       .card {
@@ -129,6 +131,19 @@
         color: var(--muted);
       }
 
+      .game-prompt {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 2px dashed rgba(255, 107, 107, 0.4);
+        background: #fff7f0;
+        font-weight: 700;
+        color: #5a2b2b;
+        width: fit-content;
+      }
+
       .game-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(80px, 1fr));
@@ -162,6 +177,11 @@
       }
 
       .tile.matched {
+        box-shadow: inset 0 0 0 3px var(--success), 0 10px 20px rgba(34, 197, 94, 0.2);
+        transform: translateY(-3px);
+      }
+
+      .tile.correct {
         box-shadow: inset 0 0 0 3px var(--success), 0 10px 20px rgba(34, 197, 94, 0.2);
         transform: translateY(-3px);
       }
@@ -279,14 +299,14 @@
 
         <section class="game-card" aria-labelledby="game-title">
           <div class="game-head">
-            <h2 id="game-title">Fruit Match</h2>
-            <p id="game-instruction">Swap neighbors to make 3 in a row.</p>
+            <h2 id="game-title">Find the Fruit</h2>
+            <p id="game-instruction">Tap the fruit we ask for.</p>
           </div>
-          <div class="game-grid" id="game-grid" role="grid" aria-label="Fruit match board"></div>
+          <div class="game-prompt" id="game-prompt"></div>
+          <div class="game-grid" id="game-grid" role="grid" aria-label="Fruit hunt board"></div>
           <div class="game-status" id="game-status" role="status" aria-live="polite"></div>
           <div class="game-actions">
-            <button class="game-reset" id="game-reset" type="button">Shuffle</button>
-            <button class="game-retry" id="game-retry" type="button">Try again</button>
+            <button class="game-reset" id="game-next" type="button">Next round</button>
           </div>
         </section>
       </main>
@@ -303,18 +323,19 @@
             offline_message: "No internet right now. Come back when you're online 🌈.",
             offline_hint: "We saved a tiny emoji game for kids 🍓🍌🍎.",
             offline_footer: "We'll reconnect when you're back online ✨.",
-            game_title: "Fruit Match 🍓",
-            game_instruction: "Drag a fruit onto a neighbor to make 3 in a row 🍎🍎🍎.",
-            game_status_ready: "Tap a fruit, then swap with a neighbor 👆",
-            game_status_win: "Yeehoo! You got it! 🎉",
-            game_status_try: "Almost! Try another swap ✨",
-            game_status_adjacent: "Choose a neighbor fruit 🙌",
-            game_shuffle: "Shuffle 🔁",
-            game_retry: "Try again 💫",
+            game_title: "Find the Fruit 🍎",
+            game_instruction: "Tap the fruit we ask for.",
+            game_prompt: "Find {fruit}",
+            game_status_ready: "Tap the right fruit 👆",
+            game_status_win: "Yeehoo! +1 point 🎉 Total: {score}",
+            game_status_try: "Oops, try again ✨",
+            game_next: "Next round",
             fruit_apple: "Apple 🍎",
             fruit_banana: "Banana 🍌",
             fruit_strawberry: "Strawberry 🍓",
-            fruit_orange: "Orange 🍊"
+            fruit_orange: "Orange 🍊",
+            fruit_grapes: "Grapes 🍇",
+            fruit_watermelon: "Watermelon 🍉"
           },
           ru: {
             language_label: "Язык 🌍",
@@ -322,18 +343,19 @@
             offline_message: "Сейчас нет связи. Возвращайтесь, когда интернет появится 🌈.",
             offline_hint: "Мы сохранили маленькую игру с эмодзи 🍓🍌🍎.",
             offline_footer: "Мы подключимся, когда интернет вернется ✨.",
-            game_title: "Фруктовое совпадение 🍓",
-            game_instruction: "Перетащите фрукт к соседу, чтобы собрать 3 в ряд 🍎🍎🍎.",
-            game_status_ready: "Выберите фрукт и поменяйте с соседом 👆",
-            game_status_win: "Ура! Получилось! 🎉",
-            game_status_try: "Почти! Попробуйте другой обмен ✨",
-            game_status_adjacent: "Выберите соседний фрукт 🙌",
-            game_shuffle: "Перемешать 🔁",
-            game_retry: "Попробовать снова 💫",
+            game_title: "Найди фрукт 🍎",
+            game_instruction: "Нажмите на фрукт, который мы попросим.",
+            game_prompt: "Найди {fruit}",
+            game_status_ready: "Нажмите правильный фрукт 👆",
+            game_status_win: "Ура! +1 очко 🎉 Всего: {score}",
+            game_status_try: "Ой, попробуйте снова ✨",
+            game_next: "Следующий раунд",
             fruit_apple: "Яблоко 🍎",
             fruit_banana: "Банан 🍌",
             fruit_strawberry: "Клубника 🍓",
-            fruit_orange: "Апельсин 🍊"
+            fruit_orange: "Апельсин 🍊",
+            fruit_grapes: "Виноград 🍇",
+            fruit_watermelon: "Арбуз 🍉"
           },
           zh: {
             language_label: "语言 🌍",
@@ -341,56 +363,59 @@
             offline_message: "现在没有网络，联网后再试试 🌈。",
             offline_hint: "这里有个小小的表情游戏 🍓🍌🍎。",
             offline_footer: "网络恢复后我们会自动连接 ✨。",
-            game_title: "水果配对 🍓",
-            game_instruction: "把水果拖到相邻位置，凑成三个一排 🍎🍎🍎。",
-            game_status_ready: "先选一个水果，再和旁边的交换 👆",
-            game_status_win: "太棒了！你成功了！🎉",
-            game_status_try: "差一点，再试一次 ✨",
-            game_status_adjacent: "请选择相邻的水果 🙌",
-            game_shuffle: "重新排列 🔁",
-            game_retry: "再试一次 💫",
+            game_title: "寻找水果 🍎",
+            game_instruction: "点击我们要找的水果。",
+            game_prompt: "找到 {fruit}",
+            game_status_ready: "点击正确的水果 👆",
+            game_status_win: "太棒了！+1 分 🎉 总分：{score}",
+            game_status_try: "哎呀，再试一次 ✨",
+            game_next: "下一轮",
             fruit_apple: "苹果 🍎",
             fruit_banana: "香蕉 🍌",
             fruit_strawberry: "草莓 🍓",
-            fruit_orange: "橙子 🍊"
+            fruit_orange: "橙子 🍊",
+            fruit_grapes: "葡萄 🍇",
+            fruit_watermelon: "西瓜 🍉"
           },
           tr: {
             language_label: "Dil 🌍",
-            offline_title: "Baglanti yok 📴",
-            offline_message: "Su anda internet yok. Online olunca tekrar gel 🌈.",
-            offline_hint: "Cocuklar icin emoji dolu bir oyun var 🍓🍌🍎.",
-            offline_footer: "Internet gelince tekrar baglanacagiz ✨.",
-            game_title: "Meyve Eslestirme 🍓",
-            game_instruction: "Meyveyi yandaki komsuya surukle, 3'lu sirayi yap 🍎🍎🍎.",
-            game_status_ready: "Bir meyve sec, sonra yandakiyle degistir 👆",
-            game_status_win: "Yeehoo! Basardin! 🎉",
-            game_status_try: "Yaklasti! Baska bir degisim dene ✨",
-            game_status_adjacent: "Yandaki bir meyve sec 🙌",
-            game_shuffle: "Karistir 🔁",
-            game_retry: "Tekrar dene 💫",
+            offline_title: "Bağlantı yok 📴",
+            offline_message: "Şu anda internet yok. Online olunca tekrar gel 🌈.",
+            offline_hint: "Çocuklar için emoji dolu bir oyun var 🍓🍌🍎.",
+            offline_footer: "İnternet gelince tekrar bağlanacağız ✨.",
+            game_title: "Meyveyi Bul 🍎",
+            game_instruction: "İstediğimiz meyveyi seç.",
+            game_prompt: "{fruit} bul",
+            game_status_ready: "Doğru meyveyi seç 👆",
+            game_status_win: "Yeehoo! +1 puan 🎉 Toplam: {score}",
+            game_status_try: "Olmadı, tekrar dene ✨",
+            game_next: "Yeni tur",
             fruit_apple: "Elma 🍎",
             fruit_banana: "Muz 🍌",
-            fruit_strawberry: "Cilek 🍓",
-            fruit_orange: "Portakal 🍊"
+            fruit_strawberry: "Çilek 🍓",
+            fruit_orange: "Portakal 🍊",
+            fruit_grapes: "Üzüm 🍇",
+            fruit_watermelon: "Karpuz 🍉"
           },
           az: {
             language_label: "Dil 🌍",
             offline_title: "Internet yoxdur 📴",
-            offline_message: "Hazirda internet yoxdur. Online olanda tekrar gel 🌈.",
-            offline_hint: "Usaqlar ucun emoji oyunumuz var 🍓🍌🍎.",
-            offline_footer: "Internet qayidanda yeniden qoşulariq ✨.",
-            game_title: "Meyve uygunlasdir 🍓",
-            game_instruction: "Meyveni qonshuya surukle, 3-u bir sirada duzelt 🍎🍎🍎.",
-            game_status_ready: "Bir meyve sec, sonra qonsusu ile deyis 👆",
-            game_status_win: "Yeehoo! Duz eladin! 🎉",
-            game_status_try: "Yaxinlasdin! Basqa bir deyis dene ✨",
-            game_status_adjacent: "Qonsu meyve sec 🙌",
-            game_shuffle: "Qarisdir 🔁",
-            game_retry: "Tekrar dene 💫",
+            offline_message: "Hazırda internet yoxdur. Online olanda tekrar gəl 🌈.",
+            offline_hint: "Uşaqlar üçün emoji oyunumuz var 🍓🍌🍎.",
+            offline_footer: "Internet qayıdanda yenidən qoşularıq ✨.",
+            game_title: "Meyvəni Tap 🍎",
+            game_instruction: "İstədiyimiz meyvəni seç.",
+            game_prompt: "{fruit} tap",
+            game_status_ready: "Düzgün meyvəni seç 👆",
+            game_status_win: "Yeehoo! +1 xal 🎉 Cəmi: {score}",
+            game_status_try: "Olmadı, yenə dene ✨",
+            game_next: "Növbəti tur",
             fruit_apple: "Alma 🍎",
             fruit_banana: "Banan 🍌",
-            fruit_strawberry: "Ciyelek 🍓",
-            fruit_orange: "Portagal 🍊"
+            fruit_strawberry: "Çiyələk 🍓",
+            fruit_orange: "Portağal 🍊",
+            fruit_grapes: "Üzüm 🍇",
+            fruit_watermelon: "Qarpız 🍉"
           },
           ar: {
             language_label: "اللغة 🌍",
@@ -398,37 +423,38 @@
             offline_message: "لا يوجد اتصال حاليا. عد عند توفر الانترنت 🌈.",
             offline_hint: "لدينا لعبة ايموجي لطيفة للاطفال 🍓🍌🍎.",
             offline_footer: "سنعود للاتصال عندما يتوفر الانترنت ✨.",
-            game_title: "مطابقة الفواكه 🍓",
-            game_instruction: "اسحب الفاكهة إلى جارها لتكوين ثلاثة في صف 🍎🍎🍎.",
-            game_status_ready: "اختر فاكهة ثم بدّلها مع الجار 👆",
-            game_status_win: "ياي! لقد نجحت! 🎉",
-            game_status_try: "قريب جدا! جرب تبديلا اخر ✨",
-            game_status_adjacent: "اختر فاكهة مجاورة 🙌",
-            game_shuffle: "اعادة ترتيب 🔁",
-            game_retry: "حاول مرة اخرى 💫",
+            game_title: "اعثر على الفاكهة 🍎",
+            game_instruction: "اضغط على الفاكهة التي نطلبها.",
+            game_prompt: "اعثر على {fruit}",
+            game_status_ready: "اضغط على الفاكهة الصحيحة 👆",
+            game_status_win: "ياي! +1 نقطة 🎉 المجموع: {score}",
+            game_status_try: "اوه، حاول مرة اخرى ✨",
+            game_next: "جولة جديدة",
             fruit_apple: "تفاح 🍎",
             fruit_banana: "موز 🍌",
             fruit_strawberry: "فراولة 🍓",
-            fruit_orange: "برتقال 🍊"
+            fruit_orange: "برتقال 🍊",
+            fruit_grapes: "عنب 🍇",
+            fruit_watermelon: "بطيخ 🍉"
           }
         };
 
-        const presets = [
-          ["apple", "apple", "banana", "banana", "strawberry", "apple", "orange", "banana", "strawberry"],
-          ["banana", "strawberry", "banana", "apple", "orange", "apple", "orange", "banana", "strawberry"],
-          ["orange", "apple", "banana", "banana", "strawberry", "apple", "apple", "banana", "strawberry"]
-        ];
+        const FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
+        const fruitEmoji = {
+          apple: "🍎",
+          banana: "🍌",
+          strawberry: "🍓",
+          orange: "🍊",
+          grapes: "🍇",
+          watermelon: "🍉"
+        };
 
         const state = {
+          target: "",
           grid: [],
-          selected: null,
-          matched: [],
-          dragging: null,
-          dragTarget: null,
-          dragMoved: false
+          score: 0,
+          solved: false
         };
-        let activePointerId = null;
-        let skipClick = false;
 
         const els = {
           lang: document.getElementById("lang"),
@@ -439,10 +465,10 @@
           offlineFooter: document.getElementById("offline-footer"),
           gameTitle: document.getElementById("game-title"),
           gameInstruction: document.getElementById("game-instruction"),
+          gamePrompt: document.getElementById("game-prompt"),
           gameGrid: document.getElementById("game-grid"),
           gameStatus: document.getElementById("game-status"),
-          gameReset: document.getElementById("game-reset"),
-          gameRetry: document.getElementById("game-retry")
+          gameNext: document.getElementById("game-next")
         };
 
         function t(key) {
@@ -457,7 +483,7 @@
           document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
           localStorage.setItem("uiLang", next);
           updateCopy();
-          renderGrid();
+          buildRound();
         }
 
         function updateCopy() {
@@ -468,11 +494,7 @@
           els.offlineFooter.textContent = t("offline_footer");
           els.gameTitle.textContent = t("game_title");
           els.gameInstruction.textContent = t("game_instruction");
-          els.gameReset.textContent = t("game_shuffle");
-          els.gameRetry.textContent = t("game_retry");
-          if (!els.gameStatus.textContent) {
-            els.gameStatus.textContent = t("game_status_ready");
-          }
+          els.gameNext.textContent = t("game_next");
         }
 
         function shuffle(array) {
@@ -486,277 +508,62 @@
           return next;
         }
 
-        function buildBoard() {
-          let next = null;
-          let attempts = 0;
-          while (attempts < 20) {
-            const preset = presets[Math.floor(Math.random() * presets.length)];
-            const candidate = shuffle(preset);
-            if (hasPossibleMove(candidate)) {
-              next = candidate;
-              break;
-            }
-            attempts += 1;
+        function buildRound() {
+          state.target = FRUITS[Math.floor(Math.random() * FRUITS.length)];
+          const pool = FRUITS.slice();
+          const picks = [state.target];
+          while (picks.length < 9) {
+            picks.push(pool[Math.floor(Math.random() * pool.length)]);
           }
-          state.grid = next || presets[0].slice();
-          state.selected = null;
-          state.matched = [];
+          state.grid = shuffle(picks);
+          state.solved = false;
+          updatePrompt();
+          renderGrid();
           els.gameStatus.textContent = t("game_status_ready");
         }
 
-        function isAdjacent(a, b) {
-          const rowA = Math.floor(a / 3);
-          const colA = a % 3;
-          const rowB = Math.floor(b / 3);
-          const colB = b % 3;
-          return Math.abs(rowA - rowB) + Math.abs(colA - colB) === 1;
+        function updatePrompt() {
+          els.gamePrompt.textContent = t("game_prompt").replace("{fruit}", t("fruit_" + state.target));
         }
 
-        function findMatchInGrid(grid) {
-          const matches = [];
-          for (let row = 0; row < 3; row += 1) {
-            const base = row * 3;
-            const a = grid[base];
-            if (a && a === grid[base + 1] && a === grid[base + 2]) {
-              matches.push(base, base + 1, base + 2);
-            }
-          }
-          for (let col = 0; col < 3; col += 1) {
-            const a = grid[col];
-            if (a && a === grid[col + 3] && a === grid[col + 6]) {
-              matches.push(col, col + 3, col + 6);
-            }
-          }
-          return Array.from(new Set(matches));
-        }
-
-        function findMatch() {
-          return findMatchInGrid(state.grid);
-        }
-
-        function hasPossibleMove(grid) {
-          const copy = grid.slice();
-          const swapIndexes = [
-            [0, 1],
-            [1, 2],
-            [3, 4],
-            [4, 5],
-            [6, 7],
-            [7, 8],
-            [0, 3],
-            [3, 6],
-            [1, 4],
-            [4, 7],
-            [2, 5],
-            [5, 8]
-          ];
-          for (const [a, b] of swapIndexes) {
-            const temp = copy[a];
-            copy[a] = copy[b];
-            copy[b] = temp;
-            const match = findMatchInGrid(copy);
-            copy[b] = copy[a];
-            copy[a] = temp;
-            if (match.length) {
-              return true;
-            }
-          }
-          return false;
-        }
-
-        function swap(a, b) {
-          const temp = state.grid[a];
-          state.grid[a] = state.grid[b];
-          state.grid[b] = temp;
-        }
-
-        function setDragTarget(next) {
-          if (state.dragTarget === next) {
+        function handlePick(fruit, button) {
+          if (state.solved) {
             return;
           }
-          if (state.dragTarget !== null) {
-            const prev = els.gameGrid.querySelector(".tile[data-index='" + state.dragTarget + "']");
-            if (prev) {
-              prev.classList.remove("target");
-            }
-          }
-          state.dragTarget = next;
-          if (next !== null) {
-            const nextTile = els.gameGrid.querySelector(".tile[data-index='" + next + "']");
-            if (nextTile) {
-              nextTile.classList.add("target");
-            }
-          }
-        }
-
-        function clearDragState() {
-          if (state.dragging !== null) {
-            const dragTile = els.gameGrid.querySelector(".tile[data-index='" + state.dragging + "']");
-            if (dragTile) {
-              dragTile.classList.remove("dragging");
-            }
-          }
-          if (state.dragTarget !== null) {
-            const targetTile = els.gameGrid.querySelector(".tile[data-index='" + state.dragTarget + "']");
-            if (targetTile) {
-              targetTile.classList.remove("target");
-            }
-          }
-          state.dragging = null;
-          state.dragTarget = null;
-          state.dragMoved = false;
-          activePointerId = null;
-        }
-
-        function applySwap(a, b) {
-          swap(a, b);
-          const match = findMatch();
-          if (match.length) {
-            state.matched = match;
-            els.gameStatus.textContent = t("game_status_win");
+          if (fruit === state.target) {
+            state.solved = true;
+            state.score += 1;
+            button.classList.add("correct");
+            els.gameStatus.textContent = t("game_status_win").replace("{score}", state.score);
+            setTimeout(buildRound, 800);
           } else {
-            swap(a, b);
-            state.matched = [];
             els.gameStatus.textContent = t("game_status_try");
           }
-          state.selected = null;
-          renderGrid();
-        }
-
-        function handleSelect(index) {
-          if (state.selected === null) {
-            state.selected = index;
-            renderGrid();
-            return;
-          }
-          if (state.selected === index) {
-            state.selected = null;
-            renderGrid();
-            return;
-          }
-          if (!isAdjacent(state.selected, index)) {
-            state.selected = index;
-            els.gameStatus.textContent = t("game_status_adjacent");
-            renderGrid();
-            return;
-          }
-          applySwap(state.selected, index);
-        }
-
-        function handlePointerDown(event, index) {
-          if (activePointerId !== null) {
-            return;
-          }
-          activePointerId = event.pointerId;
-          state.dragging = index;
-          state.dragMoved = false;
-          const tile = event.currentTarget;
-          tile.classList.add("dragging");
-          tile.setPointerCapture(event.pointerId);
-        }
-
-        function handlePointerMove(event) {
-          if (activePointerId !== event.pointerId || state.dragging === null) {
-            return;
-          }
-          state.dragMoved = true;
-          const hit = document.elementFromPoint(event.clientX, event.clientY);
-          const tile = hit ? hit.closest(".tile") : null;
-          if (!tile) {
-            setDragTarget(null);
-            return;
-          }
-          const targetIndex = Number(tile.dataset.index);
-          if (!Number.isFinite(targetIndex) || targetIndex === state.dragging) {
-            setDragTarget(null);
-            return;
-          }
-          if (!isAdjacent(state.dragging, targetIndex)) {
-            setDragTarget(null);
-            return;
-          }
-          setDragTarget(targetIndex);
-        }
-
-        function handlePointerUp(event, index) {
-          if (activePointerId !== event.pointerId) {
-            return;
-          }
-          const origin = state.dragging;
-          const target = state.dragTarget;
-          const moved = state.dragMoved;
-          clearDragState();
-          if (target !== null && origin !== null) {
-            skipClick = true;
-            applySwap(origin, target);
-            return;
-          }
-          if (!moved && index !== null) {
-            handleSelect(index);
-          }
-        }
-
-        function handlePointerCancel(event) {
-          if (activePointerId !== event.pointerId) {
-            return;
-          }
-          clearDragState();
         }
 
         function renderGrid() {
           els.gameGrid.innerHTML = "";
-          state.grid.forEach((fruit, index) => {
-            const emojiMap = {
-              apple: "🍎",
-              banana: "🍌",
-              strawberry: "🍓",
-              orange: "🍊"
-            };
-            const emoji = emojiMap[fruit] || "🍓";
+          state.grid.forEach((fruit) => {
             const button = document.createElement("button");
             button.type = "button";
             button.className = "tile";
-            button.setAttribute("aria-label", t("fruit_" + fruit));
             button.dataset.fruit = fruit;
-            button.dataset.index = String(index);
             button.innerHTML =
-              "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
-              emoji +
-              "</span><span class=\"tile-label\">" +
+              "<span class="tile-emoji" aria-hidden="true">" +
+              fruitEmoji[fruit] +
+              "</span><span class="tile-label">" +
               t("fruit_" + fruit) +
               "</span>";
-            if (state.selected === index) {
-              button.classList.add("selected");
-            }
-            if (state.matched.includes(index)) {
-              button.classList.add("matched");
-            }
-            button.addEventListener("pointerdown", (event) => handlePointerDown(event, index));
-            button.addEventListener("pointermove", handlePointerMove);
-            button.addEventListener("pointerup", (event) => handlePointerUp(event, index));
-            button.addEventListener("pointercancel", handlePointerCancel);
-            button.addEventListener("click", (event) => {
-              if (skipClick) {
-                skipClick = false;
-                event.preventDefault();
-                return;
-              }
-              handleSelect(index);
-            });
+            button.addEventListener("click", () => handlePick(fruit, button));
             els.gameGrid.appendChild(button);
           });
         }
 
-        els.lang.addEventListener("change", (event) => setLang(event.target.value));
-        els.gameReset.addEventListener("click", () => {
-          buildBoard();
-          renderGrid();
-        });
-        els.gameRetry.addEventListener("click", () => window.location.reload());
+        els.lang.addEventListener("change", () => setLang(els.lang.value));
+        els.gameNext.addEventListener("click", buildRound);
 
-        const savedLang = localStorage.getItem("uiLang") || "en";
-        buildBoard();
-        setLang(savedLang);
+        const storedLang = localStorage.getItem("uiLang");
+        setLang(storedLang || "en");
       })();
     </script>
   </body>
