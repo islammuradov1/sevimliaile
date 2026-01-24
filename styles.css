@@ -104,6 +104,30 @@
       margin: 0 auto;
     }
 
+    body[data-view="viral"] .search-row {
+      display: none !important;
+    }
+
+    body[data-view="viral"] #player-area,
+    body[data-view="viral"] #feed-view,
+    body[data-view="viral"] #search-view,
+    body[data-view="viral"] #channels-page,
+    body[data-view="viral"] #request-view,
+    body[data-view="viral"] #channel-view,
+    body[data-view="viral"] #error-view,
+    body[data-view="viral"] #admin-overview-page,
+    body[data-view="viral"] #admin-users-page,
+    body[data-view="viral"] #admin-channels-page,
+    body[data-view="viral"] #admin-videos-page,
+    body[data-view="viral"] #admin-reports-page,
+    body[data-view="viral"] #admin-imports-page {
+      display: none !important;
+    }
+
+    body[data-view="viral"] #viral-view {
+      display: block !important;
+    }
+
     body[data-view="error"] header,
     body[data-view="error"] .search-row,
     body[data-view="error"] aside {
