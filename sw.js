@@ -1,10 +1,13 @@
-const OFFLINE_CACHE = "offline-v1";
+const OFFLINE_CACHE = "offline-v2";
 const OFFLINE_URL = "/offline.html";
 
+async function cacheOffline() {
+  const cache = await caches.open(OFFLINE_CACHE);
+  await cache.add(new Request(OFFLINE_URL, { cache: "reload" }));
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(OFFLINE_CACHE).then((cache) => cache.addAll([OFFLINE_URL]))
-  );
+  event.waitUntil(cacheOffline().catch(() => null));
   self.skipWaiting();
 });
 
@@ -18,10 +21,16 @@ self.addEventListener("activate", (event) => {
           }
           return null;
         })
-      )
+      ).then(() => cacheOffline().catch(() => null))
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "CACHE_OFFLINE") {
+    event.waitUntil(cacheOffline().catch(() => null));
+  }
 });
 
 self.addEventListener("fetch", (event) => {

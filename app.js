@@ -14,6 +14,7 @@ const ui = {
       heroPlay: document.getElementById("hero-play"),
       heroChannels: document.getElementById("hero-channels"),
       settingsBar: document.getElementById("settings-bar"),
+      gamesOpen: document.getElementById("games-open"),
       drawerToggle: document.getElementById("drawer-toggle"),
       drawerClose: document.getElementById("drawer-close"),
       actionDrawer: document.getElementById("action-drawer"),
@@ -52,6 +53,7 @@ const ui = {
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
       requestView: document.getElementById("request-view"),
+      gamesView: document.getElementById("games-view"),
       channelView: document.getElementById("channel-view"),
       errorView: document.getElementById("error-view"),
       adminOverviewPage: document.getElementById("admin-overview-page"),
@@ -118,6 +120,17 @@ const ui = {
       requestDetails: document.getElementById("request-details"),
       requestContact: document.getElementById("request-contact"),
       requestMessage: document.getElementById("request-message"),
+      gamesFruitGrid: document.getElementById("games-fruit-grid"),
+      gamesFruitStatus: document.getElementById("games-fruit-status"),
+      gamesFruitShuffle: document.getElementById("games-fruit-shuffle"),
+      gamesFruitRetry: document.getElementById("games-fruit-retry"),
+      gamesMemoryGrid: document.getElementById("games-memory-grid"),
+      gamesMemoryStatus: document.getElementById("games-memory-status"),
+      gamesMemoryReset: document.getElementById("games-memory-reset"),
+      gamesFindGrid: document.getElementById("games-find-grid"),
+      gamesFindStatus: document.getElementById("games-find-status"),
+      gamesFindPrompt: document.getElementById("games-find-prompt"),
+      gamesFindNext: document.getElementById("games-find-next"),
       errorMessage: document.getElementById("error-message"),
       errorRetry: document.getElementById("error-retry"),
       errorHome: document.getElementById("error-home"),
@@ -159,7 +172,13 @@ const ui = {
       settingsChannels: document.getElementById("settings-channels"),
       settingsLanguageAll: document.getElementById("settings-language-all"),
       settingsReligions: document.getElementById("settings-religions"),
+      settingsReligionsBase: document.getElementById("settings-religions-base"),
+      settingsReligionsDetail: document.getElementById("settings-religions-detail"),
+      settingsReligionsHint: document.getElementById("settings-religions-hint"),
       uploadTopics: document.getElementById("upload-topics"),
+      uploadReligion: document.getElementById("upload-religion"),
+      uploadReligionDetail: document.getElementById("upload-religion-detail"),
+      uploadReligionHint: document.getElementById("upload-religion-hint"),
       topicsList: document.getElementById("topics-list"),
       maxWatch: document.getElementById("max-watch"),
       settingsPassword: document.getElementById("settings-password"),
@@ -284,6 +303,8 @@ const ui = {
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 17h12l-1.5-2V10a4.5 4.5 0 1 0-9 0v5L6 17z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"M10 19a2 2 0 0 0 4 0\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\"/></svg>",
       user:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z\"/></svg>",
+      games:
+        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M7 8h10a4 4 0 0 1 4 4v3a3 3 0 0 1-3 3h-2l-2-2H10l-2 2H6a3 3 0 0 1-3-3v-3a4 4 0 0 1 4-4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linejoin=\"round\"/><path d=\"M8.5 12h3M10 10.5v3\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><circle cx=\"16.5\" cy=\"12.5\" r=\"1\" fill=\"currentColor\"/><circle cx=\"18.5\" cy=\"10.5\" r=\"1\" fill=\"currentColor\"/></svg>",
       logout:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M10 17l5-5-5-5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M15 12H3\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M19 5h2v14h-2\"/></svg>"
       ,
@@ -300,6 +321,48 @@ const ui = {
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M13 7v10l6-5-6-5zm-1 5a5 5 0 1 0-5 5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
     };
 
+    const RELIGION_GROUPS = [
+      { value: "islam", details: ["shia", "sunni"] },
+      { value: "christian", details: ["catholic", "orthodox", "protestant"] },
+      { value: "jews", details: ["jews_orthodox", "jews_conservative", "jews_reform"] },
+      { value: "buddist", details: ["buddist_theravada", "buddist_mahayana", "buddist_vajrayana"] }
+    ];
+
+    const RELIGION_LABEL_KEYS = {
+      none: "religion_none",
+      islam: "religion_islam",
+      christian: "religion_christian",
+      jews: "religion_jews",
+      buddist: "religion_buddist",
+      shia: "religion_shia",
+      sunni: "religion_sunni",
+      catholic: "religion_catholic",
+      orthodox: "religion_orthodox",
+      protestant: "religion_protestant",
+      jews_orthodox: "religion_jews_orthodox",
+      jews_conservative: "religion_jews_conservative",
+      jews_reform: "religion_jews_reform",
+      buddist_theravada: "religion_buddist_theravada",
+      buddist_mahayana: "religion_buddist_mahayana",
+      buddist_vajrayana: "religion_buddist_vajrayana"
+    };
+
+    const RELIGION_DETAIL_BASE = {
+      shia: "islam",
+      sunni: "islam",
+      catholic: "christian",
+      orthodox: "christian",
+      protestant: "christian",
+      jews_orthodox: "jews",
+      jews_conservative: "jews",
+      jews_reform: "jews",
+      buddist_theravada: "buddist",
+      buddist_mahayana: "buddist",
+      buddist_vajrayana: "buddist"
+    };
+
+    const RELIGION_DETAIL_VALUES = new Set(Object.keys(RELIGION_DETAIL_BASE));
+
     const translations = {
       en: {
         search_label: "Search",
@@ -309,6 +372,42 @@ const ui = {
         controls_show: "Show controls",
         tech_panel_toggle: "Toggle player tools",
         search_placeholder: "Search videos and channels",
+        games_open: "Games",
+        games_title: "Games",
+        games_subtitle: "Quick emoji games for kids.",
+        games_fruit_title: "Fruit Match",
+        games_fruit_instruction: "Swap neighbors to make 3 in a row 🍎🍎🍎.",
+        games_fruit_status_ready: "Pick a fruit, then swap with a neighbor 👆",
+        games_fruit_status_win: "Yeehoo! You got it! 🎉",
+        games_fruit_status_try: "Almost! Try another swap ✨",
+        games_fruit_status_adjacent: "Choose a neighbor fruit 🙌",
+        games_shuffle: "Shuffle",
+        games_try_again: "Try again",
+        games_memory_title: "Memory Flip",
+        games_memory_instruction: "Flip two cards to find matching fruits.",
+        games_memory_status_ready: "Flip two cards to start.",
+        games_memory_status_match: "Nice match!",
+        games_memory_status_try: "Not a match. Try again.",
+        games_memory_status_win: "All matched! Great job! 🎉",
+        games_memory_reset: "Restart",
+        games_memory_flip: "Flip",
+        games_memory_card: "Hidden card",
+        games_find_title: "Find the Fruit",
+        games_find_instruction: "Tap the fruit we ask for.",
+        games_find_prompt: "Find the {fruit}",
+        games_find_status_ready: "Pick the right fruit.",
+        games_find_status_good: "Yes! You found it! 🎉",
+        games_find_status_try: "Oops, try again.",
+        games_find_next: "Next round",
+        games_fruit_aria: "Fruit match board",
+        games_memory_aria: "Memory flip board",
+        games_find_aria: "Find the fruit board",
+        fruit_apple: "Apple",
+        fruit_banana: "Banana",
+        fruit_strawberry: "Strawberry",
+        fruit_orange: "Orange",
+        fruit_grapes: "Grapes",
+        fruit_watermelon: "Watermelon",
         request_title: "Make a request",
         request_subtitle: "Tell us what you need and we'll prepare it.",
         request_reason: "Reason",
@@ -388,14 +487,25 @@ const ui = {
         upload_languages: "Languages",
         upload_topics: "Topics (comma separated)",
         upload_topics_placeholder: "nastya, masha, minecraft",
-        upload_religion: "Religion",
-        upload_religion_detail: "Religion detail (optional)",
+        upload_religion: "Religions",
+        upload_religion_detail: "Religion details (optional)",
+        upload_religion_hint: "Select a religion to see subcategories.",
         religion_none: "No religion",
         religion_islam: "Islam",
-        religion_shia: "Islam · Shia",
+        religion_shia: "Shia",
+        religion_sunni: "Sunni",
         religion_christian: "Christian",
+        religion_catholic: "Catholic",
+        religion_orthodox: "Orthodox",
+        religion_protestant: "Protestant",
         religion_jews: "Jews",
+        religion_jews_orthodox: "Orthodox",
+        religion_jews_conservative: "Conservative",
+        religion_jews_reform: "Reform",
         religion_buddist: "Buddist",
+        religion_buddist_theravada: "Theravada",
+        religion_buddist_mahayana: "Mahayana",
+        religion_buddist_vajrayana: "Vajrayana",
         upload_add: "Add video",
         upload_hint: "Title will auto-fill from YouTube when available.",
         admin_title: "Admin controls",
@@ -444,6 +554,7 @@ const ui = {
         settings_religions: "Religions to control",
         settings_religion_allow: "Allow only selected",
         settings_religion_block: "Hide selected",
+        settings_religion_hint: "Select a religion to see subcategories.",
         settings_watch_limit: "Daily watch limit (hours)",
         settings_password: "Confirm with your password",
         settings_save: "Save settings",
@@ -569,6 +680,12 @@ const ui = {
         admin_videos_search: "Search videos",
         admin_view_videos: "View videos",
         admin_video_language: "Language",
+        admin_video_id: "Video ID",
+        admin_video_posted_by: "Posted by",
+        admin_video_religion: "Religions",
+        admin_video_religion_detail: "Religion details",
+        admin_video_languages: "Languages",
+        admin_video_topics: "Topics",
         admin_report_message_placeholder: "Message to reporter (optional)",
         action_resolve: "Resolve",
         action_delete: "Delete",
@@ -615,6 +732,42 @@ const ui = {
         controls_show: "Показать управление",
         tech_panel_toggle: "Панель инструментов",
         search_placeholder: "Поиск видео и каналов",
+        games_open: "Игры",
+        games_title: "Игры",
+        games_subtitle: "Быстрые игры с эмодзи для детей.",
+        games_fruit_title: "Фруктовое совпадение",
+        games_fruit_instruction: "Поменяйте соседние, чтобы собрать 3 в ряд 🍎🍎🍎.",
+        games_fruit_status_ready: "Выберите фрукт и поменяйте с соседом 👆",
+        games_fruit_status_win: "Ура! Получилось! 🎉",
+        games_fruit_status_try: "Почти! Попробуйте другой обмен ✨",
+        games_fruit_status_adjacent: "Выберите соседний фрукт 🙌",
+        games_shuffle: "Перемешать",
+        games_try_again: "Ещё раз",
+        games_memory_title: "Игра на память",
+        games_memory_instruction: "Откройте две карточки и найдите пары фруктов.",
+        games_memory_status_ready: "Откройте две карточки.",
+        games_memory_status_match: "Отличная пара!",
+        games_memory_status_try: "Не совпало. Попробуйте снова.",
+        games_memory_status_win: "Все пары найдены! 🎉",
+        games_memory_reset: "Начать заново",
+        games_memory_flip: "Открыть",
+        games_memory_card: "Скрытая карта",
+        games_find_title: "Найди фрукт",
+        games_find_instruction: "Нажмите на фрукт, который мы попросим.",
+        games_find_prompt: "Найди {fruit}",
+        games_find_status_ready: "Выберите правильный фрукт.",
+        games_find_status_good: "Да! Вы нашли его! 🎉",
+        games_find_status_try: "Ой, попробуйте снова.",
+        games_find_next: "Следующий раунд",
+        games_fruit_aria: "Поле фруктового совпадения",
+        games_memory_aria: "Поле игры на память",
+        games_find_aria: "Поле «Найди фрукт»",
+        fruit_apple: "Яблоко",
+        fruit_banana: "Банан",
+        fruit_strawberry: "Клубника",
+        fruit_orange: "Апельсин",
+        fruit_grapes: "Виноград",
+        fruit_watermelon: "Арбуз",
         ui_language_label: "Язык",
         sidebar_subscribed: "Подписки",
         sidebar_channels: "Каналы",
@@ -680,6 +833,25 @@ const ui = {
         upload_languages: "Языки",
         upload_topics: "Темы (через запятую)",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "Религии",
+        upload_religion_detail: "Детали религии (необязательно)",
+        upload_religion_hint: "Выберите религию, чтобы увидеть подкатегории.",
+        religion_none: "Без религии",
+        religion_islam: "Ислам",
+        religion_shia: "Шииты",
+        religion_sunni: "Сунниты",
+        religion_christian: "Христианство",
+        religion_catholic: "Католицизм",
+        religion_orthodox: "Православие",
+        religion_protestant: "Протестантизм",
+        religion_jews: "Иудаизм",
+        religion_jews_orthodox: "Ортодоксальный",
+        religion_jews_conservative: "Консервативный",
+        religion_jews_reform: "Реформистский",
+        religion_buddist: "Буддизм",
+        religion_buddist_theravada: "Тхеравада",
+        religion_buddist_mahayana: "Махаяна",
+        religion_buddist_vajrayana: "Ваджраяна",
         upload_add: "Добавить видео",
         upload_hint: "Название подставится из YouTube при наличии.",
         admin_title: "Панель администратора",
@@ -728,6 +900,7 @@ const ui = {
         settings_religions: "Религии для контроля",
         settings_religion_allow: "Показывать только выбранные",
         settings_religion_block: "Скрыть выбранные",
+        settings_religion_hint: "Выберите религию, чтобы увидеть подкатегории.",
         settings_watch_limit: "Лимит просмотра в день (часы)",
         settings_password: "Подтвердите паролем",
         settings_save: "Сохранить",
@@ -853,6 +1026,12 @@ const ui = {
         admin_videos_search: "Поиск видео",
         admin_view_videos: "Видео канала",
         admin_video_language: "Язык",
+        admin_video_id: "ID видео",
+        admin_video_posted_by: "Опубликовал",
+        admin_video_religion: "Религии",
+        admin_video_religion_detail: "Детали религии",
+        admin_video_languages: "Языки",
+        admin_video_topics: "Темы",
         admin_report_message_placeholder: "Сообщение автору жалобы (необязательно)",
         action_resolve: "Решено",
         action_delete: "Удалить",
@@ -899,6 +1078,42 @@ const ui = {
         controls_show: "显示控制栏",
         tech_panel_toggle: "切换播放器工具",
         search_placeholder: "搜索视频和频道",
+        games_open: "游戏",
+        games_title: "游戏",
+        games_subtitle: "适合孩子的表情小游戏。",
+        games_fruit_title: "水果配对",
+        games_fruit_instruction: "交换相邻水果，凑成三个一排 🍎🍎🍎。",
+        games_fruit_status_ready: "点一个水果，再和旁边的交换 👆",
+        games_fruit_status_win: "太棒了！你成功了！🎉",
+        games_fruit_status_try: "差一点，再试一次 ✨",
+        games_fruit_status_adjacent: "请选择相邻的水果 🙌",
+        games_shuffle: "重新排列",
+        games_try_again: "再试一次",
+        games_memory_title: "记忆翻翻乐",
+        games_memory_instruction: "翻开两张卡片，找到相同的水果。",
+        games_memory_status_ready: "翻开两张卡片开始。",
+        games_memory_status_match: "配对成功！",
+        games_memory_status_try: "不匹配，再试试。",
+        games_memory_status_win: "全部配对成功！🎉",
+        games_memory_reset: "重新开始",
+        games_memory_flip: "翻开",
+        games_memory_card: "隐藏卡片",
+        games_find_title: "找水果",
+        games_find_instruction: "点出我们要找的水果。",
+        games_find_prompt: "找 {fruit}",
+        games_find_status_ready: "选择正确的水果。",
+        games_find_status_good: "对啦！找到了！🎉",
+        games_find_status_try: "哎呀，再试一次。",
+        games_find_next: "下一轮",
+        games_fruit_aria: "水果配对棋盘",
+        games_memory_aria: "记忆翻翻乐棋盘",
+        games_find_aria: "找水果棋盘",
+        fruit_apple: "苹果",
+        fruit_banana: "香蕉",
+        fruit_strawberry: "草莓",
+        fruit_orange: "橙子",
+        fruit_grapes: "葡萄",
+        fruit_watermelon: "西瓜",
         ui_language_label: "语言",
         sidebar_subscribed: "已订阅",
         sidebar_channels: "频道",
@@ -964,6 +1179,25 @@ const ui = {
         upload_languages: "语言",
         upload_topics: "主题（用逗号分隔）",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "宗教",
+        upload_religion_detail: "宗教细分（可选）",
+        upload_religion_hint: "选择宗教后可看到子分类。",
+        religion_none: "无宗教",
+        religion_islam: "伊斯兰教",
+        religion_shia: "什叶派",
+        religion_sunni: "逊尼派",
+        religion_christian: "基督教",
+        religion_catholic: "天主教",
+        religion_orthodox: "东正教",
+        religion_protestant: "新教",
+        religion_jews: "犹太教",
+        religion_jews_orthodox: "正统派",
+        religion_jews_conservative: "保守派",
+        religion_jews_reform: "改革派",
+        religion_buddist: "佛教",
+        religion_buddist_theravada: "上座部",
+        religion_buddist_mahayana: "大乘",
+        religion_buddist_vajrayana: "密宗",
         upload_add: "添加视频",
         upload_hint: "如可用，标题将自动从 YouTube 获取。",
         admin_title: "管理员控制台",
@@ -1012,6 +1246,7 @@ const ui = {
         settings_religions: "宗教筛选",
         settings_religion_allow: "仅允许所选",
         settings_religion_block: "隐藏所选",
+        settings_religion_hint: "选择宗教后可看到子分类。",
         settings_watch_limit: "每日观看时长（小时）",
         settings_password: "用密码确认",
         settings_save: "保存设置",
@@ -1137,6 +1372,12 @@ const ui = {
         admin_videos_search: "搜索视频",
         admin_view_videos: "查看视频",
         admin_video_language: "语言",
+        admin_video_id: "视频 ID",
+        admin_video_posted_by: "发布者",
+        admin_video_religion: "宗教",
+        admin_video_religion_detail: "宗教细分",
+        admin_video_languages: "语言",
+        admin_video_topics: "主题",
         admin_report_message_placeholder: "给举报者的消息（可选）",
         action_resolve: "处理",
         action_delete: "删除",
@@ -1183,6 +1424,42 @@ const ui = {
         controls_show: "Kontrolleri göster",
         tech_panel_toggle: "Oynatıcı araçları",
         search_placeholder: "Videoları ve kanalları ara",
+        games_open: "Oyunlar",
+        games_title: "Oyunlar",
+        games_subtitle: "Çocuklar için hızlı emoji oyunları.",
+        games_fruit_title: "Meyve Eşleşme",
+        games_fruit_instruction: "Yandaki meyveyi değiştir, 3'lü sırayı yap 🍎🍎🍎.",
+        games_fruit_status_ready: "Bir meyve seç, sonra yandakiyle değiştir 👆",
+        games_fruit_status_win: "Yeehoo! Başardın! 🎉",
+        games_fruit_status_try: "Az kaldı! Başka bir dene ✨",
+        games_fruit_status_adjacent: "Yandaki bir meyve seç 🙌",
+        games_shuffle: "Karıştır",
+        games_try_again: "Tekrar dene",
+        games_memory_title: "Hafıza Oyunu",
+        games_memory_instruction: "İki kartı aç, aynı meyveleri bul.",
+        games_memory_status_ready: "İki kart açarak başla.",
+        games_memory_status_match: "Harika eşleşme!",
+        games_memory_status_try: "Eşleşmedi. Tekrar dene.",
+        games_memory_status_win: "Hepsi eşleşti! 🎉",
+        games_memory_reset: "Yeniden başla",
+        games_memory_flip: "Çevir",
+        games_memory_card: "Gizli kart",
+        games_find_title: "Meyveyi Bul",
+        games_find_instruction: "İstediğimiz meyveyi seç.",
+        games_find_prompt: "{fruit} bul",
+        games_find_status_ready: "Doğru meyveyi seç.",
+        games_find_status_good: "Evet! Buldun! 🎉",
+        games_find_status_try: "Olmadı, tekrar dene.",
+        games_find_next: "Yeni tur",
+        games_fruit_aria: "Meyve eşleşme tahtası",
+        games_memory_aria: "Hafıza oyunu tahtası",
+        games_find_aria: "Meyveyi bul tahtası",
+        fruit_apple: "Elma",
+        fruit_banana: "Muz",
+        fruit_strawberry: "Çilek",
+        fruit_orange: "Portakal",
+        fruit_grapes: "Üzüm",
+        fruit_watermelon: "Karpuz",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abonelikler",
         sidebar_channels: "Kanallar",
@@ -1248,6 +1525,25 @@ const ui = {
         upload_languages: "Diller",
         upload_topics: "Konular (virgülle)",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "Dinler",
+        upload_religion_detail: "Din detayları (isteğe bağlı)",
+        upload_religion_hint: "Alt kategorileri görmek için din seçin.",
+        religion_none: "Din yok",
+        religion_islam: "İslam",
+        religion_shia: "Şii",
+        religion_sunni: "Sünni",
+        religion_christian: "Hristiyanlık",
+        religion_catholic: "Katolik",
+        religion_orthodox: "Ortodoks",
+        religion_protestant: "Protestan",
+        religion_jews: "Yahudilik",
+        religion_jews_orthodox: "Ortodoks",
+        religion_jews_conservative: "Muhafazakâr",
+        religion_jews_reform: "Reformist",
+        religion_buddist: "Budizm",
+        religion_buddist_theravada: "Theravada",
+        religion_buddist_mahayana: "Mahayana",
+        religion_buddist_vajrayana: "Vajrayana",
         upload_add: "Video ekle",
         upload_hint: "Mümkünse başlık YouTube'dan alınır.",
         admin_title: "Yönetici paneli",
@@ -1296,6 +1592,7 @@ const ui = {
         settings_religions: "Kontrol edilecek inançlar",
         settings_religion_allow: "Yalnızca seçilenleri göster",
         settings_religion_block: "Seçilenleri gizle",
+        settings_religion_hint: "Alt kategorileri görmek için din seçin.",
         settings_watch_limit: "Günlük izleme limiti (saat)",
         settings_password: "Şifre ile onayla",
         settings_save: "Ayarları kaydet",
@@ -1421,6 +1718,12 @@ const ui = {
         admin_videos_search: "Video ara",
         admin_view_videos: "Videoları gör",
         admin_video_language: "Dil",
+        admin_video_id: "Video ID",
+        admin_video_posted_by: "Yükleyen",
+        admin_video_religion: "Dinler",
+        admin_video_religion_detail: "Din detayları",
+        admin_video_languages: "Diller",
+        admin_video_topics: "Konular",
         admin_report_message_placeholder: "Bildiren kişiye mesaj (isteğe bağlı)",
         action_resolve: "Çöz",
         action_delete: "Sil",
@@ -1467,6 +1770,42 @@ const ui = {
         controls_show: "İdarələri göstər",
         tech_panel_toggle: "Pleyer alətləri",
         search_placeholder: "Video və kanalları axtarın",
+        games_open: "Oyunlar",
+        games_title: "Oyunlar",
+        games_subtitle: "Uşaqlar üçün sürətli emoji oyunları.",
+        games_fruit_title: "Meyvə Uyğunlaşdır",
+        games_fruit_instruction: "Qonşu meyvəni dəyiş, 3-ü bir sırada düzəlt 🍎🍎🍎.",
+        games_fruit_status_ready: "Bir meyvə seç, sonra qonşusu ilə dəyiş 👆",
+        games_fruit_status_win: "Yeehoo! Düz elədin! 🎉",
+        games_fruit_status_try: "Az qaldı! Başqa dəyiş dene ✨",
+        games_fruit_status_adjacent: "Qonşu meyvə seç 🙌",
+        games_shuffle: "Qarışdır",
+        games_try_again: "Təkrar dene",
+        games_memory_title: "Yaddaş Oyunu",
+        games_memory_instruction: "İki kart aç, eyni meyvələri tap.",
+        games_memory_status_ready: "İki kart açaraq başla.",
+        games_memory_status_match: "Əla uyğunlaşma!",
+        games_memory_status_try: "Uyğunlaşmadı. Təkrar dene.",
+        games_memory_status_win: "Hamısı uyğunlaşdı! 🎉",
+        games_memory_reset: "Yenidən başla",
+        games_memory_flip: "Çevir",
+        games_memory_card: "Gizli kart",
+        games_find_title: "Meyvəni Tap",
+        games_find_instruction: "İstədiyimiz meyvəni seç.",
+        games_find_prompt: "{fruit} tap",
+        games_find_status_ready: "Düzgün meyvəni seç.",
+        games_find_status_good: "Bəli! Tapdın! 🎉",
+        games_find_status_try: "Olmadı, yenə dene.",
+        games_find_next: "Növbəti tur",
+        games_fruit_aria: "Meyvə uyğunlaşdırma lövhəsi",
+        games_memory_aria: "Yaddaş oyunu lövhəsi",
+        games_find_aria: "Meyvəni tap lövhəsi",
+        fruit_apple: "Alma",
+        fruit_banana: "Banan",
+        fruit_strawberry: "Çiyələk",
+        fruit_orange: "Portağal",
+        fruit_grapes: "Üzüm",
+        fruit_watermelon: "Qarpız",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abunələr",
         sidebar_channels: "Kanallar",
@@ -1532,6 +1871,25 @@ const ui = {
         upload_languages: "Dillər",
         upload_topics: "Mövzular (vergüllə)",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "Dinlər",
+        upload_religion_detail: "Din detalları (istəyə bağlı)",
+        upload_religion_hint: "Alt kateqoriyalar üçün din seçin.",
+        religion_none: "Din yoxdur",
+        religion_islam: "İslam",
+        religion_shia: "Şiə",
+        religion_sunni: "Sünni",
+        religion_christian: "Xristianlıq",
+        religion_catholic: "Katolik",
+        religion_orthodox: "Pravoslav",
+        religion_protestant: "Protestant",
+        religion_jews: "Yəhudilik",
+        religion_jews_orthodox: "Ortodoks",
+        religion_jews_conservative: "Mühafizəkar",
+        religion_jews_reform: "Reformist",
+        religion_buddist: "Buddizm",
+        religion_buddist_theravada: "Theravada",
+        religion_buddist_mahayana: "Mahayana",
+        religion_buddist_vajrayana: "Vajrayana",
         upload_add: "Video əlavə et",
         upload_hint: "Mümkünsə başlıq YouTube-dan alınır.",
         admin_title: "Admin idarəetmə",
@@ -1580,6 +1938,7 @@ const ui = {
         settings_religions: "İdarə olunacaq inanc",
         settings_religion_allow: "Yalnız seçilənləri göstər",
         settings_religion_block: "Seçilənləri gizlət",
+        settings_religion_hint: "Alt kateqoriyalar üçün din seçin.",
         settings_watch_limit: "Gündəlik izləmə limiti (saat)",
         settings_password: "Şifrə ilə təsdiqlə",
         settings_save: "Ayarları yadda saxla",
@@ -1705,6 +2064,12 @@ const ui = {
         admin_videos_search: "Video axtar",
         admin_view_videos: "Videolara bax",
         admin_video_language: "Dil",
+        admin_video_id: "Video ID",
+        admin_video_posted_by: "Paylaşan",
+        admin_video_religion: "Dinlər",
+        admin_video_religion_detail: "Din detalları",
+        admin_video_languages: "Dillər",
+        admin_video_topics: "Mövzular",
         admin_report_message_placeholder: "Şikayət edənə mesaj (istəyə bağlı)",
         action_resolve: "Həll et",
         action_delete: "Sil",
@@ -1751,6 +2116,42 @@ const ui = {
         controls_show: "إظهار عناصر التحكم",
         tech_panel_toggle: "أدوات المشغل",
         search_placeholder: "ابحث عن الفيديوهات والقنوات",
+        games_open: "ألعاب",
+        games_title: "ألعاب",
+        games_subtitle: "ألعاب ايموجي سريعة للأطفال.",
+        games_fruit_title: "مطابقة الفواكه",
+        games_fruit_instruction: "بدّل الجيران لتكوين ثلاثة في صف 🍎🍎🍎.",
+        games_fruit_status_ready: "اختر فاكهة ثم بدّلها مع الجار 👆",
+        games_fruit_status_win: "ياي! لقد نجحت! 🎉",
+        games_fruit_status_try: "قريب جدا! جرب مرة اخرى ✨",
+        games_fruit_status_adjacent: "اختر فاكهة مجاورة 🙌",
+        games_shuffle: "إعادة ترتيب",
+        games_try_again: "حاول مرة أخرى",
+        games_memory_title: "لعبة الذاكرة",
+        games_memory_instruction: "اقلب بطاقتين وابحث عن زوج متطابق.",
+        games_memory_status_ready: "اقلب بطاقتين للبدء.",
+        games_memory_status_match: "تطابق رائع!",
+        games_memory_status_try: "غير متطابق. حاول مجددا.",
+        games_memory_status_win: "كل الأزواج تطابقت! 🎉",
+        games_memory_reset: "ابدأ من جديد",
+        games_memory_flip: "اقلب",
+        games_memory_card: "بطاقة مخفية",
+        games_find_title: "اعثر على الفاكهة",
+        games_find_instruction: "اضغط على الفاكهة التي نطلبها.",
+        games_find_prompt: "اعثر على {fruit}",
+        games_find_status_ready: "اختر الفاكهة الصحيحة.",
+        games_find_status_good: "نعم! وجدتها! 🎉",
+        games_find_status_try: "اوه، حاول مرة اخرى.",
+        games_find_next: "جولة جديدة",
+        games_fruit_aria: "لوحة مطابقة الفواكه",
+        games_memory_aria: "لوحة لعبة الذاكرة",
+        games_find_aria: "لوحة اعثر على الفاكهة",
+        fruit_apple: "تفاح",
+        fruit_banana: "موز",
+        fruit_strawberry: "فراولة",
+        fruit_orange: "برتقال",
+        fruit_grapes: "عنب",
+        fruit_watermelon: "بطيخ",
         ui_language_label: "اللغة",
         sidebar_subscribed: "المشتركات",
         sidebar_channels: "القنوات",
@@ -1816,6 +2217,25 @@ const ui = {
         upload_languages: "اللغات",
         upload_topics: "المواضيع (مفصولة بفواصل)",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "الديانات",
+        upload_religion_detail: "تفاصيل الديانة (اختياري)",
+        upload_religion_hint: "اختر ديانة لعرض الأقسام الفرعية.",
+        religion_none: "بدون ديانة",
+        religion_islam: "الإسلام",
+        religion_shia: "شيعة",
+        religion_sunni: "سنة",
+        religion_christian: "المسيحية",
+        religion_catholic: "كاثوليك",
+        religion_orthodox: "أرثوذكس",
+        religion_protestant: "بروتستانت",
+        religion_jews: "اليهودية",
+        religion_jews_orthodox: "أرثوذكس",
+        religion_jews_conservative: "محافظون",
+        religion_jews_reform: "إصلاحيون",
+        religion_buddist: "البوذية",
+        religion_buddist_theravada: "ثيرافادا",
+        religion_buddist_mahayana: "ماهايانا",
+        religion_buddist_vajrayana: "فاجرايانا",
         upload_add: "إضافة فيديو",
         upload_hint: "سيتم تعبئة العنوان تلقائياً من يوتيوب إن توفر.",
         admin_title: "لوحة الإدارة",
@@ -1864,6 +2284,7 @@ const ui = {
         settings_religions: "الديانات للتحكم",
         settings_religion_allow: "السماح بالمحدد فقط",
         settings_religion_block: "إخفاء المحدد",
+        settings_religion_hint: "اختر ديانة لعرض الأقسام الفرعية.",
         settings_watch_limit: "حد المشاهدة اليومي (بالساعات)",
         settings_password: "التأكيد بكلمة المرور",
         settings_save: "حفظ الإعدادات",
@@ -1989,6 +2410,12 @@ const ui = {
         admin_videos_search: "ابحث عن الفيديوهات",
         admin_view_videos: "عرض الفيديوهات",
         admin_video_language: "اللغة",
+        admin_video_id: "معرّف الفيديو",
+        admin_video_posted_by: "الناشر",
+        admin_video_religion: "الديانات",
+        admin_video_religion_detail: "تفاصيل الديانة",
+        admin_video_languages: "اللغات",
+        admin_video_topics: "المواضيع",
         admin_report_message_placeholder: "رسالة للمبلّغ (اختياري)",
         action_resolve: "حل",
         action_delete: "حذف",
@@ -2058,6 +2485,9 @@ const ui = {
       if (ui.errorMessage && errorMessageKey) {
         ui.errorMessage.textContent = t(errorMessageKey);
       }
+      updateUploadReligionDetails();
+      renderSettingsReligions(settingsSelectedReligions);
+      syncGamesCopy();
     }
 
     function setUiLanguage(lang) {
@@ -2089,6 +2519,94 @@ const ui = {
         button.setAttribute("aria-label", label);
         button.title = label;
         button.setAttribute("data-label", label);
+      }
+    }
+
+    function parseArrayValue(value) {
+      if (Array.isArray(value)) {
+        return value.map((item) => String(item || "").trim()).filter(Boolean);
+      }
+      if (typeof value !== "string") {
+        return [];
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return [];
+      }
+      if (trimmed.startsWith("[")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+          }
+        } catch (err) {
+          return [];
+        }
+      }
+      return trimmed
+        .split(/[|,]/g)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    function getSelectValues(select) {
+      if (!select) {
+        return [];
+      }
+      return Array.from(select.selectedOptions).map((option) => option.value);
+    }
+
+    function formatReligionLabels(values) {
+      if (!values || !values.length) {
+        return t("religion_none");
+      }
+      const list = values.map((value) => t(RELIGION_LABEL_KEYS[value] || value));
+      return list.join(", ");
+    }
+
+    function collectReligionDetails(bases) {
+      const detailValues = [];
+      RELIGION_GROUPS.forEach((group) => {
+        if (bases.includes(group.value)) {
+          detailValues.push(...group.details);
+        }
+      });
+      return detailValues;
+    }
+
+    function enforceNoneExclusiveOnSelect(select, values) {
+      if (!values.includes("none") || values.length === 1) {
+        return values;
+      }
+      const filtered = values.filter((value) => value !== "none");
+      Array.from(select.options).forEach((option) => {
+        if (option.value === "none") {
+          option.selected = false;
+        }
+      });
+      return filtered;
+    }
+
+    function updateUploadReligionDetails() {
+      if (!ui.uploadReligion || !ui.uploadReligionDetail) {
+        return;
+      }
+      let bases = getSelectValues(ui.uploadReligion);
+      bases = enforceNoneExclusiveOnSelect(ui.uploadReligion, bases);
+      const detailValues = collectReligionDetails(bases);
+      const detailSelect = ui.uploadReligionDetail;
+      const selectedDetails = new Set(getSelectValues(detailSelect));
+      detailSelect.innerHTML = "";
+      detailValues.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = t(RELIGION_LABEL_KEYS[value] || value);
+        option.selected = selectedDetails.has(value);
+        detailSelect.appendChild(option);
+      });
+      detailSelect.disabled = detailValues.length === 0;
+      if (ui.uploadReligionHint) {
+        ui.uploadReligionHint.style.display = detailValues.length ? "none" : "block";
       }
     }
 
@@ -2159,6 +2677,7 @@ const ui = {
       setButtonIcon(ui.studioOpen, icons.studio, "control_studio");
       setButtonIcon(ui.settingsOpen, icons.settings, "control_settings");
       setButtonIcon(ui.settingsBar, icons.settings, "control_settings");
+      setButtonIcon(ui.gamesOpen, icons.games, "games_open");
       setButtonIcon(ui.notificationsOpen, icons.bell, "control_updates");
       setButtonIcon(ui.authOpen, icons.user, "control_sign_in");
       setButtonIcon(ui.authLogout, icons.logout, "control_sign_out");
@@ -2230,6 +2749,53 @@ const ui = {
     const PLAYER_RELOAD_TIMEOUT_MS = 12000;
     const PLAYER_RELOAD_KEY = "playerReloads";
     const ADMIN_SECTIONS = new Set(["overview", "users", "channels", "videos", "reports", "imports"]);
+    let gamesInitialized = false;
+
+    const FRUIT_EMOJI = {
+      apple: "🍎",
+      banana: "🍌",
+      strawberry: "🍓",
+      orange: "🍊",
+      grapes: "🍇",
+      watermelon: "🍉"
+    };
+
+    const FRUIT_PRESETS = [
+      ["apple", "apple", "banana", "banana", "strawberry", "apple", "orange", "banana", "strawberry"],
+      ["banana", "strawberry", "banana", "apple", "orange", "apple", "orange", "banana", "strawberry"],
+      ["orange", "apple", "banana", "banana", "strawberry", "apple", "apple", "banana", "strawberry"]
+    ];
+
+    const MEMORY_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
+    const FIND_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
+
+    const fruitGameState = {
+      grid: [],
+      selected: null,
+      matched: [],
+      dragging: null,
+      dragTarget: null,
+      dragMoved: false,
+      activePointerId: null,
+      skipClick: false,
+      statusKey: "games_fruit_status_ready"
+    };
+
+    const memoryGameState = {
+      cards: [],
+      revealed: [],
+      matched: new Set(),
+      locked: false,
+      statusKey: "games_memory_status_ready",
+      timeoutId: null
+    };
+
+    const findGameState = {
+      target: "",
+      cards: [],
+      solved: false,
+      statusKey: "games_find_status_ready"
+    };
 
     function setTheme() {
       document.body.setAttribute("data-theme", "light");
@@ -2332,6 +2898,465 @@ const ui = {
       }
     }
 
+    function shuffleArray(items) {
+      const array = items.slice();
+      for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+      }
+      return array;
+    }
+
+    function getFruitEmoji(fruit) {
+      return FRUIT_EMOJI[fruit] || "🍓";
+    }
+
+    function getFruitLabel(fruit) {
+      return t("fruit_" + fruit);
+    }
+
+    function updateFruitStatus() {
+      if (ui.gamesFruitStatus) {
+        ui.gamesFruitStatus.textContent = t(fruitGameState.statusKey);
+      }
+    }
+
+    function updateMemoryStatus() {
+      if (ui.gamesMemoryStatus) {
+        ui.gamesMemoryStatus.textContent = t(memoryGameState.statusKey);
+      }
+    }
+
+    function updateFindStatus() {
+      if (ui.gamesFindStatus) {
+        ui.gamesFindStatus.textContent = t(findGameState.statusKey);
+      }
+    }
+
+    function updateFindPrompt() {
+      if (!ui.gamesFindPrompt || !findGameState.target) {
+        return;
+      }
+      const label = getFruitLabel(findGameState.target);
+      const template = t("games_find_prompt");
+      ui.gamesFindPrompt.textContent =
+        template.replace("{fruit}", label) + " " + getFruitEmoji(findGameState.target);
+    }
+
+    function buildFruitBoard() {
+      const preset = FRUIT_PRESETS[Math.floor(Math.random() * FRUIT_PRESETS.length)];
+      fruitGameState.grid = preset.slice();
+      fruitGameState.selected = null;
+      fruitGameState.matched = [];
+      fruitGameState.statusKey = "games_fruit_status_ready";
+      updateFruitStatus();
+    }
+
+    function fruitIsAdjacent(a, b) {
+      const rowA = Math.floor(a / 3);
+      const colA = a % 3;
+      const rowB = Math.floor(b / 3);
+      const colB = b % 3;
+      return Math.abs(rowA - rowB) + Math.abs(colA - colB) === 1;
+    }
+
+    function findFruitMatch() {
+      const matches = [];
+      for (let row = 0; row < 3; row += 1) {
+        const base = row * 3;
+        const a = fruitGameState.grid[base];
+        if (a && a === fruitGameState.grid[base + 1] && a === fruitGameState.grid[base + 2]) {
+          matches.push(base, base + 1, base + 2);
+        }
+      }
+      for (let col = 0; col < 3; col += 1) {
+        const a = fruitGameState.grid[col];
+        if (a && a === fruitGameState.grid[col + 3] && a === fruitGameState.grid[col + 6]) {
+          matches.push(col, col + 3, col + 6);
+        }
+      }
+      return Array.from(new Set(matches));
+    }
+
+    function swapFruit(a, b) {
+      const temp = fruitGameState.grid[a];
+      fruitGameState.grid[a] = fruitGameState.grid[b];
+      fruitGameState.grid[b] = temp;
+    }
+
+    function setFruitDragTarget(next) {
+      if (fruitGameState.dragTarget === next) {
+        return;
+      }
+      if (!ui.gamesFruitGrid) {
+        return;
+      }
+      if (fruitGameState.dragTarget !== null) {
+        const prev = ui.gamesFruitGrid.querySelector(
+          ".game-tile[data-index='" + fruitGameState.dragTarget + "']"
+        );
+        if (prev) {
+          prev.classList.remove("target");
+        }
+      }
+      fruitGameState.dragTarget = next;
+      if (next !== null) {
+        const nextTile = ui.gamesFruitGrid.querySelector(".game-tile[data-index='" + next + "']");
+        if (nextTile) {
+          nextTile.classList.add("target");
+        }
+      }
+    }
+
+    function clearFruitDragState() {
+      if (!ui.gamesFruitGrid) {
+        return;
+      }
+      if (fruitGameState.dragging !== null) {
+        const dragTile = ui.gamesFruitGrid.querySelector(
+          ".game-tile[data-index='" + fruitGameState.dragging + "']"
+        );
+        if (dragTile) {
+          dragTile.classList.remove("dragging");
+        }
+      }
+      if (fruitGameState.dragTarget !== null) {
+        const targetTile = ui.gamesFruitGrid.querySelector(
+          ".game-tile[data-index='" + fruitGameState.dragTarget + "']"
+        );
+        if (targetTile) {
+          targetTile.classList.remove("target");
+        }
+      }
+      fruitGameState.dragging = null;
+      fruitGameState.dragTarget = null;
+      fruitGameState.dragMoved = false;
+      fruitGameState.activePointerId = null;
+    }
+
+    function applyFruitSwap(a, b) {
+      swapFruit(a, b);
+      const match = findFruitMatch();
+      if (match.length) {
+        fruitGameState.matched = match;
+        fruitGameState.statusKey = "games_fruit_status_win";
+      } else {
+        swapFruit(a, b);
+        fruitGameState.matched = [];
+        fruitGameState.statusKey = "games_fruit_status_try";
+      }
+      fruitGameState.selected = null;
+      updateFruitStatus();
+      renderFruitGrid();
+    }
+
+    function handleFruitSelect(index) {
+      if (fruitGameState.selected === null) {
+        fruitGameState.selected = index;
+        renderFruitGrid();
+        return;
+      }
+      if (fruitGameState.selected === index) {
+        fruitGameState.selected = null;
+        renderFruitGrid();
+        return;
+      }
+      if (!fruitIsAdjacent(fruitGameState.selected, index)) {
+        fruitGameState.selected = index;
+        fruitGameState.statusKey = "games_fruit_status_adjacent";
+        updateFruitStatus();
+        renderFruitGrid();
+        return;
+      }
+      applyFruitSwap(fruitGameState.selected, index);
+    }
+
+    function handleFruitPointerDown(event, index) {
+      if (fruitGameState.activePointerId !== null) {
+        return;
+      }
+      fruitGameState.activePointerId = event.pointerId;
+      fruitGameState.dragging = index;
+      fruitGameState.dragMoved = false;
+      const tile = event.currentTarget;
+      tile.classList.add("dragging");
+      tile.setPointerCapture(event.pointerId);
+    }
+
+    function handleFruitPointerMove(event) {
+      if (fruitGameState.activePointerId !== event.pointerId || fruitGameState.dragging === null) {
+        return;
+      }
+      fruitGameState.dragMoved = true;
+      const hit = document.elementFromPoint(event.clientX, event.clientY);
+      const tile = hit ? hit.closest(".game-tile") : null;
+      if (!tile || !ui.gamesFruitGrid || !ui.gamesFruitGrid.contains(tile)) {
+        setFruitDragTarget(null);
+        return;
+      }
+      const targetIndex = Number(tile.dataset.index);
+      if (!Number.isFinite(targetIndex) || targetIndex === fruitGameState.dragging) {
+        setFruitDragTarget(null);
+        return;
+      }
+      if (!fruitIsAdjacent(fruitGameState.dragging, targetIndex)) {
+        setFruitDragTarget(null);
+        return;
+      }
+      setFruitDragTarget(targetIndex);
+    }
+
+    function handleFruitPointerUp(event, index) {
+      if (fruitGameState.activePointerId !== event.pointerId) {
+        return;
+      }
+      const origin = fruitGameState.dragging;
+      const target = fruitGameState.dragTarget;
+      const moved = fruitGameState.dragMoved;
+      clearFruitDragState();
+      if (target !== null && origin !== null) {
+        fruitGameState.skipClick = true;
+        applyFruitSwap(origin, target);
+        return;
+      }
+      if (!moved && index !== null) {
+        handleFruitSelect(index);
+      }
+    }
+
+    function handleFruitPointerCancel(event) {
+      if (fruitGameState.activePointerId !== event.pointerId) {
+        return;
+      }
+      clearFruitDragState();
+    }
+
+    function renderFruitGrid() {
+      if (!ui.gamesFruitGrid) {
+        return;
+      }
+      ui.gamesFruitGrid.innerHTML = "";
+      fruitGameState.grid.forEach((fruit, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "game-tile";
+        button.setAttribute("aria-label", getFruitLabel(fruit));
+        button.dataset.fruit = fruit;
+        button.dataset.index = String(index);
+        button.innerHTML =
+          "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
+          getFruitEmoji(fruit) +
+          "</span><span class=\"tile-label\">" +
+          getFruitLabel(fruit) +
+          "</span>";
+        if (fruitGameState.selected === index) {
+          button.classList.add("selected");
+        }
+        if (fruitGameState.matched.includes(index)) {
+          button.classList.add("matched");
+        }
+        button.addEventListener("pointerdown", (event) => handleFruitPointerDown(event, index));
+        button.addEventListener("pointermove", handleFruitPointerMove);
+        button.addEventListener("pointerup", (event) => handleFruitPointerUp(event, index));
+        button.addEventListener("pointercancel", handleFruitPointerCancel);
+        button.addEventListener("click", (event) => {
+          if (fruitGameState.skipClick) {
+            fruitGameState.skipClick = false;
+            event.preventDefault();
+            return;
+          }
+          handleFruitSelect(index);
+        });
+        ui.gamesFruitGrid.appendChild(button);
+      });
+    }
+
+    function buildMemoryBoard() {
+      if (memoryGameState.timeoutId) {
+        clearTimeout(memoryGameState.timeoutId);
+        memoryGameState.timeoutId = null;
+      }
+      memoryGameState.cards = shuffleArray(MEMORY_FRUITS.concat(MEMORY_FRUITS));
+      memoryGameState.revealed = [];
+      memoryGameState.matched = new Set();
+      memoryGameState.locked = false;
+      memoryGameState.statusKey = "games_memory_status_ready";
+      updateMemoryStatus();
+      renderMemoryGrid();
+    }
+
+    function handleMemoryFlip(index) {
+      if (memoryGameState.locked) {
+        return;
+      }
+      if (memoryGameState.matched.has(index)) {
+        return;
+      }
+      if (memoryGameState.revealed.includes(index)) {
+        return;
+      }
+      memoryGameState.revealed = memoryGameState.revealed.concat(index);
+      renderMemoryGrid();
+      if (memoryGameState.revealed.length < 2) {
+        return;
+      }
+      const [first, second] = memoryGameState.revealed;
+      if (memoryGameState.cards[first] === memoryGameState.cards[second]) {
+        memoryGameState.matched.add(first);
+        memoryGameState.matched.add(second);
+        memoryGameState.revealed = [];
+        if (memoryGameState.matched.size === memoryGameState.cards.length) {
+          memoryGameState.statusKey = "games_memory_status_win";
+        } else {
+          memoryGameState.statusKey = "games_memory_status_match";
+        }
+        updateMemoryStatus();
+        renderMemoryGrid();
+        return;
+      }
+      memoryGameState.locked = true;
+      memoryGameState.statusKey = "games_memory_status_try";
+      updateMemoryStatus();
+      memoryGameState.timeoutId = setTimeout(() => {
+        memoryGameState.revealed = [];
+        memoryGameState.locked = false;
+        memoryGameState.timeoutId = null;
+        renderMemoryGrid();
+      }, 700);
+    }
+
+    function renderMemoryGrid() {
+      if (!ui.gamesMemoryGrid) {
+        return;
+      }
+      ui.gamesMemoryGrid.innerHTML = "";
+      memoryGameState.cards.forEach((fruit, index) => {
+        const isMatched = memoryGameState.matched.has(index);
+        const isRevealed = isMatched || memoryGameState.revealed.includes(index);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "game-tile";
+        button.dataset.index = String(index);
+        if (!isRevealed) {
+          button.classList.add("masked");
+        }
+        if (isMatched) {
+          button.classList.add("matched");
+        }
+        const label = isRevealed ? getFruitLabel(fruit) : t("games_memory_card");
+        const emoji = isRevealed ? getFruitEmoji(fruit) : "❓";
+        button.setAttribute("aria-label", label);
+        button.innerHTML =
+          "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
+          emoji +
+          "</span><span class=\"tile-label\">" +
+          (isRevealed ? getFruitLabel(fruit) : t("games_memory_flip")) +
+          "</span>";
+        button.addEventListener("click", () => handleMemoryFlip(index));
+        ui.gamesMemoryGrid.appendChild(button);
+      });
+    }
+
+    function buildFindRound() {
+      const target = FIND_FRUITS[Math.floor(Math.random() * FIND_FRUITS.length)];
+      const cards = [target];
+      while (cards.length < 6) {
+        cards.push(FIND_FRUITS[Math.floor(Math.random() * FIND_FRUITS.length)]);
+      }
+      findGameState.target = target;
+      findGameState.cards = shuffleArray(cards);
+      findGameState.solved = false;
+      findGameState.statusKey = "games_find_status_ready";
+      updateFindStatus();
+      updateFindPrompt();
+      renderFindGrid();
+    }
+
+    function handleFindPick(fruit) {
+      if (findGameState.solved) {
+        return;
+      }
+      if (fruit === findGameState.target) {
+        findGameState.solved = true;
+        findGameState.statusKey = "games_find_status_good";
+      } else {
+        findGameState.statusKey = "games_find_status_try";
+      }
+      updateFindStatus();
+      renderFindGrid();
+    }
+
+    function renderFindGrid() {
+      if (!ui.gamesFindGrid) {
+        return;
+      }
+      ui.gamesFindGrid.innerHTML = "";
+      findGameState.cards.forEach((fruit) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "game-tile";
+        button.setAttribute("aria-label", getFruitLabel(fruit));
+        button.innerHTML =
+          "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
+          getFruitEmoji(fruit) +
+          "</span><span class=\"tile-label\">" +
+          getFruitLabel(fruit) +
+          "</span>";
+        if (findGameState.solved && fruit === findGameState.target) {
+          button.classList.add("matched");
+        }
+        button.addEventListener("click", () => handleFindPick(fruit));
+        ui.gamesFindGrid.appendChild(button);
+      });
+    }
+
+    function syncGamesCopy() {
+      if (!gamesInitialized) {
+        return;
+      }
+      updateFruitStatus();
+      updateMemoryStatus();
+      updateFindStatus();
+      updateFindPrompt();
+      renderFruitGrid();
+      renderMemoryGrid();
+      renderFindGrid();
+    }
+
+    function initGames() {
+      if (!ui.gamesView) {
+        return;
+      }
+      if (!gamesInitialized) {
+        buildFruitBoard();
+        renderFruitGrid();
+        if (ui.gamesFruitShuffle) {
+          ui.gamesFruitShuffle.addEventListener("click", () => {
+            buildFruitBoard();
+            renderFruitGrid();
+          });
+        }
+        if (ui.gamesFruitRetry) {
+          ui.gamesFruitRetry.addEventListener("click", () => {
+            buildFruitBoard();
+            renderFruitGrid();
+          });
+        }
+        buildMemoryBoard();
+        if (ui.gamesMemoryReset) {
+          ui.gamesMemoryReset.addEventListener("click", buildMemoryBoard);
+        }
+        buildFindRound();
+        if (ui.gamesFindNext) {
+          ui.gamesFindNext.addEventListener("click", buildFindRound);
+        }
+        gamesInitialized = true;
+      }
+      syncGamesCopy();
+    }
+
     function schedulePlayerReload() {
       if (playerReloadTimer) {
         clearTimeout(playerReloadTimer);
@@ -2357,6 +3382,7 @@ const ui = {
       const showSearch = view === "search";
       const showChannels = view === "channels";
       const showRequest = view === "request";
+      const showGames = view === "games";
       const showError = view === "error";
       const showAdmin = view.startsWith("admin");
       const showAdminOverview = showAdmin;
@@ -2375,6 +3401,9 @@ const ui = {
       toggleView(ui.viralView, showViral);
       if (ui.requestView) {
         toggleView(ui.requestView, showRequest);
+      }
+      if (ui.gamesView) {
+        toggleView(ui.gamesView, showGames);
       }
       if (ui.errorView) {
         toggleView(ui.errorView, showError);
@@ -2414,6 +3443,8 @@ const ui = {
         navFocus = "viral";
       } else if (view === "request") {
         navFocus = "request";
+      } else if (view === "games") {
+        navFocus = "home";
       } else if (navFocus === "channels" || navFocus === "viral" || navFocus === "request") {
         navFocus = "home";
       }
@@ -2459,6 +3490,20 @@ const ui = {
         ui.adminSectionToggles.forEach((button) => {
           const isActive = button.dataset.adminToggle === next;
           button.setAttribute("aria-expanded", isActive ? "true" : "false");
+        });
+      }
+    }
+
+    function closeAdminSections() {
+      adminSectionFocus = "";
+      if (ui.adminSections && ui.adminSections.length) {
+        ui.adminSections.forEach((node) => {
+          node.classList.remove("open");
+        });
+      }
+      if (ui.adminSectionToggles && ui.adminSectionToggles.length) {
+        ui.adminSectionToggles.forEach((button) => {
+          button.setAttribute("aria-expanded", "false");
         });
       }
     }
@@ -2535,6 +3580,52 @@ const ui = {
         headers.Authorization = "Bearer " + token;
       }
       return fetch(API_BASE + path, { ...options, headers });
+    }
+
+    function debounce(fn, wait = 250) {
+      let timer = null;
+      return (...args) => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+          timer = null;
+          fn(...args);
+        }, wait);
+      };
+    }
+
+    const thumbnailObserver =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            (entries, observer) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) {
+                  return;
+                }
+                const target = entry.target;
+                const src = target.dataset.thumb;
+                if (src) {
+                  target.style.backgroundImage = "url('" + src + "')";
+                  delete target.dataset.thumb;
+                }
+                observer.unobserve(target);
+              });
+            },
+            { rootMargin: "240px 0px", threshold: 0.1 }
+          )
+        : null;
+
+    function setLazyThumb(node, url) {
+      if (!node) {
+        return;
+      }
+      if (!thumbnailObserver) {
+        node.style.backgroundImage = "url('" + url + "')";
+        return;
+      }
+      node.dataset.thumb = url;
+      thumbnailObserver.observe(node);
     }
 
     function formatTime(seconds) {
@@ -2886,7 +3977,7 @@ const ui = {
       const thumbUrl = "https://img.youtube.com/vi/" + video.youtube_id + "/hqdefault.jpg";
       const thumb = document.createElement("div");
       thumb.className = "thumb";
-      thumb.style.backgroundImage = "url('" + thumbUrl + "')";
+      setLazyThumb(thumb, thumbUrl);
       const stamp = document.createElement("span");
       stamp.textContent = lengthLabel;
       thumb.appendChild(stamp);
@@ -3662,7 +4753,14 @@ const ui = {
         ui.accountPlan.textContent = planLabel;
       }
       if (ui.accountAvatar) {
-        ui.accountAvatar.textContent = avatarLetter.toUpperCase();
+        const avatarUrl = currentUser && currentUser.avatar_url ? String(currentUser.avatar_url) : "";
+        if (avatarUrl) {
+          ui.accountAvatar.textContent = "";
+          setAvatar(ui.accountAvatar, avatarUrl);
+        } else {
+          ui.accountAvatar.textContent = avatarLetter.toUpperCase();
+          setAvatar(ui.accountAvatar, "");
+        }
       }
       if (ui.heroIdentity) {
         ui.heroIdentity.textContent = currentUser ? "Signed in as " + displayName : "Guest mode";
@@ -3762,18 +4860,23 @@ const ui = {
         const languageSelect = document.getElementById("upload-language");
         const selectedLanguages = Array.from(languageSelect.selectedOptions).map((option) => option.value);
         const language = selectedLanguages[0] || "unspecified";
-        const religionSelect = document.getElementById("upload-religion");
-        const religionDetail = document.getElementById("upload-religion-detail");
-        const religion = religionSelect ? religionSelect.value : "none";
-        const religion_detail = religionDetail ? religionDetail.value.trim() : "";
+        const religionSelect = ui.uploadReligion || document.getElementById("upload-religion");
+        const religionDetail = ui.uploadReligionDetail || document.getElementById("upload-religion-detail");
+        let religions = religionSelect ? getSelectValues(religionSelect) : [];
+        if (religionSelect) {
+          religions = enforceNoneExclusiveOnSelect(religionSelect, religions);
+        }
+        const religionDetails = religionDetail ? getSelectValues(religionDetail) : [];
         const topics = ui.uploadTopics.value
           .split(/[|,]/g)
           .map((topic) => topic.trim())
           .filter(Boolean);
         payload.language = language;
         payload.languages = selectedLanguages;
-        payload.religion = religion;
-        payload.religion_detail = religion_detail;
+        payload.religions = religions;
+        payload.religion_details = religionDetails;
+        payload.religion = religions[0] || "none";
+        payload.religion_detail = religionDetails[0] || "";
         payload.topics = topics;
       }
       const res = await apiFetch("/api/videos", {
@@ -3988,88 +5091,130 @@ const ui = {
       });
     }
 
+    function getVideoReligionData(video) {
+      let bases = parseArrayValue(video.religions);
+      let details = parseArrayValue(video.religion_details);
+      if (!bases.length && video.religion) {
+        bases = [String(video.religion)];
+      }
+      if (!details.length && video.religion_detail) {
+        details = [String(video.religion_detail)];
+      }
+      const baseSet = new Set(bases.map((value) => String(value).trim().toLowerCase()).filter(Boolean));
+      const detailSet = new Set(details.map((value) => String(value).trim().toLowerCase()).filter(Boolean));
+      detailSet.forEach((value) => {
+        const base = RELIGION_DETAIL_BASE[value];
+        if (base) {
+          baseSet.add(base);
+        }
+      });
+      let baseList = Array.from(baseSet);
+      if (!baseList.length) {
+        baseList = ["none"];
+      }
+      if (baseList.length > 1 && baseList.includes("none")) {
+        baseList = baseList.filter((value) => value !== "none");
+      }
+      return { bases: baseList, details: Array.from(detailSet) };
+    }
+
+    function closeAdminVideoDetails(activeRow) {
+      const rows = document.querySelectorAll(".admin-video-row");
+      rows.forEach((row) => {
+        if (activeRow && row === activeRow) {
+          return;
+        }
+        const details = row.querySelector(".admin-video-details");
+        if (details && !details.classList.contains("hidden")) {
+          details.classList.add("hidden");
+          const toggle = row.querySelector(".admin-video-toggle");
+          if (toggle) {
+            toggle.setAttribute("aria-expanded", "false");
+          }
+        }
+      });
+    }
+
+    function buildAdminVideoRow(video) {
+      const row = document.createElement("div");
+      row.className = "channel admin-video-row";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "admin-video-toggle";
+      toggle.setAttribute("aria-expanded", "false");
+      const title = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "channel-name";
+      name.textContent = video.title || t("label_untitled");
+      const idLine = document.createElement("div");
+      idLine.className = "card-meta admin-video-id";
+      idLine.textContent = t("admin_video_id") + ": " + (video.id || "");
+      title.appendChild(name);
+      title.appendChild(idLine);
+      const caret = document.createElement("span");
+      caret.className = "card-meta";
+      caret.textContent = "▾";
+      toggle.appendChild(title);
+      toggle.appendChild(caret);
+      const details = document.createElement("div");
+      details.className = "admin-video-details hidden";
+      const meta = document.createElement("div");
+      meta.className = "admin-video-meta";
+      const { bases, details: detailValues } = getVideoReligionData(video);
+      const languages = parseArrayValue(video.languages);
+      if (!languages.length && video.language) {
+        languages.push(String(video.language));
+      }
+      const topics = parseArrayValue(video.topics);
+      const postedBy = video.channel || video.channel_name || t("label_creator");
+      const items = [
+        [t("admin_video_posted_by"), postedBy],
+        [t("admin_video_religion"), formatReligionLabels(bases)],
+        [t("admin_video_religion_detail"), detailValues.length ? formatReligionLabels(detailValues) : "-"],
+        [t("admin_video_languages"), languages.length ? languages.join(", ") : "-"],
+        [t("admin_video_topics"), topics.length ? topics.join(", ") : "-"],
+        [t("label_views"), String(video.views || 0)],
+        [t("label_hearts"), String(video.hearts || 0)]
+      ];
+      items.forEach(([label, value]) => {
+        const line = document.createElement("div");
+        line.className = "card-meta";
+        line.textContent = label + ": " + value;
+        meta.appendChild(line);
+      });
+      const actions = document.createElement("div");
+      actions.className = "channel-actions";
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "ghost";
+      deleteBtn.textContent = t("action_delete");
+      deleteBtn.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
+        if (res.ok) {
+          refreshAdminView();
+        }
+      });
+      actions.appendChild(deleteBtn);
+      details.appendChild(meta);
+      details.appendChild(actions);
+      toggle.addEventListener("click", () => {
+        closeAdminVideoDetails(row);
+        const isHidden = details.classList.toggle("hidden");
+        toggle.setAttribute("aria-expanded", String(!isHidden));
+      });
+      row.appendChild(toggle);
+      row.appendChild(details);
+      return row;
+    }
+
     function renderAdminVideos(list) {
       if (!ui.adminVideosList) {
         return;
       }
       ui.adminVideosList.innerHTML = "";
       list.forEach((video) => {
-        const row = document.createElement("div");
-        row.className = "channel";
-        const editor = document.createElement("div");
-        editor.className = "form-grid";
-        editor.style.minWidth = "220px";
-        const titleInput = document.createElement("input");
-        titleInput.type = "text";
-        titleInput.value = video.title || "";
-        titleInput.placeholder = t("label_untitled");
-        const topicsInput = document.createElement("input");
-        topicsInput.type = "text";
-        let parsedTopics = [];
-        if (Array.isArray(video.topics)) {
-          parsedTopics = video.topics;
-        } else {
-          try {
-            parsedTopics = video.topics ? JSON.parse(video.topics) : [];
-          } catch (err) {
-            parsedTopics = [];
-          }
-        }
-        topicsInput.value = parsedTopics.join(", ");
-        topicsInput.placeholder = t("upload_topics_placeholder");
-        const languageInput = document.createElement("input");
-        languageInput.type = "text";
-        languageInput.value = (video.language || "");
-        languageInput.placeholder = t("admin_video_language");
-        editor.appendChild(titleInput);
-        editor.appendChild(topicsInput);
-        editor.appendChild(languageInput);
-        row.innerHTML =
-          "<div><div class=\"channel-name\">" +
-          escapeHtml(video.title) +
-          "</div><div class=\"card-meta\">" +
-          escapeHtml(video.channel || "") +
-          " · " +
-          escapeHtml(video.views || 0) +
-          " " +
-          t("label_views") +
-          "</div></div>";
-        const actions = document.createElement("div");
-        actions.className = "channel-actions";
-        const saveBtn = document.createElement("button");
-        saveBtn.type = "button";
-        saveBtn.className = "pill";
-        saveBtn.textContent = t("action_save");
-        saveBtn.addEventListener("click", async () => {
-          const topics = topicsInput.value
-            .split(/[|,]/g)
-            .map((topic) => topic.trim())
-            .filter(Boolean);
-          const language = languageInput.value.trim().toLowerCase();
-          const res = await apiFetch("/api/videos/" + video.id + "/update", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: titleInput.value.trim(), language, topics })
-          });
-          if (res.ok) {
-            refreshAdminView();
-          }
-        });
-        const delBtn = document.createElement("button");
-        delBtn.type = "button";
-        delBtn.className = "ghost";
-        delBtn.textContent = t("action_delete");
-        delBtn.addEventListener("click", async () => {
-          const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
-          if (res.ok) {
-            refreshAdminView();
-          }
-        });
-        actions.appendChild(saveBtn);
-        actions.appendChild(delBtn);
-        row.appendChild(editor);
-        row.appendChild(actions);
-        ui.adminVideosList.appendChild(row);
+        ui.adminVideosList.appendChild(buildAdminVideoRow(video));
       });
     }
 
@@ -4082,82 +5227,7 @@ const ui = {
         return;
       }
       list.forEach((video) => {
-        const row = document.createElement("div");
-        row.className = "channel";
-        const editor = document.createElement("div");
-        editor.className = "form-grid";
-        editor.style.minWidth = "220px";
-        const titleInput = document.createElement("input");
-        titleInput.type = "text";
-        titleInput.value = video.title || "";
-        titleInput.placeholder = t("label_untitled");
-        const topicsInput = document.createElement("input");
-        topicsInput.type = "text";
-        let parsedTopics = [];
-        if (Array.isArray(video.topics)) {
-          parsedTopics = video.topics;
-        } else {
-          try {
-            parsedTopics = video.topics ? JSON.parse(video.topics) : [];
-          } catch (err) {
-            parsedTopics = [];
-          }
-        }
-        topicsInput.value = parsedTopics.join(", ");
-        topicsInput.placeholder = t("upload_topics_placeholder");
-        const languageInput = document.createElement("input");
-        languageInput.type = "text";
-        languageInput.value = (video.language || "");
-        languageInput.placeholder = t("admin_video_language");
-        editor.appendChild(titleInput);
-        editor.appendChild(topicsInput);
-        editor.appendChild(languageInput);
-        row.innerHTML =
-          "<div><div class=\"channel-name\">" +
-          escapeHtml(video.title) +
-          "</div><div class=\"card-meta\">" +
-          escapeHtml(video.channel || "") +
-          " · " +
-          escapeHtml(video.views || 0) +
-          " " +
-          t("label_views") +
-          "</div></div>";
-        const actions = document.createElement("div");
-        actions.className = "channel-actions";
-        const saveBtn = document.createElement("button");
-        saveBtn.type = "button";
-        saveBtn.className = "pill";
-        saveBtn.textContent = t("action_save");
-        saveBtn.addEventListener("click", async () => {
-          const topics = topicsInput.value
-            .split(/[|,]/g)
-            .map((topic) => topic.trim())
-            .filter(Boolean);
-          const language = languageInput.value.trim().toLowerCase();
-          const res = await apiFetch("/api/videos/" + video.id + "/update", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: titleInput.value.trim(), language, topics })
-          });
-          if (res.ok) {
-            fetchAdminVideosPage(adminVideosQuery, true);
-          }
-        });
-        const delBtn = document.createElement("button");
-        delBtn.type = "button";
-        delBtn.className = "ghost";
-        delBtn.textContent = t("action_delete");
-        delBtn.addEventListener("click", async () => {
-          const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
-          if (res.ok) {
-            fetchAdminVideosPage(adminVideosQuery, true);
-          }
-        });
-        actions.appendChild(saveBtn);
-        actions.appendChild(delBtn);
-        row.appendChild(editor);
-        row.appendChild(actions);
-        ui.adminVideosPageList.appendChild(row);
+        ui.adminVideosPageList.appendChild(buildAdminVideoRow(video));
       });
     }
 
@@ -4898,10 +5968,77 @@ const ui = {
       });
     }
 
+    function enforceNoneExclusiveOnSettings(selectedReligions, baseInputs) {
+      const hasNone = selectedReligions.has("none");
+      const hasOther = baseInputs.some((input) => input.checked && input.value !== "none");
+      if (hasNone && hasOther) {
+        selectedReligions.delete("none");
+        baseInputs.forEach((input) => {
+          if (input.value === "none") {
+            input.checked = false;
+          }
+        });
+      }
+      if (selectedReligions.has("none")) {
+        baseInputs.forEach((input) => {
+          if (input.value !== "none") {
+            input.checked = false;
+            selectedReligions.delete(input.value);
+          }
+        });
+        RELIGION_DETAIL_VALUES.forEach((value) => selectedReligions.delete(value));
+      }
+    }
+
+    function renderSettingsReligionDetails(selectedReligions, baseInputs) {
+      if (!ui.settingsReligionsDetail) {
+        return;
+      }
+      const bases = baseInputs
+        .filter((input) => input.checked && input.value !== "none")
+        .map((input) => input.value);
+      const detailValues = collectReligionDetails(bases);
+      const allowedDetails = new Set(detailValues);
+      RELIGION_DETAIL_VALUES.forEach((value) => {
+        if (!allowedDetails.has(value)) {
+          selectedReligions.delete(value);
+        }
+      });
+      ui.settingsReligionsDetail.innerHTML = "";
+      detailValues.forEach((value) => {
+        const label = document.createElement("label");
+        label.className = "pill";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.name = "settings-religion";
+        input.value = value;
+        input.checked = selectedReligions.has(value);
+        input.addEventListener("change", () => {
+          if (input.checked) {
+            selectedReligions.add(value);
+          } else {
+            selectedReligions.delete(value);
+          }
+        });
+        const text = document.createElement("span");
+        text.textContent = t(RELIGION_LABEL_KEYS[value] || value);
+        label.appendChild(input);
+        label.appendChild(text);
+        ui.settingsReligionsDetail.appendChild(label);
+      });
+      const hasDetails = detailValues.length > 0;
+      ui.settingsReligionsDetail.classList.toggle("hidden", !hasDetails);
+      if (ui.settingsReligionsHint) {
+        ui.settingsReligionsHint.style.display = hasDetails ? "none" : "block";
+      }
+    }
+
     function renderSettingsReligions(selectedReligions) {
-      if (!ui.settingsReligions) return;
-      const inputs = ui.settingsReligions.querySelectorAll("input[name='settings-religion']");
-      inputs.forEach((input) => {
+      if (!ui.settingsReligionsBase) {
+        return;
+      }
+      const baseInputs = Array.from(ui.settingsReligionsBase.querySelectorAll("input[name='settings-religion']"));
+      baseInputs.forEach((input) => {
         input.checked = selectedReligions.has(input.value);
         input.onchange = () => {
           if (input.checked) {
@@ -4909,8 +6046,12 @@ const ui = {
           } else {
             selectedReligions.delete(input.value);
           }
+          enforceNoneExclusiveOnSettings(selectedReligions, baseInputs);
+          renderSettingsReligionDetails(selectedReligions, baseInputs);
         };
       });
+      enforceNoneExclusiveOnSettings(selectedReligions, baseInputs);
+      renderSettingsReligionDetails(selectedReligions, baseInputs);
     }
 
     let languageControlsReady = false;
@@ -5407,6 +6548,9 @@ const ui = {
     if (ui.settingsBar) {
       ui.settingsBar.addEventListener("click", openSettings);
     }
+    if (ui.gamesOpen) {
+      ui.gamesOpen.addEventListener("click", () => navigateTo("/games"));
+    }
     if (ui.requestForm) {
       ui.requestForm.addEventListener("submit", sendRequest);
     }
@@ -5434,8 +6578,11 @@ const ui = {
     ui.settingsTopicSearch.addEventListener("input", () => {
       renderTopicsList(settingsSelectedTopics);
     });
-    ui.settingsChannelSearch.addEventListener("input", () => {
-      fetchSettingsChannels(ui.settingsChannelSearch.value.trim());
+    const debouncedSettingsChannelSearch = debounce((value) => {
+      fetchSettingsChannels(String(value || "").trim());
+    }, 300);
+    ui.settingsChannelSearch.addEventListener("input", (event) => {
+      debouncedSettingsChannelSearch(event.target.value);
     });
     ui.channelBack.addEventListener("click", () => {
       currentChannel = null;
@@ -5491,9 +6638,14 @@ const ui = {
     }
     ui.channelsPageOpen.addEventListener("click", () => navigateTo("/channels"));
     ui.channelsBack.addEventListener("click", () => navigateTo("/"));
-    ui.channelsSearch.addEventListener("input", () =>
-      navigateTo("/channels?q=" + encodeURIComponent(ui.channelsSearch.value.trim()), { replace: true })
-    );
+    const debouncedChannelsSearch = debounce((value) => {
+      const query = String(value || "").trim();
+      const path = query ? "/channels?q=" + encodeURIComponent(query) : "/channels";
+      navigateTo(path, { replace: true });
+    }, 300);
+    ui.channelsSearch.addEventListener("input", (event) => {
+      debouncedChannelsSearch(event.target.value);
+    });
     ui.channelsSort.addEventListener("change", applyChannelsFilters);
     ui.channelsFilterSubscribed.addEventListener("change", applyChannelsFilters);
     ui.channelsLoadMore.addEventListener("click", () => {
@@ -5505,9 +6657,14 @@ const ui = {
       ui.adminVideosBack.addEventListener("click", () => navigateTo("/"));
     }
     if (ui.adminVideosSearchPage) {
-      ui.adminVideosSearchPage.addEventListener("input", () =>
-        navigateTo("/admin/videos?q=" + encodeURIComponent(ui.adminVideosSearchPage.value.trim()), { replace: true })
-      );
+      const debouncedAdminVideosSearch = debounce((value) => {
+        const query = String(value || "").trim();
+        const path = query ? "/admin/videos?q=" + encodeURIComponent(query) : "/admin/videos";
+        navigateTo(path, { replace: true });
+      }, 300);
+      ui.adminVideosSearchPage.addEventListener("input", (event) => {
+        debouncedAdminVideosSearch(event.target.value);
+      });
     }
     if (ui.adminVideosLoadMore) {
       ui.adminVideosLoadMore.addEventListener("click", () => {
@@ -5535,16 +6692,24 @@ const ui = {
       ui.adminImportsBack.addEventListener("click", () => navigateTo("/"));
     }
     if (ui.adminUsersSearchPage) {
-      ui.adminUsersSearchPage.addEventListener("input", () =>
-        navigateTo("/admin/users?q=" + encodeURIComponent(ui.adminUsersSearchPage.value.trim()), { replace: true })
-      );
+      const debouncedAdminUsersSearch = debounce((value) => {
+        const query = String(value || "").trim();
+        const path = query ? "/admin/users?q=" + encodeURIComponent(query) : "/admin/users";
+        navigateTo(path, { replace: true });
+      }, 300);
+      ui.adminUsersSearchPage.addEventListener("input", (event) => {
+        debouncedAdminUsersSearch(event.target.value);
+      });
     }
     if (ui.adminChannelsSearchPage) {
-      ui.adminChannelsSearchPage.addEventListener("input", () =>
-        navigateTo("/admin/channels?q=" + encodeURIComponent(ui.adminChannelsSearchPage.value.trim()), {
-          replace: true
-        })
-      );
+      const debouncedAdminChannelsSearch = debounce((value) => {
+        const query = String(value || "").trim();
+        const path = query ? "/admin/channels?q=" + encodeURIComponent(query) : "/admin/channels";
+        navigateTo(path, { replace: true });
+      }, 300);
+      ui.adminChannelsSearchPage.addEventListener("input", (event) => {
+        debouncedAdminChannelsSearch(event.target.value);
+      });
     }
     if (ui.adminUsersLoadMore) {
       ui.adminUsersLoadMore.addEventListener("click", () => {
@@ -5584,19 +6749,28 @@ const ui = {
       ui.adminExportSqlPage.addEventListener("click", () => exportSql(ui.adminImportMessagePage));
     }
     if (ui.adminUserSearch) {
-      ui.adminUserSearch.addEventListener("input", () =>
-        fetchAdminUsersRemote(ui.adminUserSearch.value.trim(), "")
-      );
+      const debouncedAdminUserSearch = debounce((value) => {
+        fetchAdminUsersRemote(String(value || "").trim(), "");
+      }, 300);
+      ui.adminUserSearch.addEventListener("input", (event) => {
+        debouncedAdminUserSearch(event.target.value);
+      });
     }
     if (ui.adminChannelSearch) {
-      ui.adminChannelSearch.addEventListener("input", () =>
-        fetchAdminUsersRemote(ui.adminChannelSearch.value.trim(), "artist")
-      );
+      const debouncedAdminChannelSearch = debounce((value) => {
+        fetchAdminUsersRemote(String(value || "").trim(), "artist");
+      }, 300);
+      ui.adminChannelSearch.addEventListener("input", (event) => {
+        debouncedAdminChannelSearch(event.target.value);
+      });
     }
     if (ui.adminVideoSearch) {
-      ui.adminVideoSearch.addEventListener("input", () =>
-        fetchAdminVideosRemote(ui.adminVideoSearch.value.trim())
-      );
+      const debouncedAdminVideoSearch = debounce((value) => {
+        fetchAdminVideosRemote(String(value || "").trim());
+      }, 300);
+      ui.adminVideoSearch.addEventListener("input", (event) => {
+        debouncedAdminVideoSearch(event.target.value);
+      });
     }
     if (ui.adminTabs && ui.adminTabs.length) {
       ui.adminTabs.forEach((button) => {
@@ -5608,6 +6782,10 @@ const ui = {
     ui.registerForm.addEventListener("submit", handleRegister);
     ui.verifyResend.addEventListener("click", resendVerification);
     ui.uploadForm.addEventListener("submit", handleUpload);
+    if (ui.uploadReligion) {
+      ui.uploadReligion.addEventListener("change", updateUploadReligionDetails);
+      updateUploadReligionDetails();
+    }
     ui.settingsForm.addEventListener("submit", saveSettings);
     ui.settingsAuthForm.addEventListener("submit", confirmSettingsAuth);
     ui.profileForm.addEventListener("submit", saveProfile);
@@ -5666,6 +6844,20 @@ const ui = {
           closeModal(target);
         }
       });
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!target) {
+        return;
+      }
+      const view = document.body.getAttribute("data-view") || "";
+      if (view.startsWith("admin") && !target.closest(".admin-section")) {
+        closeAdminSections();
+      }
+      if (!target.closest(".admin-video-row")) {
+        closeAdminVideoDetails();
+      }
     });
 
     document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -5793,6 +6985,11 @@ const ui = {
         setPageView("request");
         return;
       }
+      if (path === "/games") {
+        setPageView("games");
+        initGames();
+        return;
+      }
       if (path.startsWith("/admin") && !currentUser) {
         setPageView("feed");
         return;
@@ -5869,7 +7066,21 @@ const ui = {
       if (window.location.protocol !== "https:" && window.location.protocol !== "http:") {
         return;
       }
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => {
+          if (reg.active) {
+            reg.active.postMessage({ type: "CACHE_OFFLINE" });
+          }
+          navigator.serviceWorker.ready
+            .then((readyReg) => {
+              if (readyReg.active) {
+                readyReg.active.postMessage({ type: "CACHE_OFFLINE" });
+              }
+            })
+            .catch(() => {});
+        })
+        .catch(() => {});
     }
 
     window.addEventListener("popstate", handleRoute);

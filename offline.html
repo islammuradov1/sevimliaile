@@ -10,8 +10,9 @@
         --card: #ffffff;
         --ink: #0f172a;
         --muted: #506078;
-        --accent: #0d6efd;
+        --accent: #ff6b6b;
         --success: #22c55e;
+        --sparkle: #ffd166;
         --shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
         --radius-lg: 26px;
         --radius-md: 18px;
@@ -27,7 +28,7 @@
       body {
         margin: 0;
         min-height: 100vh;
-        background: radial-gradient(circle at top, #e9f3ff 0%, #f5f7fb 40%, #eef7f1 100%);
+        background: radial-gradient(circle at top, #e7f7ff 0%, #fff6f6 45%, #f0fff3 100%);
         color: var(--ink);
         font-family: var(--font-base);
         display: grid;
@@ -52,6 +53,19 @@
         font-family: var(--font-title);
         font-size: clamp(1.4rem, 2vw, 1.9rem);
         font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .brand-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        object-fit: cover;
+        background: #fff;
       }
 
       .lang-select {
@@ -96,12 +110,12 @@
       }
 
       .game-card {
-        background: linear-gradient(135deg, #f8fbff, #fff6f0);
+        background: linear-gradient(135deg, #fff5d9, #ffeef7);
         border-radius: var(--radius-md);
         padding: 16px;
         display: grid;
         gap: 14px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
+        border: 2px solid rgba(255, 214, 102, 0.5);
       }
 
       .game-head h2 {
@@ -126,12 +140,16 @@
         border-radius: var(--radius-md);
         padding: 14px 10px;
         font-family: var(--font-title);
-        font-size: 1rem;
+        font-size: 2.1rem;
         cursor: pointer;
-        min-height: 68px;
+        min-height: 80px;
         color: #102a43;
+        display: grid;
+        place-items: center;
+        gap: 4px;
         box-shadow: inset 0 0 0 2px rgba(15, 23, 42, 0.08);
         transition: transform 0.15s ease, box-shadow 0.15s ease;
+        touch-action: none;
       }
 
       .tile:hover {
@@ -140,7 +158,7 @@
       }
 
       .tile.selected {
-        box-shadow: inset 0 0 0 3px var(--accent), 0 8px 18px rgba(13, 110, 253, 0.2);
+        box-shadow: inset 0 0 0 3px var(--accent), 0 8px 18px rgba(255, 107, 107, 0.25);
       }
 
       .tile.matched {
@@ -148,20 +166,39 @@
         transform: translateY(-3px);
       }
 
+      .tile.dragging {
+        transform: scale(1.05) rotate(-1.5deg);
+        box-shadow: inset 0 0 0 3px var(--accent), 0 14px 26px rgba(255, 107, 107, 0.25);
+      }
+
+      .tile.target {
+        box-shadow: inset 0 0 0 3px var(--sparkle), 0 10px 20px rgba(255, 209, 102, 0.3);
+      }
+
+      .tile-emoji {
+        font-size: 2.2rem;
+        line-height: 1;
+      }
+
+      .tile-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+
       .tile[data-fruit="apple"] {
-        background: #fde2e2;
+        background: linear-gradient(135deg, #ffdede, #fff3e0);
       }
 
       .tile[data-fruit="banana"] {
-        background: #fff3c4;
+        background: linear-gradient(135deg, #fff4bf, #fffbe8);
       }
 
       .tile[data-fruit="strawberry"] {
-        background: #ffe4f1;
+        background: linear-gradient(135deg, #ffd6ea, #ffeef7);
       }
 
       .tile[data-fruit="orange"] {
-        background: #ffe6c9;
+        background: linear-gradient(135deg, #ffe2c7, #fff1dd);
       }
 
       .game-status {
@@ -186,13 +223,13 @@
       }
 
       .game-reset {
-        background: var(--accent);
+        background: linear-gradient(135deg, #ff8a65, #ff6b6b);
         color: #fff;
       }
 
       .game-retry {
-        background: #e2e8f0;
-        color: var(--ink);
+        background: linear-gradient(135deg, #ffe9a8, #ffd166);
+        color: #513100;
       }
 
       footer {
@@ -216,7 +253,10 @@
   <body>
     <div class="shell">
       <header>
-        <div class="brand" id="brand">Sevimli Aile</div>
+        <div class="brand" id="brand">
+          <img src="logo.png" alt="Sevimli Aile logo" class="brand-logo">
+          <span>Sevimli Aile</span>
+        </div>
         <div class="lang-select">
           <label for="lang" id="lang-label">Language</label>
           <select id="lang" name="lang">
@@ -258,118 +298,118 @@
       (function () {
         const translations = {
           en: {
-            language_label: "Language",
-            offline_title: "You're offline",
-            offline_message: "No internet right now. Come back when you're online.",
-            offline_hint: "We saved a small game so kids can keep learning.",
-            offline_footer: "We'll reconnect when you're back online.",
-            game_title: "Fruit Match",
-            game_instruction: "Swap neighbors to make 3 in a row.",
-            game_status_ready: "Pick a fruit, then swap with a neighbor.",
-            game_status_win: "Yeehoo! You got it!",
-            game_status_try: "Almost! Try another swap.",
-            game_status_adjacent: "Choose a neighbor fruit.",
-            game_shuffle: "Shuffle",
-            game_retry: "Try again",
-            fruit_apple: "Apple",
-            fruit_banana: "Banana",
-            fruit_strawberry: "Strawberry",
-            fruit_orange: "Orange"
+            language_label: "Language 🌍",
+            offline_title: "You're offline 📴",
+            offline_message: "No internet right now. Come back when you're online 🌈.",
+            offline_hint: "We saved a tiny emoji game for kids 🍓🍌🍎.",
+            offline_footer: "We'll reconnect when you're back online ✨.",
+            game_title: "Fruit Match 🍓",
+            game_instruction: "Drag a fruit onto a neighbor to make 3 in a row 🍎🍎🍎.",
+            game_status_ready: "Tap a fruit, then swap with a neighbor 👆",
+            game_status_win: "Yeehoo! You got it! 🎉",
+            game_status_try: "Almost! Try another swap ✨",
+            game_status_adjacent: "Choose a neighbor fruit 🙌",
+            game_shuffle: "Shuffle 🔁",
+            game_retry: "Try again 💫",
+            fruit_apple: "Apple 🍎",
+            fruit_banana: "Banana 🍌",
+            fruit_strawberry: "Strawberry 🍓",
+            fruit_orange: "Orange 🍊"
           },
           ru: {
-            language_label: "Язык",
-            offline_title: "Нет интернета",
-            offline_message: "Сейчас нет связи. Возвращайтесь, когда интернет появится.",
-            offline_hint: "Мы сохранили небольшую игру для детей.",
-            offline_footer: "Мы подключимся, когда интернет вернется.",
-            game_title: "Фруктовое совпадение",
-            game_instruction: "Поменяйте соседние фрукты, чтобы собрать 3 в ряд.",
-            game_status_ready: "Выберите фрукт и поменяйте с соседом.",
-            game_status_win: "Ура! Получилось!",
-            game_status_try: "Почти! Попробуйте другой обмен.",
-            game_status_adjacent: "Выберите соседний фрукт.",
-            game_shuffle: "Перемешать",
-            game_retry: "Попробовать снова",
-            fruit_apple: "Яблоко",
-            fruit_banana: "Банан",
-            fruit_strawberry: "Клубника",
-            fruit_orange: "Апельсин"
+            language_label: "Язык 🌍",
+            offline_title: "Нет интернета 📴",
+            offline_message: "Сейчас нет связи. Возвращайтесь, когда интернет появится 🌈.",
+            offline_hint: "Мы сохранили маленькую игру с эмодзи 🍓🍌🍎.",
+            offline_footer: "Мы подключимся, когда интернет вернется ✨.",
+            game_title: "Фруктовое совпадение 🍓",
+            game_instruction: "Перетащите фрукт к соседу, чтобы собрать 3 в ряд 🍎🍎🍎.",
+            game_status_ready: "Выберите фрукт и поменяйте с соседом 👆",
+            game_status_win: "Ура! Получилось! 🎉",
+            game_status_try: "Почти! Попробуйте другой обмен ✨",
+            game_status_adjacent: "Выберите соседний фрукт 🙌",
+            game_shuffle: "Перемешать 🔁",
+            game_retry: "Попробовать снова 💫",
+            fruit_apple: "Яблоко 🍎",
+            fruit_banana: "Банан 🍌",
+            fruit_strawberry: "Клубника 🍓",
+            fruit_orange: "Апельсин 🍊"
           },
           zh: {
-            language_label: "语言",
-            offline_title: "暂无网络",
-            offline_message: "现在没有网络，联网后再试试。",
-            offline_hint: "这里有个小小配对游戏。",
-            offline_footer: "网络恢复后我们会自动连接。",
-            game_title: "水果配对",
-            game_instruction: "交换相邻水果，凑成三个一排。",
-            game_status_ready: "先选一个水果，再和旁边的交换。",
-            game_status_win: "太棒了！你成功了！",
-            game_status_try: "差一点，再试一次。",
-            game_status_adjacent: "请选择相邻的水果。",
-            game_shuffle: "重新排列",
-            game_retry: "再试一次",
-            fruit_apple: "苹果",
-            fruit_banana: "香蕉",
-            fruit_strawberry: "草莓",
-            fruit_orange: "橙子"
+            language_label: "语言 🌍",
+            offline_title: "暂无网络 📴",
+            offline_message: "现在没有网络，联网后再试试 🌈。",
+            offline_hint: "这里有个小小的表情游戏 🍓🍌🍎。",
+            offline_footer: "网络恢复后我们会自动连接 ✨。",
+            game_title: "水果配对 🍓",
+            game_instruction: "把水果拖到相邻位置，凑成三个一排 🍎🍎🍎。",
+            game_status_ready: "先选一个水果，再和旁边的交换 👆",
+            game_status_win: "太棒了！你成功了！🎉",
+            game_status_try: "差一点，再试一次 ✨",
+            game_status_adjacent: "请选择相邻的水果 🙌",
+            game_shuffle: "重新排列 🔁",
+            game_retry: "再试一次 💫",
+            fruit_apple: "苹果 🍎",
+            fruit_banana: "香蕉 🍌",
+            fruit_strawberry: "草莓 🍓",
+            fruit_orange: "橙子 🍊"
           },
           tr: {
-            language_label: "Dil",
-            offline_title: "Baglanti yok",
-            offline_message: "Su anda internet yok. Online olunca tekrar gel.",
-            offline_hint: "Cocuklar icin kucuk bir oyun hazir.",
-            offline_footer: "Internet gelince tekrar baglanacagiz.",
-            game_title: "Meyve Eslestirme",
-            game_instruction: "Yanyana meyveleri degistir, 3'lu sirayi tamamla.",
-            game_status_ready: "Bir meyve sec, sonra yandakiyle degistir.",
-            game_status_win: "Yeehoo! Basardin!",
-            game_status_try: "Yaklasti! Baska bir degisim dene.",
-            game_status_adjacent: "Yandaki bir meyve sec.",
-            game_shuffle: "Karistir",
-            game_retry: "Tekrar dene",
-            fruit_apple: "Elma",
-            fruit_banana: "Muz",
-            fruit_strawberry: "Cilek",
-            fruit_orange: "Portakal"
+            language_label: "Dil 🌍",
+            offline_title: "Baglanti yok 📴",
+            offline_message: "Su anda internet yok. Online olunca tekrar gel 🌈.",
+            offline_hint: "Cocuklar icin emoji dolu bir oyun var 🍓🍌🍎.",
+            offline_footer: "Internet gelince tekrar baglanacagiz ✨.",
+            game_title: "Meyve Eslestirme 🍓",
+            game_instruction: "Meyveyi yandaki komsuya surukle, 3'lu sirayi yap 🍎🍎🍎.",
+            game_status_ready: "Bir meyve sec, sonra yandakiyle degistir 👆",
+            game_status_win: "Yeehoo! Basardin! 🎉",
+            game_status_try: "Yaklasti! Baska bir degisim dene ✨",
+            game_status_adjacent: "Yandaki bir meyve sec 🙌",
+            game_shuffle: "Karistir 🔁",
+            game_retry: "Tekrar dene 💫",
+            fruit_apple: "Elma 🍎",
+            fruit_banana: "Muz 🍌",
+            fruit_strawberry: "Cilek 🍓",
+            fruit_orange: "Portakal 🍊"
           },
           az: {
-            language_label: "Dil",
-            offline_title: "Internet yoxdur",
-            offline_message: "Hazirda internet yoxdur. Online olanda tekrar gel.",
-            offline_hint: "Usaqlar ucun balaca oyun hazirdir.",
-            offline_footer: "Internet qayidanda yeniden qoşulariq.",
-            game_title: "Meyve uygunlasdir",
-            game_instruction: "Yan-yana meyveleri deyis, 3-u bir sirada duzelt.",
-            game_status_ready: "Bir meyve sec, sonra qonsusu ile deyis.",
-            game_status_win: "Yeehoo! Duz eladin!",
-            game_status_try: "Yaxinlasdin! Basqa bir deyis dene.",
-            game_status_adjacent: "Qonsu meyve sec.",
-            game_shuffle: "Qarisdir",
-            game_retry: "Tekrar dene",
-            fruit_apple: "Alma",
-            fruit_banana: "Banan",
-            fruit_strawberry: "Ciyelek",
-            fruit_orange: "Portagal"
+            language_label: "Dil 🌍",
+            offline_title: "Internet yoxdur 📴",
+            offline_message: "Hazirda internet yoxdur. Online olanda tekrar gel 🌈.",
+            offline_hint: "Usaqlar ucun emoji oyunumuz var 🍓🍌🍎.",
+            offline_footer: "Internet qayidanda yeniden qoşulariq ✨.",
+            game_title: "Meyve uygunlasdir 🍓",
+            game_instruction: "Meyveni qonshuya surukle, 3-u bir sirada duzelt 🍎🍎🍎.",
+            game_status_ready: "Bir meyve sec, sonra qonsusu ile deyis 👆",
+            game_status_win: "Yeehoo! Duz eladin! 🎉",
+            game_status_try: "Yaxinlasdin! Basqa bir deyis dene ✨",
+            game_status_adjacent: "Qonsu meyve sec 🙌",
+            game_shuffle: "Qarisdir 🔁",
+            game_retry: "Tekrar dene 💫",
+            fruit_apple: "Alma 🍎",
+            fruit_banana: "Banan 🍌",
+            fruit_strawberry: "Ciyelek 🍓",
+            fruit_orange: "Portagal 🍊"
           },
           ar: {
-            language_label: "اللغة",
-            offline_title: "لا يوجد انترنت",
-            offline_message: "لا يوجد اتصال حاليا. عد عند توفر الانترنت.",
-            offline_hint: "لدينا لعبة صغيرة للاطفال حتى يستمتعوا.",
-            offline_footer: "سنعود للاتصال عندما يتوفر الانترنت.",
-            game_title: "مطابقة الفواكه",
-            game_instruction: "بدل بين فاكهتين متجاورتين لتكوين ثلاثة في صف.",
-            game_status_ready: "اختر فاكهة ثم بدّلها مع الجار.",
-            game_status_win: "ياي! لقد نجحت!",
-            game_status_try: "قريب جدا! جرب تبديلا اخر.",
-            game_status_adjacent: "اختر فاكهة مجاورة.",
-            game_shuffle: "اعادة ترتيب",
-            game_retry: "حاول مرة اخرى",
-            fruit_apple: "تفاح",
-            fruit_banana: "موز",
-            fruit_strawberry: "فراولة",
-            fruit_orange: "برتقال"
+            language_label: "اللغة 🌍",
+            offline_title: "لا يوجد انترنت 📴",
+            offline_message: "لا يوجد اتصال حاليا. عد عند توفر الانترنت 🌈.",
+            offline_hint: "لدينا لعبة ايموجي لطيفة للاطفال 🍓🍌🍎.",
+            offline_footer: "سنعود للاتصال عندما يتوفر الانترنت ✨.",
+            game_title: "مطابقة الفواكه 🍓",
+            game_instruction: "اسحب الفاكهة إلى جارها لتكوين ثلاثة في صف 🍎🍎🍎.",
+            game_status_ready: "اختر فاكهة ثم بدّلها مع الجار 👆",
+            game_status_win: "ياي! لقد نجحت! 🎉",
+            game_status_try: "قريب جدا! جرب تبديلا اخر ✨",
+            game_status_adjacent: "اختر فاكهة مجاورة 🙌",
+            game_shuffle: "اعادة ترتيب 🔁",
+            game_retry: "حاول مرة اخرى 💫",
+            fruit_apple: "تفاح 🍎",
+            fruit_banana: "موز 🍌",
+            fruit_strawberry: "فراولة 🍓",
+            fruit_orange: "برتقال 🍊"
           }
         };
 
@@ -382,8 +422,13 @@
         const state = {
           grid: [],
           selected: null,
-          matched: []
+          matched: [],
+          dragging: null,
+          dragTarget: null,
+          dragMoved: false
         };
+        let activePointerId = null;
+        let skipClick = false;
 
         const els = {
           lang: document.getElementById("lang"),
@@ -470,6 +515,59 @@
           state.grid[b] = temp;
         }
 
+        function setDragTarget(next) {
+          if (state.dragTarget === next) {
+            return;
+          }
+          if (state.dragTarget !== null) {
+            const prev = els.gameGrid.querySelector(".tile[data-index='" + state.dragTarget + "']");
+            if (prev) {
+              prev.classList.remove("target");
+            }
+          }
+          state.dragTarget = next;
+          if (next !== null) {
+            const nextTile = els.gameGrid.querySelector(".tile[data-index='" + next + "']");
+            if (nextTile) {
+              nextTile.classList.add("target");
+            }
+          }
+        }
+
+        function clearDragState() {
+          if (state.dragging !== null) {
+            const dragTile = els.gameGrid.querySelector(".tile[data-index='" + state.dragging + "']");
+            if (dragTile) {
+              dragTile.classList.remove("dragging");
+            }
+          }
+          if (state.dragTarget !== null) {
+            const targetTile = els.gameGrid.querySelector(".tile[data-index='" + state.dragTarget + "']");
+            if (targetTile) {
+              targetTile.classList.remove("target");
+            }
+          }
+          state.dragging = null;
+          state.dragTarget = null;
+          state.dragMoved = false;
+          activePointerId = null;
+        }
+
+        function applySwap(a, b) {
+          swap(a, b);
+          const match = findMatch();
+          if (match.length) {
+            state.matched = match;
+            els.gameStatus.textContent = t("game_status_win");
+          } else {
+            swap(a, b);
+            state.matched = [];
+            els.gameStatus.textContent = t("game_status_try");
+          }
+          state.selected = null;
+          renderGrid();
+        }
+
         function handleSelect(index) {
           if (state.selected === null) {
             state.selected = index;
@@ -487,35 +585,109 @@
             renderGrid();
             return;
           }
-          swap(state.selected, index);
-          const match = findMatch();
-          if (match.length) {
-            state.matched = match;
-            els.gameStatus.textContent = t("game_status_win");
-          } else {
-            swap(state.selected, index);
-            state.matched = [];
-            els.gameStatus.textContent = t("game_status_try");
+          applySwap(state.selected, index);
+        }
+
+        function handlePointerDown(event, index) {
+          if (activePointerId !== null) {
+            return;
           }
-          state.selected = null;
-          renderGrid();
+          activePointerId = event.pointerId;
+          state.dragging = index;
+          state.dragMoved = false;
+          const tile = event.currentTarget;
+          tile.classList.add("dragging");
+          tile.setPointerCapture(event.pointerId);
+        }
+
+        function handlePointerMove(event) {
+          if (activePointerId !== event.pointerId || state.dragging === null) {
+            return;
+          }
+          state.dragMoved = true;
+          const hit = document.elementFromPoint(event.clientX, event.clientY);
+          const tile = hit ? hit.closest(".tile") : null;
+          if (!tile) {
+            setDragTarget(null);
+            return;
+          }
+          const targetIndex = Number(tile.dataset.index);
+          if (!Number.isFinite(targetIndex) || targetIndex === state.dragging) {
+            setDragTarget(null);
+            return;
+          }
+          if (!isAdjacent(state.dragging, targetIndex)) {
+            setDragTarget(null);
+            return;
+          }
+          setDragTarget(targetIndex);
+        }
+
+        function handlePointerUp(event, index) {
+          if (activePointerId !== event.pointerId) {
+            return;
+          }
+          const origin = state.dragging;
+          const target = state.dragTarget;
+          const moved = state.dragMoved;
+          clearDragState();
+          if (target !== null && origin !== null) {
+            skipClick = true;
+            applySwap(origin, target);
+            return;
+          }
+          if (!moved && index !== null) {
+            handleSelect(index);
+          }
+        }
+
+        function handlePointerCancel(event) {
+          if (activePointerId !== event.pointerId) {
+            return;
+          }
+          clearDragState();
         }
 
         function renderGrid() {
           els.gameGrid.innerHTML = "";
           state.grid.forEach((fruit, index) => {
+            const emojiMap = {
+              apple: "🍎",
+              banana: "🍌",
+              strawberry: "🍓",
+              orange: "🍊"
+            };
+            const emoji = emojiMap[fruit] || "🍓";
             const button = document.createElement("button");
             button.type = "button";
             button.className = "tile";
-            button.textContent = t("fruit_" + fruit);
+            button.setAttribute("aria-label", t("fruit_" + fruit));
             button.dataset.fruit = fruit;
+            button.dataset.index = String(index);
+            button.innerHTML =
+              "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
+              emoji +
+              "</span><span class=\"tile-label\">" +
+              t("fruit_" + fruit) +
+              "</span>";
             if (state.selected === index) {
               button.classList.add("selected");
             }
             if (state.matched.includes(index)) {
               button.classList.add("matched");
             }
-            button.addEventListener("click", () => handleSelect(index));
+            button.addEventListener("pointerdown", (event) => handlePointerDown(event, index));
+            button.addEventListener("pointermove", handlePointerMove);
+            button.addEventListener("pointerup", (event) => handlePointerUp(event, index));
+            button.addEventListener("pointercancel", handlePointerCancel);
+            button.addEventListener("click", (event) => {
+              if (skipClick) {
+                skipClick = false;
+                event.preventDefault();
+                return;
+              }
+              handleSelect(index);
+            });
             els.gameGrid.appendChild(button);
           });
         }

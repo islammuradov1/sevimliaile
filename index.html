@@ -44,6 +44,14 @@
         </div>
         <div class="topbar-center"></div>
         <div class="topbar-right">
+          <div class="account-chip" id="account-chip" aria-live="polite">
+            <div class="account-avatar" id="account-avatar">K</div>
+            <div class="account-meta">
+              <div class="account-name" id="account-name">Guest</div>
+              <div class="account-plan" id="account-plan">Not signed in</div>
+            </div>
+          </div>
+          <button class="pill icon-button" id="games-open" type="button" aria-label="Games"></button>
           <button class="pill icon-button" id="settings-bar" type="button" aria-label="Settings (pro)">
             Settings
           </button>
@@ -59,13 +67,6 @@
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <aside class="action-drawer" id="action-drawer" aria-hidden="true">
       <div class="drawer-head">
-        <div class="account-chip" id="account-chip" aria-live="polite">
-          <div class="account-avatar" id="account-avatar">K</div>
-          <div class="account-meta">
-            <div class="account-name" id="account-name">Guest</div>
-            <div class="account-plan" id="account-plan">Not signed in</div>
-          </div>
-        </div>
         <button class="pill icon-button" id="drawer-close" type="button" aria-label="Close menu">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M18 6 6 18m0-12 12 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -484,6 +485,55 @@
           </form>
         </section>
 
+        <section class="games-view hidden" id="games-view" aria-hidden="true">
+          <div class="section-head games-head">
+            <div>
+              <h2 data-i18n="games_title">Games</h2>
+              <p class="card-meta" data-i18n="games_subtitle">Quick emoji games for kids.</p>
+            </div>
+            <div class="games-brand">
+              <img src="logo.png" alt="Sevimli Aile logo">
+            </div>
+          </div>
+          <div class="games-grid">
+            <article class="game-card" aria-labelledby="game-fruit-title">
+              <div class="game-head">
+                <h3 id="game-fruit-title" data-i18n="games_fruit_title">Fruit Match</h3>
+                <p class="card-meta" data-i18n="games_fruit_instruction">Swap neighbors to make 3 in a row.</p>
+              </div>
+              <div class="game-grid grid-3" id="games-fruit-grid" role="grid" data-i18n-aria="games_fruit_aria"></div>
+              <div class="game-status" id="games-fruit-status" role="status" aria-live="polite"></div>
+              <div class="game-actions">
+                <button class="ghost" id="games-fruit-shuffle" type="button" data-i18n="games_shuffle">Shuffle</button>
+                <button class="pill" id="games-fruit-retry" type="button" data-i18n="games_try_again">Try again</button>
+              </div>
+            </article>
+            <article class="game-card" aria-labelledby="game-memory-title">
+              <div class="game-head">
+                <h3 id="game-memory-title" data-i18n="games_memory_title">Memory Flip</h3>
+                <p class="card-meta" data-i18n="games_memory_instruction">Flip two cards to find matching fruits.</p>
+              </div>
+              <div class="game-grid grid-4" id="games-memory-grid" role="grid" data-i18n-aria="games_memory_aria"></div>
+              <div class="game-status" id="games-memory-status" role="status" aria-live="polite"></div>
+              <div class="game-actions">
+                <button class="ghost" id="games-memory-reset" type="button" data-i18n="games_memory_reset">Restart</button>
+              </div>
+            </article>
+            <article class="game-card" aria-labelledby="game-find-title">
+              <div class="game-head">
+                <h3 id="game-find-title" data-i18n="games_find_title">Find the Fruit</h3>
+                <p class="card-meta" data-i18n="games_find_instruction">Tap the fruit we ask for.</p>
+              </div>
+              <div class="game-prompt" id="games-find-prompt"></div>
+              <div class="game-grid grid-3" id="games-find-grid" role="grid" data-i18n-aria="games_find_aria"></div>
+              <div class="game-status" id="games-find-status" role="status" aria-live="polite"></div>
+              <div class="game-actions">
+                <button class="ghost" id="games-find-next" type="button" data-i18n="games_find_next">Next round</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
         <section class="channel-view hidden" id="channel-view" aria-hidden="true">
           <div class="section-head">
             <div class="channel-hero">
@@ -564,17 +614,19 @@
             <option value="turkish" data-i18n="lang_turkish">Turkish</option>
             <option value="arabic" data-i18n="lang_arabic">Arabic</option>
           </select>
-          <label for="upload-religion" data-i18n="upload_religion">Religion</label>
-          <select id="upload-religion" name="upload-religion">
+          <label for="upload-religion" data-i18n="upload_religion">Religions</label>
+          <select id="upload-religion" name="upload-religion" multiple>
             <option value="none" data-i18n="religion_none">No religion</option>
             <option value="islam" data-i18n="religion_islam">Islam</option>
-            <option value="shia" data-i18n="religion_shia">Islam · Shia</option>
             <option value="christian" data-i18n="religion_christian">Christian</option>
             <option value="jews" data-i18n="religion_jews">Jews</option>
             <option value="buddist" data-i18n="religion_buddist">Buddist</option>
           </select>
-          <label for="upload-religion-detail" data-i18n="upload_religion_detail">Religion detail (optional)</label>
-          <input id="upload-religion-detail" name="upload-religion-detail" type="text" placeholder="Shia, Sunni, Catholic..." data-i18n-placeholder="upload_religion_detail_placeholder">
+          <label for="upload-religion-detail" data-i18n="upload_religion_detail">Religion details (optional)</label>
+          <select id="upload-religion-detail" name="upload-religion-detail" multiple></select>
+          <div class="card-meta" id="upload-religion-hint" data-i18n="upload_religion_hint">
+            Select a religion to see subcategories.
+          </div>
           <label for="upload-topics" data-i18n="upload_topics">Topics (comma separated)</label>
           <input id="upload-topics" name="upload-topics" type="text" placeholder="nastya, masha, minecraft" data-i18n-placeholder="upload_topics_placeholder" list="topics-list">
           <datalist id="topics-list"></datalist>
@@ -740,13 +792,18 @@
                 <label class="pill"><input type="radio" name="religion-mode" value="block"> <span data-i18n="settings_religion_block">Hide selected</span></label>
                 <label class="pill"><input type="radio" name="religion-mode" value="off" checked> <span data-i18n="settings_mode_off">Not using</span></label>
               </div>
-              <div class="settings-chips" id="settings-religions">
-                <label class="pill"><input type="checkbox" name="settings-religion" value="none"> <span data-i18n="religion_none">No religion</span></label>
-                <label class="pill"><input type="checkbox" name="settings-religion" value="islam"> <span data-i18n="religion_islam">Islam</span></label>
-                <label class="pill"><input type="checkbox" name="settings-religion" value="shia"> <span data-i18n="religion_shia">Islam · Shia</span></label>
-                <label class="pill"><input type="checkbox" name="settings-religion" value="christian"> <span data-i18n="religion_christian">Christian</span></label>
-                <label class="pill"><input type="checkbox" name="settings-religion" value="jews"> <span data-i18n="religion_jews">Jews</span></label>
-                <label class="pill"><input type="checkbox" name="settings-religion" value="buddist"> <span data-i18n="religion_buddist">Buddist</span></label>
+              <div class="settings-religions" id="settings-religions">
+                <div class="settings-chips settings-religions-base" id="settings-religions-base">
+                  <label class="pill"><input type="checkbox" name="settings-religion" value="none" data-religion-base="true"> <span data-i18n="religion_none">No religion</span></label>
+                  <label class="pill"><input type="checkbox" name="settings-religion" value="islam" data-religion-base="true"> <span data-i18n="religion_islam">Islam</span></label>
+                  <label class="pill"><input type="checkbox" name="settings-religion" value="christian" data-religion-base="true"> <span data-i18n="religion_christian">Christian</span></label>
+                  <label class="pill"><input type="checkbox" name="settings-religion" value="jews" data-religion-base="true"> <span data-i18n="religion_jews">Jews</span></label>
+                  <label class="pill"><input type="checkbox" name="settings-religion" value="buddist" data-religion-base="true"> <span data-i18n="religion_buddist">Buddist</span></label>
+                </div>
+                <div class="settings-chips settings-religions-detail hidden" id="settings-religions-detail"></div>
+                <div class="card-meta settings-religions-hint" id="settings-religions-hint" data-i18n="settings_religion_hint">
+                  Select a religion to see subcategories.
+                </div>
               </div>
             </div>
             <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>

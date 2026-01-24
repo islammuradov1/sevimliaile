@@ -93,22 +93,94 @@ function normalizeLanguages(input) {
     .filter(Boolean);
 }
 
+const RELIGION_BASES = new Set(["none", "islam", "christian", "jews", "buddist"]);
+const RELIGION_DETAIL_BASE = {
+  shia: "islam",
+  sunni: "islam",
+  catholic: "christian",
+  orthodox: "christian",
+  protestant: "christian",
+  jews_orthodox: "jews",
+  jews_conservative: "jews",
+  jews_reform: "jews",
+  buddist_theravada: "buddist",
+  buddist_mahayana: "buddist",
+  buddist_vajrayana: "buddist"
+};
+const RELIGION_DETAILS = new Set(Object.keys(RELIGION_DETAIL_BASE));
+
+function parseList(input) {
+  if (!input) return [];
+  if (Array.isArray(input)) {
+    return input.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+  const raw = String(input || "").trim();
+  if (!raw) return [];
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+      }
+    } catch (err) {
+      return [];
+    }
+  }
+  return raw
+    .split(/[|,]/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function normalizeReligion(input) {
   if (!input || typeof input !== "string") return "none";
   const value = input.trim().toLowerCase();
-  if (["islam", "christian", "jews", "buddist", "none"].includes(value)) return value;
-  if (value === "shia" || value === "sunni") return "islam";
-  return "none";
+  if (RELIGION_BASES.has(value)) return value;
+  return RELIGION_DETAIL_BASE[value] || "none";
 }
 
 function normalizeReligionDetail(religion, detail) {
   if (!detail || typeof detail !== "string") return "";
   const value = detail.trim().toLowerCase();
-  if (religion === "islam" && (value === "shia" || value === "sunni")) return value;
-  if (religion === "christian" && ["catholic", "orthodox", "protestant"].includes(value)) {
-    return value;
+  const base = RELIGION_DETAIL_BASE[value];
+  if (!base) return "";
+  if (!religion || religion === "none") return value;
+  return base === religion ? value : "";
+}
+
+function normalizeReligionList(input) {
+  const values = parseList(input);
+  const result = [];
+  const seen = new Set();
+  let hasNone = false;
+  values.forEach((value) => {
+    const base = normalizeReligion(value);
+    if (base === "none") {
+      hasNone = true;
+      return;
+    }
+    if (!seen.has(base)) {
+      result.push(base);
+      seen.add(base);
+    }
+  });
+  if (!result.length && hasNone) {
+    return ["none"];
   }
-  return "";
+  return result;
+}
+
+function normalizeReligionDetailList(input) {
+  const values = parseList(input);
+  const result = [];
+  const seen = new Set();
+  values.forEach((value) => {
+    const entry = String(value || "").trim().toLowerCase();
+    if (!RELIGION_DETAILS.has(entry) || seen.has(entry)) return;
+    result.push(entry);
+    seen.add(entry);
+  });
+  return result;
 }
 
 function normalizeAllowedReligions(values) {
@@ -117,20 +189,79 @@ function normalizeAllowedReligions(values) {
   const seen = new Set();
   values.forEach((value) => {
     const v = String(value || "").trim().toLowerCase();
-    if (["none", "islam", "shia", "sunni", "christian", "jews", "buddist"].includes(v) && !seen.has(v)) {
+    if ((RELIGION_BASES.has(v) || RELIGION_DETAILS.has(v)) && !seen.has(v)) {
       allowed.push(v);
       seen.add(v);
     }
   });
+  if (allowed.includes("none") && allowed.length > 1) {
+    return allowed.filter((value) => value !== "none");
+  }
   return allowed;
 }
 
-function isReligionAllowed(allowedList, mode, religion, detail) {
+function normalizeReligionArrays(religionsInput, religionDetailsInput, legacyReligion, legacyDetail) {
+  const baseSet = new Set(normalizeReligionList(religionsInput));
+  const detailSet = new Set(normalizeReligionDetailList(religionDetailsInput));
+  const legacyBase = normalizeReligion(String(legacyReligion || ""));
+  if (legacyBase) {
+    baseSet.add(legacyBase);
+  }
+  const legacyDetailValue = normalizeReligionDetail(
+    legacyBase,
+    legacyDetail || legacyReligion
+  );
+  if (legacyDetailValue) {
+    detailSet.add(legacyDetailValue);
+  }
+  detailSet.forEach((detail) => {
+    const base = RELIGION_DETAIL_BASE[detail];
+    if (base) {
+      baseSet.add(base);
+    }
+  });
+  if (baseSet.has("none") && baseSet.size > 1) {
+    baseSet.delete("none");
+  }
+  if (baseSet.has("none")) {
+    detailSet.clear();
+  }
+  let bases = Array.from(baseSet);
+  if (!bases.length) {
+    bases = ["none"];
+  }
+  const details = Array.from(detailSet);
+  let legacyBaseFinal = bases[0] || "none";
+  let legacyDetailFinal = "";
+  for (const detail of details) {
+    const detailBase = RELIGION_DETAIL_BASE[detail];
+    if (!detailBase) continue;
+    if (legacyBaseFinal === "none" || legacyBaseFinal === detailBase) {
+      legacyDetailFinal = detail;
+      if (legacyBaseFinal === "none") {
+        legacyBaseFinal = detailBase;
+      }
+      break;
+    }
+  }
+  if (!legacyDetailFinal && legacyDetail) {
+    legacyDetailFinal = normalizeReligionDetail(legacyBaseFinal, legacyDetail);
+  }
+  return { bases, details, legacyBase: legacyBaseFinal, legacyDetail: legacyDetailFinal };
+}
+
+function isReligionAllowed(allowedList, mode, religion, detail, religions, religionDetails) {
   if (mode === "off") return true;
   if (!allowedList || !allowedList.length) return true;
-  const base = (religion || "none").toLowerCase();
-  const extra = (detail || "").toLowerCase();
-  const matches = allowedList.includes(base) || (extra && allowedList.includes(extra));
+  const normalizedAllowed = normalizeAllowedReligions(allowedList);
+  const { bases, details } = normalizeReligionArrays(
+    religions,
+    religionDetails,
+    religion,
+    detail
+  );
+  const tokens = new Set([...bases, ...details].map((value) => String(value).toLowerCase()));
+  const matches = normalizedAllowed.some((value) => tokens.has(String(value).toLowerCase()));
   return mode === "block" ? !matches : matches;
 }
 
@@ -763,6 +894,11 @@ export default {
       const channelMode = settings.channelMode;
       const allowedReligions = settings.allowedReligions;
       const religionMode = settings.religionMode;
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasReligions = videoColumns.has("religions");
+      const hasReligionDetails = videoColumns.has("religion_details");
+      const hasReligion = videoColumns.has("religion");
+      const hasReligionDetail = videoColumns.has("religion_detail");
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (onlySubscribed) {
@@ -811,22 +947,37 @@ export default {
         }
         if (allowedReligions.length && religionMode !== "off") {
           const list = allowedReligions.map(() => "?").join(",");
-          if (religionMode === "block") {
-            where +=
-              " AND (COALESCE(videos.religion, 'none') NOT IN (" +
-              list +
-              ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail NOT IN (" +
-              list +
-              ")))";
-          } else {
-            where +=
-              " AND (COALESCE(videos.religion, 'none') IN (" +
-              list +
-              ") OR COALESCE(videos.religion_detail, '') IN (" +
-              list +
-              "))";
+          const clauses = [];
+          let repeats = 0;
+          if (hasReligions) {
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religions) WHERE value IN (" + list + "))"
+            );
+            repeats += 1;
           }
-          binds.push(...allowedReligions, ...allowedReligions);
+          if (hasReligionDetails) {
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religion_details) WHERE value IN (" + list + "))"
+            );
+            repeats += 1;
+          }
+          if (hasReligion) {
+            clauses.push("COALESCE(videos.religion, 'none') IN (" + list + ")");
+            repeats += 1;
+          }
+          if (hasReligionDetail) {
+            clauses.push("COALESCE(videos.religion_detail, '') IN (" + list + ")");
+            repeats += 1;
+          }
+          if (clauses.length) {
+            where +=
+              (religionMode === "block" ? " AND NOT (" : " AND (") +
+              clauses.join(" OR ") +
+              ")";
+            for (let i = 0; i < repeats; i += 1) {
+              binds.push(...allowedReligions);
+            }
+          }
         }
       }
       const query =
@@ -846,7 +997,9 @@ export default {
       const videos = rows.slice(0, limit).map((row) => ({
         ...row,
         topics: safeJsonArray(row.topics),
-        languages: safeJsonArray(row.languages)
+        languages: safeJsonArray(row.languages),
+        religions: safeJsonArray(row.religions),
+        religion_details: safeJsonArray(row.religion_details)
       }));
       return jsonResponse({ videos, hasMore }, 200, withCors({}, origin));
     }
@@ -926,7 +1079,9 @@ export default {
               settings.allowedReligions,
               settings.religionMode,
               video.religion,
-              video.religion_detail
+              video.religion_detail,
+              video.religions,
+              video.religion_details
             )
           ) {
             return jsonResponse({ error: "Blocked by religion settings." }, 403, withCors({}, origin));
@@ -946,7 +1101,9 @@ export default {
       const enriched = {
         ...video,
         topics: safeJsonArray(video.topics),
-        languages: safeJsonArray(video.languages)
+        languages: safeJsonArray(video.languages),
+        religions: safeJsonArray(video.religions),
+        religion_details: safeJsonArray(video.religion_details)
       };
       return jsonResponse({ video: enriched }, 200, withCors({}, origin));
     }
@@ -974,6 +1131,12 @@ export default {
       if (videoColumns.has("religion_detail")) {
         selectCols.push("religion_detail");
       }
+      if (videoColumns.has("religions")) {
+        selectCols.push("religions");
+      }
+      if (videoColumns.has("religion_details")) {
+        selectCols.push("religion_details");
+      }
       const video = await env.DB.prepare("SELECT " + selectCols.join(", ") + " FROM videos WHERE id = ?")
         .bind(videoId)
         .first();
@@ -987,29 +1150,36 @@ export default {
       const languages = normalizeLanguages(body.languages || language);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
-      const updates = ["title = ?", "language = ?", "languages = ?", "topics = ?"];
+      const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+        body.religions || video.religions,
+        body.religion_details || video.religion_details,
+        body.religion || video.religion || "none",
+        body.religion_detail || video.religion_detail || ""
+      );
+      const updates = ["title = ?", "language = ?", "languages = ?"];
       const values = [
         title || "Untitled video",
         language || "unspecified",
-        JSON.stringify(storedLanguages),
-        JSON.stringify(topics)
+        JSON.stringify(storedLanguages)
       ];
       if (videoColumns.has("religion")) {
-        const rawReligion = body.religion;
-        const nextReligion = rawReligion ? normalizeReligion(rawReligion) : video.religion || "none";
-        updates.splice(3, 0, "religion = ?");
-        values.splice(3, 0, nextReligion);
-        if (videoColumns.has("religion_detail")) {
-          const nextReligionDetail = body.religion_detail
-            ? normalizeReligionDetail(nextReligion, body.religion_detail)
-            : rawReligion
-            ? normalizeReligionDetail(nextReligion, rawReligion)
-            : video.religion_detail || "";
-          const topicsIndex = updates.indexOf("topics = ?");
-          updates.splice(topicsIndex, 0, "religion_detail = ?");
-          values.splice(topicsIndex, 0, nextReligionDetail);
-        }
+        updates.push("religion = ?");
+        values.push(legacyBase);
       }
+      if (videoColumns.has("religion_detail")) {
+        updates.push("religion_detail = ?");
+        values.push(legacyDetail);
+      }
+      if (videoColumns.has("religions")) {
+        updates.push("religions = ?");
+        values.push(JSON.stringify(bases));
+      }
+      if (videoColumns.has("religion_details")) {
+        updates.push("religion_details = ?");
+        values.push(JSON.stringify(details));
+      }
+      updates.push("topics = ?");
+      values.push(JSON.stringify(topics));
       values.push(videoId);
       await env.DB.prepare("UPDATE videos SET " + updates.join(", ") + " WHERE id = ?")
         .bind(...values)
@@ -1038,9 +1208,12 @@ export default {
       const languages = normalizeLanguages(body.languages);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
-      const rawReligion = body.religion;
-      const religion = normalizeReligion(rawReligion);
-      const religionDetail = normalizeReligionDetail(religion, body.religion_detail || rawReligion);
+      const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+        body.religions,
+        body.religion_details,
+        body.religion || "",
+        body.religion_detail || ""
+      );
       const videoColumns = await getTableColumns(env, "videos");
       const insertCols = [
         "title",
@@ -1050,9 +1223,7 @@ export default {
         "views",
         "duration",
         "language",
-        "languages",
-        "topics",
-        "created_at"
+        "languages"
       ];
       const values = [
         meta.title,
@@ -1062,19 +1233,28 @@ export default {
         0,
         meta.duration || 0,
         language,
-        JSON.stringify(storedLanguages),
-        JSON.stringify(topics),
-        nowIso()
+        JSON.stringify(storedLanguages)
       ];
       if (videoColumns.has("religion")) {
-        insertCols.splice(8, 0, "religion");
-        values.splice(8, 0, religion);
+        insertCols.push("religion");
+        values.push(legacyBase);
       }
       if (videoColumns.has("religion_detail")) {
-        const index = insertCols.indexOf("topics");
-        insertCols.splice(index, 0, "religion_detail");
-        values.splice(index, 0, religionDetail);
+        insertCols.push("religion_detail");
+        values.push(legacyDetail);
       }
+      if (videoColumns.has("religions")) {
+        insertCols.push("religions");
+        values.push(JSON.stringify(bases));
+      }
+      if (videoColumns.has("religion_details")) {
+        insertCols.push("religion_details");
+        values.push(JSON.stringify(details));
+      }
+      insertCols.push("topics");
+      values.push(JSON.stringify(topics));
+      insertCols.push("created_at");
+      values.push(nowIso());
       const placeholders = insertCols.map(() => "?").join(", ");
       await env.DB.prepare(
         "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + placeholders + ")"
@@ -1296,6 +1476,11 @@ export default {
       const channelMode = settings.channelMode;
       const allowedReligions = settings.allowedReligions;
       const religionMode = settings.religionMode;
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasReligions = videoColumns.has("religions");
+      const hasReligionDetails = videoColumns.has("religion_details");
+      const hasReligion = videoColumns.has("religion");
+      const hasReligionDetail = videoColumns.has("religion_detail");
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (applyFilters && allowedChannels.length && channelMode !== "off") {
@@ -1331,22 +1516,37 @@ export default {
         }
         if (allowedReligions.length && religionMode !== "off") {
           const list = allowedReligions.map(() => "?").join(",");
-          if (religionMode === "block") {
-            where +=
-              " AND (COALESCE(videos.religion, 'none') NOT IN (" +
-              list +
-              ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail NOT IN (" +
-              list +
-              ")))";
-          } else {
-            where +=
-              " AND (COALESCE(videos.religion, 'none') IN (" +
-              list +
-              ") OR COALESCE(videos.religion_detail, '') IN (" +
-              list +
-              "))";
+          const clauses = [];
+          let repeats = 0;
+          if (hasReligions) {
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religions) WHERE value IN (" + list + "))"
+            );
+            repeats += 1;
           }
-          binds.push(...allowedReligions, ...allowedReligions);
+          if (hasReligionDetails) {
+            clauses.push(
+              "EXISTS (SELECT 1 FROM json_each(videos.religion_details) WHERE value IN (" + list + "))"
+            );
+            repeats += 1;
+          }
+          if (hasReligion) {
+            clauses.push("COALESCE(videos.religion, 'none') IN (" + list + ")");
+            repeats += 1;
+          }
+          if (hasReligionDetail) {
+            clauses.push("COALESCE(videos.religion_detail, '') IN (" + list + ")");
+            repeats += 1;
+          }
+          if (clauses.length) {
+            where +=
+              (religionMode === "block" ? " AND NOT (" : " AND (") +
+              clauses.join(" OR ") +
+              ")";
+            for (let i = 0; i < repeats; i += 1) {
+              binds.push(...allowedReligions);
+            }
+          }
         }
       }
       const result = await env.DB.prepare(
@@ -1363,7 +1563,9 @@ export default {
       const videos = (result.results || []).map((row) => ({
         ...row,
         topics: safeJsonArray(row.topics),
-        languages: safeJsonArray(row.languages)
+        languages: safeJsonArray(row.languages),
+        religions: safeJsonArray(row.religions),
+        religion_details: safeJsonArray(row.religion_details)
       }));
       return jsonResponse({ videos }, 200, withCors({}, origin));
     }
@@ -1417,12 +1619,20 @@ export default {
       const videoColumns = await getTableColumns(env, "videos");
       const hasReligion = videoColumns.has("religion");
       const hasReligionDetail = videoColumns.has("religion_detail");
+      const hasReligions = videoColumns.has("religions");
+      const hasReligionDetails = videoColumns.has("religion_details");
       const selectCols = ["youtube_url", "language", "languages"];
       if (hasReligion) {
         selectCols.push("religion");
       }
       if (hasReligionDetail) {
         selectCols.push("religion_detail");
+      }
+      if (hasReligions) {
+        selectCols.push("religions");
+      }
+      if (hasReligionDetails) {
+        selectCols.push("religion_details");
       }
       selectCols.push("topics");
       const result = await env.DB.prepare(
@@ -1444,6 +1654,8 @@ export default {
         const safeTopics = String(topics).replace(/'/g, "''");
         const safeReligion = String(row.religion || "none").replace(/'/g, "''");
         const safeReligionDetail = String(row.religion_detail || "").replace(/'/g, "''");
+        const safeReligions = JSON.stringify(safeJsonArray(row.religions)).replace(/'/g, "''");
+        const safeReligionDetails = JSON.stringify(safeJsonArray(row.religion_details)).replace(/'/g, "''");
         const columnNames = ["youtube_url", "language", "languages"];
         const valueParts = [`'${safeUrl}'`, `'${safeLanguage}'`, `'${safeLanguages}'`];
         if (hasReligion) {
@@ -1453,6 +1665,14 @@ export default {
         if (hasReligionDetail) {
           columnNames.push("religion_detail");
           valueParts.push(`'${safeReligionDetail}'`);
+        }
+        if (hasReligions) {
+          columnNames.push("religions");
+          valueParts.push(`'${safeReligions}'`);
+        }
+        if (hasReligionDetails) {
+          columnNames.push("religion_details");
+          valueParts.push(`'${safeReligionDetails}'`);
         }
         columnNames.push("topics");
         valueParts.push(`'${safeTopics}'`);
@@ -1484,6 +1704,8 @@ export default {
       const videoColumns = await getTableColumns(env, "videos");
       const hasReligion = videoColumns.has("religion");
       const hasReligionDetail = videoColumns.has("religion_detail");
+      const hasReligions = videoColumns.has("religions");
+      const hasReligionDetails = videoColumns.has("religion_details");
       const insertCols = [
         "title",
         "youtube_url",
@@ -1492,17 +1714,22 @@ export default {
         "views",
         "duration",
         "language",
-        "languages",
-        "topics",
-        "created_at"
+        "languages"
       ];
       if (hasReligion) {
-        insertCols.splice(8, 0, "religion");
+        insertCols.push("religion");
       }
       if (hasReligionDetail) {
-        const topicsIndex = insertCols.indexOf("topics");
-        insertCols.splice(topicsIndex, 0, "religion_detail");
+        insertCols.push("religion_detail");
       }
+      if (hasReligions) {
+        insertCols.push("religions");
+      }
+      if (hasReligionDetails) {
+        insertCols.push("religion_details");
+      }
+      insertCols.push("topics");
+      insertCols.push("created_at");
       const insertSql =
         "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + insertCols.map(() => "?").join(", ") + ")";
       for (const row of rows) {
@@ -1525,10 +1752,11 @@ export default {
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
         const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
-        const religion = normalizeReligion(row.religion || row.faith);
-        const religionDetail = normalizeReligionDetail(
-          religion,
-          row.religion_detail || row.faith_detail || row.religion || row.faith
+        const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+          row.religions,
+          row.religion_details,
+          row.religion || row.faith || "",
+          row.religion_detail || row.faith_detail || row.religion || row.faith || ""
         );
         const values = [
           meta.title,
@@ -1538,17 +1766,21 @@ export default {
           0,
           meta.duration || 0,
           language,
-          JSON.stringify(storedLanguages),
-          JSON.stringify(topics),
-          nowIso()
+          JSON.stringify(storedLanguages)
         ];
         if (hasReligion) {
-          values.splice(8, 0, religion);
+          values.push(legacyBase);
         }
         if (hasReligionDetail) {
-          const topicsIndex = insertCols.indexOf("topics");
-          values.splice(topicsIndex, 0, religionDetail);
+          values.push(legacyDetail);
         }
+        if (hasReligions) {
+          values.push(JSON.stringify(bases));
+        }
+        if (hasReligionDetails) {
+          values.push(JSON.stringify(details));
+        }
+        values.push(JSON.stringify(topics), nowIso());
         const result = await env.DB.prepare(insertSql).bind(...values).run();
         inserted.push(result.meta.last_row_id);
       }
@@ -1567,6 +1799,8 @@ export default {
       const videoColumns = await getTableColumns(env, "videos");
       const hasReligion = videoColumns.has("religion");
       const hasReligionDetail = videoColumns.has("religion_detail");
+      const hasReligions = videoColumns.has("religions");
+      const hasReligionDetails = videoColumns.has("religion_details");
       const insertCols = [
         "title",
         "youtube_url",
@@ -1575,17 +1809,22 @@ export default {
         "views",
         "duration",
         "language",
-        "languages",
-        "topics",
-        "created_at"
+        "languages"
       ];
       if (hasReligion) {
-        insertCols.splice(8, 0, "religion");
+        insertCols.push("religion");
       }
       if (hasReligionDetail) {
-        const topicsIndex = insertCols.indexOf("topics");
-        insertCols.splice(topicsIndex, 0, "religion_detail");
+        insertCols.push("religion_detail");
       }
+      if (hasReligions) {
+        insertCols.push("religions");
+      }
+      if (hasReligionDetails) {
+        insertCols.push("religion_details");
+      }
+      insertCols.push("topics");
+      insertCols.push("created_at");
       const insertSql =
         "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + insertCols.map(() => "?").join(", ") + ")";
       for (const row of rows) {
@@ -1608,10 +1847,11 @@ export default {
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
         const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
-        const religion = normalizeReligion(row.religion || row.faith);
-        const religionDetail = normalizeReligionDetail(
-          religion,
-          row.religion_detail || row.faith_detail || row.religion || row.faith
+        const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+          row.religions,
+          row.religion_details,
+          row.religion || row.faith || "",
+          row.religion_detail || row.faith_detail || row.religion || row.faith || ""
         );
         const values = [
           meta.title,
@@ -1621,17 +1861,21 @@ export default {
           0,
           meta.duration || 0,
           language,
-          JSON.stringify(storedLanguages),
-          JSON.stringify(topics),
-          nowIso()
+          JSON.stringify(storedLanguages)
         ];
         if (hasReligion) {
-          values.splice(8, 0, religion);
+          values.push(legacyBase);
         }
         if (hasReligionDetail) {
-          const topicsIndex = insertCols.indexOf("topics");
-          values.splice(topicsIndex, 0, religionDetail);
+          values.push(legacyDetail);
         }
+        if (hasReligions) {
+          values.push(JSON.stringify(bases));
+        }
+        if (hasReligionDetails) {
+          values.push(JSON.stringify(details));
+        }
+        values.push(JSON.stringify(topics), nowIso());
         const result = await env.DB.prepare(insertSql).bind(...values).run();
         inserted.push(result.meta.last_row_id);
       }

@@ -142,6 +142,8 @@ async function initDb() {
       language TEXT,
       religion TEXT,
       religion_detail TEXT,
+      religions TEXT[],
+      religion_details TEXT[],
       topics TEXT[],
       created_at TIMESTAMPTZ NOT NULL
     );
@@ -207,9 +209,14 @@ async function initDb() {
   await pool.query("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL");
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS firebase_uid TEXT UNIQUE");
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'free'");
+  await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT");
+  await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT");
+  await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS slogan TEXT");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS language TEXT");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religion TEXT");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religion_detail TEXT");
+  await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religions TEXT[]");
+  await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religion_details TEXT[]");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS topics TEXT[]");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS topic_mode TEXT NOT NULL DEFAULT 'allow'");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS allowed_channels INTEGER[]");
@@ -376,16 +383,61 @@ function normalizeLanguage(input) {
   return input.trim().toLowerCase() || "unspecified";
 }
 
+const RELIGION_BASES = new Set(["none", "islam", "christian", "jews", "buddist"]);
+const RELIGION_DETAIL_BASE = {
+  shia: "islam",
+  sunni: "islam",
+  catholic: "christian",
+  orthodox: "christian",
+  protestant: "christian",
+  jews_orthodox: "jews",
+  jews_conservative: "jews",
+  jews_reform: "jews",
+  buddist_theravada: "buddist",
+  buddist_mahayana: "buddist",
+  buddist_vajrayana: "buddist"
+};
+const RELIGION_DETAILS = new Set(Object.keys(RELIGION_DETAIL_BASE));
+
+function parseList(input) {
+  if (!input) {
+    return [];
+  }
+  if (Array.isArray(input)) {
+    return input.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+  if (typeof input !== "string") {
+    return [];
+  }
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return [];
+  }
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+      }
+    } catch (err) {
+      return [];
+    }
+  }
+  return trimmed
+    .split(/[|,]/g)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function normalizeReligion(input) {
   if (!input || typeof input !== "string") {
     return "none";
   }
   const value = input.trim().toLowerCase();
-  const allowed = ["islam", "shia", "christian", "jews", "buddist", "none"];
-  if (allowed.includes(value)) {
-    return value === "shia" ? "islam" : value;
+  if (RELIGION_BASES.has(value)) {
+    return value;
   }
-  return "none";
+  return RELIGION_DETAIL_BASE[value] || "none";
 }
 
 function normalizeReligionDetail(religion, detail) {
@@ -393,13 +445,123 @@ function normalizeReligionDetail(religion, detail) {
     return "";
   }
   const value = detail.trim().toLowerCase();
-  if (religion === "islam" && (value === "shia" || value === "sunni")) {
+  const base = RELIGION_DETAIL_BASE[value];
+  if (!base) {
+    return "";
+  }
+  if (!religion || religion === "none") {
     return value;
   }
-  if (religion === "christian" && ["catholic", "orthodox", "protestant"].includes(value)) {
-    return value;
+  return base === religion ? value : "";
+}
+
+function normalizeReligionList(input) {
+  const values = parseList(input);
+  const result = [];
+  const seen = new Set();
+  let hasNone = false;
+  values.forEach((value) => {
+    const base = normalizeReligion(value);
+    if (base === "none") {
+      hasNone = true;
+      return;
+    }
+    if (!seen.has(base)) {
+      result.push(base);
+      seen.add(base);
+    }
+  });
+  if (!result.length && hasNone) {
+    return ["none"];
   }
-  return "";
+  return result;
+}
+
+function normalizeReligionDetailList(input) {
+  const values = parseList(input);
+  const result = [];
+  const seen = new Set();
+  values.forEach((value) => {
+    const entry = String(value || "").trim().toLowerCase();
+    if (!RELIGION_DETAILS.has(entry) || seen.has(entry)) {
+      return;
+    }
+    result.push(entry);
+    seen.add(entry);
+  });
+  return result;
+}
+
+function normalizeAllowedReligions(values) {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+  const result = [];
+  const seen = new Set();
+  values.forEach((value) => {
+    const entry = String(value || "").trim().toLowerCase();
+    if (!(RELIGION_BASES.has(entry) || RELIGION_DETAILS.has(entry)) || seen.has(entry)) {
+      return;
+    }
+    result.push(entry);
+    seen.add(entry);
+  });
+  if (result.includes("none") && result.length > 1) {
+    return result.filter((value) => value !== "none");
+  }
+  return result;
+}
+
+function normalizeReligionArrays(religionsInput, religionDetailsInput, legacyReligion, legacyDetail) {
+  const baseSet = new Set(normalizeReligionList(religionsInput));
+  const detailSet = new Set(normalizeReligionDetailList(religionDetailsInput));
+  const legacyBase = normalizeReligion(String(legacyReligion || ""));
+  if (legacyBase) {
+    baseSet.add(legacyBase);
+  }
+  const legacyDetailValue = normalizeReligionDetail(
+    legacyBase,
+    legacyDetail || legacyReligion
+  );
+  if (legacyDetailValue) {
+    detailSet.add(legacyDetailValue);
+  }
+  detailSet.forEach((detail) => {
+    const base = RELIGION_DETAIL_BASE[detail];
+    if (base) {
+      baseSet.add(base);
+    }
+  });
+  if (baseSet.has("none") && baseSet.size > 1) {
+    baseSet.delete("none");
+  }
+  if (baseSet.has("none")) {
+    detailSet.clear();
+  }
+  let bases = Array.from(baseSet);
+  if (!bases.length) {
+    bases = ["none"];
+  }
+  const details = Array.from(detailSet);
+  let legacyBaseFinal = bases[0] || "none";
+  let legacyDetailFinal = "";
+  for (const detail of details) {
+    const detailBase = RELIGION_DETAIL_BASE[detail];
+    if (!detailBase) {
+      continue;
+    }
+    if (legacyBaseFinal === "none" || legacyBaseFinal === detailBase) {
+      legacyDetailFinal = detail;
+      if (legacyBaseFinal === "none") {
+        legacyBaseFinal = detailBase;
+      }
+      break;
+    }
+  }
+  if (!legacyDetailFinal && legacyDetail) {
+    legacyDetailFinal = normalizeReligionDetail(legacyBaseFinal, legacyDetail);
+  }
+  return { bases, details, legacyBase: legacyBaseFinal, legacyDetail: legacyDetailFinal };
 }
 
 function normalizeTopics(input) {
@@ -582,13 +744,33 @@ function requireRole(roles) {
 
 app.get("/api/me", auth, async (req, res) => {
   const result = await pool.query(
-    "SELECT id, email, role, plan, created_at FROM users WHERE id = $1",
+    "SELECT id, email, role, plan, display_name, avatar_url, slogan, created_at FROM users WHERE id = $1",
     [req.user.id]
   );
   if (result.rowCount === 0) {
     return res.status(404).json({ error: "User not found." });
   }
   res.json({ user: result.rows[0] });
+});
+
+app.get("/api/profile", auth, async (req, res) => {
+  const result = await pool.query(
+    "SELECT display_name, avatar_url, slogan FROM users WHERE id = $1",
+    [req.user.id]
+  );
+  res.json({ profile: result.rows[0] || {} });
+});
+
+app.post("/api/profile", auth, requireRole(["artist", "admin"]), async (req, res) => {
+  const { displayName, slogan, avatarUrl } = req.body || {};
+  const safeName = String(displayName || "").trim();
+  const safeSlogan = String(slogan || "").trim();
+  const safeAvatar = String(avatarUrl || "").trim();
+  await pool.query(
+    "UPDATE users SET display_name = $1, slogan = $2, avatar_url = $3 WHERE id = $4",
+    [safeName, safeSlogan, safeAvatar, req.user.id]
+  );
+  res.json({ success: true });
 });
 
 app.get("/api/firebase-config", (_req, res) => {
@@ -644,9 +826,7 @@ app.post("/api/settings", auth, requireRecentAuth(), async (req, res) => {
   const finalTopicMode = topicMode === "block" ? "block" : topicMode === "off" ? "off" : "allow";
   const finalChannelMode =
     channelMode === "block" ? "block" : channelMode === "off" ? "off" : "allow";
-  const finalReligions = Array.isArray(religions)
-    ? religions.map((rel) => String(rel).trim().toLowerCase()).filter(Boolean)
-    : [];
+  const finalReligions = normalizeAllowedReligions(religions || []);
   const finalReligionMode =
     religionMode === "block" ? "block" : religionMode === "off" ? "off" : "allow";
   const finalMaxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(maxDailyMinutes || "0", 10)));
@@ -808,7 +988,9 @@ app.get("/api/videos", auth, async (req, res) => {
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
   const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
   const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
-  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const allowedReligions = normalizeAllowedReligions(
+    settingsResult.rows[0]?.allowed_religions || []
+  );
   const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
   const params = [];
   let where = "WHERE videos.youtube_id IS NOT NULL";
@@ -850,22 +1032,20 @@ app.get("/api/videos", auth, async (req, res) => {
   if (allowedReligions.length && religionMode !== "off") {
     params.push(allowedReligions);
     const relParam = params.length;
-    params.push(allowedReligions);
-    const relDetailParam = params.length;
+    const match =
+      "COALESCE(videos.religions, ARRAY[]::text[]) && $" +
+      relParam +
+      " OR COALESCE(videos.religion_details, ARRAY[]::text[]) && $" +
+      relParam +
+      " OR COALESCE(videos.religion, 'none') = ANY($" +
+      relParam +
+      ") OR COALESCE(videos.religion_detail, '') = ANY($" +
+      relParam +
+      ")";
     if (religionMode === "block") {
-      where +=
-        " AND (COALESCE(videos.religion, 'none') <> ALL($" +
-        relParam +
-        ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail <> ALL($" +
-        relDetailParam +
-        ")))";
+      where += " AND NOT (" + match + ")";
     } else {
-      where +=
-        " AND (COALESCE(videos.religion, 'none') = ANY($" +
-        relParam +
-        ") OR COALESCE(videos.religion_detail, '') = ANY($" +
-        relDetailParam +
-        "))";
+      where += " AND (" + match + ")";
     }
   }
   const limitParam = params.length + 1;
@@ -899,7 +1079,9 @@ app.get("/api/viral", auth, async (req, res) => {
   const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
   const allowedTopics = settingsResult.rows[0]?.allowed_topics || [];
   const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
-  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const allowedReligions = normalizeAllowedReligions(
+    settingsResult.rows[0]?.allowed_religions || []
+  );
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
   const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
   const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
@@ -928,22 +1110,20 @@ app.get("/api/viral", auth, async (req, res) => {
   if (allowedReligions.length && religionMode !== "off") {
     params.push(allowedReligions);
     const relParam = params.length;
-    params.push(allowedReligions);
-    const relDetailParam = params.length;
+    const match =
+      "COALESCE(videos.religions, ARRAY[]::text[]) && $" +
+      relParam +
+      " OR COALESCE(videos.religion_details, ARRAY[]::text[]) && $" +
+      relParam +
+      " OR COALESCE(videos.religion, 'none') = ANY($" +
+      relParam +
+      ") OR COALESCE(videos.religion_detail, '') = ANY($" +
+      relParam +
+      ")";
     if (religionMode === "block") {
-      where +=
-        " AND (COALESCE(videos.religion, 'none') <> ALL($" +
-        relParam +
-        ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail <> ALL($" +
-        relDetailParam +
-        ")))";
+      where += " AND NOT (" + match + ")";
     } else {
-      where +=
-        " AND (COALESCE(videos.religion, 'none') = ANY($" +
-        relParam +
-        ") OR COALESCE(videos.religion_detail, '') = ANY($" +
-        relDetailParam +
-        "))";
+      where += " AND (" + match + ")";
     }
   }
   params.push(limit);
@@ -970,7 +1150,9 @@ app.get("/api/videos/:id", auth, async (req, res) => {
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
   const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
   const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
-  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const allowedReligions = normalizeAllowedReligions(
+    settingsResult.rows[0]?.allowed_religions || []
+  );
   const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
   const result = await pool.query(
     "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = $1 AND videos.youtube_id IS NOT NULL",
@@ -993,9 +1175,17 @@ app.get("/api/videos/:id", auth, async (req, res) => {
     }
   }
   if (allowedReligions.length && religionMode !== "off") {
-    const rel = (video.religion || "none").toLowerCase();
-    const relDetail = (video.religion_detail || "").toLowerCase();
-    const isAllowedReligion = allowedReligions.includes(rel) || (relDetail && allowedReligions.includes(relDetail));
+    const normalizedAllowed = normalizeAllowedReligions(allowedReligions);
+    const { bases, details } = normalizeReligionArrays(
+      video.religions,
+      video.religion_details,
+      video.religion || "none",
+      video.religion_detail || ""
+    );
+    const tokens = new Set([...bases, ...details].map((value) => String(value).toLowerCase()));
+    const isAllowedReligion = normalizedAllowed.some((value) =>
+      tokens.has(String(value).toLowerCase())
+    );
     if (religionMode === "allow" && !isAllowedReligion) {
       return res.status(403).json({ error: "Blocked by religion settings." });
     }
@@ -1207,10 +1397,11 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
     const youtubeUrl = row.youtube_url || row.url || "";
     const finalLanguage = normalizeLanguage(row.language || row.lang || "");
     const finalTopics = normalizeTopics(row.topics || "");
-    const finalReligion = normalizeReligion(row.religion || row.faith || "");
-    const finalReligionDetail = normalizeReligionDetail(
-      finalReligion,
-      row.religion_detail || row.faith_detail || row.religion || ""
+    const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+      row.religions,
+      row.religion_details,
+      row.religion || row.faith || "",
+      row.religion_detail || row.faith_detail || row.religion || row.faith || ""
     );
     const youtubeId = extractYouTubeId(youtubeUrl);
     if (!youtubeId) {
@@ -1226,8 +1417,8 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
     const finalTitle = meta.title;
     const finalDescription = "";
     const result = await pool.query(
-      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
-        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
+      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, religions, religion_details, topics, duration, created_at) " +
+        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id",
       [
         finalTitle,
         finalDescription,
@@ -1235,8 +1426,10 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
         youtubeId,
         req.user.id,
         finalLanguage,
-        finalReligion,
-        finalReligionDetail,
+        legacyBase,
+        legacyDetail,
+        bases,
+        details,
         finalTopics,
         meta.duration || 0,
         nowIso()
@@ -1259,10 +1452,11 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
     const youtubeUrl = row.youtube_url || row.url || "";
     const finalLanguage = normalizeLanguage(row.language || row.lang || "");
     const finalTopics = normalizeTopics(row.topics || "");
-    const finalReligion = normalizeReligion(row.religion || row.faith || "");
-    const finalReligionDetail = normalizeReligionDetail(
-      finalReligion,
-      row.religion_detail || row.faith_detail || row.religion || ""
+    const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
+      row.religions,
+      row.religion_details,
+      row.religion || row.faith || "",
+      row.religion_detail || row.faith_detail || row.religion || row.faith || ""
     );
     const youtubeId = extractYouTubeId(youtubeUrl);
     if (!youtubeId) {
@@ -1278,8 +1472,8 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
     const finalTitle = meta.title;
     const finalDescription = "";
     const result = await pool.query(
-      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
-        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
+      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, religions, religion_details, topics, duration, created_at) " +
+        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id",
       [
         finalTitle,
         finalDescription,
@@ -1287,8 +1481,10 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
         youtubeId,
         req.user.id,
         finalLanguage,
-        finalReligion,
-        finalReligionDetail,
+        legacyBase,
+        legacyDetail,
+        bases,
+        details,
         finalTopics,
         meta.duration || 0,
         nowIso()
@@ -1371,18 +1567,20 @@ app.get("/api/stats", auth, async (req, res) => {
 });
 
 app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole(["artist", "admin"]), async (req, res) => {
-  const { youtubeUrl, language, topics, religion, religion_detail } = req.body || {};
+  const { youtubeUrl, language, topics, religion, religion_detail, religions, religion_details } = req.body || {};
   const youtubeId = extractYouTubeId(youtubeUrl);
   if (!youtubeId) {
     return res.status(400).json({ error: "Valid YouTube URL required." });
   }
   const canSetMetadata = req.user.role === "admin" || req.user.role === "artist";
   const finalLanguage = canSetMetadata ? normalizeLanguage(language) : "unspecified";
-  const rawReligion = canSetMetadata ? String(religion || "") : "";
-  const finalReligion = canSetMetadata ? normalizeReligion(rawReligion) : "none";
-  const finalReligionDetail = canSetMetadata
-    ? normalizeReligionDetail(finalReligion, religion_detail || rawReligion)
-    : "";
+  const { bases, details, legacyBase, legacyDetail } = canSetMetadata
+    ? normalizeReligionArrays(religions, religion_details, religion || "", religion_detail || "")
+    : { bases: ["none"], details: [], legacyBase: "none", legacyDetail: "" };
+  const finalReligion = canSetMetadata ? legacyBase : "none";
+  const finalReligionDetail = canSetMetadata ? legacyDetail : "";
+  const finalReligions = canSetMetadata ? bases : ["none"];
+  const finalReligionDetails = canSetMetadata ? details : [];
   const finalTopics = canSetMetadata ? normalizeTopics(topics) : [];
   const meta = await fetchYouTubeMeta(youtubeId, youtubeUrl);
   const finalTitle = meta.title;
@@ -1392,8 +1590,8 @@ app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole([
     return res.status(400).json({ error: "Unable to fetch a title for this URL." });
   }
   const result = await pool.query(
-    "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
-      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
+    "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, religions, religion_details, topics, duration, created_at) " +
+      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *",
     [
       finalTitle,
       finalDescription,
@@ -1403,11 +1601,13 @@ app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole([
       finalLanguage,
       finalReligion,
       finalReligionDetail,
+      finalReligions,
+      finalReligionDetails,
       finalTopics,
       finalDuration,
       nowIso()
     ]
-  ); 
+  );
   const owner = await pool.query("SELECT email FROM users WHERE id = $1", [req.user.id]);
   const video = result.rows[0];
   res.json({ video: { ...video, channel: owner.rows[0] ? owner.rows[0].email : "" } });
