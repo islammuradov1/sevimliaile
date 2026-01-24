@@ -2,6 +2,7 @@ const ui = {
       navHome: document.getElementById("nav-home"),
       navExplore: document.getElementById("nav-explore"),
       navChannels: document.getElementById("nav-channels"),
+      navRequests: document.getElementById("nav-requests"),
       railHome: document.getElementById("rail-home"),
       railViral: document.getElementById("rail-viral"),
       railChannels: document.getElementById("rail-channels"),
@@ -50,6 +51,7 @@ const ui = {
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
+      requestView: document.getElementById("request-view"),
       channelView: document.getElementById("channel-view"),
       adminOverviewPage: document.getElementById("admin-overview-page"),
       adminOverviewPageList: document.getElementById("admin-overview-page-list"),
@@ -108,6 +110,11 @@ const ui = {
       timeCurrent: document.getElementById("time-current"),
       timeDuration: document.getElementById("time-duration"),
       authGate: document.getElementById("auth-gate"),
+      requestForm: document.getElementById("request-form"),
+      requestReason: document.getElementById("request-reason"),
+      requestDetails: document.getElementById("request-details"),
+      requestContact: document.getElementById("request-contact"),
+      requestMessage: document.getElementById("request-message"),
       uploadModal: document.getElementById("upload-modal"),
       adminModal: document.getElementById("admin-modal"),
       settingsModal: document.getElementById("settings-modal"),
@@ -293,6 +300,20 @@ const ui = {
         controls_show: "Show controls",
         tech_panel_toggle: "Toggle player tools",
         search_placeholder: "Search videos and channels",
+        request_title: "Make a request",
+        request_subtitle: "Tell us what you need and we'll prepare it.",
+        request_reason: "Reason",
+        request_video: "Request videos from a YouTube channel",
+        request_partnership: "Partnership",
+        request_feature: "New functionality",
+        request_pro: "Free Pro for 1 month",
+        request_details_label: "Details",
+        request_details_placeholder: "Channel name, link, or what you want to see",
+        request_contact_label: "How to reach you",
+        request_contact_placeholder: "Email or phone",
+        request_success: "Request sent. We'll get back to you.",
+        request_error: "Couldn't send. Try again.",
+        request_required: "Please fill all fields.",
         ui_language_label: "Language",
         sidebar_subscribed: "Subscribed",
         sidebar_channels: "Channels",
@@ -1966,6 +1987,9 @@ const ui = {
         ui.uiLanguage.value = next;
       }
       applyTranslations();
+      if (ui.navRequests && ui.navRequests.querySelector("span")) {
+        ui.navRequests.querySelector("span").textContent = "Xahiş et";
+      }
     }
 
     function setButtonIcon(button, icon, labelKey, suffix) {
@@ -2182,18 +2206,37 @@ const ui = {
     function setPrimaryNav(view) {
       const isChannels = view === "channels";
       const isHomey = view === "feed" || view === "search" || view === "channel";
-      const isViral = navFocus === "viral" && view === "feed";
+      const isViral = view === "viral";
+      const isRequest = view === "request";
       const set = (node, active) => {
         if (node) {
           node.classList.toggle("active", Boolean(active));
         }
       };
-      set(ui.navHome, isHomey && navFocus !== "channels" && navFocus !== "viral");
-      set(ui.railHome, isHomey && navFocus !== "channels" && navFocus !== "viral");
-      set(ui.navChannels, isChannels || navFocus === "channels");
-      set(ui.railChannels, isChannels || navFocus === "channels");
+      set(ui.navHome, isHomey && !isChannels && !isViral);
+      set(ui.railHome, isHomey && !isChannels && !isViral);
+      set(ui.navChannels, isChannels);
+      set(ui.railChannels, isChannels);
       set(ui.navExplore, isViral);
       set(ui.railViral, isViral);
+      if (ui.navRequests) {
+        ui.navRequests.classList.toggle("active", isRequest);
+      }
+    }
+
+    function updateRequestFields(reason) {
+      if (!ui.requestDetails) return;
+      if (reason === "video") {
+        ui.requestDetails.placeholder = "Channel name, links, and topics you want";
+      } else if (reason === "partnership") {
+        ui.requestDetails.placeholder = "Who you are, brand/channel, how we collaborate";
+      } else if (reason === "feature") {
+        ui.requestDetails.placeholder = "Describe the feature you need";
+      } else if (reason === "pro") {
+        ui.requestDetails.placeholder = "Why you need Pro for a month";
+      } else {
+        ui.requestDetails.placeholder = "Tell us what you need";
+      }
     }
 
     function schedulePlayerReload() {
@@ -2215,10 +2258,12 @@ const ui = {
 
     function setPageView(view) {
       const showFeed = view === "feed";
+      const showViral = view === "viral";
       const showChannel = view === "channel";
       const showWatch = view === "watch";
       const showSearch = view === "search";
       const showChannels = view === "channels";
+      const showRequest = view === "request";
       const showAdminOverview = view === "admin-overview";
       const showAdminUsers = view === "admin-users";
       const showAdminChannels = view === "admin-channels";
@@ -2227,8 +2272,12 @@ const ui = {
       const showAdminImports = view === "admin-imports";
       ui.feedView.classList.toggle("hidden", !showFeed);
       ui.feedView.setAttribute("aria-hidden", String(!showFeed));
-      ui.viralView.classList.toggle("hidden", !showFeed);
-      ui.viralView.setAttribute("aria-hidden", String(!showFeed));
+      ui.viralView.classList.toggle("hidden", !showViral);
+      ui.viralView.setAttribute("aria-hidden", String(!showViral));
+      if (ui.requestView) {
+        ui.requestView.classList.toggle("hidden", !showRequest);
+        ui.requestView.setAttribute("aria-hidden", String(!showRequest));
+      }
       ui.channelView.classList.toggle("hidden", !showChannel);
       ui.channelView.setAttribute("aria-hidden", String(!showChannel));
       ui.searchView.classList.toggle("hidden", !showSearch);
@@ -2266,10 +2315,11 @@ const ui = {
       }
       if (view === "channels") {
         navFocus = "channels";
-      } else if (navFocus === "channels" && view !== "channels") {
-        navFocus = "home";
-      }
-      if (view !== "feed" && navFocus === "viral") {
+      } else if (view === "viral") {
+        navFocus = "viral";
+      } else if (view === "request") {
+        navFocus = "request";
+      } else if (navFocus === "channels" || navFocus === "viral" || navFocus === "request") {
         navFocus = "home";
       }
       setPrimaryNav(view);
@@ -2773,6 +2823,9 @@ const ui = {
     }
 
     function renderChannels(channels, container = ui.channelList) {
+      if (!container) {
+        return;
+      }
       container.innerHTML = "";
       if (!channels.length) {
         container.textContent = t("message_no_channels");
@@ -2821,6 +2874,9 @@ const ui = {
     }
 
     function renderSubscriptions() {
+      if (!ui.subscribedList) {
+        return;
+      }
       ui.subscribedList.innerHTML = "";
       if (!subscriptions.length) {
         ui.subscribedList.textContent = t("message_no_subscriptions");
@@ -3141,6 +3197,38 @@ const ui = {
       });
     }
 
+    async function sendRequest(event) {
+      event.preventDefault();
+      if (!currentUser) {
+        lockApp(t("message_sign_in"));
+        return;
+      }
+      if (!ui.requestReason || !ui.requestDetails || !ui.requestContact || !ui.requestMessage) {
+        return;
+      }
+      const reason = ui.requestReason.value;
+      const details = ui.requestDetails.value.trim();
+      const contact = ui.requestContact.value.trim();
+      const messageNode = ui.requestMessage;
+      messageNode.textContent = "";
+      if (!reason || !details || !contact) {
+        messageNode.textContent = t("request_required");
+        return;
+      }
+      const res = await apiFetch("/api/requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason, details, contact })
+      });
+      if (res.ok) {
+        messageNode.textContent = t("request_success");
+        ui.requestForm.reset();
+        updateRequestFields(ui.requestReason.value);
+      } else {
+        messageNode.textContent = t("request_error");
+      }
+    }
+
     async function fetchChannels() {
       if (!currentUser) {
         return;
@@ -3354,7 +3442,7 @@ const ui = {
         currentUser && (currentUser.role === "artist" || currentUser.role === "admin")
           ? "inline-flex"
           : "none";
-      ui.adminOpen.style.display = "none";
+      ui.adminOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
       ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
@@ -4986,6 +5074,20 @@ const ui = {
     if (ui.settingsBar) {
       ui.settingsBar.addEventListener("click", openSettings);
     }
+    if (ui.requestForm) {
+      ui.requestForm.addEventListener("submit", sendRequest);
+    }
+    if (ui.requestReason) {
+      ui.requestReason.addEventListener("change", (event) => updateRequestFields(event.target.value));
+      updateRequestFields(ui.requestReason.value);
+    }
+    if (ui.requestForm) {
+      ui.requestForm.addEventListener("submit", sendRequest);
+    }
+    if (ui.requestReason) {
+      ui.requestReason.addEventListener("change", (event) => updateRequestFields(event.target.value));
+      updateRequestFields(ui.requestReason.value);
+    }
     if (ui.playerShell) {
       ui.playerShell.addEventListener("dblclick", togglePlay);
     }
@@ -5034,10 +5136,15 @@ const ui = {
     ui.adminChannelsOpen.addEventListener("click", () => navigateTo("/admin/channels"));
     ui.adminReportsOpen.addEventListener("click", () => navigateTo("/admin/reports"));
     ui.adminImportsOpen.addEventListener("click", () => navigateTo("/admin/imports"));
+    if (ui.navRequests) {
+      ui.navRequests.addEventListener("click", goRequest);
+    }
     ui.studioOpen.addEventListener("click", openStudio);
     ui.settingsOpen.addEventListener("click", openSettings);
     ui.notificationsOpen.addEventListener("click", openNotifications);
-    ui.channelsOpen.addEventListener("click", () => navigateTo("/channels"));
+    if (ui.channelsOpen) {
+      ui.channelsOpen.addEventListener("click", () => navigateTo("/channels"));
+    }
     ui.channelsPageOpen.addEventListener("click", () => navigateTo("/channels"));
     ui.channelsBack.addEventListener("click", () => navigateTo("/"));
     ui.channelsSearch.addEventListener("input", () =>
@@ -5178,19 +5285,26 @@ const ui = {
 
     const goViral = () => {
       navFocus = "viral";
-      setPrimaryNav("feed");
-      navigateTo("/");
+      setPrimaryNav("viral");
+      navigateTo("/viral");
       setTimeout(() => {
-        setPageView("feed");
-        if (ui.viralView) {
-          ui.viralView.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 50);
+        setPageView("viral");
+      }, 10);
+    };
+
+    const goRequest = () => {
+      navFocus = "request";
+      setPrimaryNav("request");
+      navigateTo("/request");
+      setTimeout(() => setPageView("request"), 10);
     };
 
     [ui.navHome, ui.railHome].forEach((button) => button && button.addEventListener("click", goHome));
     [ui.navChannels, ui.railChannels].forEach((button) => button && button.addEventListener("click", goChannels));
     [ui.navExplore, ui.railViral].forEach((button) => button && button.addEventListener("click", goViral));
+    if (ui.navRequests) {
+      ui.navRequests.addEventListener("click", goRequest);
+    }
 
     if (ui.heroChannels) {
       ui.heroChannels.addEventListener("click", goChannels);
@@ -5209,13 +5323,13 @@ const ui = {
     }
 
     if (ui.accountChip) {
-      ui.accountChip.addEventListener("click", () => {
-        if (currentUser) {
-          openStudio();
-        } else {
-          lockApp(t("message_sign_in"));
-        }
-      });
+    ui.accountChip.addEventListener("click", () => {
+      if (currentUser) {
+        openStudio();
+      } else {
+        lockApp(t("message_sign_in"));
+      }
+    });
     }
 
     setUiLanguage(getUiLanguage());
@@ -5261,6 +5375,17 @@ const ui = {
         const query = params.get("q") || "";
         ui.searchInput.value = query;
         fetchSearchResults(query, true);
+        return;
+      }
+      if (path === "/viral") {
+        navFocus = "viral";
+        setPageView("viral");
+        fetchViral();
+        return;
+      }
+      if (path === "/request") {
+        navFocus = "request";
+        setPageView("request");
         return;
       }
       if (path.startsWith("/admin") && !currentUser) {

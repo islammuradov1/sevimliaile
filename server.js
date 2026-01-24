@@ -2,6 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const admin = require("firebase-admin");
 const { Pool } = require("pg");
+let newDb = null;
+try {
+  ({ newDb } = require("pg-mem"));
+} catch (err) {
+  // pg-mem is optional; used only for in-memory fallback.
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,9 +22,34 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "";
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 120;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
+let pool = null;
+let dbMode = "memory";
+
+function createPool() {
+  const url = process.env.DATABASE_URL;
+  if (url) {
+    try {
+      pool = new Pool({ connectionString: url });
+      dbMode = "postgres";
+      console.log("Using Postgres via DATABASE_URL.");
+      return;
+    } catch (err) {
+      console.warn("Failed to create Postgres pool, falling back to in-memory DB.", err);
+    }
+  }
+  if (newDb) {
+    const mem = newDb({ autoCreateForeignKeyIndices: true });
+    const pgMem = mem.adapters.createPg();
+    pool = new pgMem.Pool();
+    dbMode = "memory";
+    console.warn("No DATABASE_URL set or connection failed. Using in-memory database (data resets on restart).");
+  } else {
+    console.error("DATABASE_URL missing and pg-mem is not installed. API server cannot start.");
+    process.exit(1);
+  }
+}
+
+createPool();
 
 if (FIREBASE_PROJECT_ID && FIREBASE_CLIENT_EMAIL && FIREBASE_PRIVATE_KEY) {
   admin.initializeApp({
@@ -42,8 +73,21 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: "2mb" }));
 app.use((req, res, next) => {
-  const blocked = ["/.env", "/server.js", "/package.json", "/package-lock.json"];
-  if (blocked.includes(req.path) || req.path.startsWith("/.git")) {
+  const blocked = [
+    "/.env",
+    "/server.js",
+    "/package.json",
+    "/package-lock.json",
+    "/wrangler.toml"
+  ];
+  const isBlocked =
+    blocked.includes(req.path) ||
+    req.path.startsWith("/.git") ||
+    req.path.startsWith("/scripts") ||
+    req.path.startsWith("/src") ||
+    req.path.startsWith("/migrations") ||
+    req.path.includes("..");
+  if (isBlocked) {
     return res.status(404).end();
   }
   next();
@@ -774,6 +818,20 @@ app.get("/api/videos", auth, async (req, res) => {
   res.json({ videos, hasMore });
 });
 
+app.get("/api/viral", auth, async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || "8", 10), 20);
+  const rows = await pool.query(
+    "SELECT videos.*, users.email as channel, users.role as channel_role, " +
+      "COALESCE(like_counts.count, 0)::int as hearts " +
+      "FROM videos JOIN users ON videos.owner_id = users.id " +
+      "LEFT JOIN (SELECT video_id, COUNT(*) as count FROM likes GROUP BY video_id) like_counts ON like_counts.video_id = videos.id " +
+      "WHERE videos.youtube_id IS NOT NULL " +
+      "ORDER BY videos.views DESC, hearts DESC LIMIT $1",
+    [limit]
+  );
+  res.json({ videos: rows.rows, hasMore: false });
+});
+
 app.get("/api/videos/:id", auth, async (req, res) => {
   const settingsResult = await pool.query(
     "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = $1",
@@ -1193,13 +1251,43 @@ app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole([
   res.json({ video: { ...video, channel: owner.rows[0] ? owner.rows[0].email : "" } });
 });
 
-initDb()
-  .then(() => {
+app.post("/api/requests", auth, async (req, res) => {
+  const { reason, details, contact } = req.body || {};
+  if (!reason || !details || !contact) {
+    return res.status(400).json({ error: "reason, details, contact required" });
+  }
+  await pool.query(
+    "INSERT INTO notifications (user_id, message, created_at) VALUES ($1, $2, $3)",
+    [req.user.id, `[REQUEST:${reason}] ${details} | contact: ${contact}`, nowIso()]
+  );
+  res.json({ success: true });
+});
+
+async function start() {
+  try {
+    await initDb();
     app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`Server running on http://localhost:${PORT} (${dbMode})`);
     });
-  })
-  .catch((err) => {
-    console.error("Failed to start server", err);
-    process.exit(1);
-  });
+  } catch (err) {
+    if (dbMode === "postgres") {
+      console.error("Postgres connection failed, retrying with in-memory DB.", err);
+      createPool();
+      try {
+        await initDb();
+        app.listen(PORT, () => {
+          console.log(`Server running on http://localhost:${PORT} (${dbMode})`);
+        });
+        return;
+      } catch (inner) {
+        console.error("Failed to start server after fallback", inner);
+        process.exit(1);
+      }
+    } else {
+      console.error("Failed to start server", err);
+      process.exit(1);
+    }
+  }
+}
+
+start();

@@ -924,6 +924,20 @@ export default {
       return jsonResponse({ notifications: result.results || [] }, 200, withCors({}, origin));
     }
 
+    if (path === "/requests" && request.method === "POST") {
+      const body = await parseJson(request);
+      const { reason, details, contact } = body || {};
+      if (!reason || !details || !contact) {
+        return jsonResponse({ error: "reason, details, contact required" }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare(
+        "INSERT INTO notifications (user_id, message, created_at) VALUES (?, ?, ?)"
+      )
+        .bind(user.id, `[REQUEST:${reason}] ${details} | contact: ${contact}`, nowIso())
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
     if (path.startsWith("/notifications/") && path.endsWith("/read") && request.method === "POST") {
       const id = path.split("/")[2];
       await env.DB.prepare("UPDATE notifications SET read_at = ? WHERE id = ? AND user_id = ?")

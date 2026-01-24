@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ff6b4a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="logo.png">
   <title>Sevimli Aile - Video Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,9 +24,22 @@
             <span>Sevimli Aile</span>
           </div>
           <nav class="top-nav" aria-label="Primary navigation">
-            <button type="button" id="nav-home" class="active" aria-label="Home">Home</button>
-            <button type="button" id="nav-explore" aria-label="Viral videos">Viral</button>
-            <button type="button" id="nav-channels" aria-label="Channels">Channels</button>
+            <button type="button" id="nav-home" class="active" aria-label="Home">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8z"/></svg>
+              <span>Home</span>
+            </button>
+            <button type="button" id="nav-explore" aria-label="Viral videos">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2s-1 3-4.5 5S3 12 3 14.5A7.5 7.5 0 0 0 10.5 22c4.1 0 7.5-3.4 7.5-7.5 0-1.9-.8-3.6-2-5C17.5 7.5 19 6 20 4c-1 5-4 6-4 6C17 6 12 2 12 2z" fill="currentColor"/></svg>
+              <span>Viral</span>
+            </button>
+            <button type="button" id="nav-channels" aria-label="Channels">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v3H4zm0 5h12v3H4zm0 5h16v3H4z"/></svg>
+              <span>Channels</span>
+            </button>
+            <button type="button" id="nav-requests" aria-label="Requests" class="accent-green">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3l4 2-4 2V3z"/><path d="M9 13l2 2 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+              <span>Xahiş et</span>
+            </button>
           </nav>
         </div>
         <div class="topbar-center"></div>
@@ -101,44 +118,6 @@
     </div>
 
     <div class="layout">
-      <aside>
-        <div class="nav-rail" aria-label="Navigation">
-          <button type="button" id="rail-home" class="active" aria-label="Home">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/>
-            </svg>
-            <span>Home</span>
-          </button>
-          <button type="button" id="rail-viral" aria-label="Viral">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M13 3s-1 3-4 4.5C5 9 3 12 3 14.5 3 18.1 6 21 9.5 21c3.5 0 6.5-2.9 6.5-6.5 0-1.8-.7-3.3-1.8-4.5C16.5 9 18 8 19 6c-1 5-4 5-4 5 1-4-2-8-2-8z" fill="currentColor"/>
-            </svg>
-            <span>Viral</span>
-          </button>
-          <button type="button" id="rail-channels" aria-label="Channels">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 6h16v3H4zM4 11h12v3H4zM4 16h16v3H4z"/>
-            </svg>
-            <span>Channels</span>
-          </button>
-        </div>
-        <div class="sidebar-section">
-          <h3 data-i18n="sidebar_subscribed">Subscribed</h3>
-          <div id="subscribed-list" class="form-grid"></div>
-        </div>
-        <div class="sidebar-section">
-          <div class="section-head">
-            <h3 data-i18n="sidebar_channels">Channels</h3>
-            <button class="pill icon-button" id="channels-open" type="button" aria-label="All channels" data-i18n-aria="channels_open">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-          <div id="channel-list" class="form-grid"></div>
-        </div>
-      </aside>
-
       <main>
         <section class="player-area" id="player-area">
           <div class="player-shell" id="player-shell" data-state="loading">
@@ -460,6 +439,36 @@
             <h2 data-i18n="feed_viral">Viral</h2>
           </div>
           <div class="grid" id="viral-grid"></div>
+        </section>
+
+        <section class="request-view hidden" id="request-view" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="request_title">Xahiş et</h2>
+            <p class="card-meta" data-i18n="request_subtitle">Let us know what you need.</p>
+          </div>
+          <form class="request-card" id="request-form">
+            <div class="form-grid">
+              <label for="request-reason" data-i18n="request_reason">Reason</label>
+              <select id="request-reason" name="request-reason" required>
+                <option value="video" data-i18n="request_video">Request videos from a YouTube channel</option>
+                <option value="partnership" data-i18n="request_partnership">Partnership</option>
+                <option value="feature" data-i18n="request_feature">New functionality</option>
+                <option value="pro" data-i18n="request_pro">Free Pro for 1 month</option>
+              </select>
+            </div>
+            <div class="form-grid request-fields" id="request-fields">
+              <label for="request-details" data-i18n="request_details_label">Details</label>
+              <textarea id="request-details" name="request-details" rows="4" placeholder="Tell us the channel name, links, or what you need" data-i18n-placeholder="request_details_placeholder" required></textarea>
+            </div>
+            <div class="form-grid">
+              <label for="request-contact" data-i18n="request_contact_label">How to reach you</label>
+              <input id="request-contact" name="request-contact" type="text" placeholder="Email or phone" data-i18n-placeholder="request_contact_placeholder" required>
+            </div>
+            <div class="form-actions">
+              <button class="primary green" type="submit" id="request-submit">Xahiş et</button>
+              <span class="card-meta" id="request-message"></span>
+            </div>
+          </form>
         </section>
 
         <section class="channel-view hidden" id="channel-view" aria-hidden="true">

@@ -5,7 +5,8 @@
   "description": "Sevimli Aile video hub",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node scripts/serve-static.js",
+    "api": "node server.js",
     "build": "node scripts/build.js"
   },
   "dependencies": {
