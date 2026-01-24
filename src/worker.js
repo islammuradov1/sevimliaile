@@ -75,6 +75,46 @@ function normalizeLanguages(input) {
     .filter(Boolean);
 }
 
+function normalizeReligion(input) {
+  if (!input || typeof input !== "string") return "none";
+  const value = input.trim().toLowerCase();
+  if (["islam", "christian", "jews", "buddist", "none"].includes(value)) return value;
+  if (value === "shia" || value === "sunni") return "islam";
+  return "none";
+}
+
+function normalizeReligionDetail(religion, detail) {
+  if (!detail || typeof detail !== "string") return "";
+  const value = detail.trim().toLowerCase();
+  if (religion === "islam" && (value === "shia" || value === "sunni")) return value;
+  if (religion === "christian" && ["catholic", "orthodox", "protestant"].includes(value)) {
+    return value;
+  }
+  return "";
+}
+
+function normalizeAllowedReligions(values) {
+  if (!Array.isArray(values)) return [];
+  const allowed = [];
+  const seen = new Set();
+  values.forEach((value) => {
+    const v = String(value || "").trim().toLowerCase();
+    if (["none", "islam", "shia", "sunni", "christian", "jews", "buddist"].includes(v) && !seen.has(v)) {
+      allowed.push(v);
+      seen.add(v);
+    }
+  });
+  return allowed;
+}
+
+function isReligionAllowed(allowedList, mode, religion, detail) {
+  if (!allowedList || !allowedList.length) return true;
+  const base = (religion || "none").toLowerCase();
+  const extra = (detail || "").toLowerCase();
+  const matches = allowedList.includes(base) || (extra && allowedList.includes(extra));
+  return mode === "block" ? !matches : matches;
+}
+
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/).filter(Boolean);
@@ -236,7 +276,7 @@ function safeJsonArray(value) {
 async function loadUserSettings(env, userId) {
   try {
     const settings = await env.DB.prepare(
-      "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
+      "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
     )
       .bind(userId)
       .first();
@@ -245,8 +285,10 @@ async function loadUserSettings(env, userId) {
       allowedLanguages: safeJsonArray(settings?.allowed_languages),
       allowedTopics: safeJsonArray(settings?.allowed_topics),
       allowedChannels: safeJsonArray(settings?.allowed_channels),
+      allowedReligions: normalizeAllowedReligions(safeJsonArray(settings?.allowed_religions)),
       topicMode: settings?.topic_mode || "allow",
       channelMode: settings?.channel_mode || "allow",
+      religionMode: settings?.religion_mode || "allow",
       maxDailyMinutes: settings?.max_daily_minutes || 0
     };
   } catch (err) {
@@ -255,8 +297,10 @@ async function loadUserSettings(env, userId) {
       allowedLanguages: [],
       allowedTopics: [],
       allowedChannels: [],
+      allowedReligions: [],
       topicMode: "allow",
       channelMode: "allow",
+      religionMode: "allow",
       maxDailyMinutes: 0
     };
   }
@@ -405,8 +449,10 @@ export default {
             allowed_languages: data.allowedLanguages,
             allowed_topics: data.allowedTopics,
             allowed_channels: data.allowedChannels,
+            allowed_religions: data.allowedReligions,
             topic_mode: data.topicMode,
             channel_mode: data.channelMode,
+            religion_mode: data.religionMode,
             max_daily_minutes: data.maxDailyMinutes
           }
         },
@@ -425,19 +471,23 @@ export default {
       const channels = normalizeChannelIds(body.channels);
       const topicMode = body.topicMode === "block" ? "block" : "allow";
       const channelMode = body.channelMode === "block" ? "block" : "allow";
+      const religions = normalizeAllowedReligions(body.religions || []);
+      const religionMode = body.religionMode === "block" ? "block" : "allow";
       const maxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(body.maxDailyMinutes || "0", 10)));
       await env.DB.prepare(
-        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes, updated_at) " +
-          "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
-          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, allowed_channels = excluded.allowed_channels, topic_mode = excluded.topic_mode, channel_mode = excluded.channel_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
+        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes, updated_at) " +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, allowed_channels = excluded.allowed_channels, allowed_religions = excluded.allowed_religions, topic_mode = excluded.topic_mode, channel_mode = excluded.channel_mode, religion_mode = excluded.religion_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
       )
         .bind(
           user.id,
           JSON.stringify(languages),
           JSON.stringify(topics),
           JSON.stringify(channels),
+          JSON.stringify(religions),
           topicMode,
           channelMode,
+          religionMode,
           maxDailyMinutes,
           nowIso()
         )
@@ -636,6 +686,8 @@ export default {
       const topicMode = settings.topicMode;
       const allowedChannels = settings.allowedChannels;
       const channelMode = settings.channelMode;
+      const allowedReligions = settings.allowedReligions;
+      const religionMode = settings.religionMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (onlySubscribed) {
@@ -681,6 +733,25 @@ export default {
               " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
           }
           binds.push(...allowedTopics);
+        }
+        if (allowedReligions.length) {
+          const list = allowedReligions.map(() => "?").join(",");
+          if (religionMode === "block") {
+            where +=
+              " AND (COALESCE(videos.religion, 'none') NOT IN (" +
+              list +
+              ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail NOT IN (" +
+              list +
+              ")))";
+          } else {
+            where +=
+              " AND (COALESCE(videos.religion, 'none') IN (" +
+              list +
+              ") OR COALESCE(videos.religion_detail, '') IN (" +
+              list +
+              "))";
+          }
+          binds.push(...allowedReligions, ...allowedReligions);
         }
       }
       const query =
@@ -739,9 +810,73 @@ export default {
       return jsonResponse({ videos: rows.slice(0, limit), hasMore }, 200, withCors({}, origin));
     }
 
+    if (
+      path.startsWith("/videos/") &&
+      request.method === "GET" &&
+      !path.endsWith("/view") &&
+      !path.endsWith("/like") &&
+      !path.endsWith("/update")
+    ) {
+      const videoId = path.split("/")[2];
+      if (!videoId) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
+      const video = await env.DB.prepare(
+        "SELECT videos.*, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel " +
+          "FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = ? AND videos.youtube_id IS NOT NULL"
+      )
+        .bind(videoId)
+        .first();
+      if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
+      const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
+      if (applyFilters) {
+        if (
+          settings.allowedLanguages.length &&
+          !settings.allowedLanguages.includes((video.language || "").toLowerCase())
+        ) {
+          return jsonResponse({ error: "Blocked by language settings." }, 403, withCors({}, origin));
+        }
+        if (settings.allowedChannels.length) {
+          const isAllowedChannel = settings.allowedChannels.includes(Number(video.owner_id));
+          if (settings.channelMode === "allow" && !isAllowedChannel) {
+            return jsonResponse({ error: "Blocked by channel settings." }, 403, withCors({}, origin));
+          }
+          if (settings.channelMode === "block" && isAllowedChannel) {
+            return jsonResponse({ error: "Blocked by channel settings." }, 403, withCors({}, origin));
+          }
+        }
+        if (
+          !isReligionAllowed(
+            settings.allowedReligions,
+            settings.religionMode,
+            video.religion,
+            video.religion_detail
+          )
+        ) {
+          return jsonResponse({ error: "Blocked by religion settings." }, 403, withCors({}, origin));
+        }
+        if (settings.allowedTopics.length) {
+          const topics = safeJsonArray(video.topics).map((topic) => String(topic || "").toLowerCase());
+          const hasTopic = topics.some((topic) => settings.allowedTopics.includes(topic));
+          if (settings.topicMode === "allow" && !hasTopic) {
+            return jsonResponse({ error: "Blocked by topic settings." }, 403, withCors({}, origin));
+          }
+          if (settings.topicMode === "block" && hasTopic) {
+            return jsonResponse({ error: "Blocked by topic settings." }, 403, withCors({}, origin));
+          }
+        }
+      }
+      const enriched = {
+        ...video,
+        topics: safeJsonArray(video.topics),
+        languages: safeJsonArray(video.languages)
+      };
+      return jsonResponse({ video: enriched }, 200, withCors({}, origin));
+    }
+
     if (path.startsWith("/videos/") && request.method === "DELETE") {
       const videoId = path.split("/")[2];
-      const video = await env.DB.prepare("SELECT owner_id FROM videos WHERE id = ?")
+      const video = await env.DB.prepare("SELECT owner_id, religion, religion_detail FROM videos WHERE id = ?")
         .bind(videoId)
         .first();
       if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
@@ -767,13 +902,22 @@ export default {
       const languages = normalizeLanguages(body.languages || language);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
+      const rawReligion = body.religion;
+      const nextReligion = rawReligion ? normalizeReligion(rawReligion) : video.religion || "none";
+      const nextReligionDetail = body.religion_detail
+        ? normalizeReligionDetail(nextReligion, body.religion_detail)
+        : rawReligion
+        ? normalizeReligionDetail(nextReligion, rawReligion)
+        : video.religion_detail || "";
       await env.DB.prepare(
-        "UPDATE videos SET title = ?, language = ?, languages = ?, topics = ? WHERE id = ?"
+        "UPDATE videos SET title = ?, language = ?, languages = ?, religion = ?, religion_detail = ?, topics = ? WHERE id = ?"
       )
         .bind(
           title || "Untitled video",
           language || "unspecified",
           JSON.stringify(storedLanguages),
+          nextReligion,
+          nextReligionDetail,
           JSON.stringify(topics),
           videoId
         )
@@ -802,9 +946,12 @@ export default {
       const languages = normalizeLanguages(body.languages);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
+      const rawReligion = body.religion;
+      const religion = normalizeReligion(rawReligion);
+      const religionDetail = normalizeReligionDetail(religion, body.religion_detail || rawReligion);
       await env.DB.prepare(
-        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
-          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
+        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
+          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
       )
         .bind(
           meta.title,
@@ -814,6 +961,8 @@ export default {
           meta.duration || 0,
           language,
           JSON.stringify(storedLanguages),
+          religion,
+          religionDetail,
           JSON.stringify(topics),
           nowIso()
         )
@@ -1031,6 +1180,8 @@ export default {
       const topicMode = settings.topicMode;
       const allowedChannels = settings.allowedChannels;
       const channelMode = settings.channelMode;
+      const allowedReligions = settings.allowedReligions;
+      const religionMode = settings.religionMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
       if (applyFilters && allowedChannels.length) {
@@ -1063,6 +1214,25 @@ export default {
               " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
           }
           binds.push(...allowedTopics);
+        }
+        if (allowedReligions.length) {
+          const list = allowedReligions.map(() => "?").join(",");
+          if (religionMode === "block") {
+            where +=
+              " AND (COALESCE(videos.religion, 'none') NOT IN (" +
+              list +
+              ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail NOT IN (" +
+              list +
+              ")))";
+          } else {
+            where +=
+              " AND (COALESCE(videos.religion, 'none') IN (" +
+              list +
+              ") OR COALESCE(videos.religion_detail, '') IN (" +
+              list +
+              "))";
+          }
+          binds.push(...allowedReligions, ...allowedReligions);
         }
       }
       const result = await env.DB.prepare(
@@ -1131,7 +1301,7 @@ export default {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
       const result = await env.DB.prepare(
-        "SELECT youtube_url, language, languages, topics FROM videos ORDER BY created_at DESC"
+        "SELECT youtube_url, language, languages, religion, religion_detail, topics FROM videos ORDER BY created_at DESC"
       ).all();
       const lines = (result.results || []).map((row) => {
         const safeUrl = String(row.youtube_url || "").replace(/'/g, "''");
@@ -1147,13 +1317,19 @@ export default {
         const safeLanguages = JSON.stringify(languages).replace(/'/g, "''");
         const topics = row.topics ? JSON.parse(row.topics).join("|") : "";
         const safeTopics = String(topics).replace(/'/g, "''");
+        const safeReligion = String(row.religion || "none").replace(/'/g, "''");
+        const safeReligionDetail = String(row.religion_detail || "").replace(/'/g, "''");
         return (
-          "INSERT INTO videos (youtube_url, language, languages, topics) VALUES ('" +
+          "INSERT INTO videos (youtube_url, language, languages, religion, religion_detail, topics) VALUES ('" +
           safeUrl +
           "', '" +
           safeLanguage +
           "', '" +
           safeLanguages +
+          "', '" +
+          safeReligion +
+          "', '" +
+          safeReligionDetail +
           "', '" +
           safeTopics +
           "');"
@@ -1196,9 +1372,14 @@ export default {
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
         const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
+        const religion = normalizeReligion(row.religion || row.faith);
+        const religionDetail = normalizeReligionDetail(
+          religion,
+          row.religion_detail || row.faith_detail || row.religion || row.faith
+        );
         const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
         )
           .bind(
             meta.title,
@@ -1208,6 +1389,8 @@ export default {
             meta.duration || 0,
             language,
             JSON.stringify(storedLanguages),
+            religion,
+            religionDetail,
             JSON.stringify(topics),
             nowIso()
           )
@@ -1246,9 +1429,14 @@ export default {
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
         const storedLanguages = languages.length ? languages : language ? [language] : [];
         const topics = normalizeTopics(row.topics || "");
+        const religion = normalizeReligion(row.religion || row.faith);
+        const religionDetail = normalizeReligionDetail(
+          religion,
+          row.religion_detail || row.faith_detail || row.religion || row.faith
+        );
         const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)"
+          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
+            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
         )
           .bind(
             meta.title,
@@ -1258,6 +1446,8 @@ export default {
             meta.duration || 0,
             language,
             JSON.stringify(storedLanguages),
+            religion,
+            religionDetail,
             JSON.stringify(topics),
             nowIso()
           )

@@ -131,7 +131,6 @@ const ui = {
       adminImportsOpen: document.getElementById("admin-imports-open"),
       adminVideosOpen: document.getElementById("admin-videos-open"),
       channelsPageOpen: document.getElementById("channels-page-open"),
-      studioOpen: document.getElementById("studio-open"),
       settingsOpen: document.getElementById("settings-open"),
       notificationsOpen: document.getElementById("notifications-open"),
       contactOpen: document.getElementById("contact-open"),
@@ -152,6 +151,7 @@ const ui = {
       settingsTopics: document.getElementById("settings-topics"),
       settingsChannelSearch: document.getElementById("channel-search"),
       settingsChannels: document.getElementById("settings-channels"),
+      settingsReligions: document.getElementById("settings-religions"),
       uploadTopics: document.getElementById("upload-topics"),
       topicsList: document.getElementById("topics-list"),
       maxWatch: document.getElementById("max-watch"),
@@ -374,6 +374,14 @@ const ui = {
         upload_languages: "Languages",
         upload_topics: "Topics (comma separated)",
         upload_topics_placeholder: "nastya, masha, minecraft",
+        upload_religion: "Religion",
+        upload_religion_detail: "Religion detail (optional)",
+        religion_none: "No religion",
+        religion_islam: "Islam",
+        religion_shia: "Islam · Shia",
+        religion_christian: "Christian",
+        religion_jews: "Jews",
+        religion_buddist: "Buddist",
         upload_add: "Add video",
         upload_hint: "Title will auto-fill from YouTube when available.",
         admin_title: "Admin controls",
@@ -417,6 +425,9 @@ const ui = {
         settings_channel_block: "Hide selected",
         settings_channel_search: "Find channel",
         settings_channel_placeholder: "Search channels",
+        settings_religions: "Religions to control",
+        settings_religion_allow: "Allow only selected",
+        settings_religion_block: "Hide selected",
         settings_watch_limit: "Daily watch limit (hours)",
         settings_password: "Confirm with your password",
         settings_save: "Save settings",
@@ -691,6 +702,9 @@ const ui = {
         settings_channel_block: "Скрыть выбранные",
         settings_channel_search: "Найти канал",
         settings_channel_placeholder: "Поиск каналов",
+        settings_religions: "Религии для контроля",
+        settings_religion_allow: "Показывать только выбранные",
+        settings_religion_block: "Скрыть выбранные",
         settings_watch_limit: "Лимит просмотра в день (часы)",
         settings_password: "Подтвердите паролем",
         settings_save: "Сохранить",
@@ -965,6 +979,9 @@ const ui = {
         settings_channel_block: "隐藏所选",
         settings_channel_search: "查找频道",
         settings_channel_placeholder: "搜索频道",
+        settings_religions: "宗教筛选",
+        settings_religion_allow: "仅允许所选",
+        settings_religion_block: "隐藏所选",
         settings_watch_limit: "每日观看时长（小时）",
         settings_password: "用密码确认",
         settings_save: "保存设置",
@@ -1239,6 +1256,9 @@ const ui = {
         settings_channel_block: "Seçilenleri gizle",
         settings_channel_search: "Kanal ara",
         settings_channel_placeholder: "Kanalları ara",
+        settings_religions: "Kontrol edilecek inançlar",
+        settings_religion_allow: "Yalnızca seçilenleri göster",
+        settings_religion_block: "Seçilenleri gizle",
         settings_watch_limit: "Günlük izleme limiti (saat)",
         settings_password: "Şifre ile onayla",
         settings_save: "Ayarları kaydet",
@@ -1513,6 +1533,9 @@ const ui = {
         settings_channel_block: "Seçilənləri gizlət",
         settings_channel_search: "Kanal tap",
         settings_channel_placeholder: "Kanalları axtar",
+        settings_religions: "İdarə olunacaq inanc",
+        settings_religion_allow: "Yalnız seçilənləri göstər",
+        settings_religion_block: "Seçilənləri gizlət",
         settings_watch_limit: "Gündəlik izləmə limiti (saat)",
         settings_password: "Şifrə ilə təsdiqlə",
         settings_save: "Ayarları yadda saxla",
@@ -1787,6 +1810,9 @@ const ui = {
         settings_channel_block: "إخفاء المحدد",
         settings_channel_search: "ابحث عن قناة",
         settings_channel_placeholder: "ابحث عن القنوات",
+        settings_religions: "الديانات للتحكم",
+        settings_religion_allow: "السماح بالمحدد فقط",
+        settings_religion_block: "إخفاء المحدد",
         settings_watch_limit: "حد المشاهدة اليومي (بالساعات)",
         settings_password: "التأكيد بكلمة المرور",
         settings_save: "حفظ الإعدادات",
@@ -2115,6 +2141,7 @@ const ui = {
     let settingsSelectedTopics = new Set();
     let settingsAvailableChannels = [];
     let settingsSelectedChannels = new Set();
+    let settingsSelectedReligions = new Set();
     let adminUsersData = [];
     let adminChannelsData = [];
     let adminVideosData = [];
@@ -3115,6 +3142,12 @@ const ui = {
         return;
       }
       const res = await apiFetch("/api/videos/" + videoId);
+      if (res.status === 403) {
+        navigateTo("/", { replace: true });
+        setPageView("feed");
+        updateStatus("status_limit_reached");
+        return;
+      }
       if (!res.ok) {
         return;
       }
@@ -3568,12 +3601,18 @@ const ui = {
         const languageSelect = document.getElementById("upload-language");
         const selectedLanguages = Array.from(languageSelect.selectedOptions).map((option) => option.value);
         const language = selectedLanguages[0] || "unspecified";
+        const religionSelect = document.getElementById("upload-religion");
+        const religionDetail = document.getElementById("upload-religion-detail");
+        const religion = religionSelect ? religionSelect.value : "none";
+        const religion_detail = religionDetail ? religionDetail.value.trim() : "";
         const topics = ui.uploadTopics.value
           .split(/[|,]/g)
           .map((topic) => topic.trim())
           .filter(Boolean);
         payload.language = language;
         payload.languages = selectedLanguages;
+        payload.religion = religion;
+        payload.religion_detail = religion_detail;
         payload.topics = topics;
       }
       const res = await apiFetch("/api/videos", {
@@ -4468,32 +4507,43 @@ const ui = {
       ui.settingsForm.reset();
       ui.historyList.innerHTML = t("status_loading");
       settingsSelectedTopics = new Set();
+      settingsSelectedChannels = new Set();
+      settingsSelectedReligions = new Set();
       const res = await apiFetch("/api/settings");
       const data = await res.json();
       if (res.ok && data.settings) {
         const languages = new Set(data.settings.allowed_languages || []);
         const topics = new Set(data.settings.allowed_topics || []);
         const channels = new Set((data.settings.allowed_channels || []).map(String));
+        const religions = new Set((data.settings.allowed_religions || []).map((rel) => String(rel).toLowerCase()));
         const mode = data.settings.topic_mode === "block" ? "block" : "allow";
         const channelMode = data.settings.channel_mode === "block" ? "block" : "allow";
+        const religionMode = data.settings.religion_mode === "block" ? "block" : "allow";
         document.querySelectorAll("input[name='topic-mode']").forEach((input) => {
           input.checked = input.value === mode;
         });
         document.querySelectorAll("input[name='channel-mode']").forEach((input) => {
           input.checked = input.value === channelMode;
         });
+        document.querySelectorAll("input[name='religion-mode']").forEach((input) => {
+          input.checked = input.value === religionMode;
+        });
         document.querySelectorAll("input[name='settings-language']").forEach((input) => {
           input.checked = languages.has(input.value);
         });
         settingsSelectedTopics = topics;
         settingsSelectedChannels = channels;
+        settingsSelectedReligions = religions;
         ui.maxWatch.value = Math.round((data.settings.max_daily_minutes || 0) / 60);
+      } else {
+        renderSettingsReligions(settingsSelectedReligions);
       }
       const unlocked = Date.now() - settingsUnlockedAt < SETTINGS_UNLOCK_MS;
       ui.settingsPassword.required = !unlocked;
       ui.settingsPassword.value = "";
       await fetchTopics();
       await fetchSettingsChannels("");
+      renderSettingsReligions(settingsSelectedReligions);
       await loadHistory();
       openModal(ui.settingsModal);
     }
@@ -4635,6 +4685,21 @@ const ui = {
       });
     }
 
+    function renderSettingsReligions(selectedReligions) {
+      if (!ui.settingsReligions) return;
+      const inputs = ui.settingsReligions.querySelectorAll("input[name='settings-religion']");
+      inputs.forEach((input) => {
+        input.checked = selectedReligions.has(input.value);
+        input.onchange = () => {
+          if (input.checked) {
+            selectedReligions.add(input.value);
+          } else {
+            selectedReligions.delete(input.value);
+          }
+        };
+      });
+    }
+
     async function loadHistory() {
       const res = await apiFetch("/api/history");
       const data = await res.json();
@@ -4714,6 +4779,9 @@ const ui = {
       const topicMode = document.querySelector("input[name='topic-mode']:checked").value;
       const channels = Array.from(settingsSelectedChannels);
       const channelMode = document.querySelector("input[name='channel-mode']:checked").value;
+      const religions = Array.from(settingsSelectedReligions);
+      const religionMode =
+        (document.querySelector("input[name='religion-mode']:checked") || {}).value || "allow";
       const maxDailyMinutes = Math.max(
         0,
         Math.min(24 * 60, parseInt(ui.maxWatch.value || "0", 10) * 60)
@@ -4721,7 +4789,16 @@ const ui = {
       const res = await apiFetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ languages, topics, topicMode, channels, channelMode, maxDailyMinutes })
+        body: JSON.stringify({
+          languages,
+          topics,
+          topicMode,
+          channels,
+          channelMode,
+          religions,
+          religionMode,
+          maxDailyMinutes
+        })
       });
       if (!res.ok) {
         const data = await res.json();
@@ -5139,7 +5216,9 @@ const ui = {
     if (ui.navRequests) {
       ui.navRequests.addEventListener("click", goRequest);
     }
-    ui.studioOpen.addEventListener("click", openStudio);
+    if (ui.studioOpen) {
+      ui.studioOpen.addEventListener("click", openStudio);
+    }
     ui.settingsOpen.addEventListener("click", openSettings);
     ui.notificationsOpen.addEventListener("click", openNotifications);
     if (ui.channelsOpen) {

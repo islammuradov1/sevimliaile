@@ -97,7 +97,6 @@
         </div>
         <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
         <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
-        <button class="pill icon-button" id="studio-open" type="button" aria-label="Studio"></button>
         <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
         <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
         <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
@@ -540,6 +539,17 @@
             <option value="turkish" data-i18n="lang_turkish">Turkish</option>
             <option value="arabic" data-i18n="lang_arabic">Arabic</option>
           </select>
+          <label for="upload-religion" data-i18n="upload_religion">Religion</label>
+          <select id="upload-religion" name="upload-religion">
+            <option value="none" data-i18n="religion_none">No religion</option>
+            <option value="islam" data-i18n="religion_islam">Islam</option>
+            <option value="shia" data-i18n="religion_shia">Islam · Shia</option>
+            <option value="christian" data-i18n="religion_christian">Christian</option>
+            <option value="jews" data-i18n="religion_jews">Jews</option>
+            <option value="buddist" data-i18n="religion_buddist">Buddist</option>
+          </select>
+          <label for="upload-religion-detail" data-i18n="upload_religion_detail">Religion detail (optional)</label>
+          <input id="upload-religion-detail" name="upload-religion-detail" type="text" placeholder="Shia, Sunni, Catholic..." data-i18n-placeholder="upload_religion_detail_placeholder">
           <label for="upload-topics" data-i18n="upload_topics">Topics (comma separated)</label>
           <input id="upload-topics" name="upload-topics" type="text" placeholder="nastya, masha, minecraft" data-i18n-placeholder="upload_topics_placeholder" list="topics-list">
           <datalist id="topics-list"></datalist>
@@ -694,6 +704,21 @@
               <label for="channel-search" data-i18n="settings_channel_search">Find channel</label>
               <input id="channel-search" name="channel-search" type="search" placeholder="Search channels" data-i18n-placeholder="settings_channel_placeholder">
               <div id="settings-channels" class="form-grid topic-list"></div>
+            </div>
+            <div class="settings-section">
+              <div class="card-meta" data-i18n="settings_religions">Religions to control</div>
+              <div class="settings-pills">
+                <label class="pill"><input type="radio" name="religion-mode" value="allow" checked> <span data-i18n="settings_religion_allow">Allow only selected</span></label>
+                <label class="pill"><input type="radio" name="religion-mode" value="block"> <span data-i18n="settings_religion_block">Hide selected</span></label>
+              </div>
+              <div class="settings-chips" id="settings-religions">
+                <label class="pill"><input type="checkbox" name="settings-religion" value="none"> <span data-i18n="religion_none">No religion</span></label>
+                <label class="pill"><input type="checkbox" name="settings-religion" value="islam"> <span data-i18n="religion_islam">Islam</span></label>
+                <label class="pill"><input type="checkbox" name="settings-religion" value="shia"> <span data-i18n="religion_shia">Islam · Shia</span></label>
+                <label class="pill"><input type="checkbox" name="settings-religion" value="christian"> <span data-i18n="religion_christian">Christian</span></label>
+                <label class="pill"><input type="checkbox" name="settings-religion" value="jews"> <span data-i18n="religion_jews">Jews</span></label>
+                <label class="pill"><input type="checkbox" name="settings-religion" value="buddist"> <span data-i18n="religion_buddist">Buddist</span></label>
+              </div>
             </div>
             <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
             <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">

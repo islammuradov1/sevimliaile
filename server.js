@@ -136,6 +136,8 @@ async function initDb() {
       views INTEGER NOT NULL DEFAULT 0,
       duration INTEGER NOT NULL DEFAULT 0,
       language TEXT,
+      religion TEXT,
+      religion_detail TEXT,
       topics TEXT[],
       created_at TIMESTAMPTZ NOT NULL
     );
@@ -202,11 +204,15 @@ async function initDb() {
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS firebase_uid TEXT UNIQUE");
   await pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'free'");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS language TEXT");
+  await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religion TEXT");
+  await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS religion_detail TEXT");
   await pool.query("ALTER TABLE videos ADD COLUMN IF NOT EXISTS topics TEXT[]");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS topic_mode TEXT NOT NULL DEFAULT 'allow'");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS allowed_channels INTEGER[]");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS channel_mode TEXT NOT NULL DEFAULT 'allow'");
   await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS max_daily_minutes INTEGER NOT NULL DEFAULT 0");
+  await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS allowed_religions TEXT[]");
+  await pool.query("ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS religion_mode TEXT NOT NULL DEFAULT 'allow'");
   await pool.query("ALTER TABLE view_history ADD COLUMN IF NOT EXISTS watch_seconds INTEGER NOT NULL DEFAULT 0");
 }
 
@@ -364,6 +370,32 @@ function normalizeLanguage(input) {
     return "unspecified";
   }
   return input.trim().toLowerCase() || "unspecified";
+}
+
+function normalizeReligion(input) {
+  if (!input || typeof input !== "string") {
+    return "none";
+  }
+  const value = input.trim().toLowerCase();
+  const allowed = ["islam", "shia", "christian", "jews", "buddist", "none"];
+  if (allowed.includes(value)) {
+    return value === "shia" ? "islam" : value;
+  }
+  return "none";
+}
+
+function normalizeReligionDetail(religion, detail) {
+  if (!detail || typeof detail !== "string") {
+    return "";
+  }
+  const value = detail.trim().toLowerCase();
+  if (religion === "islam" && (value === "shia" || value === "sunni")) {
+    return value;
+  }
+  if (religion === "christian" && ["catholic", "orthodox", "protestant"].includes(value)) {
+    return value;
+  }
+  return "";
 }
 
 function normalizeTopics(input) {
@@ -572,17 +604,21 @@ app.get("/api/settings", auth, async (req, res) => {
     return res.status(403).json({ error: "Settings available on pro plan only." });
   }
   const result = await pool.query(
-    "SELECT allowed_languages, allowed_topics, topic_mode, max_daily_minutes FROM user_settings WHERE user_id = $1",
+    "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes FROM user_settings WHERE user_id = $1",
     [req.user.id]
   );
+  const row = result.rows[0] || {};
   res.json({
-    settings:
-      result.rows[0] || {
-        allowed_languages: [],
-        allowed_topics: [],
-        topic_mode: "allow",
-        max_daily_minutes: 0
-      }
+    settings: {
+      allowed_languages: row.allowed_languages || [],
+      allowed_topics: row.allowed_topics || [],
+      allowed_channels: row.allowed_channels || [],
+      allowed_religions: row.allowed_religions || [],
+      topic_mode: row.topic_mode || "allow",
+      channel_mode: row.channel_mode || "allow",
+      religion_mode: row.religion_mode || "allow",
+      max_daily_minutes: row.max_daily_minutes || 0
+    }
   });
 });
 
@@ -590,7 +626,8 @@ app.post("/api/settings", auth, requireRecentAuth(), async (req, res) => {
   if (req.user.plan !== "pro") {
     return res.status(403).json({ error: "Settings available on pro plan only." });
   }
-  const { languages, topics, channels, topicMode, channelMode, maxDailyMinutes } = req.body || {};
+  const { languages, topics, channels, topicMode, channelMode, religions, religionMode, maxDailyMinutes } =
+    req.body || {};
   const finalLanguages = Array.isArray(languages)
     ? languages.map((lang) => String(lang).trim().toLowerCase()).filter(Boolean)
     : [];
@@ -602,18 +639,24 @@ app.post("/api/settings", auth, requireRecentAuth(), async (req, res) => {
     : [];
   const finalTopicMode = topicMode === "block" ? "block" : "allow";
   const finalChannelMode = channelMode === "block" ? "block" : "allow";
+  const finalReligions = Array.isArray(religions)
+    ? religions.map((rel) => String(rel).trim().toLowerCase()).filter(Boolean)
+    : [];
+  const finalReligionMode = religionMode === "block" ? "block" : "allow";
   const finalMaxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(maxDailyMinutes || "0", 10)));
   await pool.query(
-    "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode, max_daily_minutes, updated_at) " +
-      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) " +
-      "ON CONFLICT (user_id) DO UPDATE SET allowed_languages = $2, allowed_topics = $3, allowed_channels = $4, topic_mode = $5, channel_mode = $6, max_daily_minutes = $7, updated_at = $8",
+    "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes, updated_at) " +
+      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) " +
+      "ON CONFLICT (user_id) DO UPDATE SET allowed_languages = $2, allowed_topics = $3, allowed_channels = $4, allowed_religions = $5, topic_mode = $6, channel_mode = $7, religion_mode = $8, max_daily_minutes = $9, updated_at = $10",
     [
       req.user.id,
       finalLanguages,
       finalTopics,
       finalChannels,
+      finalReligions,
       finalTopicMode,
       finalChannelMode,
+      finalReligionMode,
       finalMaxDailyMinutes,
       nowIso()
     ]
@@ -751,7 +794,7 @@ app.get("/api/videos", auth, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit || "30", 10), 100);
   const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
   const settingsResult = await pool.query(
-    "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = $1",
+    "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode FROM user_settings WHERE user_id = $1",
     [req.user.id]
   );
   const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
@@ -759,6 +802,8 @@ app.get("/api/videos", auth, async (req, res) => {
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
   const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
   const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
+  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
   const params = [];
   let where = "WHERE videos.youtube_id IS NOT NULL";
   if (onlySubscribed) {
@@ -796,6 +841,27 @@ app.get("/api/videos", auth, async (req, res) => {
       where += " AND videos.owner_id = ANY($" + params.length + ")";
     }
   }
+  if (allowedReligions.length) {
+    params.push(allowedReligions);
+    const relParam = params.length;
+    params.push(allowedReligions);
+    const relDetailParam = params.length;
+    if (religionMode === "block") {
+      where +=
+        " AND (COALESCE(videos.religion, 'none') <> ALL($" +
+        relParam +
+        ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail <> ALL($" +
+        relDetailParam +
+        ")))";
+    } else {
+      where +=
+        " AND (COALESCE(videos.religion, 'none') = ANY($" +
+        relParam +
+        ") OR COALESCE(videos.religion_detail, '') = ANY($" +
+        relDetailParam +
+        "))";
+    }
+  }
   const limitParam = params.length + 1;
   const offsetParam = params.length + 2;
   const likedParam = params.length + 3;
@@ -820,21 +886,77 @@ app.get("/api/videos", auth, async (req, res) => {
 
 app.get("/api/viral", auth, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit || "8", 10), 20);
+  const settingsResult = await pool.query(
+    "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode FROM user_settings WHERE user_id = $1",
+    [req.user.id]
+  );
+  const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
+  const allowedTopics = settingsResult.rows[0]?.allowed_topics || [];
+  const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
+  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
+  const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
+  const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
+  const params = [];
+  let where = "WHERE videos.youtube_id IS NOT NULL";
+  if (allowedChannels.length) {
+    params.push(allowedChannels);
+    if (channelMode === "block") {
+      where += " AND videos.owner_id <> ALL($" + params.length + ")";
+    } else {
+      where += " AND videos.owner_id = ANY($" + params.length + ")";
+    }
+  }
+  if (allowedLanguages.length) {
+    params.push(allowedLanguages);
+    where += " AND videos.language = ANY($" + params.length + ")";
+  }
+  if (allowedTopics.length) {
+    params.push(allowedTopics);
+    if (topicMode === "block") {
+      where += " AND NOT (COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length + ")";
+    } else {
+      where += " AND COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length;
+    }
+  }
+  if (allowedReligions.length) {
+    params.push(allowedReligions);
+    const relParam = params.length;
+    params.push(allowedReligions);
+    const relDetailParam = params.length;
+    if (religionMode === "block") {
+      where +=
+        " AND (COALESCE(videos.religion, 'none') <> ALL($" +
+        relParam +
+        ") AND (videos.religion_detail IS NULL OR videos.religion_detail = '' OR videos.religion_detail <> ALL($" +
+        relDetailParam +
+        ")))";
+    } else {
+      where +=
+        " AND (COALESCE(videos.religion, 'none') = ANY($" +
+        relParam +
+        ") OR COALESCE(videos.religion_detail, '') = ANY($" +
+        relDetailParam +
+        "))";
+    }
+  }
+  params.push(limit);
   const rows = await pool.query(
     "SELECT videos.*, users.email as channel, users.role as channel_role, " +
       "COALESCE(like_counts.count, 0)::int as hearts " +
       "FROM videos JOIN users ON videos.owner_id = users.id " +
       "LEFT JOIN (SELECT video_id, COUNT(*) as count FROM likes GROUP BY video_id) like_counts ON like_counts.video_id = videos.id " +
-      "WHERE videos.youtube_id IS NOT NULL " +
-      "ORDER BY videos.views DESC, hearts DESC LIMIT $1",
-    [limit]
+      where +
+      " ORDER BY videos.views DESC, hearts DESC LIMIT $" +
+      params.length,
+    params
   );
   res.json({ videos: rows.rows, hasMore: false });
 });
 
 app.get("/api/videos/:id", auth, async (req, res) => {
   const settingsResult = await pool.query(
-    "SELECT allowed_languages, allowed_topics, allowed_channels, topic_mode, channel_mode FROM user_settings WHERE user_id = $1",
+    "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode FROM user_settings WHERE user_id = $1",
     [req.user.id]
   );
   const allowedLanguages = settingsResult.rows[0]?.allowed_languages || [];
@@ -842,6 +964,8 @@ app.get("/api/videos/:id", auth, async (req, res) => {
   const topicMode = settingsResult.rows[0]?.topic_mode || "allow";
   const allowedChannels = settingsResult.rows[0]?.allowed_channels || [];
   const channelMode = settingsResult.rows[0]?.channel_mode || "allow";
+  const allowedReligions = settingsResult.rows[0]?.allowed_religions || [];
+  const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
   const result = await pool.query(
     "SELECT videos.*, users.email as channel FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = $1 AND videos.youtube_id IS NOT NULL",
     [req.params.id]
@@ -860,6 +984,17 @@ app.get("/api/videos/:id", auth, async (req, res) => {
     }
     if (channelMode === "block" && isAllowedChannel) {
       return res.status(403).json({ error: "Blocked by channel settings." });
+    }
+  }
+  if (allowedReligions.length) {
+    const rel = (video.religion || "none").toLowerCase();
+    const relDetail = (video.religion_detail || "").toLowerCase();
+    const isAllowedReligion = allowedReligions.includes(rel) || (relDetail && allowedReligions.includes(relDetail));
+    if (religionMode === "allow" && !isAllowedReligion) {
+      return res.status(403).json({ error: "Blocked by religion settings." });
+    }
+    if (religionMode === "block" && isAllowedReligion) {
+      return res.status(403).json({ error: "Blocked by religion settings." });
     }
   }
   if (allowedTopics.length) {
@@ -1066,6 +1201,11 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
     const youtubeUrl = row.youtube_url || row.url || "";
     const finalLanguage = normalizeLanguage(row.language || row.lang || "");
     const finalTopics = normalizeTopics(row.topics || "");
+    const finalReligion = normalizeReligion(row.religion || row.faith || "");
+    const finalReligionDetail = normalizeReligionDetail(
+      finalReligion,
+      row.religion_detail || row.faith_detail || row.religion || ""
+    );
     const youtubeId = extractYouTubeId(youtubeUrl);
     if (!youtubeId) {
       skipped.push({ youtubeUrl, reason: "Invalid URL" });
@@ -1080,8 +1220,8 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
     const finalTitle = meta.title;
     const finalDescription = "";
     const result = await pool.query(
-      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, topics, duration, created_at) " +
-        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
+        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
       [
         finalTitle,
         finalDescription,
@@ -1089,6 +1229,8 @@ app.post("/api/admin/import-csv", auth, requireRole("admin"), async (req, res) =
         youtubeId,
         req.user.id,
         finalLanguage,
+        finalReligion,
+        finalReligionDetail,
         finalTopics,
         meta.duration || 0,
         nowIso()
@@ -1111,6 +1253,11 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
     const youtubeUrl = row.youtube_url || row.url || "";
     const finalLanguage = normalizeLanguage(row.language || row.lang || "");
     const finalTopics = normalizeTopics(row.topics || "");
+    const finalReligion = normalizeReligion(row.religion || row.faith || "");
+    const finalReligionDetail = normalizeReligionDetail(
+      finalReligion,
+      row.religion_detail || row.faith_detail || row.religion || ""
+    );
     const youtubeId = extractYouTubeId(youtubeUrl);
     if (!youtubeId) {
       skipped.push({ youtubeUrl, reason: "Invalid URL" });
@@ -1125,8 +1272,8 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
     const finalTitle = meta.title;
     const finalDescription = "";
     const result = await pool.query(
-      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, topics, duration, created_at) " +
-        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+      "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
+        "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
       [
         finalTitle,
         finalDescription,
@@ -1134,6 +1281,8 @@ app.post("/api/admin/import-sql", auth, requireRole("admin"), async (req, res) =
         youtubeId,
         req.user.id,
         finalLanguage,
+        finalReligion,
+        finalReligionDetail,
         finalTopics,
         meta.duration || 0,
         nowIso()
@@ -1216,13 +1365,18 @@ app.get("/api/stats", auth, async (req, res) => {
 });
 
 app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole(["artist", "admin"]), async (req, res) => {
-  const { youtubeUrl, language, topics } = req.body || {};
+  const { youtubeUrl, language, topics, religion, religion_detail } = req.body || {};
   const youtubeId = extractYouTubeId(youtubeUrl);
   if (!youtubeId) {
     return res.status(400).json({ error: "Valid YouTube URL required." });
   }
   const canSetMetadata = req.user.role === "admin" || req.user.role === "artist";
   const finalLanguage = canSetMetadata ? normalizeLanguage(language) : "unspecified";
+  const rawReligion = canSetMetadata ? String(religion || "") : "";
+  const finalReligion = canSetMetadata ? normalizeReligion(rawReligion) : "none";
+  const finalReligionDetail = canSetMetadata
+    ? normalizeReligionDetail(finalReligion, religion_detail || rawReligion)
+    : "";
   const finalTopics = canSetMetadata ? normalizeTopics(topics) : [];
   const meta = await fetchYouTubeMeta(youtubeId, youtubeUrl);
   const finalTitle = meta.title;
@@ -1232,8 +1386,8 @@ app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole([
     return res.status(400).json({ error: "Unable to fetch a title for this URL." });
   }
   const result = await pool.query(
-    "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, topics, duration, created_at) " +
-      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+    "INSERT INTO videos (title, description, youtube_url, youtube_id, owner_id, language, religion, religion_detail, topics, duration, created_at) " +
+      "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *",
     [
       finalTitle,
       finalDescription,
@@ -1241,11 +1395,13 @@ app.post("/api/videos", auth, rateLimit(80, RATE_LIMIT_WINDOW_MS), requireRole([
       youtubeId,
       req.user.id,
       finalLanguage,
+      finalReligion,
+      finalReligionDetail,
       finalTopics,
       finalDuration,
       nowIso()
     ]
-  );
+  ); 
   const owner = await pool.query("SELECT email FROM users WHERE id = $1", [req.user.id]);
   const video = result.rows[0];
   res.json({ video: { ...video, channel: owner.rows[0] ? owner.rows[0].email : "" } });
