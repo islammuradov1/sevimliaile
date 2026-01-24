@@ -1,7 +1,7 @@
 :root {
-      --bg: linear-gradient(180deg, #0c63d6 0%, #0c63d6 30%, #d33a3a 30%, #d33a3a 60%, #1f9e60 60%, #1f9e60 100%);
-      --bg-alt: rgba(255, 255, 255, 0.9);
-      --bg-soft: rgba(255, 255, 255, 0.7);
+      --bg: #f4f7fb;
+      --bg-alt: rgba(255, 255, 255, 0.95);
+      --bg-soft: rgba(255, 255, 255, 0.85);
       --ink: #0f172a;
       --muted: #22304a;
       --stroke: rgba(255, 255, 255, 0.55);
@@ -31,7 +31,6 @@
       margin: 0;
       font-family: var(--font-base);
       background: var(--bg);
-      background-attachment: fixed;
       color: var(--ink);
       min-height: 100vh;
       scroll-padding-top: 140px;
@@ -46,10 +45,10 @@
       inset: 0;
       background-image: url("logo.png");
       background-repeat: no-repeat;
-      background-position: center 26%;
+      background-position: center 24%;
       background-size: min(36vw, 520px);
       opacity: 0.08;
-      filter: saturate(1.1);
+      filter: saturate(1.05);
       pointer-events: none;
       z-index: 0;
     }

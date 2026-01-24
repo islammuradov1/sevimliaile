@@ -2025,6 +2025,9 @@ const ui = {
     }
 
     function setButtonIcon(button, icon, labelKey, suffix) {
+      if (!button) {
+        return;
+      }
       const extra = suffix ? "<span class=\"count\">" + suffix + "</span>" : "";
       button.innerHTML = icon + extra;
       if (labelKey) {
@@ -5242,9 +5245,6 @@ const ui = {
     ui.adminChannelsOpen.addEventListener("click", () => navigateTo("/admin/channels"));
     ui.adminReportsOpen.addEventListener("click", () => navigateTo("/admin/reports"));
     ui.adminImportsOpen.addEventListener("click", () => navigateTo("/admin/imports"));
-    if (ui.navRequests) {
-      ui.navRequests.addEventListener("click", goRequest);
-    }
     if (ui.studioOpen) {
       ui.studioOpen.addEventListener("click", openStudio);
     }

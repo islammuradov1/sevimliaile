@@ -5,7 +5,7 @@ main = "src/worker.js"
 [vars]
 FIREBASE_API_KEY = "AIzaSyCjyLtc5VlLmOY2C-SGKloabi6hpDhLM9Q"
 FIREBASE_PROJECT_ID = "sevimli-aile"
-ADMIN_EMAIL = "islammuradov1@icloud.com"
+ADMIN_EMAIL = ""
 YOUTUBE_API_KEY = ""
 FRONTEND_ORIGIN = "https://sevimliaile.pages.dev"
 FIREBASE_AUTH_DOMAIN = "sevimli-aile.firebaseapp.com"
