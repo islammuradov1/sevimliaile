@@ -339,7 +339,7 @@ async function upsertUser(env, firebaseUser) {
         .bind(uid, existing.id)
         .run();
     }
-    if (email === env.ADMIN_EMAIL && existing.role !== "admin") {
+    if (env.ADMIN_EMAIL && email === env.ADMIN_EMAIL && existing.role !== "admin") {
       await env.DB.prepare("UPDATE users SET role = 'admin' WHERE id = ?")
         .bind(existing.id)
         .run();
@@ -353,9 +353,16 @@ async function upsertUser(env, firebaseUser) {
   )
     .bind(email, uid, createdAt)
     .run();
-  return env.DB.prepare("SELECT * FROM users WHERE firebase_uid = ?")
+  const created = await env.DB.prepare("SELECT * FROM users WHERE firebase_uid = ?")
     .bind(uid)
     .first();
+  if (env.ADMIN_EMAIL && email === env.ADMIN_EMAIL && created.role !== "admin") {
+    await env.DB.prepare("UPDATE users SET role = 'admin' WHERE id = ?")
+      .bind(created.id)
+      .run();
+    return { ...created, role: "admin" };
+  }
+  return created;
 }
 
 async function auth(request, env) {

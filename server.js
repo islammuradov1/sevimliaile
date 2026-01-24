@@ -11,7 +11,7 @@ try {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "islammuradov1@icloud.com").toLowerCase();
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
 const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "";
 const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL || "";
 const FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY || "";
@@ -72,13 +72,17 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: "2mb" }));
+app.use("/api", rateLimit());
 app.use((req, res, next) => {
   const blocked = [
     "/.env",
     "/server.js",
     "/package.json",
     "/package-lock.json",
-    "/wrangler.toml"
+    "/wrangler.toml",
+    "/node_modules",
+    "/data",
+    "/uploads"
   ];
   const isBlocked =
     blocked.includes(req.path) ||
@@ -521,7 +525,7 @@ async function upsertUserFromFirebase(firebaseUser) {
     ]);
     user = updated.rows[0];
   }
-  if (email === ADMIN_EMAIL && user.role !== "admin") {
+  if (ADMIN_EMAIL && email === ADMIN_EMAIL && user.role !== "admin") {
     const updated = await pool.query(
       "UPDATE users SET role = 'admin' WHERE id = $1 RETURNING *",
       [user.id]

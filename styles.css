@@ -1,13 +1,5 @@
 :root {
-      --bg: linear-gradient(
-        180deg,
-        #0d6efd 0%,
-        #0d6efd 32%,
-        #e63946 32%,
-        #e63946 64%,
-        #2fbf71 64%,
-        #2fbf71 100%
-      );
+      --bg: linear-gradient(180deg, #0c63d6 0%, #0c63d6 30%, #d33a3a 30%, #d33a3a 60%, #1f9e60 60%, #1f9e60 100%);
       --bg-alt: rgba(255, 255, 255, 0.9);
       --bg-soft: rgba(255, 255, 255, 0.7);
       --ink: #0f172a;
@@ -45,6 +37,21 @@
       scroll-padding-top: 140px;
       scroll-padding-bottom: 200px;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("logo.png");
+      background-repeat: no-repeat;
+      background-position: center 26%;
+      background-size: min(36vw, 520px);
+      opacity: 0.08;
+      filter: saturate(1.1);
+      pointer-events: none;
+      z-index: 0;
     }
 
     h1, h2, h3, .logo {
@@ -62,6 +69,8 @@
       display: grid;
       grid-template-rows: auto 1fr;
       overflow-x: hidden;
+      position: relative;
+      z-index: 1;
     }
 
     .auth-gate {
@@ -1338,6 +1347,12 @@
       min-width: 44px;
       min-height: 44px;
       position: relative;
+      color: #0c2035;
+      background: linear-gradient(135deg, #ffffff, #e6f0ff);
+      border-radius: 999px;
+      border: 2px solid var(--stroke);
+      box-shadow: var(--shadow);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease;
     }
 
     .icon-button svg {
@@ -1352,6 +1367,19 @@
       top: -6px;
       right: -6px;
       font-size: 0.9rem;
+    }
+
+    .icon-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+      background: linear-gradient(135deg, #f1f7ff, #dce9ff);
+      color: #071526;
+    }
+
+    .icon-button:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow);
+      background: linear-gradient(135deg, #e0ebff, #c3dbff);
     }
 
     .fullscreen-exit-btn {
