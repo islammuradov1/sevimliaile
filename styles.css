@@ -422,6 +422,11 @@
       justify-content: flex-start;
     }
 
+    .drawer-scroll .icon-button .drawer-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
     .topbar-left {
       display: flex;
       align-items: center;
@@ -981,6 +986,18 @@
       align-items: center;
     }
 
+    .channel-actions .pill.is-subscribed {
+      background: linear-gradient(135deg, #2f7ee6, #5aa7ff);
+      color: #f7fbff;
+      border: none;
+      box-shadow: 0 12px 22px rgba(47, 126, 230, 0.25);
+    }
+
+    .subscribe-text {
+      margin-left: 6px;
+      font-weight: 700;
+    }
+
     .channel .pill {
       padding: 6px 10px;
       font-size: 0.85rem;
@@ -993,6 +1010,34 @@
       gap: 6px;
       align-items: center;
       flex-wrap: wrap;
+    }
+
+    .video-channel {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .video-channel .channel-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border: 2px solid rgba(47, 126, 230, 0.2);
+      background: #f2f7ff;
+      background-image: url(\"/logo.png\");
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+    }
+
+    .video-channel .channel-link {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      cursor: pointer;
     }
 
     main {
@@ -1767,7 +1812,7 @@
   height: 44px;
   border-radius: 14px;
   background: #f2f7ff;
-  background-image: url("logo.png");
+  background-image: url("/logo.png");
   background-size: cover;
   background-position: center;
   border: 2px solid rgba(47, 126, 230, 0.2);

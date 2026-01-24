@@ -441,6 +441,14 @@ const ui = {
     const translations = {
       en: {
         search_label: "Search",
+        nav_home: "Home",
+        nav_viral: "Viral",
+        nav_channels: "Channels",
+        nav_requests: "Requests",
+        nav_upload: "Upload",
+        nav_admin: "Admin",
+        nav_settings: "Settings",
+        nav_theme: "Theme",
         sidebar_toggle: "Toggle sidebar",
         sidebar_show: "Show sidebar",
         controls_hide: "Hide controls",
@@ -920,6 +928,14 @@ const ui = {
       },
       ru: {
         search_label: "Поиск",
+        nav_home: "Домой",
+        nav_viral: "Вирусное",
+        nav_channels: "Каналы",
+        nav_requests: "Запросы",
+        nav_upload: "Загрузка",
+        nav_admin: "Админ",
+        nav_settings: "Настройки",
+        nav_theme: "Тема",
         sidebar_toggle: "Скрыть боковую панель",
         sidebar_show: "Показать боковую панель",
         controls_hide: "Скрыть управление",
@@ -1314,6 +1330,14 @@ const ui = {
       },
       zh: {
         search_label: "搜索",
+        nav_home: "主页",
+        nav_viral: "热门",
+        nav_channels: "频道",
+        nav_requests: "请求",
+        nav_upload: "上传",
+        nav_admin: "管理",
+        nav_settings: "设置",
+        nav_theme: "主题",
         sidebar_toggle: "切换侧边栏",
         sidebar_show: "显示侧边栏",
         controls_hide: "隐藏控制栏",
@@ -1708,6 +1732,14 @@ const ui = {
       },
       tr: {
         search_label: "Ara",
+        nav_home: "Ana sayfa",
+        nav_viral: "Viral",
+        nav_channels: "Kanallar",
+        nav_requests: "İstekler",
+        nav_upload: "Yükle",
+        nav_admin: "Admin",
+        nav_settings: "Ayarlar",
+        nav_theme: "Tema",
         sidebar_toggle: "Kenar çubuğunu değiştir",
         sidebar_show: "Kenar çubuğunu göster",
         controls_hide: "Kontrolleri gizle",
@@ -2102,6 +2134,14 @@ const ui = {
       },
       az: {
         search_label: "Axtar",
+        nav_home: "Ana səhifə",
+        nav_viral: "Viral",
+        nav_channels: "Kanallar",
+        nav_requests: "Xahiş et",
+        nav_upload: "Yüklə",
+        nav_admin: "Admin",
+        nav_settings: "Ayarlar",
+        nav_theme: "Tema",
         sidebar_toggle: "Yan paneli dəyiş",
         sidebar_show: "Yan paneli göstər",
         controls_hide: "İdarələri gizlət",
@@ -2496,6 +2536,14 @@ const ui = {
       },
       ar: {
         search_label: "بحث",
+        nav_home: "الرئيسية",
+        nav_viral: "شائع",
+        nav_channels: "القنوات",
+        nav_requests: "الطلبات",
+        nav_upload: "تحميل",
+        nav_admin: "الإدارة",
+        nav_settings: "الإعدادات",
+        nav_theme: "المظهر",
         sidebar_toggle: "تبديل الشريط الجانبي",
         sidebar_show: "إظهار الشريط الجانبي",
         controls_hide: "إخفاء عناصر التحكم",
@@ -2938,7 +2986,7 @@ const ui = {
       }
       applyTranslations();
       if (ui.navRequests && ui.navRequests.querySelector("span")) {
-        ui.navRequests.querySelector("span").textContent = "Xahiş et";
+        ui.navRequests.querySelector("span").textContent = t("nav_requests");
       }
     }
 
@@ -2947,13 +2995,29 @@ const ui = {
         return;
       }
       const extra = suffix ? "<span class=\"count\">" + suffix + "</span>" : "";
-      button.innerHTML = icon + extra;
+      const label = labelKey ? t(labelKey) : "";
+      const showLabel = button.closest(".action-drawer");
+      const text = showLabel && label ? "<span class=\"drawer-label\">" + escapeHtml(label) + "</span>" : "";
+      button.innerHTML = icon + extra + text;
       if (labelKey) {
-        const label = t(labelKey);
         button.setAttribute("aria-label", label);
         button.title = label;
         button.setAttribute("data-label", label);
       }
+    }
+
+    function setSubscribeButton(button, isSubscribed) {
+      if (!button) {
+        return;
+      }
+      const labelKey = isSubscribed ? "label_subscribed" : "label_subscribe";
+      const label = t(labelKey);
+      const icon = isSubscribed ? icons.check : icons.plus;
+      button.innerHTML = icon + "<span class=\"subscribe-text\">" + escapeHtml(label) + "</span>";
+      button.classList.toggle("is-subscribed", isSubscribed);
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      button.setAttribute("data-label", label);
     }
 
     function parseArrayValue(value) {
@@ -4535,7 +4599,7 @@ const ui = {
       if (ui.requestView) {
         toggleView(ui.requestView, showRequest);
       }
-      toggleView(ui.gamesPreview, showGames && !gameDetailActive);
+      toggleView(ui.gamesPreview, showGames);
       toggleView(ui.gamesDetailView, showGames && gameDetailActive);
       if (ui.errorView) {
         toggleView(ui.errorView, showError);
@@ -5284,23 +5348,28 @@ const ui = {
       title.textContent = video.title;
       const meta = document.createElement("div");
       meta.className = "card-meta";
-      let channelNode;
+      const channelLine = document.createElement("div");
+      channelLine.className = "video-channel";
       const channelName = video.channel_name || t("label_creator");
-      if (video.channel_role === "artist") {
-        const channelButton = document.createElement("button");
-        channelButton.type = "button";
-        channelButton.className = "link-button";
-        channelButton.textContent = channelName;
-        channelButton.addEventListener("click", (event) => {
-          event.stopPropagation();
-          navigateTo("/channel/" + video.owner_id);
-        });
-        channelNode = channelButton;
-      } else {
-        const channelLabel = document.createElement("span");
-        channelLabel.textContent = channelName;
-        channelNode = channelLabel;
-      }
+      const channelAvatar = document.createElement("button");
+      channelAvatar.type = "button";
+      channelAvatar.className = "channel-avatar";
+      channelAvatar.setAttribute("aria-label", channelName);
+      setAvatar(channelAvatar, video.channel_avatar);
+      channelAvatar.addEventListener("click", (event) => {
+        event.stopPropagation();
+        navigateTo("/channel/" + video.owner_id);
+      });
+      const channelButton = document.createElement("button");
+      channelButton.type = "button";
+      channelButton.className = "channel-link";
+      channelButton.textContent = channelName;
+      channelButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        navigateTo("/channel/" + video.owner_id);
+      });
+      channelLine.appendChild(channelAvatar);
+      channelLine.appendChild(channelButton);
       const details = document.createElement("span");
       details.textContent =
         " · " +
@@ -5311,7 +5380,7 @@ const ui = {
         (video.hearts || 0) +
         " " +
         t("label_hearts");
-      meta.appendChild(channelNode);
+      meta.appendChild(channelLine);
       meta.appendChild(details);
       body.appendChild(title);
       body.appendChild(meta);
@@ -5371,11 +5440,7 @@ const ui = {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "pill icon-button";
-      setButtonIcon(
-        button,
-        isSubscribed ? icons.check : icons.plus,
-        isSubscribed ? "label_subscribed" : "label_subscribe"
-      );
+      setSubscribeButton(button, isSubscribed);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
         toggleSubscription(channel.id);
@@ -5512,11 +5577,7 @@ const ui = {
       ui.channelSloganView.textContent = currentChannel.slogan || "";
       const heroAvatar = ui.channelView.querySelector(".channel-hero .avatar");
       setAvatar(heroAvatar, currentChannel.avatar_url);
-      setButtonIcon(
-        ui.channelSubscribe,
-        currentChannel.is_subscribed ? icons.check : icons.plus,
-        currentChannel.is_subscribed ? "label_subscribed" : "label_subscribe"
-      );
+      setSubscribeButton(ui.channelSubscribe, currentChannel.is_subscribed);
       ui.channelSubscribe.disabled = Boolean(
         currentUser && String(currentUser.id) === String(currentChannel.id)
       );

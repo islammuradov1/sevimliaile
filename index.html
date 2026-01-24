@@ -24,21 +24,21 @@
             <span>Sevimli Aile</span>
           </div>
           <nav class="top-nav" aria-label="Primary navigation">
-            <button type="button" id="nav-home" class="active" aria-label="Home">
+            <button type="button" id="nav-home" class="active" aria-label="Home" data-i18n-aria="nav_home">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8z"/></svg>
-              <span>Home</span>
+              <span data-i18n="nav_home">Home</span>
             </button>
-            <button type="button" id="nav-explore" aria-label="Viral videos">
+            <button type="button" id="nav-explore" aria-label="Viral videos" data-i18n-aria="nav_viral">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2s-1 3-4.5 5S3 12 3 14.5A7.5 7.5 0 0 0 10.5 22c4.1 0 7.5-3.4 7.5-7.5 0-1.9-.8-3.6-2-5C17.5 7.5 19 6 20 4c-1 5-4 6-4 6C17 6 12 2 12 2z" fill="currentColor"/></svg>
-              <span>Viral</span>
+              <span data-i18n="nav_viral">Viral</span>
             </button>
-            <button type="button" id="nav-channels" aria-label="Channels">
+            <button type="button" id="nav-channels" aria-label="Channels" data-i18n-aria="nav_channels">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v3H4zm0 5h12v3H4zm0 5h16v3H4z"/></svg>
-              <span>Channels</span>
+              <span data-i18n="nav_channels">Channels</span>
             </button>
-            <button type="button" id="nav-requests" aria-label="Requests" class="accent-green">
+            <button type="button" id="nav-requests" aria-label="Requests" class="accent-green" data-i18n-aria="nav_requests">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3l4 2-4 2V3z"/><path d="M9 13l2 2 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-              <span>Xahiş et</span>
+              <span data-i18n="nav_requests">Xahiş et</span>
             </button>
           </nav>
         </div>
@@ -52,8 +52,8 @@
             </div>
           </div>
           <button class="pill icon-button" id="games-open" type="button" aria-label="Games"></button>
-          <button class="pill icon-button" id="settings-bar" type="button" aria-label="Settings (pro)">
-            Settings
+          <button class="pill icon-button" id="settings-bar" type="button" aria-label="Settings (pro)" data-i18n-aria="nav_settings">
+            <span data-i18n="nav_settings">Settings</span>
           </button>
           <button class="pill icon-button drawer-toggle" id="drawer-toggle" type="button" aria-expanded="false" aria-controls="action-drawer">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -85,15 +85,31 @@
             <option value="ar">🇸🇦 العربية</option>
           </select>
         </div>
-        <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
+        <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode" data-i18n-aria="nav_theme">
+          <span data-i18n="nav_theme">Theme</span>
+        </button>
         <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
-        <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
-        <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
-        <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
-        <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
-        <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates"></button>
-        <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in"></button>
-        <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out"></button>
+        <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open">
+          <span data-i18n="channels_open">Channels</span>
+        </button>
+        <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video" data-i18n-aria="nav_upload">
+          <span data-i18n="nav_upload">Upload</span>
+        </button>
+        <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin" data-i18n-aria="nav_admin">
+          <span data-i18n="nav_admin">Admin</span>
+        </button>
+        <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings" data-i18n-aria="nav_settings">
+          <span data-i18n="nav_settings">Settings</span>
+        </button>
+        <button class="pill icon-button" id="notifications-open" type="button" aria-label="Updates" data-i18n-aria="updates_title">
+          <span data-i18n="updates_title">Updates</span>
+        </button>
+        <button class="pill icon-button" id="auth-open" type="button" aria-label="Sign in" data-i18n-aria="auth_sign_in">
+          <span data-i18n="auth_sign_in">Sign in</span>
+        </button>
+        <button class="pill icon-button" id="auth-logout" type="button" aria-label="Sign out" data-i18n-aria="auth_sign_out">
+          <span data-i18n="auth_sign_out">Sign out</span>
+        </button>
       </div>
     </aside>
     <div class="search-row">
@@ -582,11 +598,13 @@
               <input id="request-contact" name="request-contact" type="text" placeholder="Email or phone" data-i18n-placeholder="request_contact_placeholder" required>
             </div>
             <div class="form-actions">
-              <button class="primary green" type="submit" id="request-submit">Xahiş et</button>
+              <button class="primary green" type="submit" id="request-submit" data-i18n="request_submit">Xahiş et</button>
               <span class="card-meta" id="request-message"></span>
             </div>
           </form>
         </section>
+
+        
 
         <section class="games-preview hidden" id="games-view" aria-hidden="true">
           <div class="section-head games-head">
@@ -609,21 +627,7 @@
               <span class="card-meta" id="games-redeem-message" aria-live="polite"></span>
             </div>
           </div>
-          <div class="scoreboard" id="games-scoreboard">
-            <div class="scoreboard-head">
-              <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
-              <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
-            </div>
-            <div class="leaderboard-list" id="games-scoreboard-body">
-              <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
-            </div>
-          </div>
-          <div class="ad-slot" id="games-ad-slot" aria-label="Game ads"></div>
-          <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
-          <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
-        </section>
-
-        <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
+          <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
           <div class="section-head games-detail-head">
             <button class="pill ghost" id="games-back" type="button" data-i18n="games_back">Back</button>
             <div>
@@ -681,6 +685,21 @@
             </article>
           </div>
         </section>
+          <div class="scoreboard" id="games-scoreboard">
+            <div class="scoreboard-head">
+              <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
+              <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
+            </div>
+            <div class="leaderboard-list" id="games-scoreboard-body">
+              <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
+            </div>
+          </div>
+          <div class="ad-slot" id="games-ad-slot" aria-label="Game ads"></div>
+          <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
+          <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
+        </section>
+
+        
 
         <section class="channel-view hidden" id="channel-view" aria-hidden="true">
           <div class="section-head">
