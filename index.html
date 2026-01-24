@@ -497,6 +497,17 @@
 
   <section class="auth-gate" id="auth-gate">
     <div class="auth-card">
+      <div class="lang-select">
+        <label class="sr-only" for="auth-language" data-i18n="ui_language_label">Language</label>
+        <select id="auth-language" name="auth-language" aria-label="App language" data-i18n-aria="ui_language_label">
+          <option value="en">English</option>
+          <option value="ru">Русский</option>
+          <option value="zh">中文</option>
+          <option value="tr">Türkçe</option>
+          <option value="az">Azərbaycan</option>
+          <option value="ar">العربية</option>
+        </select>
+      </div>
       <h2 data-i18n="auth_welcome">Welcome to Sevimli Aile</h2>
       <p class="card-meta" data-i18n="auth_subtitle">Log in or create an account to start watching.</p>
       <form class="form-grid" id="login-form">

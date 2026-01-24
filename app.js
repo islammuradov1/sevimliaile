@@ -196,6 +196,7 @@ const ui = {
       adminImportMessagePage: document.getElementById("admin-import-message-page"),
       adminReports: document.getElementById("admin-reports"),
       uiLanguage: document.getElementById("ui-language"),
+      authLanguage: document.getElementById("auth-language"),
       controlsHeart: document.getElementById("controls-heart"),
       controlsReport: document.getElementById("controls-report"),
       controlsReplay: document.getElementById("controls-replay"),
@@ -2018,6 +2019,9 @@ const ui = {
       if (ui.uiLanguage) {
         ui.uiLanguage.value = next;
       }
+      if (ui.authLanguage) {
+        ui.authLanguage.value = next;
+      }
       applyTranslations();
       if (ui.navRequests && ui.navRequests.querySelector("span")) {
         ui.navRequests.querySelector("span").textContent = "Xahiş et";
@@ -3485,29 +3489,38 @@ const ui = {
 
     function updateAuthUI() {
       const isAdmin = currentUser && currentUser.role === "admin";
-      ui.authLogout.style.display = currentUser ? "inline-flex" : "none";
-      ui.authOpen.style.display = currentUser ? "none" : "inline-flex";
+      const setDisplay = (node, value) => {
+        if (node) {
+          node.style.display = value;
+        }
+      };
+      setDisplay(ui.authLogout, currentUser ? "inline-flex" : "none");
+      setDisplay(ui.authOpen, currentUser ? "none" : "inline-flex");
       if (!currentUser) {
         stopPlayback();
       }
-      ui.uploadOpen.style.display =
+      setDisplay(
+        ui.uploadOpen,
         currentUser && (currentUser.role === "artist" || currentUser.role === "admin")
           ? "inline-flex"
-          : "none";
-      ui.adminOpen.style.display = isAdmin ? "inline-flex" : "none";
+          : "none"
+      );
+      setDisplay(ui.adminOpen, isAdmin ? "inline-flex" : "none");
       const isAdminView =
         document.body.getAttribute("data-view") &&
         document.body.getAttribute("data-view").startsWith("admin");
-      ui.adminNav.style.display = isAdmin && isAdminView ? "flex" : "none";
-      ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
-      ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
-      ui.settingsBar.style.display = "inline-flex";
-      ui.settingsOpen.style.display = "inline-flex";
-      ui.notificationsOpen.style.display = currentUser ? "inline-flex" : "none";
-      ui.uploadMetadata.style.display =
+      setDisplay(ui.adminNav, isAdmin && isAdminView ? "flex" : "none");
+      setDisplay(ui.adminVideosOpen, isAdmin ? "inline-flex" : "none");
+      setDisplay(ui.studioOpen, currentUser ? "inline-flex" : "none");
+      setDisplay(ui.settingsBar, "inline-flex");
+      setDisplay(ui.settingsOpen, "inline-flex");
+      setDisplay(ui.notificationsOpen, currentUser ? "inline-flex" : "none");
+      setDisplay(
+        ui.uploadMetadata,
         currentUser && (currentUser.role === "admin" || currentUser.role === "artist")
           ? "grid"
-          : "none";
+          : "none"
+      );
       const displayName =
         (currentUser && (currentUser.display_name || currentUser.email)) ||
         (firebaseUser && firebaseUser.email) ||
@@ -5342,6 +5355,9 @@ const ui = {
     }
     if (ui.uiLanguage) {
       ui.uiLanguage.addEventListener("change", (event) => setUiLanguage(event.target.value));
+    }
+    if (ui.authLanguage) {
+      ui.authLanguage.addEventListener("change", (event) => setUiLanguage(event.target.value));
     }
     if (ui.forgotPassword) {
       ui.forgotPassword.addEventListener("click", sendPasswordReset);

@@ -90,6 +90,11 @@
       gap: 14px;
     }
 
+    .auth-card .lang-select {
+      display: flex;
+      justify-content: flex-end;
+    }
+
     .auth-card form {
       background: var(--bg-soft);
       border: 2px dashed var(--stroke);
