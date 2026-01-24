@@ -637,12 +637,14 @@ app.post("/api/settings", auth, requireRecentAuth(), async (req, res) => {
   const finalChannels = Array.isArray(channels)
     ? channels.map((id) => parseInt(id, 10)).filter((id) => Number.isFinite(id))
     : [];
-  const finalTopicMode = topicMode === "block" ? "block" : "allow";
-  const finalChannelMode = channelMode === "block" ? "block" : "allow";
+  const finalTopicMode = topicMode === "block" ? "block" : topicMode === "off" ? "off" : "allow";
+  const finalChannelMode =
+    channelMode === "block" ? "block" : channelMode === "off" ? "off" : "allow";
   const finalReligions = Array.isArray(religions)
     ? religions.map((rel) => String(rel).trim().toLowerCase()).filter(Boolean)
     : [];
-  const finalReligionMode = religionMode === "block" ? "block" : "allow";
+  const finalReligionMode =
+    religionMode === "block" ? "block" : religionMode === "off" ? "off" : "allow";
   const finalMaxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(maxDailyMinutes || "0", 10)));
   await pool.query(
     "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes, updated_at) " +
@@ -825,7 +827,7 @@ app.get("/api/videos", auth, async (req, res) => {
     params.push(allowedLanguages);
     where += " AND videos.language = ANY($" + params.length + ")";
   }
-  if (allowedTopics.length) {
+  if (allowedTopics.length && topicMode !== "off") {
     params.push(allowedTopics);
     if (topicMode === "block") {
       where += " AND NOT (COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length + ")";
@@ -833,7 +835,7 @@ app.get("/api/videos", auth, async (req, res) => {
       where += " AND COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length;
     }
   }
-  if (allowedChannels.length) {
+  if (allowedChannels.length && channelMode !== "off") {
     params.push(allowedChannels);
     if (channelMode === "block") {
       where += " AND videos.owner_id <> ALL($" + params.length + ")";
@@ -841,7 +843,7 @@ app.get("/api/videos", auth, async (req, res) => {
       where += " AND videos.owner_id = ANY($" + params.length + ")";
     }
   }
-  if (allowedReligions.length) {
+  if (allowedReligions.length && religionMode !== "off") {
     params.push(allowedReligions);
     const relParam = params.length;
     params.push(allowedReligions);
@@ -899,7 +901,7 @@ app.get("/api/viral", auth, async (req, res) => {
   const religionMode = settingsResult.rows[0]?.religion_mode || "allow";
   const params = [];
   let where = "WHERE videos.youtube_id IS NOT NULL";
-  if (allowedChannels.length) {
+  if (allowedChannels.length && channelMode !== "off") {
     params.push(allowedChannels);
     if (channelMode === "block") {
       where += " AND videos.owner_id <> ALL($" + params.length + ")";
@@ -911,7 +913,7 @@ app.get("/api/viral", auth, async (req, res) => {
     params.push(allowedLanguages);
     where += " AND videos.language = ANY($" + params.length + ")";
   }
-  if (allowedTopics.length) {
+  if (allowedTopics.length && topicMode !== "off") {
     params.push(allowedTopics);
     if (topicMode === "block") {
       where += " AND NOT (COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length + ")";
@@ -919,7 +921,7 @@ app.get("/api/viral", auth, async (req, res) => {
       where += " AND COALESCE(videos.topics, ARRAY[]::text[]) && $" + params.length;
     }
   }
-  if (allowedReligions.length) {
+  if (allowedReligions.length && religionMode !== "off") {
     params.push(allowedReligions);
     const relParam = params.length;
     params.push(allowedReligions);
@@ -977,7 +979,7 @@ app.get("/api/videos/:id", auth, async (req, res) => {
   if (allowedLanguages.length && !allowedLanguages.includes((video.language || "").toLowerCase())) {
     return res.status(403).json({ error: "Blocked by language settings." });
   }
-  if (allowedChannels.length) {
+  if (allowedChannels.length && channelMode !== "off") {
     const isAllowedChannel = allowedChannels.includes(Number(video.owner_id));
     if (channelMode === "allow" && !isAllowedChannel) {
       return res.status(403).json({ error: "Blocked by channel settings." });
@@ -986,7 +988,7 @@ app.get("/api/videos/:id", auth, async (req, res) => {
       return res.status(403).json({ error: "Blocked by channel settings." });
     }
   }
-  if (allowedReligions.length) {
+  if (allowedReligions.length && religionMode !== "off") {
     const rel = (video.religion || "none").toLowerCase();
     const relDetail = (video.religion_detail || "").toLowerCase();
     const isAllowedReligion = allowedReligions.includes(rel) || (relDetail && allowedReligions.includes(relDetail));
@@ -997,7 +999,7 @@ app.get("/api/videos/:id", auth, async (req, res) => {
       return res.status(403).json({ error: "Blocked by religion settings." });
     }
   }
-  if (allowedTopics.length) {
+  if (allowedTopics.length && topicMode !== "off") {
     const hasTopic = (video.topics || []).some((topic) =>
       allowedTopics.includes(String(topic || "").toLowerCase())
     );

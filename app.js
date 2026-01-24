@@ -425,6 +425,7 @@ const ui = {
         settings_channel_block: "Hide selected",
         settings_channel_search: "Find channel",
         settings_channel_placeholder: "Search channels",
+        settings_mode_off: "Not using",
         settings_religions: "Religions to control",
         settings_religion_allow: "Allow only selected",
         settings_religion_block: "Hide selected",
@@ -702,6 +703,7 @@ const ui = {
         settings_channel_block: "Скрыть выбранные",
         settings_channel_search: "Найти канал",
         settings_channel_placeholder: "Поиск каналов",
+        settings_mode_off: "Не использовать",
         settings_religions: "Религии для контроля",
         settings_religion_allow: "Показывать только выбранные",
         settings_religion_block: "Скрыть выбранные",
@@ -979,6 +981,7 @@ const ui = {
         settings_channel_block: "隐藏所选",
         settings_channel_search: "查找频道",
         settings_channel_placeholder: "搜索频道",
+        settings_mode_off: "不使用",
         settings_religions: "宗教筛选",
         settings_religion_allow: "仅允许所选",
         settings_religion_block: "隐藏所选",
@@ -1256,6 +1259,7 @@ const ui = {
         settings_channel_block: "Seçilenleri gizle",
         settings_channel_search: "Kanal ara",
         settings_channel_placeholder: "Kanalları ara",
+        settings_mode_off: "Kullanmıyorum",
         settings_religions: "Kontrol edilecek inançlar",
         settings_religion_allow: "Yalnızca seçilenleri göster",
         settings_religion_block: "Seçilenleri gizle",
@@ -1533,6 +1537,7 @@ const ui = {
         settings_channel_block: "Seçilənləri gizlət",
         settings_channel_search: "Kanal tap",
         settings_channel_placeholder: "Kanalları axtar",
+        settings_mode_off: "İstifadə edilmir",
         settings_religions: "İdarə olunacaq inanc",
         settings_religion_allow: "Yalnız seçilənləri göstər",
         settings_religion_block: "Seçilənləri gizlət",
@@ -1810,6 +1815,7 @@ const ui = {
         settings_channel_block: "إخفاء المحدد",
         settings_channel_search: "ابحث عن قناة",
         settings_channel_placeholder: "ابحث عن القنوات",
+        settings_mode_off: "غير مستخدم",
         settings_religions: "الديانات للتحكم",
         settings_religion_allow: "السماح بالمحدد فقط",
         settings_religion_block: "إخفاء المحدد",
@@ -2297,6 +2303,13 @@ const ui = {
       const showAdminVideos = view === "admin-videos";
       const showAdminReports = view === "admin-reports";
       const showAdminImports = view === "admin-imports";
+      const isAdminView =
+        showAdminOverview ||
+        showAdminUsers ||
+        showAdminChannels ||
+        showAdminVideos ||
+        showAdminReports ||
+        showAdminImports;
       ui.feedView.classList.toggle("hidden", !showFeed);
       ui.feedView.setAttribute("aria-hidden", String(!showFeed));
       ui.viralView.classList.toggle("hidden", !showViral);
@@ -2323,6 +2336,9 @@ const ui = {
       ui.adminReportsPage.setAttribute("aria-hidden", String(!showAdminReports));
       ui.adminImportsPage.classList.toggle("hidden", !showAdminImports);
       ui.adminImportsPage.setAttribute("aria-hidden", String(!showAdminImports));
+      if (ui.adminNav) {
+        ui.adminNav.style.display = isAdminView && currentUser && currentUser.role === "admin" ? "flex" : "none";
+      }
       const hidePlayer = !showWatch;
       ui.playerArea.classList.toggle("hidden", hidePlayer);
       ui.playerArea.style.display = hidePlayer ? "none" : "grid";
@@ -3476,7 +3492,10 @@ const ui = {
           ? "inline-flex"
           : "none";
       ui.adminOpen.style.display = isAdmin ? "inline-flex" : "none";
-      ui.adminNav.style.display = isAdmin ? "inline-flex" : "none";
+      const isAdminView =
+        document.body.getAttribute("data-view") &&
+        document.body.getAttribute("data-view").startsWith("admin");
+      ui.adminNav.style.display = isAdmin && isAdminView ? "flex" : "none";
       ui.adminVideosOpen.style.display = isAdmin ? "inline-flex" : "none";
       ui.studioOpen.style.display = currentUser ? "inline-flex" : "none";
       ui.settingsBar.style.display = "inline-flex";
@@ -4516,9 +4535,19 @@ const ui = {
         const topics = new Set(data.settings.allowed_topics || []);
         const channels = new Set((data.settings.allowed_channels || []).map(String));
         const religions = new Set((data.settings.allowed_religions || []).map((rel) => String(rel).toLowerCase()));
-        const mode = data.settings.topic_mode === "block" ? "block" : "allow";
-        const channelMode = data.settings.channel_mode === "block" ? "block" : "allow";
-        const religionMode = data.settings.religion_mode === "block" ? "block" : "allow";
+        const mode = data.settings.topic_mode === "block" ? "block" : data.settings.topic_mode === "off" ? "off" : "allow";
+        const channelMode =
+          data.settings.channel_mode === "block"
+            ? "block"
+            : data.settings.channel_mode === "off"
+            ? "off"
+            : "allow";
+        const religionMode =
+          data.settings.religion_mode === "block"
+            ? "block"
+            : data.settings.religion_mode === "off"
+            ? "off"
+            : "allow";
         document.querySelectorAll("input[name='topic-mode']").forEach((input) => {
           input.checked = input.value === mode;
         });

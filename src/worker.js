@@ -108,6 +108,7 @@ function normalizeAllowedReligions(values) {
 }
 
 function isReligionAllowed(allowedList, mode, religion, detail) {
+  if (mode === "off") return true;
   if (!allowedList || !allowedList.length) return true;
   const base = (religion || "none").toLowerCase();
   const extra = (detail || "").toLowerCase();
@@ -469,10 +470,12 @@ export default {
       const languages = normalizeLanguages(body.languages);
       const topics = normalizeTopics(body.topics);
       const channels = normalizeChannelIds(body.channels);
-      const topicMode = body.topicMode === "block" ? "block" : "allow";
-      const channelMode = body.channelMode === "block" ? "block" : "allow";
+      const topicMode = body.topicMode === "block" ? "block" : body.topicMode === "off" ? "off" : "allow";
+      const channelMode =
+        body.channelMode === "block" ? "block" : body.channelMode === "off" ? "off" : "allow";
       const religions = normalizeAllowedReligions(body.religions || []);
-      const religionMode = body.religionMode === "block" ? "block" : "allow";
+      const religionMode =
+        body.religionMode === "block" ? "block" : body.religionMode === "off" ? "off" : "allow";
       const maxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(body.maxDailyMinutes || "0", 10)));
       await env.DB.prepare(
         "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes, updated_at) " +
@@ -522,7 +525,7 @@ export default {
         where += " AND (users.display_name LIKE ? OR users.slogan LIKE ?)";
         binds.push("%" + search + "%", "%" + search + "%");
       }
-      if (!showAll && applyFilters && allowedChannels.length) {
+      if (!showAll && applyFilters && allowedChannels.length && channelMode !== "off") {
         if (allowedChannels.length) {
           const list = allowedChannels.map(() => "?").join(",");
           if (channelMode === "block") {
@@ -566,7 +569,7 @@ export default {
       const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedChannels = settings.allowedChannels;
       const channelMode = settings.channelMode;
-      if (applyFilters && allowedChannels.length) {
+      if (applyFilters && allowedChannels.length && channelMode !== "off") {
           const channelIdNum = parseInt(channelId, 10);
           const isAllowed = allowedChannels.includes(channelIdNum);
           if ((channelMode === "allow" && !isAllowed) || (channelMode === "block" && isAllowed)) {
@@ -703,7 +706,7 @@ export default {
           " AND (videos.title LIKE ? OR users.display_name LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
         binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%");
       }
-      if (applyFilters && allowedChannels.length) {
+      if (applyFilters && allowedChannels.length && channelMode !== "off") {
           const list = allowedChannels.map(() => "?").join(",");
           if (channelMode === "block") {
             where += " AND videos.owner_id NOT IN (" + list + ")";
@@ -723,7 +726,7 @@ export default {
             "))";
           binds.push(...allowedLanguages, ...allowedLanguages);
         }
-        if (allowedTopics.length) {
+        if (allowedTopics.length && topicMode !== "off") {
           const inList = allowedTopics.map(() => "?").join(",");
           if (topicMode === "block") {
             where +=
@@ -734,7 +737,7 @@ export default {
           }
           binds.push(...allowedTopics);
         }
-        if (allowedReligions.length) {
+        if (allowedReligions.length && religionMode !== "off") {
           const list = allowedReligions.map(() => "?").join(",");
           if (religionMode === "block") {
             where +=
@@ -836,7 +839,7 @@ export default {
         ) {
           return jsonResponse({ error: "Blocked by language settings." }, 403, withCors({}, origin));
         }
-        if (settings.allowedChannels.length) {
+        if (settings.allowedChannels.length && settings.channelMode !== "off") {
           const isAllowedChannel = settings.allowedChannels.includes(Number(video.owner_id));
           if (settings.channelMode === "allow" && !isAllowedChannel) {
             return jsonResponse({ error: "Blocked by channel settings." }, 403, withCors({}, origin));
@@ -845,17 +848,19 @@ export default {
             return jsonResponse({ error: "Blocked by channel settings." }, 403, withCors({}, origin));
           }
         }
-        if (
-          !isReligionAllowed(
-            settings.allowedReligions,
-            settings.religionMode,
-            video.religion,
-            video.religion_detail
-          )
-        ) {
-          return jsonResponse({ error: "Blocked by religion settings." }, 403, withCors({}, origin));
+        if (settings.religionMode !== "off") {
+          if (
+            !isReligionAllowed(
+              settings.allowedReligions,
+              settings.religionMode,
+              video.religion,
+              video.religion_detail
+            )
+          ) {
+            return jsonResponse({ error: "Blocked by religion settings." }, 403, withCors({}, origin));
+          }
         }
-        if (settings.allowedTopics.length) {
+        if (settings.allowedTopics.length && settings.topicMode !== "off") {
           const topics = safeJsonArray(video.topics).map((topic) => String(topic || "").toLowerCase());
           const hasTopic = topics.some((topic) => settings.allowedTopics.includes(topic));
           if (settings.topicMode === "allow" && !hasTopic) {
@@ -1184,7 +1189,7 @@ export default {
       const religionMode = settings.religionMode;
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
-      if (applyFilters && allowedChannels.length) {
+      if (applyFilters && allowedChannels.length && channelMode !== "off") {
           const list = allowedChannels.map(() => "?").join(",");
           if (channelMode === "block") {
             where += " AND videos.owner_id NOT IN (" + list + ")";
@@ -1204,7 +1209,7 @@ export default {
             "))";
           binds.push(...allowedLanguages, ...allowedLanguages);
         }
-        if (allowedTopics.length) {
+        if (allowedTopics.length && topicMode !== "off") {
           const inList = allowedTopics.map(() => "?").join(",");
           if (topicMode === "block") {
             where +=
@@ -1215,7 +1220,7 @@ export default {
           }
           binds.push(...allowedTopics);
         }
-        if (allowedReligions.length) {
+        if (allowedReligions.length && religionMode !== "off") {
           const list = allowedReligions.map(() => "?").join(",");
           if (religionMode === "block") {
             where +=
