@@ -49,11 +49,33 @@ const ui = {
       searchTitle: document.getElementById("search-title"),
       searchBack: document.getElementById("search-back"),
       searchContext: document.getElementById("search-context"),
+      searchFilters: document.getElementById("search-filters"),
+      searchFilterDay: document.getElementById("search-filter-day"),
+      searchFilterLanguage: document.getElementById("search-filter-language"),
+      searchFilterReligion: document.getElementById("search-filter-religion"),
+      searchFilterTopic: document.getElementById("search-filter-topic"),
+      searchFilterLength: document.getElementById("search-filter-length"),
+      searchFilterClear: document.getElementById("search-filter-clear"),
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
       requestView: document.getElementById("request-view"),
-      gamesView: document.getElementById("games-view"),
+      gamesPreview: document.getElementById("games-view"),
+      gamesPreviewGrid: document.getElementById("games-preview-grid"),
+      gamesAdSlot: document.getElementById("games-ad-slot"),
+      gamesDetailView: document.getElementById("games-detail-view"),
+      gamesDetailTitle: document.getElementById("games-detail-title"),
+      gamesDetailSubtitle: document.getElementById("games-detail-subtitle"),
+      gamesAdSlotDetail: document.getElementById("games-ad-slot-detail"),
+      gamesPointsValue: document.getElementById("games-points-value"),
+      gamesRedeem: document.getElementById("games-redeem"),
+      gamesRedeemMessage: document.getElementById("games-redeem-message"),
+      gamesPointsValueDetail: document.getElementById("games-points-value-detail"),
+      gamesRedeemDetail: document.getElementById("games-redeem-detail"),
+      gamesRedeemMessageDetail: document.getElementById("games-redeem-message-detail"),
+      gamesScoreboardBody: document.getElementById("games-scoreboard-body"),
+      gamesScoreboardBodyDetail: document.getElementById("games-scoreboard-body-detail"),
+      gamesBack: document.getElementById("games-back"),
       channelView: document.getElementById("channel-view"),
       errorView: document.getElementById("error-view"),
       adminOverviewPage: document.getElementById("admin-overview-page"),
@@ -81,6 +103,15 @@ const ui = {
       adminImportsBack: document.getElementById("admin-imports-back"),
       adminSectionToggles: document.querySelectorAll("[data-admin-toggle]"),
       adminSections: document.querySelectorAll(".admin-section"),
+      adminAdsForm: document.getElementById("admin-ads-form"),
+      adminAdsSlot: document.getElementById("admin-ads-slot"),
+      adminAdsTitle: document.getElementById("admin-ads-title"),
+      adminAdsImage: document.getElementById("admin-ads-image"),
+      adminAdsLink: document.getElementById("admin-ads-link"),
+      adminAdsActive: document.getElementById("admin-ads-active"),
+      adminAdsSave: document.getElementById("admin-ads-save"),
+      adminAdsList: document.getElementById("admin-ads-list"),
+      adminAdsMessage: document.getElementById("admin-ads-message"),
       channelTitle: document.getElementById("channel-title"),
       channelStats: document.getElementById("channel-stats"),
       channelSloganView: document.getElementById("channel-slogan-view"),
@@ -109,6 +140,7 @@ const ui = {
       muteToggle: document.getElementById("controls-mute"),
       volumeDown: document.getElementById("controls-volume-down"),
       volumeUp: document.getElementById("controls-volume-up"),
+      volumeRange: document.getElementById("volume-bar"),
       volumeLevel: document.getElementById("volume-level"),
       autoNextToggle: document.getElementById("controls-auto-next"),
       seekBar: document.getElementById("seek-bar"),
@@ -131,6 +163,12 @@ const ui = {
       gamesFindStatus: document.getElementById("games-find-status"),
       gamesFindPrompt: document.getElementById("games-find-prompt"),
       gamesFindNext: document.getElementById("games-find-next"),
+      gamesMathLevels: document.querySelectorAll("[data-math-level]"),
+      gamesMathQuestion: document.getElementById("games-math-question"),
+      gamesMathAnswer: document.getElementById("games-math-answer"),
+      gamesMathSubmit: document.getElementById("games-math-submit"),
+      gamesMathNext: document.getElementById("games-math-next"),
+      gamesMathStatus: document.getElementById("games-math-status"),
       errorMessage: document.getElementById("error-message"),
       errorRetry: document.getElementById("error-retry"),
       errorHome: document.getElementById("error-home"),
@@ -187,6 +225,7 @@ const ui = {
       profileForm: document.getElementById("profile-form"),
       profileMessage: document.getElementById("profile-message"),
       profileName: document.getElementById("profile-name"),
+      profileBio: document.getElementById("profile-bio"),
       profileSlogan: document.getElementById("profile-slogan"),
       profileAvatar: document.getElementById("profile-avatar"),
       adminList: document.getElementById("admin-list"),
@@ -231,6 +270,7 @@ const ui = {
       controlsSeekBack: document.getElementById("controls-seek-back"),
       controlsSeekForward: document.getElementById("controls-seek-forward"),
       controlsFullscreen: document.getElementById("controls-fullscreen"),
+      speedSelect: document.getElementById("speed-select"),
       qualitySelect: document.getElementById("quality-select"),
       captionSelect: document.getElementById("caption-select"),
       reportModal: document.getElementById("report-modal"),
@@ -363,6 +403,47 @@ const ui = {
 
     const RELIGION_DETAIL_VALUES = new Set(Object.keys(RELIGION_DETAIL_BASE));
 
+    const GAME_CATALOG = [
+      {
+        id: "fruit",
+        aliases: ["1"],
+        icon: "🍓",
+        titleKey: "games_fruit_title",
+        subtitleKey: "games_fruit_instruction"
+      },
+      {
+        id: "memory",
+        aliases: ["2"],
+        icon: "🧠",
+        titleKey: "games_memory_title",
+        subtitleKey: "games_memory_instruction"
+      },
+      {
+        id: "find",
+        aliases: ["3"],
+        icon: "🔍",
+        titleKey: "games_find_title",
+        subtitleKey: "games_find_instruction"
+      },
+      {
+        id: "math",
+        aliases: ["4"],
+        icon: "➕",
+        titleKey: "games_math_title",
+        subtitleKey: "games_math_instruction"
+      }
+    ];
+
+    function resolveGameSlug(slug) {
+      if (!slug) {
+        return null;
+      }
+      const normalized = slug.toString().toLowerCase();
+      return GAME_CATALOG.find(
+        (game) => game.id === normalized || (game.aliases && game.aliases.includes(normalized))
+      );
+    }
+
     const translations = {
       en: {
         search_label: "Search",
@@ -372,6 +453,23 @@ const ui = {
         controls_show: "Show controls",
         tech_panel_toggle: "Toggle player tools",
         search_placeholder: "Search videos and channels",
+        filter_label_day: "Day",
+        filter_day_all: "All the time",
+        filter_day_today: "Today",
+        filter_day_week: "This week",
+        filter_day_month: "This month",
+        filter_day_year: "This year",
+        filter_label_language: "Language",
+        filter_label_religion: "Religion",
+        filter_religion_all: "All religions",
+        filter_label_topic: "Topic",
+        filter_topic_placeholder: "Type a topic",
+        filter_label_length: "Length",
+        filter_length_all: "All lengths",
+        filter_length_short: "Short (<4 min)",
+        filter_length_medium: "Medium (4-20 min)",
+        filter_length_long: "Long (>20 min)",
+        filter_clear: "Clear filters",
         games_open: "Games",
         games_title: "Games",
         games_subtitle: "Quick emoji games for kids.",
@@ -399,6 +497,88 @@ const ui = {
         games_find_status_good: "Yes! You found it! 🎉",
         games_find_status_try: "Oops, try again.",
         games_find_next: "Next round",
+        games_math_title: "Math Mission",
+        games_math_instruction: "Choose a level and solve the question.",
+        games_math_easy: "Easy",
+        games_math_medium: "Medium",
+        games_math_hard: "Hard",
+        games_math_placeholder: "Type the answer",
+        games_math_submit: "Check",
+        games_math_next: "Next",
+        games_math_status_ready: "Pick a level to start.",
+        games_math_status_correct: "Correct! 🎉",
+        games_math_status_wrong: "Not quite, try again.",
+        games_points_label: "Points",
+        games_points_note: "Win games to earn points for Pro time.",
+        games_redeem: "Get 1 month Pro",
+        games_redeem_cost: "Redeem for {points} points.",
+        games_redeem_need_signin: "Sign in to collect points.",
+        games_redeem_need_points: "Need {points} more points.",
+        games_redeem_success: "Pro unlocked for 1 month 🎉",
+        games_points_earned: "You earned {points} points!",
+        games_points_limit: "Daily points limit reached. Try again tomorrow.",
+        games_scoreboard_title: "لوحة النقاط",
+        games_scoreboard_note: "آخر نشاط للنقاط.",
+        games_scoreboard_type: "النوع",
+        games_scoreboard_points: "النقاط",
+        games_scoreboard_time: "الوقت",
+        games_scoreboard_empty: "لا توجد أنشطة بعد.",
+        games_score_type_win: "فوز في اللعبة",
+        games_score_type_redeem: "تم إنفاقها على برو",
+        games_scoreboard_title: "Xal cədvəli",
+        games_scoreboard_note: "Son xal dəyişiklikləri.",
+        games_scoreboard_type: "Növ",
+        games_scoreboard_points: "Xal",
+        games_scoreboard_time: "Vaxt",
+        games_scoreboard_empty: "Hələ aktivlik yoxdur.",
+        games_score_type_win: "Oyun qələbəsi",
+        games_score_type_redeem: "Pro üçün xərcləndi",
+        games_scoreboard_title: "Puan Tablosu",
+        games_scoreboard_note: "Son puan hareketleri.",
+        games_scoreboard_type: "Tür",
+        games_scoreboard_points: "Puan",
+        games_scoreboard_time: "Zaman",
+        games_scoreboard_empty: "Henüz hareket yok.",
+        games_score_type_win: "Oyun kazancı",
+        games_score_type_redeem: "Pro için harcandı",
+        games_scoreboard_title: "积分榜",
+        games_scoreboard_note: "最近的积分记录。",
+        games_scoreboard_type: "类型",
+        games_scoreboard_points: "积分",
+        games_scoreboard_time: "时间",
+        games_scoreboard_empty: "还没有记录。",
+        games_score_type_win: "游戏胜利",
+        games_score_type_redeem: "兑换 Pro",
+        games_scoreboard_title: "Таблица очков",
+        games_scoreboard_note: "Последние действия с очками.",
+        games_scoreboard_type: "Тип",
+        games_scoreboard_points: "Очки",
+        games_scoreboard_time: "Когда",
+        games_scoreboard_empty: "Пока нет активности.",
+        games_score_type_win: "Победа в игре",
+        games_score_type_redeem: "Потрачено на Pro",
+        games_scoreboard_title: "Scoreboard",
+        games_scoreboard_note: "Latest points activity.",
+        games_scoreboard_type: "Type",
+        games_scoreboard_points: "Points",
+        games_scoreboard_time: "When",
+        games_scoreboard_empty: "No activity yet.",
+        games_score_type_win: "Game win",
+        games_score_type_redeem: "Spent on Pro",
+        admin_tab_ads: "Ads",
+        admin_ads_hint: "Place ads in the games section.",
+        admin_ads_slot: "Ad slot",
+        admin_ads_slot_games: "Games",
+        admin_ads_title_label: "Title",
+        admin_ads_title_placeholder: "Kids puzzle books",
+        admin_ads_image_label: "Image URL",
+        admin_ads_link_label: "Link URL",
+        admin_ads_active_label: "Active",
+        admin_ads_save: "Save ad",
+        admin_ads_empty: "No ads yet.",
+        admin_ads_message_saved: "Ad saved.",
+        admin_ads_message_failed: "Unable to save ad.",
+        admin_ads_message_deleted: "Ad removed.",
         games_fruit_aria: "Fruit match board",
         games_memory_aria: "Memory flip board",
         games_find_aria: "Find the fruit board",
@@ -452,6 +632,10 @@ const ui = {
         feed_load_more: "Load more",
         feed_viral: "Viral",
         channel_title: "Channel",
+        games_preview_note: "Tap a game to play on its own page.",
+        games_back: "Back to games",
+        games_kid_playing: "Kid playing",
+        games_preview_tag: "Kid playing",
         search_results: "Results for",
         search_title: "Search results",
         search_back: "Back to feed",
@@ -528,12 +712,15 @@ const ui = {
         admin_import_sql: "Import SQL",
         admin_grant_hint: "Grant artist role to add YouTube videos.",
         studio_title: "Studio",
-        studio_profile: "Creator profile",
+        studio_profile: "Profile",
         studio_name: "Display name",
-        studio_name_placeholder: "Creator name",
+        studio_bio: "Bio",
+        studio_bio_placeholder: "Fun bio",
+        studio_name_placeholder: "Kid name",
         studio_slogan: "Short slogan",
         studio_slogan_placeholder: "Fun slogan",
         studio_avatar: "Profile image URL",
+        studio_avatar_note: "PNG link only (no upload).",
         studio_avatar_placeholder: "https://...",
         studio_save: "Save profile",
         studio_stats: "Your stats",
@@ -575,6 +762,8 @@ const ui = {
         lang_arabic: "Arabic",
         control_volume_down: "Volume down",
         control_volume_up: "Volume up",
+        control_volume: "Volume",
+        control_speed: "Playback speed",
         control_report: "Report",
         control_replay: "Replay",
         control_next: "Next video",
@@ -706,6 +895,7 @@ const ui = {
         message_export_failed: "Export failed.",
         message_profile_load_failed: "Unable to load profile.",
         message_profile_save_failed: "Unable to save profile.",
+        message_profile_avatar_png: "Please use a .png image URL.",
         message_profile_saved: "Profile saved.",
         message_history_unavailable: "History unavailable.",
         message_stats_unavailable: "Stats unavailable.",
@@ -732,6 +922,23 @@ const ui = {
         controls_show: "Показать управление",
         tech_panel_toggle: "Панель инструментов",
         search_placeholder: "Поиск видео и каналов",
+        filter_label_day: "День",
+        filter_day_all: "Всё время",
+        filter_day_today: "Сегодня",
+        filter_day_week: "На этой неделе",
+        filter_day_month: "В этом месяце",
+        filter_day_year: "В этом году",
+        filter_label_language: "Язык",
+        filter_label_religion: "Религия",
+        filter_religion_all: "Все религии",
+        filter_label_topic: "Тема",
+        filter_topic_placeholder: "Введите тему",
+        filter_label_length: "Длительность",
+        filter_length_all: "Любая длительность",
+        filter_length_short: "Короткое (<4 мин)",
+        filter_length_medium: "Среднее (4-20 мин)",
+        filter_length_long: "Долгое (>20 мин)",
+        filter_clear: "Сбросить фильтры",
         games_open: "Игры",
         games_title: "Игры",
         games_subtitle: "Быстрые игры с эмодзи для детей.",
@@ -798,6 +1005,10 @@ const ui = {
         feed_load_more: "Загрузить ещё",
         feed_viral: "Вирусное",
         channel_title: "Канал",
+        games_preview_note: "Нажмите игру, чтобы открыть её страницу.",
+        games_back: "Назад к играм",
+        games_kid_playing: "Ребенок играет",
+        games_preview_tag: "Ребенок играет",
         search_results: "Результаты для",
         search_title: "Результаты поиска",
         search_back: "Назад к ленте",
@@ -874,12 +1085,15 @@ const ui = {
         admin_import_sql: "Импорт SQL",
         admin_grant_hint: "Дайте роль артиста для добавления видео.",
         studio_title: "Студия",
-        studio_profile: "Профиль автора",
+        studio_profile: "Профиль",
         studio_name: "Имя",
+        studio_bio: "О себе",
+        studio_bio_placeholder: "Коротко о себе",
         studio_name_placeholder: "Имя автора",
         studio_slogan: "Короткий слоган",
         studio_slogan_placeholder: "Весёлый слоган",
         studio_avatar: "URL аватара",
+        studio_avatar_note: "Только PNG-ссылка (без загрузки).",
         studio_avatar_placeholder: "https://...",
         studio_save: "Сохранить профиль",
         studio_stats: "Ваша статистика",
@@ -921,6 +1135,8 @@ const ui = {
         lang_arabic: "Арабский",
         control_volume_down: "Уменьшить громкость",
         control_volume_up: "Увеличить громкость",
+        control_volume: "Громкость",
+        control_speed: "Скорость",
         control_report: "Пожаловаться",
         control_replay: "Повтор",
         control_next: "Следующее видео",
@@ -1052,6 +1268,7 @@ const ui = {
         message_export_failed: "Экспорт не удался.",
         message_profile_load_failed: "Не удалось загрузить профиль.",
         message_profile_save_failed: "Не удалось сохранить профиль.",
+        message_profile_avatar_png: "Нужна ссылка на .png.",
         message_profile_saved: "Профиль сохранён.",
         message_history_unavailable: "История недоступна.",
         message_stats_unavailable: "Статистика недоступна.",
@@ -1078,6 +1295,23 @@ const ui = {
         controls_show: "显示控制栏",
         tech_panel_toggle: "切换播放器工具",
         search_placeholder: "搜索视频和频道",
+        filter_label_day: "日期",
+        filter_day_all: "所有时间",
+        filter_day_today: "今天",
+        filter_day_week: "本周",
+        filter_day_month: "本月",
+        filter_day_year: "今年",
+        filter_label_language: "语言",
+        filter_label_religion: "宗教",
+        filter_religion_all: "全部宗教",
+        filter_label_topic: "主题",
+        filter_topic_placeholder: "输入主题",
+        filter_label_length: "长度",
+        filter_length_all: "所有长度",
+        filter_length_short: "短 (<4 分钟)",
+        filter_length_medium: "中等 (4-20 分钟)",
+        filter_length_long: "长 (>20 分钟)",
+        filter_clear: "清除筛选",
         games_open: "游戏",
         games_title: "游戏",
         games_subtitle: "适合孩子的表情小游戏。",
@@ -1144,6 +1378,10 @@ const ui = {
         feed_load_more: "加载更多",
         feed_viral: "热门",
         channel_title: "频道",
+        games_preview_note: "点击游戏访问独立页面。",
+        games_back: "返回游戏",
+        games_kid_playing: "孩子在玩",
+        games_preview_tag: "孩子在玩",
         search_results: "搜索结果：",
         search_title: "搜索结果",
         search_back: "返回首页",
@@ -1220,12 +1458,15 @@ const ui = {
         admin_import_sql: "导入 SQL",
         admin_grant_hint: "授予作者角色以添加视频。",
         studio_title: "工作室",
-        studio_profile: "创作者资料",
+        studio_profile: "个人资料",
         studio_name: "显示名称",
+        studio_bio: "简介",
+        studio_bio_placeholder: "简单介绍一下自己",
         studio_name_placeholder: "创作者名称",
         studio_slogan: "简短标语",
         studio_slogan_placeholder: "有趣的标语",
         studio_avatar: "头像链接",
+        studio_avatar_note: "仅 PNG 链接（不上传）。",
         studio_avatar_placeholder: "https://...",
         studio_save: "保存资料",
         studio_stats: "你的数据",
@@ -1267,6 +1508,8 @@ const ui = {
         lang_arabic: "阿拉伯语",
         control_volume_down: "降低音量",
         control_volume_up: "提高音量",
+        control_volume: "音量",
+        control_speed: "播放速度",
         control_report: "举报",
         control_replay: "重播",
         control_next: "下一个视频",
@@ -1398,6 +1641,7 @@ const ui = {
         message_export_failed: "导出失败。",
         message_profile_load_failed: "无法加载资料。",
         message_profile_save_failed: "无法保存资料。",
+        message_profile_avatar_png: "请使用 .png 图片链接。",
         message_profile_saved: "资料已保存。",
         message_history_unavailable: "历史不可用。",
         message_stats_unavailable: "统计不可用。",
@@ -1424,6 +1668,23 @@ const ui = {
         controls_show: "Kontrolleri göster",
         tech_panel_toggle: "Oynatıcı araçları",
         search_placeholder: "Videoları ve kanalları ara",
+        filter_label_day: "Gün",
+        filter_day_all: "Tüm zamanlar",
+        filter_day_today: "Bugün",
+        filter_day_week: "Bu hafta",
+        filter_day_month: "Bu ay",
+        filter_day_year: "Bu yıl",
+        filter_label_language: "Dil",
+        filter_label_religion: "Din",
+        filter_religion_all: "Tüm dinler",
+        filter_label_topic: "Konu",
+        filter_topic_placeholder: "Bir konu yazın",
+        filter_label_length: "Uzunluk",
+        filter_length_all: "Tüm uzunluklar",
+        filter_length_short: "Kısa (<4 dk)",
+        filter_length_medium: "Orta (4-20 dk)",
+        filter_length_long: "Uzun (>20 dk)",
+        filter_clear: "Filtreleri temizle",
         games_open: "Oyunlar",
         games_title: "Oyunlar",
         games_subtitle: "Çocuklar için hızlı emoji oyunları.",
@@ -1490,6 +1751,10 @@ const ui = {
         feed_load_more: "Daha fazla",
         feed_viral: "Viral",
         channel_title: "Kanal",
+        games_preview_note: "Oyunu açmak için dokunun.",
+        games_back: "Oyunlara geri dön",
+        games_kid_playing: "Çocuk oynuyor",
+        games_preview_tag: "Çocuk oynuyor",
         search_results: "Arama sonuçları:",
         search_title: "Arama sonuçları",
         search_back: "Akışa dön",
@@ -1566,12 +1831,15 @@ const ui = {
         admin_import_sql: "SQL içe aktar",
         admin_grant_hint: "Video eklemek için sanatçı rolü verin.",
         studio_title: "Stüdyo",
-        studio_profile: "Üretici profili",
+        studio_profile: "Profil",
         studio_name: "Görünen ad",
+        studio_bio: "Hakkında",
+        studio_bio_placeholder: "Kısa bio",
         studio_name_placeholder: "Üretici adı",
         studio_slogan: "Kısa slogan",
         studio_slogan_placeholder: "Eğlenceli slogan",
         studio_avatar: "Profil görseli URL",
+        studio_avatar_note: "Sadece PNG linki (yükleme yok).",
         studio_avatar_placeholder: "https://...",
         studio_save: "Profili kaydet",
         studio_stats: "İstatistiklerin",
@@ -1613,6 +1881,8 @@ const ui = {
         lang_arabic: "Arapça",
         control_volume_down: "Sesi azalt",
         control_volume_up: "Sesi artır",
+        control_volume: "Ses",
+        control_speed: "Oynatma hızı",
         control_report: "Bildir",
         control_replay: "Tekrar",
         control_next: "Sonraki video",
@@ -1744,6 +2014,7 @@ const ui = {
         message_export_failed: "Dışa aktarma başarısız.",
         message_profile_load_failed: "Profil yüklenemedi.",
         message_profile_save_failed: "Profil kaydedilemedi.",
+        message_profile_avatar_png: "Lutfen .png resim linki kullanın.",
         message_profile_saved: "Profil kaydedildi.",
         message_history_unavailable: "Geçmiş kullanılamıyor.",
         message_stats_unavailable: "İstatistikler kullanılamıyor.",
@@ -1770,6 +2041,23 @@ const ui = {
         controls_show: "İdarələri göstər",
         tech_panel_toggle: "Pleyer alətləri",
         search_placeholder: "Video və kanalları axtarın",
+        filter_label_day: "Gün",
+        filter_day_all: "Bütün zamanlar",
+        filter_day_today: "Bugün",
+        filter_day_week: "Bu həftə",
+        filter_day_month: "Bu ay",
+        filter_day_year: "Bu il",
+        filter_label_language: "Dil",
+        filter_label_religion: "Din",
+        filter_religion_all: "Bütün dinlər",
+        filter_label_topic: "Mövzu",
+        filter_topic_placeholder: "Mövzu yazın",
+        filter_label_length: "Uzunluq",
+        filter_length_all: "Bütün uzunluqlar",
+        filter_length_short: "Qısa (<4 dəq)",
+        filter_length_medium: "Orta (4-20 dəq)",
+        filter_length_long: "Uzun (>20 dəq)",
+        filter_clear: "Filtrləri təmizlə",
         games_open: "Oyunlar",
         games_title: "Oyunlar",
         games_subtitle: "Uşaqlar üçün sürətli emoji oyunları.",
@@ -1836,6 +2124,10 @@ const ui = {
         feed_load_more: "Daha çox",
         feed_viral: "Viral",
         channel_title: "Kanal",
+        games_preview_note: "Oyunu xüsusi səhifəsində açmaq üçün toxunun.",
+        games_back: "Oyunlara qayıt",
+        games_kid_playing: "Uşaq oynayır",
+        games_preview_tag: "Uşaq oynayır",
         search_results: "Axtarış nəticələri:",
         search_title: "Axtarış nəticələri",
         search_back: "Lentə qayıt",
@@ -1912,12 +2204,15 @@ const ui = {
         admin_import_sql: "SQL idxal et",
         admin_grant_hint: "Video əlavə etmək üçün artist rolunu verin.",
         studio_title: "Studiya",
-        studio_profile: "Yaradıcı profili",
+        studio_profile: "Profil",
         studio_name: "Görünən ad",
+        studio_bio: "Haqqında",
+        studio_bio_placeholder: "Qısa bio",
         studio_name_placeholder: "Yaradıcı adı",
         studio_slogan: "Qısa sloqan",
         studio_slogan_placeholder: "Əyləncəli sloqan",
         studio_avatar: "Profil şəkli URL",
+        studio_avatar_note: "Yalnız PNG linki (yükləmə yoxdur).",
         studio_avatar_placeholder: "https://...",
         studio_save: "Profili yadda saxla",
         studio_stats: "Statistikanız",
@@ -1959,6 +2254,8 @@ const ui = {
         lang_arabic: "Ərəb",
         control_volume_down: "Səsi azalt",
         control_volume_up: "Səsi artır",
+        control_volume: "Səs",
+        control_speed: "Oxutma sürəti",
         control_report: "Şikayət",
         control_replay: "Təkrar",
         control_next: "Növbəti video",
@@ -2090,6 +2387,7 @@ const ui = {
         message_export_failed: "Eksport alınmadı.",
         message_profile_load_failed: "Profil yüklənmədi.",
         message_profile_save_failed: "Profil yadda saxlanmadı.",
+        message_profile_avatar_png: "Zehmet olmasa .png linkinden istifade edin.",
         message_profile_saved: "Profil yadda saxlanıldı.",
         message_history_unavailable: "Tarixçə əlçatan deyil.",
         message_stats_unavailable: "Statistika əlçatan deyil.",
@@ -2116,6 +2414,23 @@ const ui = {
         controls_show: "إظهار عناصر التحكم",
         tech_panel_toggle: "أدوات المشغل",
         search_placeholder: "ابحث عن الفيديوهات والقنوات",
+        filter_label_day: "اليوم",
+        filter_day_all: "كل الأوقات",
+        filter_day_today: "اليوم",
+        filter_day_week: "هذا الأسبوع",
+        filter_day_month: "هذا الشهر",
+        filter_day_year: "هذا العام",
+        filter_label_language: "اللغة",
+        filter_label_religion: "الدّين",
+        filter_religion_all: "كل الأديان",
+        filter_label_topic: "الموضوع",
+        filter_topic_placeholder: "اكتب موضوعاً",
+        filter_label_length: "الطول",
+        filter_length_all: "كل الأطوال",
+        filter_length_short: "قصير (<٤ دقائق)",
+        filter_length_medium: "متوسط (٤-٢٠ دقيقة)",
+        filter_length_long: "طويل (>٢٠ دقيقة)",
+        filter_clear: "مسح الفلاتر",
         games_open: "ألعاب",
         games_title: "ألعاب",
         games_subtitle: "ألعاب ايموجي سريعة للأطفال.",
@@ -2182,6 +2497,10 @@ const ui = {
         feed_load_more: "تحميل المزيد",
         feed_viral: "شائع",
         channel_title: "القناة",
+        games_preview_note: "اضغط لعبة لفتح صفحتها الخاصة.",
+        games_back: "العودة إلى الألعاب",
+        games_kid_playing: "طفل يلعب",
+        games_preview_tag: "طفل يلعب",
         search_results: "نتائج البحث عن",
         search_title: "نتائج البحث",
         search_back: "العودة للرئيسية",
@@ -2258,12 +2577,15 @@ const ui = {
         admin_import_sql: "استيراد SQL",
         admin_grant_hint: "امنح دور الفنان لإضافة فيديوهات.",
         studio_title: "الاستوديو",
-        studio_profile: "ملف المبدع",
+        studio_profile: "الملف الشخصي",
         studio_name: "الاسم الظاهر",
+        studio_bio: "نبذة",
+        studio_bio_placeholder: "نبذة قصيرة",
         studio_name_placeholder: "اسم المبدع",
         studio_slogan: "شعار قصير",
         studio_slogan_placeholder: "شعار ممتع",
         studio_avatar: "رابط صورة الملف",
+        studio_avatar_note: "رابط PNG فقط (بدون رفع).",
         studio_avatar_placeholder: "https://...",
         studio_save: "حفظ الملف",
         studio_stats: "إحصاءاتك",
@@ -2305,6 +2627,8 @@ const ui = {
         lang_arabic: "العربية",
         control_volume_down: "خفض الصوت",
         control_volume_up: "رفع الصوت",
+        control_volume: "الصوت",
+        control_speed: "سرعة التشغيل",
         control_report: "إبلاغ",
         control_replay: "إعادة",
         control_next: "الفيديو التالي",
@@ -2436,6 +2760,7 @@ const ui = {
         message_export_failed: "فشل التصدير.",
         message_profile_load_failed: "تعذر تحميل الملف.",
         message_profile_save_failed: "تعذر حفظ الملف.",
+        message_profile_avatar_png: "يرجى استخدام رابط صورة .png.",
         message_profile_saved: "تم حفظ الملف.",
         message_history_unavailable: "السجل غير متاح.",
         message_stats_unavailable: "الإحصاءات غير متاحة.",
@@ -2712,6 +3037,13 @@ const ui = {
     let searchOffset = 0;
     let searchHasMore = true;
     let searchFetching = false;
+    let searchFilters = {
+      day: "all",
+      languages: [],
+      religion: "",
+      topic: "",
+      length: ""
+    };
     let channelsQuery = "";
     let channelsOffset = 0;
     let channelsHasMore = true;
@@ -2727,6 +3059,7 @@ const ui = {
     let adminUsersData = [];
     let adminChannelsData = [];
     let adminVideosData = [];
+    let adminAdsData = [];
     let adminVideosQuery = "";
     let adminVideosOffset = 0;
     let adminVideosHasMore = true;
@@ -2741,6 +3074,9 @@ const ui = {
     let adminChannelsPageHasMore = true;
     let adminChannelsPageFetching = false;
     let adminSectionFocus = "overview";
+    let adsCache = {};
+    let adsFetching = false;
+    let adViewStarts = new Map();
     let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
     let navFocus = "home";
     let errorMessageKey = "error_message";
@@ -2748,8 +3084,18 @@ const ui = {
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
     const PLAYER_RELOAD_TIMEOUT_MS = 12000;
     const PLAYER_RELOAD_KEY = "playerReloads";
-    const ADMIN_SECTIONS = new Set(["overview", "users", "channels", "videos", "reports", "imports"]);
+    const ADMIN_SECTIONS = new Set(["overview", "users", "channels", "videos", "reports", "ads", "imports"]);
+    let activeGameId = "";
+    let gameDetailActive = false;
+    const CONTROL_HIDE_DELAY = 2600;
+    let controlsHideTimer = null;
+    let controlsHidden = false;
     let gamesInitialized = false;
+    const VOLUME_STORAGE_KEY = "playerVolume";
+    const MUTE_STORAGE_KEY = "playerMuted";
+    const CAPTIONS_STORAGE_KEY = "playerCaptions";
+    const SPEED_STORAGE_KEY = "playerSpeed";
+    let lastVolume = 100;
 
     const FRUIT_EMOJI = {
       apple: "🍎",
@@ -2768,6 +3114,13 @@ const ui = {
 
     const MEMORY_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
     const FIND_FRUITS = ["apple", "banana", "strawberry", "orange", "grapes", "watermelon"];
+    const GAME_REWARDS = {
+      fruit: 8,
+      memory: 12,
+      find: 6,
+      math: 10
+    };
+    const PRO_REDEEM_COST = 500;
 
     const fruitGameState = {
       grid: [],
@@ -2778,7 +3131,8 @@ const ui = {
       dragMoved: false,
       activePointerId: null,
       skipClick: false,
-      statusKey: "games_fruit_status_ready"
+      statusKey: "games_fruit_status_ready",
+      awarded: false
     };
 
     const memoryGameState = {
@@ -2787,14 +3141,24 @@ const ui = {
       matched: new Set(),
       locked: false,
       statusKey: "games_memory_status_ready",
-      timeoutId: null
+      timeoutId: null,
+      awarded: false
     };
 
     const findGameState = {
       target: "",
       cards: [],
       solved: false,
-      statusKey: "games_find_status_ready"
+      statusKey: "games_find_status_ready",
+      awarded: false
+    };
+
+    const mathGameState = {
+      level: "easy",
+      question: "",
+      answer: 0,
+      statusKey: "games_math_status_ready",
+      awarded: false
     };
 
     function setTheme() {
@@ -2898,6 +3262,76 @@ const ui = {
       }
     }
 
+    function collectSelectValues(select) {
+      if (!select) {
+        return [];
+      }
+      return Array.from(select.selectedOptions)
+        .map((option) => option.value)
+        .filter(Boolean);
+    }
+
+    function gatherSearchFilters() {
+      searchFilters.day = (ui.searchFilterDay ? ui.searchFilterDay.value : "all") || "all";
+      searchFilters.languages = collectSelectValues(ui.searchFilterLanguage);
+      searchFilters.religion = (ui.searchFilterReligion ? ui.searchFilterReligion.value : "") || "";
+      searchFilters.topic = (ui.searchFilterTopic ? ui.searchFilterTopic.value.trim() : "") || "";
+      searchFilters.length = (ui.searchFilterLength ? ui.searchFilterLength.value : "") || "";
+    }
+
+    function applySearchFiltersToParams(params) {
+      if (!searchFilters) {
+        return;
+      }
+      if (searchFilters.day && searchFilters.day !== "all") {
+        params.set("since", searchFilters.day);
+      }
+      if (searchFilters.languages.length) {
+        params.set("languages", searchFilters.languages.join(","));
+      }
+      if (searchFilters.religion) {
+        params.set("religion", searchFilters.religion);
+      }
+      if (searchFilters.topic) {
+        params.set("topic", searchFilters.topic);
+      }
+      if (searchFilters.length) {
+        params.set("length", searchFilters.length);
+      }
+    }
+
+    function resetSearchFilters() {
+      if (!ui.searchFilters) {
+        return;
+      }
+      if (ui.searchFilterDay) {
+        ui.searchFilterDay.value = "all";
+      }
+      if (ui.searchFilterLanguage) {
+        Array.from(ui.searchFilterLanguage.options).forEach((option) => {
+          option.selected = false;
+        });
+      }
+      if (ui.searchFilterReligion) {
+        ui.searchFilterReligion.value = "";
+      }
+      if (ui.searchFilterTopic) {
+        ui.searchFilterTopic.value = "";
+      }
+      if (ui.searchFilterLength) {
+        ui.searchFilterLength.value = "";
+      }
+      gatherSearchFilters();
+    }
+
+    function handleSearchFilterChange() {
+      gatherSearchFilters();
+      if (!searchQuery) {
+        return;
+      }
+      fetchSearchResults(searchQuery, true);
+    }
+
     function shuffleArray(items) {
       const array = items.slice();
       for (let i = array.length - 1; i > 0; i -= 1) {
@@ -2945,12 +3379,280 @@ const ui = {
         template.replace("{fruit}", label) + " " + getFruitEmoji(findGameState.target);
     }
 
+    function setGamesMessage(message) {
+      if (ui.gamesRedeemMessage) {
+        ui.gamesRedeemMessage.textContent = message || "";
+      }
+      if (ui.gamesRedeemMessageDetail) {
+        ui.gamesRedeemMessageDetail.textContent = message || "";
+      }
+    }
+
+    function updatePointsUI() {
+      const points = currentUser ? Number(currentUser.points || 0) : 0;
+      if (ui.gamesPointsValue) {
+        ui.gamesPointsValue.textContent = String(points);
+      }
+      if (ui.gamesPointsValueDetail) {
+        ui.gamesPointsValueDetail.textContent = String(points);
+      }
+      const costText = t("games_redeem_cost").replace("{points}", PRO_REDEEM_COST);
+      if (!currentUser) {
+        if (ui.gamesRedeem) {
+          ui.gamesRedeem.disabled = true;
+        }
+        if (ui.gamesRedeemDetail) {
+          ui.gamesRedeemDetail.disabled = true;
+        }
+        setGamesMessage(t("games_redeem_need_signin"));
+        return;
+      }
+      if (ui.gamesRedeem) {
+        ui.gamesRedeem.disabled = points < PRO_REDEEM_COST;
+      }
+      if (ui.gamesRedeemDetail) {
+        ui.gamesRedeemDetail.disabled = points < PRO_REDEEM_COST;
+      }
+      if (points < PRO_REDEEM_COST) {
+        setGamesMessage(
+          t("games_redeem_need_points").replace("{points}", String(PRO_REDEEM_COST - points))
+        );
+      } else {
+        setGamesMessage(costText);
+      }
+    }
+
+    async function fetchPointsLedger() {
+      if (!currentUser) {
+        if (ui.gamesScoreboardBody) {
+          ui.gamesScoreboardBody.innerHTML =
+            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
+        }
+        if (ui.gamesScoreboardBodyDetail) {
+          ui.gamesScoreboardBodyDetail.innerHTML =
+            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
+        }
+        return;
+      }
+      const res = await apiFetch("/api/points");
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      const entries = data.events || [];
+      if (typeof data.points === "number" && currentUser) {
+        currentUser.points = data.points;
+      }
+      const render = (target) => {
+        if (!target) {
+          return;
+        }
+        if (!entries.length) {
+          target.innerHTML =
+            "<tr><td colspan=\"3\" class=\"card-meta\">" + t("games_scoreboard_empty") + "</td></tr>";
+          return;
+        }
+        target.innerHTML = "";
+        entries.forEach((entry) => {
+          const row = document.createElement("tr");
+          const type =
+            entry.type === "redeem_pro" ? t("games_score_type_redeem") : t("games_score_type_win");
+          const points = Number(entry.points || 0);
+          const pointsCell =
+            (points >= 0 ? "+" : "") +
+            points +
+            " pts";
+          const time = entry.created_at ? new Date(entry.created_at).toLocaleString() : "";
+          row.innerHTML =
+            "<td>" +
+            escapeHtml(type) +
+            "</td><td class=\"" +
+            (points >= 0 ? "score-positive" : "score-negative") +
+            "\">" +
+            escapeHtml(pointsCell) +
+            "</td><td>" +
+            escapeHtml(time) +
+            "</td>";
+          target.appendChild(row);
+        });
+      };
+      render(ui.gamesScoreboardBody);
+      render(ui.gamesScoreboardBodyDetail);
+      updatePointsUI();
+    }
+
+    function sendAdView(adId, durationSeconds) {
+      if (!token) {
+        return;
+      }
+      fetch("/api/ads/view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+        body: JSON.stringify({ adId, durationSeconds }),
+        keepalive: true
+      }).catch(() => {});
+    }
+
+    function flushAdViews() {
+      if (!currentUser || adViewStarts.size === 0) {
+        adViewStarts.clear();
+        return;
+      }
+      const now = Date.now();
+      const entries = Array.from(adViewStarts.entries());
+      adViewStarts.clear();
+      entries.forEach(([adId, start]) => {
+        const duration = Math.max(0, Math.round((now - start) / 1000));
+        if (duration >= 3) {
+          sendAdView(adId, duration);
+        }
+      });
+    }
+
+    function startAdViewTracking(ads) {
+      if (!currentUser) {
+        return;
+      }
+      const now = Date.now();
+      ads.forEach((ad) => {
+        if (!ad || !ad.id) {
+          return;
+        }
+        if (!adViewStarts.has(ad.id)) {
+          adViewStarts.set(ad.id, now);
+        }
+      });
+    }
+
+    function renderAdSlot(container, ads) {
+      if (!container) {
+        return;
+      }
+      container.innerHTML = "";
+      const list = Array.isArray(ads) ? ads : [];
+      container.classList.remove("hidden");
+      if (!list.length) {
+        const placeholder = document.createElement("div");
+        placeholder.className = "ad-card ad-placeholder";
+        placeholder.innerHTML =
+          "<div class=\"ad-image ad-logo\" aria-hidden=\"true\"></div>" +
+          "<div class=\"ad-copy\">" +
+          "<div class=\"ad-title\">Sevimli Aile</div>" +
+          "<div class=\"card-meta\">" +
+          t("games_title") +
+          "</div></div>";
+        container.appendChild(placeholder);
+        return;
+      }
+      list.slice(0, 2).forEach((ad) => {
+        const card = document.createElement("a");
+        card.className = "ad-card";
+        card.href = ad.link_url || "#";
+        card.target = ad.link_url ? "_blank" : "_self";
+        card.rel = ad.link_url ? "noopener noreferrer" : "";
+        card.innerHTML =
+          "<div class=\"ad-image\" style=\"background-image: url('" +
+          escapeHtml(ad.image_url || "") +
+          "')\"></div>" +
+          "<div class=\"ad-copy\">" +
+          "<div class=\"ad-title\">" +
+          escapeHtml(ad.title || t(\"label_update\")) +
+          "</div>" +
+          "<div class=\"card-meta\">" +
+          escapeHtml(ad.slot || \"\") +
+          "</div></div>";
+        container.appendChild(card);
+      });
+      startAdViewTracking(list.slice(0, 2));
+    }
+
+    async function fetchAds(slot) {
+      if (!currentUser || adsFetching) {
+        return;
+      }
+      adsFetching = true;
+      const params = new URLSearchParams();
+      if (slot) {
+        params.set("slot", slot);
+      }
+      const res = await apiFetch("/api/ads?" + params.toString());
+      if (res.ok) {
+        const data = await res.json();
+        adsCache[slot || "all"] = data.ads || [];
+      }
+      adsFetching = false;
+      renderAdSlot(ui.gamesAdSlot, adsCache.games || []);
+      renderAdSlot(ui.gamesAdSlotDetail, adsCache.games || []);
+    }
+
+    async function awardGameWin(gameId) {
+      if (!currentUser) {
+        setGamesMessage(t("games_redeem_need_signin"));
+        return;
+      }
+      try {
+        const res = await apiFetch("/api/games/win", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ gameId })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          const error = data && data.error ? String(data.error) : "";
+          if (error === "limit") {
+            setGamesMessage(t("games_points_limit"));
+          }
+          return;
+        }
+        if (typeof data.points === "number") {
+          currentUser.points = data.points;
+        }
+        if (typeof data.awardedPoints === "number") {
+          setGamesMessage(
+            t("games_points_earned").replace("{points}", String(data.awardedPoints))
+          );
+        }
+        fetchPointsLedger();
+      } catch (err) {
+        setGamesMessage("");
+      }
+    }
+
+    async function redeemProWithPoints() {
+      if (!currentUser) {
+        setGamesMessage(t("games_redeem_need_signin"));
+        return;
+      }
+      try {
+        const res = await apiFetch("/api/rewards/redeem-pro", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) {
+          if (data && data.error === "points") {
+            updatePointsUI();
+          }
+          return;
+        }
+        if (typeof data.points === "number") {
+          currentUser.points = data.points;
+        }
+        if (data.plan) {
+          currentUser.plan = data.plan;
+        }
+        updateAuthUI();
+        fetchPointsLedger();
+        setGamesMessage(t("games_redeem_success"));
+      } catch (err) {
+        setGamesMessage("");
+      }
+    }
+
     function buildFruitBoard() {
       const preset = FRUIT_PRESETS[Math.floor(Math.random() * FRUIT_PRESETS.length)];
       fruitGameState.grid = preset.slice();
       fruitGameState.selected = null;
       fruitGameState.matched = [];
       fruitGameState.statusKey = "games_fruit_status_ready";
+      fruitGameState.awarded = false;
       updateFruitStatus();
     }
 
@@ -3042,6 +3744,10 @@ const ui = {
       if (match.length) {
         fruitGameState.matched = match;
         fruitGameState.statusKey = "games_fruit_status_win";
+        if (!fruitGameState.awarded) {
+          fruitGameState.awarded = true;
+          awardGameWin("fruit");
+        }
       } else {
         swapFruit(a, b);
         fruitGameState.matched = [];
@@ -3183,6 +3889,7 @@ const ui = {
       memoryGameState.matched = new Set();
       memoryGameState.locked = false;
       memoryGameState.statusKey = "games_memory_status_ready";
+      memoryGameState.awarded = false;
       updateMemoryStatus();
       renderMemoryGrid();
     }
@@ -3209,6 +3916,10 @@ const ui = {
         memoryGameState.revealed = [];
         if (memoryGameState.matched.size === memoryGameState.cards.length) {
           memoryGameState.statusKey = "games_memory_status_win";
+          if (!memoryGameState.awarded) {
+            memoryGameState.awarded = true;
+            awardGameWin("memory");
+          }
         } else {
           memoryGameState.statusKey = "games_memory_status_match";
         }
@@ -3269,6 +3980,7 @@ const ui = {
       findGameState.cards = shuffleArray(cards);
       findGameState.solved = false;
       findGameState.statusKey = "games_find_status_ready";
+      findGameState.awarded = false;
       updateFindStatus();
       updateFindPrompt();
       renderFindGrid();
@@ -3281,6 +3993,10 @@ const ui = {
       if (fruit === findGameState.target) {
         findGameState.solved = true;
         findGameState.statusKey = "games_find_status_good";
+        if (!findGameState.awarded) {
+          findGameState.awarded = true;
+          awardGameWin("find");
+        }
       } else {
         findGameState.statusKey = "games_find_status_try";
       }
@@ -3312,6 +4028,142 @@ const ui = {
       });
     }
 
+    function updateMathStatus() {
+      if (ui.gamesMathStatus) {
+        ui.gamesMathStatus.textContent = t(mathGameState.statusKey);
+      }
+    }
+
+    function pickFactorPairs(value, maxFactor) {
+      const pairs = [];
+      for (let i = 2; i <= maxFactor; i += 1) {
+        if (value % i === 0) {
+          pairs.push([i, value / i]);
+        }
+      }
+      return pairs;
+    }
+
+    function buildMathQuestion(level) {
+      let text = "";
+      let answer = 0;
+      if (level === "medium") {
+        const a = 2 + Math.floor(Math.random() * 9);
+        const b = 2 + Math.floor(Math.random() * 9);
+        text = a + " × " + b + " = ?";
+        answer = a * b;
+      } else if (level === "hard") {
+        let attempts = 0;
+        let a = 0;
+        let b = 0;
+        let c = 0;
+        let d = 0;
+        let result = 0;
+        while (attempts < 25) {
+          attempts += 1;
+          c = 2 + Math.floor(Math.random() * 5);
+          d = 2 + Math.floor(Math.random() * 5);
+          result = 2 + Math.floor(Math.random() * 8);
+          const product = c * d * result;
+          const pairs = pickFactorPairs(product, 30);
+          if (!pairs.length) {
+            continue;
+          }
+          const pair = pairs[Math.floor(Math.random() * pairs.length)];
+          a = pair[0];
+          b = pair[1];
+          if (a && b) {
+            text = a + " × " + b + " ÷ (" + c + " × " + d + ") = ?";
+            answer = result;
+            break;
+          }
+        }
+        if (!text) {
+          const fallbackA = 12;
+          const fallbackB = 6;
+          text = fallbackA + " × " + fallbackB + " ÷ (3 × 4) = ?";
+          answer = 6;
+        }
+      } else {
+        const a = 1 + Math.floor(Math.random() * 9);
+        const b = 1 + Math.floor(Math.random() * 9);
+        text = a + " + " + b + " = ?";
+        answer = a + b;
+      }
+      mathGameState.question = text;
+      mathGameState.answer = answer;
+      mathGameState.awarded = false;
+      mathGameState.statusKey = "games_math_status_ready";
+      if (ui.gamesMathQuestion) {
+        ui.gamesMathQuestion.textContent = text;
+      }
+      if (ui.gamesMathAnswer) {
+        ui.gamesMathAnswer.value = "";
+      }
+      updateMathStatus();
+    }
+
+    function setMathLevel(level) {
+      mathGameState.level = level;
+      if (ui.gamesMathLevels && ui.gamesMathLevels.length) {
+        ui.gamesMathLevels.forEach((button) => {
+          button.classList.toggle("active", button.dataset.mathLevel === level);
+        });
+      }
+      buildMathQuestion(level);
+    }
+
+    function checkMathAnswer() {
+      if (!ui.gamesMathAnswer) {
+        return;
+      }
+      const raw = ui.gamesMathAnswer.value.trim().replace(",", ".");
+      const value = Number(raw);
+      if (!Number.isFinite(value)) {
+        mathGameState.statusKey = "games_math_status_wrong";
+        updateMathStatus();
+        return;
+      }
+      const correct = Math.abs(value - mathGameState.answer) < 0.01;
+      if (correct) {
+        mathGameState.statusKey = "games_math_status_correct";
+        if (!mathGameState.awarded) {
+          mathGameState.awarded = true;
+          awardGameWin("math");
+        }
+      } else {
+        mathGameState.statusKey = "games_math_status_wrong";
+      }
+      updateMathStatus();
+    }
+
+    function initMathGame() {
+      if (ui.gamesMathLevels && ui.gamesMathLevels.length) {
+        ui.gamesMathLevels.forEach((button) => {
+          button.addEventListener("click", () => {
+            setMathLevel(button.dataset.mathLevel || "easy");
+          });
+        });
+      }
+      if (ui.gamesMathSubmit) {
+        ui.gamesMathSubmit.addEventListener("click", checkMathAnswer);
+      }
+      if (ui.gamesMathAnswer) {
+        ui.gamesMathAnswer.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            checkMathAnswer();
+          }
+        });
+      }
+      if (ui.gamesMathNext) {
+        ui.gamesMathNext.addEventListener("click", () => {
+          buildMathQuestion(mathGameState.level);
+        });
+      }
+      setMathLevel(mathGameState.level);
+    }
+
     function syncGamesCopy() {
       if (!gamesInitialized) {
         return;
@@ -3319,14 +4171,18 @@ const ui = {
       updateFruitStatus();
       updateMemoryStatus();
       updateFindStatus();
+      updateMathStatus();
       updateFindPrompt();
       renderFruitGrid();
       renderMemoryGrid();
       renderFindGrid();
+      renderGameCatalog();
+      renderGameDetail(activeGameId);
+      updatePointsUI();
     }
 
     function initGames() {
-      if (!ui.gamesView) {
+      if (!ui.gamesPreview && !ui.gamesDetailView) {
         return;
       }
       if (!gamesInitialized) {
@@ -3352,9 +4208,63 @@ const ui = {
         if (ui.gamesFindNext) {
           ui.gamesFindNext.addEventListener("click", buildFindRound);
         }
+        initMathGame();
         gamesInitialized = true;
       }
       syncGamesCopy();
+      fetchAds("games");
+      fetchPointsLedger();
+    }
+
+    function renderGameCatalog() {
+      if (!ui.gamesPreviewGrid) {
+        return;
+      }
+      ui.gamesPreviewGrid.innerHTML = "";
+      GAME_CATALOG.forEach((game) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "game-preview-card";
+        button.dataset.game = game.id;
+        button.setAttribute("aria-label", t(game.titleKey));
+        button.innerHTML =
+          '<div class="game-preview-art" aria-hidden="true">' +
+          game.icon +
+          "</div><span class=\"game-preview-title\">" +
+          t(game.titleKey) +
+          "</span><span class=\"game-preview-tag\">" +
+          t("games_preview_tag") +
+          "</span>";
+        button.addEventListener("click", () => {
+          navigateTo("/games/" + game.id);
+        });
+        ui.gamesPreviewGrid.appendChild(button);
+      });
+    }
+
+    function renderGameDetail(gameId) {
+      if (!ui.gamesDetailView) {
+        return;
+      }
+      const game = resolveGameSlug(gameId || activeGameId);
+      const cards = ui.gamesDetailView.querySelectorAll(".game-card");
+      cards.forEach((card) => {
+        const match = card.dataset.game === (game ? game.id : "");
+        card.classList.toggle("active", match);
+      });
+      if (!game) {
+        gameDetailActive = false;
+        activeGameId = "";
+        return;
+      }
+      gameDetailActive = true;
+      activeGameId = game.id;
+      if (ui.gamesDetailTitle) {
+        ui.gamesDetailTitle.textContent = t(game.titleKey);
+      }
+      if (ui.gamesDetailSubtitle) {
+        ui.gamesDetailSubtitle.textContent = t(game.subtitleKey);
+      }
     }
 
     function schedulePlayerReload() {
@@ -3375,6 +4285,10 @@ const ui = {
     }
 
     function setPageView(view) {
+      const previousView = document.body.getAttribute("data-view") || "";
+      if (previousView === "games" && view !== "games") {
+        flushAdViews();
+      }
       const showFeed = view === "feed";
       const showViral = view === "viral";
       const showChannel = view === "channel";
@@ -3383,6 +4297,10 @@ const ui = {
       const showChannels = view === "channels";
       const showRequest = view === "request";
       const showGames = view === "games";
+      if (!showGames) {
+        gameDetailActive = false;
+        activeGameId = "";
+      }
       const showError = view === "error";
       const showAdmin = view.startsWith("admin");
       const showAdminOverview = showAdmin;
@@ -3402,11 +4320,14 @@ const ui = {
       if (ui.requestView) {
         toggleView(ui.requestView, showRequest);
       }
-      if (ui.gamesView) {
-        toggleView(ui.gamesView, showGames);
-      }
+      toggleView(ui.gamesPreview, showGames && !gameDetailActive);
+      toggleView(ui.gamesDetailView, showGames && gameDetailActive);
       if (ui.errorView) {
         toggleView(ui.errorView, showError);
+      }
+      if (ui.searchFilters) {
+        const showSearchFilters = showSearch && Boolean(searchQuery && searchQuery.trim());
+        ui.searchFilters.classList.toggle("hidden", !showSearchFilters);
       }
       toggleView(ui.channelView, showChannel);
       toggleView(ui.searchView, showSearch);
@@ -3451,6 +4372,66 @@ const ui = {
       setPrimaryNav(view);
       document.body.setAttribute("data-view", view);
       window.scrollTo({ top: 0, behavior: "smooth" });
+      if (showWatch) {
+        showControls();
+        scheduleControlHide();
+      } else {
+        cancelControlHide();
+        showControls();
+      }
+    }
+
+    function showControls() {
+      document.body.classList.remove("controls-hidden");
+      controlsHidden = false;
+    }
+
+    function cancelControlHide() {
+      if (controlsHideTimer) {
+        clearTimeout(controlsHideTimer);
+        controlsHideTimer = null;
+      }
+    }
+
+    function scheduleControlHide() {
+      cancelControlHide();
+      if (document.body.getAttribute("data-view") !== "watch") {
+        return;
+      }
+      controlsHideTimer = setTimeout(() => {
+        if (document.body.getAttribute("data-view") === "watch") {
+          document.body.classList.add("controls-hidden");
+          controlsHidden = true;
+        }
+      }, CONTROL_HIDE_DELAY);
+    }
+
+    function handleControlInteraction(event) {
+      const tag = event.target && event.target.tagName ? event.target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select") {
+        return;
+      }
+      showControls();
+      scheduleControlHide();
+    }
+
+    function handleGlobalShortcuts(event) {
+      const target = event.target;
+      const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea" || tag === "select") {
+        return;
+      }
+      const key = event.key ? event.key.toLowerCase() : "";
+      if (key === " " || key === "spacebar") {
+        event.preventDefault();
+        togglePlay();
+      } else if (key === "m") {
+        toggleMute();
+      } else if (key === "f") {
+        toggleFullscreen();
+      } else if (key === "escape" && document.fullscreenElement) {
+        document.exitFullscreen();
+      }
     }
 
     function showErrorPage(messageKey) {
@@ -3633,8 +4614,18 @@ const ui = {
         return "0:00";
       }
       const total = Math.floor(seconds);
-      const minutes = Math.floor(total / 60);
+      const hours = Math.floor(total / 3600);
+      const minutes = Math.floor((total % 3600) / 60);
       const secs = total % 60;
+      if (hours > 0) {
+        return (
+          String(hours).padStart(2, "0") +
+          ":" +
+          String(minutes).padStart(2, "0") +
+          ":" +
+          String(secs).padStart(2, "0")
+        );
+      }
       return minutes + ":" + String(secs).padStart(2, "0");
     }
 
@@ -3648,6 +4639,39 @@ const ui = {
         "%, #eadfd2 " +
         percent +
         "%, #eadfd2 100%)";
+    }
+
+    function updateVolumeBarFill(value) {
+      if (!ui.volumeRange) {
+        return;
+      }
+      const percent = Math.min(100, Math.max(0, Number(value) || 0));
+      ui.volumeRange.style.background =
+        "linear-gradient(90deg, var(--accent) 0%, var(--accent) " +
+        percent +
+        "%, #eadfd2 " +
+        percent +
+        "%, #eadfd2 100%)";
+    }
+
+    function getStoredNumber(key, fallback) {
+      const raw = localStorage.getItem(key);
+      const value = Number(raw);
+      if (!Number.isFinite(value)) {
+        return fallback;
+      }
+      return value;
+    }
+
+    function getStoredBool(key, fallback) {
+      const raw = localStorage.getItem(key);
+      if (raw === "true") {
+        return true;
+      }
+      if (raw === "false") {
+        return false;
+      }
+      return fallback;
     }
 
     function syncTimelineDisplay() {
@@ -3671,12 +4695,21 @@ const ui = {
         ui.volumeLevel.textContent = "--";
         ui.volumeDown.disabled = true;
         ui.volumeUp.disabled = true;
+        if (ui.volumeRange) {
+          ui.volumeRange.disabled = true;
+          updateVolumeBarFill(ui.volumeRange.value);
+        }
         return;
       }
       const volume = player.getVolume ? player.getVolume() : 0;
       ui.volumeLevel.textContent = volume + "%";
       ui.volumeDown.disabled = volume <= 0;
       ui.volumeUp.disabled = volume >= 100;
+      if (ui.volumeRange) {
+        ui.volumeRange.disabled = false;
+        ui.volumeRange.value = String(volume);
+        updateVolumeBarFill(volume);
+      }
     }
 
     function syncControlLabels() {
@@ -3693,6 +4726,9 @@ const ui = {
         ui.muteToggle.disabled = true;
         ui.autoNextToggle.disabled = true;
         ui.seekBar.disabled = true;
+        if (ui.speedSelect) {
+          ui.speedSelect.disabled = true;
+        }
         ui.qualitySelect.disabled = true;
         if (ui.captionSelect) {
           ui.captionSelect.disabled = true;
@@ -3723,12 +4759,57 @@ const ui = {
       ui.playToggle.disabled = false;
       ui.muteToggle.disabled = false;
       ui.autoNextToggle.disabled = false;
+      if (ui.speedSelect) {
+        ui.speedSelect.disabled = false;
+      }
       ui.qualitySelect.disabled = false;
       if (ui.captionSelect) {
         ui.captionSelect.disabled = false;
       }
       syncVolumeDisplay();
       syncTimelineDisplay();
+    }
+
+    function initStoredControls() {
+      const storedVolume = Math.max(0, Math.min(100, getStoredNumber(VOLUME_STORAGE_KEY, 100)));
+      lastVolume = storedVolume > 0 ? storedVolume : 100;
+      if (ui.volumeRange) {
+        ui.volumeRange.value = String(storedVolume);
+        updateVolumeBarFill(storedVolume);
+      }
+      if (ui.volumeLevel) {
+        ui.volumeLevel.textContent = storedVolume + "%";
+      }
+      const storedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
+      if (ui.speedSelect && storedSpeed) {
+        ui.speedSelect.value = storedSpeed;
+      }
+      const storedCaptions = localStorage.getItem(CAPTIONS_STORAGE_KEY);
+      if (ui.captionSelect && storedCaptions) {
+        ui.captionSelect.value = storedCaptions;
+      }
+    }
+
+    function applyStoredPlayerPreferences() {
+      if (!player) {
+        return;
+      }
+      const storedVolume = Math.max(0, Math.min(100, getStoredNumber(VOLUME_STORAGE_KEY, 100)));
+      if (player.setVolume) {
+        player.setVolume(storedVolume);
+      }
+      if (storedVolume > 0) {
+        lastVolume = storedVolume;
+      }
+      const shouldMute = getStoredBool(MUTE_STORAGE_KEY, false);
+      if (shouldMute && player.mute) {
+        player.mute();
+      } else if (!shouldMute && player.unMute) {
+        player.unMute();
+      }
+      applyPlaybackSpeed(false);
+      setCaptions();
+      syncVolumeDisplay();
     }
 
     function updateFullscreenButton() {
@@ -4338,6 +5419,7 @@ const ui = {
       params.set("limit", String(searchLimit));
       params.set("offset", String(searchOffset));
       params.set("search", searchQuery);
+      applySearchFiltersToParams(params);
       const res = await apiFetch("/api/videos?" + params.toString());
       const data = await res.json();
       if (!res.ok) {
@@ -4698,6 +5780,7 @@ const ui = {
       const data = await res.json();
       currentUser = data.user;
       updateAuthUI();
+      fetchPointsLedger();
       fetchSubscriptions();
       unlockApp();
       handleRoute();
@@ -4715,6 +5798,7 @@ const ui = {
       setDisplay(ui.authOpen, currentUser ? "none" : "inline-flex");
       if (!currentUser) {
         stopPlayback();
+        adViewStarts.clear();
       }
       setDisplay(
         ui.uploadOpen,
@@ -4743,8 +5827,9 @@ const ui = {
         (firebaseUser && firebaseUser.email) ||
         "Guest";
       const avatarLetter = (displayName && displayName[0]) || "K";
+      const points = currentUser ? Number(currentUser.points || 0) : 0;
       const planLabel = currentUser
-        ? (currentUser.role || "user") + " • " + (currentUser.plan || "free")
+        ? (currentUser.role || "user") + " • " + (currentUser.plan || "free") + " • " + points + " pts"
         : "Guest mode";
       if (ui.accountName) {
         ui.accountName.textContent = displayName;
@@ -4770,6 +5855,7 @@ const ui = {
         ui.filterSubscribed.classList.remove("active");
       }
       updateHeartButton();
+      updatePointsUI();
     }
 
     const LOGIN_ATTEMPT_KEY = "loginAttempts";
@@ -5435,6 +6521,129 @@ const ui = {
       renderAdminReports(data.reports || [], ui.adminReportsPageList);
     }
 
+    function renderAdminAds(list) {
+      if (!ui.adminAdsList) {
+        return;
+      }
+      ui.adminAdsList.innerHTML = "";
+      if (!list.length) {
+        ui.adminAdsList.textContent = t("admin_ads_empty");
+        return;
+      }
+      const formatHours = (seconds) => {
+        const value = Number(seconds || 0) / 3600;
+        return value.toFixed(1);
+      };
+      list.forEach((ad) => {
+        const row = document.createElement("div");
+        row.className = "channel";
+        const preview = document.createElement("div");
+        preview.className = "avatar avatar-image";
+        if (ad.image_url) {
+          preview.style.backgroundImage = "url('" + escapeHtml(ad.image_url) + "')";
+        }
+        const info = document.createElement("div");
+        info.innerHTML =
+          "<div class=\"channel-name\">" +
+          escapeHtml(ad.title || "Ad") +
+          "</div><div class=\"card-meta\">" +
+          escapeHtml(ad.slot || "") +
+          " · " +
+          (ad.active ? "active" : "inactive") +
+          " · " +
+          (ad.views || 0) +
+          " views · " +
+          (ad.kids || 0) +
+          " kids · " +
+          formatHours(ad.watch_seconds || 0) +
+          " hrs</div>";
+        const actions = document.createElement("div");
+        actions.className = "channel-actions";
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "pill";
+        toggle.textContent = ad.active ? "Disable" : "Enable";
+        toggle.addEventListener("click", async () => {
+          await apiFetch("/api/admin/ads/" + ad.id, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ active: !ad.active })
+          });
+          fetchAdminAdsPage();
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "ghost";
+        remove.textContent = t("action_delete");
+        remove.addEventListener("click", async () => {
+          await apiFetch("/api/admin/ads/" + ad.id, { method: "DELETE" });
+          if (ui.adminAdsMessage) {
+            ui.adminAdsMessage.textContent = t("admin_ads_message_deleted");
+          }
+          fetchAdminAdsPage();
+        });
+        actions.appendChild(toggle);
+        actions.appendChild(remove);
+        row.appendChild(preview);
+        row.appendChild(info);
+        row.appendChild(actions);
+        ui.adminAdsList.appendChild(row);
+      });
+    }
+
+    async function fetchAdminAdsPage() {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      if (ui.adminAdsList) {
+        ui.adminAdsList.innerHTML = t("status_loading");
+      }
+      openAdminSection("ads");
+      const res = await apiFetch("/api/admin/ads");
+      const data = await res.json();
+      if (!res.ok) {
+        if (ui.adminAdsMessage) {
+          ui.adminAdsMessage.textContent = t("admin_ads_message_failed");
+        }
+        return;
+      }
+      adminAdsData = data.ads || [];
+      renderAdminAds(adminAdsData);
+    }
+
+    async function handleAdminAdsSubmit(event) {
+      event.preventDefault();
+      if (!ui.adminAdsMessage) {
+        return;
+      }
+      ui.adminAdsMessage.textContent = "";
+      const payload = {
+        slot: ui.adminAdsSlot ? ui.adminAdsSlot.value : "games",
+        title: ui.adminAdsTitle ? ui.adminAdsTitle.value.trim() : "",
+        image_url: ui.adminAdsImage ? ui.adminAdsImage.value.trim() : "",
+        link_url: ui.adminAdsLink ? ui.adminAdsLink.value.trim() : "",
+        active: ui.adminAdsActive ? ui.adminAdsActive.checked : true
+      };
+      const res = await apiFetch("/api/admin/ads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        ui.adminAdsMessage.textContent = t("admin_ads_message_failed");
+        return;
+      }
+      ui.adminAdsMessage.textContent = t("admin_ads_message_saved");
+      if (ui.adminAdsForm) {
+        ui.adminAdsForm.reset();
+        if (ui.adminAdsActive) {
+          ui.adminAdsActive.checked = true;
+        }
+      }
+      fetchAdminAdsPage();
+      fetchAds("games");
+    }
+
     function openAdminImportsPage() {
       if (!currentUser || currentUser.role !== "admin") {
         return;
@@ -5469,6 +6678,10 @@ const ui = {
       }
       if (section === "reports") {
         fetchAdminReportsPage();
+        return;
+      }
+      if (section === "ads") {
+        fetchAdminAdsPage();
         return;
       }
       if (section === "imports") {
@@ -5609,7 +6822,7 @@ const ui = {
       ui.artistStats.innerHTML = "";
       ui.manageList.innerHTML = "";
       ui.profileMessage.textContent = "";
-      if (currentUser && (currentUser.role === "artist" || currentUser.role === "admin")) {
+      if (currentUser) {
         ui.profileForm.style.display = "grid";
         await loadProfile();
       } else {
@@ -5722,6 +6935,9 @@ const ui = {
       ui.profileName.value = data.profile?.display_name || "";
       ui.profileSlogan.value = data.profile?.slogan || "";
       ui.profileAvatar.value = data.profile?.avatar_url || "";
+      if (ui.profileBio) {
+        ui.profileBio.value = data.profile?.bio || "";
+      }
     }
 
     async function saveProfile(event) {
@@ -5730,14 +6946,23 @@ const ui = {
       const displayName = ui.profileName.value.trim();
       const slogan = ui.profileSlogan.value.trim();
       const avatarUrl = ui.profileAvatar.value.trim();
+      const bio = ui.profileBio ? ui.profileBio.value.trim() : "";
+      if (avatarUrl && !/\.png($|[?#])/i.test(avatarUrl)) {
+        ui.profileMessage.textContent = t("message_profile_avatar_png");
+        return;
+      }
       const res = await apiFetch("/api/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName, slogan, avatarUrl })
+        body: JSON.stringify({ displayName, slogan, avatarUrl, bio })
       });
       const data = await res.json();
       if (!res.ok) {
-        ui.profileMessage.textContent = data.error || t("message_profile_save_failed");
+        if (data && typeof data.error === "string" && data.error.toLowerCase().includes("png")) {
+          ui.profileMessage.textContent = t("message_profile_avatar_png");
+        } else {
+          ui.profileMessage.textContent = data.error || t("message_profile_save_failed");
+        }
         return;
       }
       ui.profileMessage.textContent = t("message_profile_saved");
@@ -6297,7 +7522,8 @@ const ui = {
       if (!player || !player.playVideo) {
         return;
       }
-      if (player.mute) {
+      const shouldMute = getStoredBool(MUTE_STORAGE_KEY, true);
+      if (shouldMute && player.mute) {
         player.mute();
       }
       player.playVideo();
@@ -6317,11 +7543,11 @@ const ui = {
       updateStatus("status_ready");
       setPlayerState("ready");
       setOverlayState(false, true, false);
+      applyStoredPlayerPreferences();
       attemptAutoplay();
       syncControlLabels();
       setPreferredQuality();
       startTicker();
-      setCaptions();
       if (videos.length) {
         loadVideo(0);
       }
@@ -6395,12 +7621,47 @@ const ui = {
       if (!player) {
         return;
       }
-      if (player.isMuted && player.isMuted()) {
-        player.unMute();
+      const isMuted = player.isMuted && player.isMuted();
+      if (isMuted) {
+        if (player.unMute) {
+          player.unMute();
+        }
+        if (lastVolume > 0 && player.setVolume) {
+          player.setVolume(lastVolume);
+        }
+        localStorage.setItem(MUTE_STORAGE_KEY, "false");
       } else if (player.mute) {
+        if (player.getVolume) {
+          const current = player.getVolume();
+          if (current > 0) {
+            lastVolume = current;
+          }
+        }
         player.mute();
+        localStorage.setItem(MUTE_STORAGE_KEY, "true");
       }
       syncControlLabels();
+    }
+
+    function setVolume(value, store = true) {
+      if (!player || !player.setVolume) {
+        return;
+      }
+      const next = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+      player.setVolume(next);
+      if (next > 0 && player.unMute) {
+        player.unMute();
+        localStorage.setItem(MUTE_STORAGE_KEY, "false");
+        lastVolume = next;
+      }
+      if (store) {
+        localStorage.setItem(VOLUME_STORAGE_KEY, String(next));
+      }
+      if (ui.volumeRange) {
+        ui.volumeRange.value = String(next);
+        updateVolumeBarFill(next);
+      }
+      ui.volumeLevel.textContent = next + "%";
     }
 
     function changeVolume(delta) {
@@ -6408,10 +7669,12 @@ const ui = {
         return;
       }
       const next = Math.max(0, Math.min(100, player.getVolume() + delta));
-      player.setVolume(next);
-      if (next > 0 && player.unMute) {
-        player.unMute();
-      }
+      setVolume(next);
+      syncControlLabels();
+    }
+
+    function handleVolumeInput(event) {
+      setVolume(event.target.value);
       syncControlLabels();
     }
 
@@ -6471,11 +7734,36 @@ const ui = {
       flashState("play");
     }
 
+    function applyPlaybackSpeed(store = true) {
+      if (!player || !player.setPlaybackRate) {
+        return;
+      }
+      let value = 1;
+      if (ui.speedSelect) {
+        value = Number(ui.speedSelect.value || "1");
+      }
+      if (!Number.isFinite(value)) {
+        value = 1;
+      }
+      const rates = player.getAvailablePlaybackRates ? player.getAvailablePlaybackRates() : [];
+      if (rates.length && !rates.includes(value)) {
+        value = rates.includes(1) ? 1 : rates[0];
+      }
+      player.setPlaybackRate(value);
+      if (ui.speedSelect && ui.speedSelect.value !== String(value)) {
+        ui.speedSelect.value = String(value);
+      }
+      if (store) {
+        localStorage.setItem(SPEED_STORAGE_KEY, String(value));
+      }
+    }
+
     function setCaptions() {
       if (!player) {
         return;
       }
       const value = ui.captionSelect ? ui.captionSelect.value : "off";
+      localStorage.setItem(CAPTIONS_STORAGE_KEY, value);
       if (value === "off") {
         if (player.unloadModule) {
           player.unloadModule("captions");
@@ -6550,6 +7838,12 @@ const ui = {
     }
     if (ui.gamesOpen) {
       ui.gamesOpen.addEventListener("click", () => navigateTo("/games"));
+    }
+    if (ui.gamesRedeem) {
+      ui.gamesRedeem.addEventListener("click", redeemProWithPoints);
+    }
+    if (ui.gamesRedeemDetail) {
+      ui.gamesRedeemDetail.addEventListener("click", redeemProWithPoints);
     }
     if (ui.requestForm) {
       ui.requestForm.addEventListener("submit", sendRequest);
@@ -6777,6 +8071,9 @@ const ui = {
         button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
       });
     }
+    if (ui.adminAdsForm) {
+      ui.adminAdsForm.addEventListener("submit", handleAdminAdsSubmit);
+    }
 
     ui.loginForm.addEventListener("submit", handleLogin);
     ui.registerForm.addEventListener("submit", handleRegister);
@@ -6796,8 +8093,15 @@ const ui = {
     ui.muteToggle.addEventListener("click", toggleMute);
     ui.volumeDown.addEventListener("click", () => changeVolume(-10));
     ui.volumeUp.addEventListener("click", () => changeVolume(10));
+    if (ui.volumeRange) {
+      ui.volumeRange.addEventListener("input", handleVolumeInput);
+      ui.volumeRange.addEventListener("change", handleVolumeInput);
+    }
     ui.autoNextToggle.addEventListener("click", toggleAutoNext);
     ui.controlsFullscreen.addEventListener("click", toggleFullscreen);
+    if (ui.speedSelect) {
+      ui.speedSelect.addEventListener("change", () => applyPlaybackSpeed(true));
+    }
     ui.qualitySelect.addEventListener("change", setQuality);
     if (ui.captionSelect) {
       ui.captionSelect.addEventListener("change", setCaptions);
@@ -6858,6 +8162,14 @@ const ui = {
       if (!target.closest(".admin-video-row")) {
         closeAdminVideoDetails();
       }
+    });
+
+    ["mousemove", "mousedown", "pointermove", "touchstart"].forEach((type) => {
+      document.addEventListener(type, handleControlInteraction);
+    });
+    document.addEventListener("keydown", (event) => {
+      handleControlInteraction(event);
+      handleGlobalShortcuts(event);
     });
 
     document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -6923,6 +8235,7 @@ const ui = {
     });
     }
 
+    initStoredControls();
     setUiLanguage(getUiLanguage());
     setTheme();
     setView("default");
@@ -6942,6 +8255,33 @@ const ui = {
     ui.searchBack.addEventListener("click", () => {
       navigateTo("/");
     });
+    if (ui.searchFilterDay) {
+      ui.searchFilterDay.addEventListener("change", handleSearchFilterChange);
+    }
+    if (ui.searchFilterLanguage) {
+      ui.searchFilterLanguage.addEventListener("change", handleSearchFilterChange);
+    }
+    if (ui.searchFilterReligion) {
+      ui.searchFilterReligion.addEventListener("change", handleSearchFilterChange);
+    }
+    if (ui.searchFilterTopic) {
+      ui.searchFilterTopic.addEventListener("input", handleSearchFilterChange);
+    }
+    if (ui.searchFilterLength) {
+      ui.searchFilterLength.addEventListener("change", handleSearchFilterChange);
+    }
+    if (ui.searchFilterClear) {
+      ui.searchFilterClear.addEventListener("click", () => {
+        resetSearchFilters();
+        handleSearchFilterChange();
+      });
+    }
+    if (ui.gamesBack) {
+      ui.gamesBack.addEventListener("click", () => {
+        navigateTo("/games");
+      });
+    }
+    resetSearchFilters();
     if (ui.errorRetry) {
       ui.errorRetry.addEventListener("click", () => window.location.reload());
     }
@@ -6980,14 +8320,31 @@ const ui = {
         fetchViral();
         return;
       }
+      if (path === "/games") {
+        gameDetailActive = false;
+        activeGameId = "";
+        setPageView("games");
+        initGames();
+        return;
+      }
+      if (path.startsWith("/games/")) {
+        const parts = path.split("/").filter(Boolean);
+        const gameSlug = parts[1];
+        const game = resolveGameSlug(gameSlug);
+        if (!game) {
+          showErrorPage("error_not_found");
+          return;
+        }
+        activeGameId = game.id;
+        gameDetailActive = true;
+        setPageView("games");
+        initGames();
+        renderGameDetail(game.id);
+        return;
+      }
       if (path === "/request") {
         navFocus = "request";
         setPageView("request");
-        return;
-      }
-      if (path === "/games") {
-        setPageView("games");
-        initGames();
         return;
       }
       if (path.startsWith("/admin") && !currentUser) {
@@ -7030,6 +8387,10 @@ const ui = {
       }
       if (path === "/admin/reports") {
         fetchAdminReportsPage();
+        return;
+      }
+      if (path === "/admin/ads") {
+        fetchAdminAdsPage();
         return;
       }
       if (path === "/admin/imports") {
@@ -7084,6 +8445,9 @@ const ui = {
     }
 
     window.addEventListener("popstate", handleRoute);
+    window.addEventListener("beforeunload", () => {
+      flushAdViews();
+    });
     window.addEventListener("error", (event) => {
       if (event && event.target && event.target !== window) {
         return;

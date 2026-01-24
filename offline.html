@@ -475,9 +475,30 @@
           }
         }
 
+        function shuffle(array) {
+          const next = array.slice();
+          for (let i = next.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = next[i];
+            next[i] = next[j];
+            next[j] = temp;
+          }
+          return next;
+        }
+
         function buildBoard() {
-          const preset = presets[Math.floor(Math.random() * presets.length)];
-          state.grid = preset.slice();
+          let next = null;
+          let attempts = 0;
+          while (attempts < 20) {
+            const preset = presets[Math.floor(Math.random() * presets.length)];
+            const candidate = shuffle(preset);
+            if (hasPossibleMove(candidate)) {
+              next = candidate;
+              break;
+            }
+            attempts += 1;
+          }
+          state.grid = next || presets[0].slice();
           state.selected = null;
           state.matched = [];
           els.gameStatus.textContent = t("game_status_ready");
@@ -491,22 +512,56 @@
           return Math.abs(rowA - rowB) + Math.abs(colA - colB) === 1;
         }
 
-        function findMatch() {
+        function findMatchInGrid(grid) {
           const matches = [];
           for (let row = 0; row < 3; row += 1) {
             const base = row * 3;
-            const a = state.grid[base];
-            if (a && a === state.grid[base + 1] && a === state.grid[base + 2]) {
+            const a = grid[base];
+            if (a && a === grid[base + 1] && a === grid[base + 2]) {
               matches.push(base, base + 1, base + 2);
             }
           }
           for (let col = 0; col < 3; col += 1) {
-            const a = state.grid[col];
-            if (a && a === state.grid[col + 3] && a === state.grid[col + 6]) {
+            const a = grid[col];
+            if (a && a === grid[col + 3] && a === grid[col + 6]) {
               matches.push(col, col + 3, col + 6);
             }
           }
           return Array.from(new Set(matches));
+        }
+
+        function findMatch() {
+          return findMatchInGrid(state.grid);
+        }
+
+        function hasPossibleMove(grid) {
+          const copy = grid.slice();
+          const swapIndexes = [
+            [0, 1],
+            [1, 2],
+            [3, 4],
+            [4, 5],
+            [6, 7],
+            [7, 8],
+            [0, 3],
+            [3, 6],
+            [1, 4],
+            [4, 7],
+            [2, 5],
+            [5, 8]
+          ];
+          for (const [a, b] of swapIndexes) {
+            const temp = copy[a];
+            copy[a] = copy[b];
+            copy[b] = temp;
+            const match = findMatchInGrid(copy);
+            copy[b] = copy[a];
+            copy[a] = temp;
+            if (match.length) {
+              return true;
+            }
+          }
+          return false;
         }
 
         function swap(a, b) {

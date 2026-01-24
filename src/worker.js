@@ -1,6 +1,18 @@
 const JSON_HEADERS = { "Content-Type": "application/json" };
 const SCHEMA_TTL_MS = 5 * 60 * 1000;
 const schemaCache = {};
+const GAME_REWARDS = {
+  fruit: 8,
+  memory: 12,
+  find: 6,
+  math: 10
+};
+const GAME_DAILY_LIMIT = 5;
+const GAME_DAILY_POINT_LIMIT = 120;
+const GAME_MIN_INTERVAL_MS = 5000;
+const PRO_REDEEM_COST = 500;
+const PRO_REDEEM_DAYS = 30;
+const gameWinBuckets = new Map();
 
 async function getTableColumns(env, table) {
   const cached = schemaCache[table];
@@ -36,7 +48,7 @@ function withCors(headers, origin) {
   return {
     ...headers,
     "Access-Control-Allow-Origin": origin || "*",
-    "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,DELETE,PATCH,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
 }
@@ -48,6 +60,43 @@ async function parseJson(request) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function startOfTodayIso() {
+  const now = new Date();
+  now.setUTCHours(0, 0, 0, 0);
+  return now.toISOString();
+}
+
+function sanitizeUrl(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return "";
+    }
+    return url.toString();
+  } catch (err) {
+    return "";
+  }
+}
+
+function isPngUrl(value) {
+  if (!value) return false;
+  return /\.png($|[?#])/i.test(String(value));
+}
+
+function isProActive(expiresAt) {
+  if (!expiresAt) return false;
+  const expiry = new Date(expiresAt);
+  return Number.isFinite(expiry.getTime()) && expiry.getTime() > Date.now();
+}
+
+function effectivePlan(user) {
+  if (user && user.plan === "pro") return "pro";
+  if (user && isProActive(user.pro_expires_at)) return "pro";
+  return "free";
 }
 
 function normalizeTopics(input) {
@@ -575,9 +624,17 @@ export default {
         return jsonResponse({ error: "Unauthorized" }, 401, withCors({}, origin));
       }
 
+      const plan = effectivePlan(user);
+      if (plan !== user.plan) {
+        await env.DB.prepare("UPDATE users SET plan = ? WHERE id = ?")
+          .bind(plan, user.id)
+          .run();
+        user.plan = plan;
+      }
+
     if (path === "/me" && request.method === "GET") {
       const current = await env.DB.prepare(
-        "SELECT id, email, role, plan, display_name, avatar_url, slogan, created_at FROM users WHERE id = ?"
+        "SELECT id, email, role, plan, points, pro_expires_at, display_name, avatar_url, slogan, bio, created_at FROM users WHERE id = ?"
       )
         .bind(user.id)
         .first();
@@ -586,7 +643,7 @@ export default {
 
     if (path === "/profile" && request.method === "GET") {
       const current = await env.DB.prepare(
-        "SELECT display_name, avatar_url, slogan FROM users WHERE id = ?"
+        "SELECT display_name, avatar_url, slogan, bio FROM users WHERE id = ?"
       )
         .bind(user.id)
         .first();
@@ -594,17 +651,18 @@ export default {
     }
 
     if (path === "/profile" && request.method === "POST") {
-      if (!requireRole(user, ["artist", "admin"])) {
-        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
-      }
       const body = await parseJson(request);
       const displayName = String(body.displayName || "").trim();
       const slogan = String(body.slogan || "").trim();
-      const avatarUrl = String(body.avatarUrl || "").trim();
+      const bio = String(body.bio || "").trim();
+      const avatarUrl = sanitizeUrl(body.avatarUrl);
+      if (avatarUrl && !isPngUrl(avatarUrl)) {
+        return jsonResponse({ error: "PNG URL required." }, 400, withCors({}, origin));
+      }
       await env.DB.prepare(
-        "UPDATE users SET display_name = ?, slogan = ?, avatar_url = ? WHERE id = ?"
+        "UPDATE users SET display_name = ?, slogan = ?, avatar_url = ?, bio = ? WHERE id = ?"
       )
-        .bind(displayName, slogan, avatarUrl, user.id)
+        .bind(displayName, slogan, avatarUrl, bio, user.id)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -711,6 +769,164 @@ export default {
         } catch (err) {}
       });
       return jsonResponse({ topics: Array.from(set).sort() }, 200, withCors({}, origin));
+    }
+
+    if (path === "/points" && request.method === "GET") {
+      const pointsRow = await env.DB.prepare("SELECT points FROM users WHERE id = ?")
+        .bind(user.id)
+        .first();
+      const events = await env.DB.prepare(
+        "SELECT type, points, created_at FROM points_events WHERE user_id = ? ORDER BY created_at DESC LIMIT 20"
+      )
+        .bind(user.id)
+        .all();
+      return jsonResponse(
+        { points: pointsRow ? pointsRow.points : 0, events: events.results || [] },
+        200,
+        withCors({}, origin)
+      );
+    }
+
+    if (path === "/ads" && request.method === "GET") {
+      const slot = String(url.searchParams.get("slot") || "").trim().toLowerCase();
+      const binds = [];
+      let where = "WHERE active = 1";
+      if (slot) {
+        where += " AND slot = ?";
+        binds.push(slot);
+      }
+      const result = await env.DB.prepare(
+        "SELECT id, slot, title, image_url, link_url FROM ads " + where + " ORDER BY created_at DESC"
+      )
+        .bind(...binds)
+        .all();
+      return jsonResponse({ ads: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/ads/view" && request.method === "POST") {
+      const body = await parseJson(request);
+      const adId = Number(body.adId);
+      let duration = Number(body.durationSeconds);
+      if (!Number.isFinite(adId)) {
+        return jsonResponse({ error: "ad" }, 400, withCors({}, origin));
+      }
+      if (!Number.isFinite(duration)) {
+        duration = 0;
+      }
+      duration = Math.max(0, Math.min(6 * 60 * 60, Math.round(duration)));
+      if (duration < 3) {
+        return jsonResponse({ ignored: true }, 200, withCors({}, origin));
+      }
+      const adCheck = await env.DB.prepare("SELECT id FROM ads WHERE id = ? AND active = 1")
+        .bind(adId)
+        .first();
+      if (!adCheck) {
+        return jsonResponse({ error: "ad" }, 404, withCors({}, origin));
+      }
+      const lastView = await env.DB.prepare(
+        "SELECT viewed_at FROM ad_views WHERE ad_id = ? AND user_id = ? ORDER BY viewed_at DESC LIMIT 1"
+      )
+        .bind(adId, user.id)
+        .first();
+      if (lastView && lastView.viewed_at) {
+        const lastAt = new Date(lastView.viewed_at).getTime();
+        if (Number.isFinite(lastAt) && Date.now() - lastAt < 5000) {
+          return jsonResponse({ ignored: true }, 200, withCors({}, origin));
+        }
+      }
+      await env.DB.prepare(
+        "INSERT INTO ad_views (ad_id, user_id, duration_seconds, viewed_at) VALUES (?, ?, ?, ?)"
+      )
+        .bind(adId, user.id, duration, nowIso())
+        .run();
+      return jsonResponse({ ok: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/games/win" && request.method === "POST") {
+      const body = await parseJson(request);
+      const gameId = String(body.gameId || "").trim().toLowerCase();
+      const reward = GAME_REWARDS[gameId];
+      if (!reward) {
+        return jsonResponse({ error: "game" }, 400, withCors({}, origin));
+      }
+      const now = Date.now();
+      const bucket = gameWinBuckets.get(user.id) || { last: 0 };
+      if (now - bucket.last < GAME_MIN_INTERVAL_MS) {
+        return jsonResponse({ error: "limit" }, 429, withCors({}, origin));
+      }
+      bucket.last = now;
+      gameWinBuckets.set(user.id, bucket);
+      const today = startOfTodayIso();
+      const countResult = await env.DB.prepare(
+        "SELECT COUNT(*) as total FROM game_wins WHERE user_id = ? AND game_id = ? AND won_at >= ?"
+      )
+        .bind(user.id, gameId, today)
+        .first();
+      const total = countResult ? Number(countResult.total || 0) : 0;
+      if (total >= GAME_DAILY_LIMIT) {
+        return jsonResponse({ error: "limit" }, 429, withCors({}, origin));
+      }
+      const pointsResult = await env.DB.prepare(
+        "SELECT COALESCE(SUM(points), 0) as total FROM game_wins WHERE user_id = ? AND won_at >= ?"
+      )
+        .bind(user.id, today)
+        .first();
+      const dailyPoints = pointsResult ? Number(pointsResult.total || 0) : 0;
+      if (dailyPoints >= GAME_DAILY_POINT_LIMIT) {
+        return jsonResponse({ error: "limit" }, 429, withCors({}, origin));
+      }
+      await env.DB.prepare(
+        "INSERT INTO game_wins (user_id, game_id, points, won_at) VALUES (?, ?, ?, ?)"
+      )
+        .bind(user.id, gameId, reward, nowIso())
+        .run();
+      await env.DB.prepare(
+        "INSERT INTO points_events (user_id, type, points, created_at) VALUES (?, ?, ?, ?)"
+      )
+        .bind(user.id, "game_win", reward, nowIso())
+        .run();
+      const updated = await env.DB.prepare(
+        "UPDATE users SET points = points + ? WHERE id = ?"
+      )
+        .bind(reward, user.id)
+        .run();
+      const row = await env.DB.prepare("SELECT points FROM users WHERE id = ?")
+        .bind(user.id)
+        .first();
+      return jsonResponse({ points: row ? row.points : 0, awardedPoints: reward }, 200, withCors({}, origin));
+    }
+
+    if (path === "/rewards/redeem-pro" && request.method === "POST") {
+      const current = await env.DB.prepare(
+        "SELECT points, pro_expires_at FROM users WHERE id = ?"
+      )
+        .bind(user.id)
+        .first();
+      if (!current) {
+        return jsonResponse({ error: "user" }, 404, withCors({}, origin));
+      }
+      const currentPoints = Number(current.points || 0);
+      if (currentPoints < PRO_REDEEM_COST) {
+        return jsonResponse({ error: "points" }, 400, withCors({}, origin));
+      }
+      const now = new Date();
+      const base = isProActive(current.pro_expires_at) ? new Date(current.pro_expires_at) : now;
+      const expiresAt = new Date(base.getTime() + PRO_REDEEM_DAYS * 24 * 60 * 60 * 1000);
+      await env.DB.prepare(
+        "UPDATE users SET points = points - ?, plan = 'pro', pro_expires_at = ? WHERE id = ?"
+      )
+        .bind(PRO_REDEEM_COST, expiresAt.toISOString(), user.id)
+        .run();
+      await env.DB.prepare(
+        "INSERT INTO points_events (user_id, type, points, created_at) VALUES (?, ?, ?, ?)"
+      )
+        .bind(user.id, "redeem_pro", -PRO_REDEEM_COST, nowIso())
+        .run();
+      return jsonResponse(
+        { points: currentPoints - PRO_REDEEM_COST, plan: "pro", pro_expires_at: expiresAt.toISOString() },
+        200,
+        withCors({}, origin)
+      );
     }
 
     if (path === "/channels" && request.method === "GET") {
@@ -858,9 +1074,15 @@ export default {
       if (!body.userId) {
         return jsonResponse({ error: "userId required." }, 400, withCors({}, origin));
       }
-      await env.DB.prepare("UPDATE users SET plan = ? WHERE id = ?")
-        .bind(plan, body.userId)
-        .run();
+      if (plan === "free") {
+        await env.DB.prepare("UPDATE users SET plan = ?, pro_expires_at = NULL WHERE id = ?")
+          .bind(plan, body.userId)
+          .run();
+      } else {
+        await env.DB.prepare("UPDATE users SET plan = ? WHERE id = ?")
+          .bind(plan, body.userId)
+          .run();
+      }
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
@@ -875,6 +1097,108 @@ export default {
       const nextRole = body.role === "artist" ? "artist" : "user";
       await env.DB.prepare("UPDATE users SET role = ? WHERE id = ?")
         .bind(nextRole, body.userId)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/ads" && request.method === "GET") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const result = await env.DB.prepare(
+        "SELECT ads.id, ads.slot, ads.title, ads.image_url, ads.link_url, ads.active, ads.created_at, " +
+          "COUNT(ad_views.id) as views, COUNT(DISTINCT ad_views.user_id) as kids, " +
+          "COALESCE(SUM(ad_views.duration_seconds), 0) as watch_seconds " +
+          "FROM ads LEFT JOIN ad_views ON ad_views.ad_id = ads.id " +
+          "GROUP BY ads.id ORDER BY ads.created_at DESC"
+      ).all();
+      return jsonResponse({ ads: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/ads" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const slot = String(body.slot || "").trim().toLowerCase();
+      const title = String(body.title || "").trim().slice(0, 120);
+      const imageUrl = sanitizeUrl(body.image_url);
+      const linkUrl = sanitizeUrl(body.link_url);
+      const active = typeof body.active === "boolean" ? body.active : true;
+      if (!slot || slot !== "games") {
+        return jsonResponse({ error: "slot" }, 400, withCors({}, origin));
+      }
+      if (!imageUrl) {
+        return jsonResponse({ error: "image" }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare(
+        "INSERT INTO ads (slot, title, image_url, link_url, active, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+      )
+        .bind(slot, title, imageUrl, linkUrl || null, active ? 1 : 0, nowIso())
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/admin/ads/") && request.method === "PATCH") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const id = Number(path.split("/").pop());
+      if (!Number.isFinite(id)) {
+        return jsonResponse({ error: "id" }, 400, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const fields = [];
+      const binds = [];
+      if (body.slot) {
+        const slot = String(body.slot).trim().toLowerCase();
+        if (slot !== "games") {
+          return jsonResponse({ error: "slot" }, 400, withCors({}, origin));
+        }
+        fields.push("slot = ?");
+        binds.push(slot);
+      }
+      if (typeof body.title === "string") {
+        fields.push("title = ?");
+        binds.push(body.title.trim().slice(0, 120));
+      }
+      if (typeof body.image_url === "string") {
+        const imageUrl = sanitizeUrl(body.image_url);
+        if (!imageUrl) {
+          return jsonResponse({ error: "image" }, 400, withCors({}, origin));
+        }
+        fields.push("image_url = ?");
+        binds.push(imageUrl);
+      }
+      if (typeof body.link_url === "string") {
+        const linkUrl = sanitizeUrl(body.link_url);
+        fields.push("link_url = ?");
+        binds.push(linkUrl || null);
+      }
+      if (typeof body.active === "boolean") {
+        fields.push("active = ?");
+        binds.push(body.active ? 1 : 0);
+      }
+      if (!fields.length) {
+        return jsonResponse({ error: "payload" }, 400, withCors({}, origin));
+      }
+      binds.push(id);
+      await env.DB.prepare("UPDATE ads SET " + fields.join(", ") + " WHERE id = ?")
+        .bind(...binds)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/admin/ads/") && request.method === "DELETE") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const id = Number(path.split("/").pop());
+      if (!Number.isFinite(id)) {
+        return jsonResponse({ error: "id" }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare("DELETE FROM ads WHERE id = ?")
+        .bind(id)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }

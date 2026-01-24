@@ -189,9 +189,12 @@
               <div class="controls">
                 <div class="timeline">
                   <label class="sr-only" for="seek-bar" data-i18n="timeline_label">Video timeline</label>
-                  <span class="time-label" id="time-current">0:00</span>
+                  <div class="time-display" aria-live="polite">
+                    <span class="time-label" id="time-current">0:00</span>
+                    <span class="time-separator" aria-hidden="true">/</span>
+                    <span class="time-label" id="time-duration">0:00</span>
+                  </div>
                   <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline" data-i18n-aria="timeline_seek">
-                  <span class="time-label" id="time-duration">0:00</span>
                 </div>
                 <div class="control-group">
                   <div class="control-row control-row--modes">
@@ -199,6 +202,14 @@
                     <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
                     <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
                     <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
+                    <select class="quality-select" id="speed-select" aria-label="Playback speed" data-i18n-aria="control_speed">
+                      <option value="0.5">0.5x</option>
+                      <option value="0.75">0.75x</option>
+                      <option value="1" selected>1x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="2">2x</option>
+                    </select>
                     <select class="quality-select" id="quality-select" aria-label="Playback quality">
                       <option value="default" data-i18n="quality_auto">Auto</option>
                       <option value="tiny">144p</option>
@@ -225,6 +236,7 @@
                     <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
                     <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
                     <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
+                    <input class="volume-range" type="range" id="volume-bar" name="volume-bar" min="0" max="100" step="1" value="100" aria-label="Volume" data-i18n-aria="control_volume">
                     <span class="volume-readout" id="volume-level">100%</span>
                     <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
                     <button class="ghost icon-button" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
@@ -271,6 +283,60 @@
                 <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
               </svg>
             </button>
+          </div>
+          <div class="search-filters hidden" id="search-filters">
+            <div class="filter-row">
+              <div class="filter-item">
+                <label for="search-filter-day" data-i18n="filter_label_day">Day</label>
+                <select id="search-filter-day" aria-label="Day filter">
+                  <option value="all" data-i18n="filter_day_all">All time</option>
+                  <option value="today" data-i18n="filter_day_today">Today</option>
+                  <option value="week" data-i18n="filter_day_week">This week</option>
+                  <option value="month" data-i18n="filter_day_month">This month</option>
+                  <option value="year" data-i18n="filter_day_year">This year</option>
+                </select>
+              </div>
+              <div class="filter-item">
+                <label for="search-filter-language" data-i18n="filter_label_language">Language</label>
+                <select id="search-filter-language" multiple size="3" aria-label="Language filter">
+                  <option value="en" data-i18n="lang_english">English</option>
+                  <option value="ru" data-i18n="lang_russian">Русский</option>
+                  <option value="zh" data-i18n="lang_chinese">中文</option>
+                  <option value="tr" data-i18n="lang_turkish">Türkçe</option>
+                  <option value="az" data-i18n="lang_azerbaijani">Azərbaycan</option>
+                  <option value="ar" data-i18n="lang_arabic">العربية</option>
+                </select>
+              </div>
+              <div class="filter-item">
+                <label for="search-filter-religion" data-i18n="filter_label_religion">Religion</label>
+                <select id="search-filter-religion" aria-label="Religion filter">
+                  <option value="" data-i18n="filter_religion_all">All religions</option>
+                  <option value="islam" data-i18n="religion_islam">Islam</option>
+                  <option value="christian" data-i18n="religion_christian">Christian</option>
+                  <option value="jews" data-i18n="religion_jews">Jews</option>
+                  <option value="buddist" data-i18n="religion_buddist">Buddist</option>
+                  <option value="none" data-i18n="religion_none">No religion</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-item">
+                <label for="search-filter-topic" data-i18n="filter_label_topic">Topic</label>
+                <input type="text" id="search-filter-topic" placeholder="Type a topic" data-i18n-placeholder="filter_topic_placeholder">
+              </div>
+              <div class="filter-item">
+                <label for="search-filter-length" data-i18n="filter_label_length">Length</label>
+                <select id="search-filter-length" aria-label="Length filter">
+                  <option value="" data-i18n="filter_length_all">All lengths</option>
+                  <option value="short" data-i18n="filter_length_short">Short (&lt;4 min)</option>
+                  <option value="medium" data-i18n="filter_length_medium">Medium (4-20 min)</option>
+                  <option value="long" data-i18n="filter_length_long">Long (&gt;20 min)</option>
+                </select>
+              </div>
+              <div class="filter-item filter-actions">
+                <button class="ghost" id="search-filter-clear" type="button" data-i18n="filter_clear">Clear filters</button>
+              </div>
+            </div>
           </div>
           <div class="section-sub" id="search-title"></div>
           <div class="grid search-grid" id="search-grid"></div>
@@ -422,6 +488,38 @@
                 <div class="form-grid" id="admin-reports-page-list"></div>
               </div>
             </div>
+            <div class="admin-section" data-admin-section="ads">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="ads">
+                <span data-i18n="admin_tab_ads">Ads</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="section-actions">
+                  <span class="section-hint" data-i18n="admin_ads_hint">Place ads in the games section.</span>
+                </div>
+                <form class="form-grid" id="admin-ads-form">
+                  <label for="admin-ads-slot" data-i18n="admin_ads_slot">Ad slot</label>
+                  <select id="admin-ads-slot" name="admin-ads-slot">
+                    <option value="games" data-i18n="admin_ads_slot_games">Games</option>
+                  </select>
+                  <label for="admin-ads-title" data-i18n="admin_ads_title_label">Title</label>
+                  <input id="admin-ads-title" name="admin-ads-title" type="text" placeholder="Kids puzzle books" data-i18n-placeholder="admin_ads_title_placeholder" required>
+                  <label for="admin-ads-image" data-i18n="admin_ads_image_label">Image URL</label>
+                  <input id="admin-ads-image" name="admin-ads-image" type="url" placeholder="https://..." required>
+                  <label for="admin-ads-link" data-i18n="admin_ads_link_label">Link URL</label>
+                  <input id="admin-ads-link" name="admin-ads-link" type="url" placeholder="https://...">
+                  <label class="pill">
+                    <input type="checkbox" id="admin-ads-active" checked>
+                    <span data-i18n="admin_ads_active_label">Active</span>
+                  </label>
+                  <div class="form-actions">
+                    <button class="ghost" type="submit" id="admin-ads-save" data-i18n="admin_ads_save">Save ad</button>
+                  </div>
+                  <div class="card-meta" id="admin-ads-message"></div>
+                </form>
+                <div class="form-grid" id="admin-ads-list"></div>
+              </div>
+            </div>
             <div class="admin-section" data-admin-section="imports">
               <button class="admin-section-toggle" type="button" data-admin-toggle="imports">
                 <span data-i18n="admin_tab_imports">Imports</span>
@@ -485,7 +583,7 @@
           </form>
         </section>
 
-        <section class="games-view hidden" id="games-view" aria-hidden="true">
+        <section class="games-preview hidden" id="games-view" aria-hidden="true">
           <div class="section-head games-head">
             <div>
               <h2 data-i18n="games_title">Games</h2>
@@ -495,8 +593,91 @@
               <img src="logo.png" alt="Sevimli Aile logo">
             </div>
           </div>
-          <div class="games-grid">
-            <article class="game-card" aria-labelledby="game-fruit-title">
+          <div class="games-points" id="games-points">
+            <div class="games-points-meta">
+              <span class="points-label" data-i18n="games_points_label">Points</span>
+              <span class="points-value" id="games-points-value">0</span>
+              <span class="card-meta" data-i18n="games_points_note">Win games to earn points.</span>
+            </div>
+            <div class="games-points-actions">
+              <button class="pill" id="games-redeem" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
+              <span class="card-meta" id="games-redeem-message" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="scoreboard" id="games-scoreboard">
+            <div class="scoreboard-head">
+              <h3 data-i18n="games_scoreboard_title">Scoreboard</h3>
+              <span class="card-meta" data-i18n="games_scoreboard_note">Latest points activity.</span>
+            </div>
+            <div class="scoreboard-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="games_scoreboard_type">Type</th>
+                    <th data-i18n="games_scoreboard_points">Points</th>
+                    <th data-i18n="games_scoreboard_time">When</th>
+                  </tr>
+                </thead>
+                <tbody id="games-scoreboard-body">
+                  <tr>
+                    <td colspan="3" class="card-meta" data-i18n="games_scoreboard_empty">No activity yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ad-slot" id="games-ad-slot" aria-label="Game ads"></div>
+          <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
+          <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
+        </section>
+
+        <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
+          <div class="section-head games-detail-head">
+            <button class="pill ghost" id="games-back" type="button" data-i18n="games_back">Back</button>
+            <div>
+              <h2 id="games-detail-title" data-i18n="games_title">Games</h2>
+              <p class="card-meta" id="games-detail-subtitle" data-i18n="games_subtitle">Quick emoji games for kids.</p>
+            </div>
+            <div class="games-detail-tag">
+              <span data-i18n="games_kid_playing">Kid playing</span>
+            </div>
+          </div>
+          <div class="games-points" id="games-points-detail">
+            <div class="games-points-meta">
+              <span class="points-label" data-i18n="games_points_label">Points</span>
+              <span class="points-value" id="games-points-value-detail">0</span>
+              <span class="card-meta" data-i18n="games_points_note">Win games to earn points.</span>
+            </div>
+            <div class="games-points-actions">
+              <button class="pill" id="games-redeem-detail" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
+              <span class="card-meta" id="games-redeem-message-detail" aria-live="polite"></span>
+            </div>
+          </div>
+          <div class="scoreboard" id="games-scoreboard-detail">
+            <div class="scoreboard-head">
+              <h3 data-i18n="games_scoreboard_title">Scoreboard</h3>
+              <span class="card-meta" data-i18n="games_scoreboard_note">Latest points activity.</span>
+            </div>
+            <div class="scoreboard-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="games_scoreboard_type">Type</th>
+                    <th data-i18n="games_scoreboard_points">Points</th>
+                    <th data-i18n="games_scoreboard_time">When</th>
+                  </tr>
+                </thead>
+                <tbody id="games-scoreboard-body-detail">
+                  <tr>
+                    <td colspan="3" class="card-meta" data-i18n="games_scoreboard_empty">No activity yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ad-slot" id="games-ad-slot-detail" aria-label="Game ads"></div>
+          <div class="games-detail-board">
+            <article class="game-card hidden" data-game="fruit" aria-labelledby="game-fruit-title">
               <div class="game-head">
                 <h3 id="game-fruit-title" data-i18n="games_fruit_title">Fruit Match</h3>
                 <p class="card-meta" data-i18n="games_fruit_instruction">Swap neighbors to make 3 in a row.</p>
@@ -508,7 +689,7 @@
                 <button class="pill" id="games-fruit-retry" type="button" data-i18n="games_try_again">Try again</button>
               </div>
             </article>
-            <article class="game-card" aria-labelledby="game-memory-title">
+            <article class="game-card hidden" data-game="memory" aria-labelledby="game-memory-title">
               <div class="game-head">
                 <h3 id="game-memory-title" data-i18n="games_memory_title">Memory Flip</h3>
                 <p class="card-meta" data-i18n="games_memory_instruction">Flip two cards to find matching fruits.</p>
@@ -519,7 +700,7 @@
                 <button class="ghost" id="games-memory-reset" type="button" data-i18n="games_memory_reset">Restart</button>
               </div>
             </article>
-            <article class="game-card" aria-labelledby="game-find-title">
+            <article class="game-card hidden" data-game="find" aria-labelledby="game-find-title">
               <div class="game-head">
                 <h3 id="game-find-title" data-i18n="games_find_title">Find the Fruit</h3>
                 <p class="card-meta" data-i18n="games_find_instruction">Tap the fruit we ask for.</p>
@@ -529,6 +710,26 @@
               <div class="game-status" id="games-find-status" role="status" aria-live="polite"></div>
               <div class="game-actions">
                 <button class="ghost" id="games-find-next" type="button" data-i18n="games_find_next">Next round</button>
+              </div>
+            </article>
+            <article class="game-card hidden" data-game="math" aria-labelledby="game-math-title">
+              <div class="game-head">
+                <h3 id="game-math-title" data-i18n="games_math_title">Math Mission</h3>
+                <p class="card-meta" data-i18n="games_math_instruction">Choose a level and solve the question.</p>
+              </div>
+              <div class="math-levels" role="group" aria-label="Math levels">
+                <button class="pill" type="button" data-math-level="easy" data-i18n="games_math_easy">Easy</button>
+                <button class="pill" type="button" data-math-level="medium" data-i18n="games_math_medium">Medium</button>
+                <button class="pill" type="button" data-math-level="hard" data-i18n="games_math_hard">Hard</button>
+              </div>
+              <div class="math-card">
+                <div class="math-question" id="games-math-question">1 + 1 = ?</div>
+                <input class="math-input" id="games-math-answer" type="text" inputmode="decimal" placeholder="Type the answer" data-i18n-placeholder="games_math_placeholder">
+                <div class="math-actions">
+                  <button class="pill" id="games-math-submit" type="button" data-i18n="games_math_submit">Check</button>
+                  <button class="ghost" id="games-math-next" type="button" data-i18n="games_math_next">Next</button>
+                </div>
+                <div class="game-status" id="games-math-status" role="status" aria-live="polite"></div>
               </div>
             </article>
           </div>
@@ -718,13 +919,16 @@
     <div class="modal-card">
       <h2 data-i18n="studio_title">Studio</h2>
       <form class="form-grid" id="profile-form">
-        <div class="card-meta" data-i18n="studio_profile">Creator profile</div>
+        <div class="card-meta" data-i18n="studio_profile">Profile</div>
         <label for="profile-name" data-i18n="studio_name">Display name</label>
-        <input id="profile-name" name="profile-name" type="text" placeholder="Creator name" data-i18n-placeholder="studio_name_placeholder">
+        <input id="profile-name" name="profile-name" type="text" placeholder="Kid name" data-i18n-placeholder="studio_name_placeholder">
+        <label for="profile-bio" data-i18n="studio_bio">Bio</label>
+        <textarea id="profile-bio" name="profile-bio" rows="3" placeholder="Fun bio" data-i18n-placeholder="studio_bio_placeholder"></textarea>
         <label for="profile-slogan" data-i18n="studio_slogan">Short slogan</label>
         <input id="profile-slogan" name="profile-slogan" type="text" placeholder="Fun slogan" data-i18n-placeholder="studio_slogan_placeholder">
         <label for="profile-avatar" data-i18n="studio_avatar">Profile image URL</label>
         <input id="profile-avatar" name="profile-avatar" type="url" placeholder="https://..." data-i18n-placeholder="studio_avatar_placeholder">
+        <div class="card-meta" data-i18n="studio_avatar_note">PNG link only (no upload).</div>
         <div class="form-actions">
           <button class="primary" type="submit" data-i18n="studio_save">Save profile</button>
         </div>
