@@ -87,14 +87,6 @@
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
         <button class="pill contact-button" id="contact-open" type="button" data-i18n="contact_button">HƏRŞEY ÜÇÜN ƏLAQƏ DÜYMƏSİ</button>
         <button class="pill icon-button" id="channels-page-open" type="button" aria-label="Channels" data-i18n-aria="channels_open"></button>
-        <div class="admin-nav" id="admin-nav">
-          <button class="pill icon-button" id="admin-overview-open" type="button" aria-label="Admin overview" data-i18n-aria="admin_overview"></button>
-          <button class="pill icon-button" id="admin-users-open" type="button" aria-label="Admin users" data-i18n-aria="admin_users"></button>
-          <button class="pill icon-button" id="admin-channels-open" type="button" aria-label="Admin channels" data-i18n-aria="admin_channels"></button>
-          <button class="pill icon-button" id="admin-videos-open" type="button" aria-label="Admin videos" data-i18n-aria="admin_videos_open"></button>
-          <button class="pill icon-button" id="admin-reports-open" type="button" aria-label="Admin reports" data-i18n-aria="admin_reports"></button>
-          <button class="pill icon-button" id="admin-imports-open" type="button" aria-label="Admin imports" data-i18n-aria="admin_imports"></button>
-        </div>
         <button class="pill icon-button" id="upload-open" type="button" aria-label="Add video"></button>
         <button class="pill icon-button" id="admin-open" type="button" aria-label="Admin"></button>
         <button class="pill icon-button" id="settings-open" type="button" aria-label="Settings"></button>
@@ -298,6 +290,33 @@
           </div>
         </section>
 
+        <section class="error-view hidden" id="error-view" aria-hidden="true">
+          <div class="error-card">
+            <div class="error-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3 2 21h20L12 3zm0 6v5m0 4h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h2 data-i18n="error_title">Something went wrong</h2>
+            <p class="card-meta" id="error-message">We couldn't open this page.</p>
+            <div class="error-actions">
+              <button class="pill" id="error-retry" type="button" data-i18n="error_retry">Try again</button>
+              <button class="ghost" id="error-home" type="button" data-i18n="error_home">Back to home</button>
+            </div>
+            <div class="lang-select">
+              <label class="sr-only" for="error-language" data-i18n="ui_language_label">Language</label>
+              <select id="error-language" name="error-language" aria-label="App language" data-i18n-aria="ui_language_label">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="zh">中文</option>
+                <option value="tr">Türkçe</option>
+                <option value="az">Azərbaycan</option>
+                <option value="ar">العربية</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
         <section class="recommendations hidden" id="channels-page" aria-hidden="true">
           <div class="section-head">
             <h2 data-i18n="channels_title">Channels</h2>
@@ -328,108 +347,103 @@
 
         <section class="recommendations hidden" id="admin-overview-page" aria-hidden="true">
           <div class="section-head">
-            <h2 data-i18n="admin_overview_title">Admin overview</h2>
+            <h2 data-i18n="admin_title">Admin controls</h2>
             <button class="pill icon-button" id="admin-overview-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
               </svg>
             </button>
           </div>
-          <div class="form-grid" id="admin-overview-page-list"></div>
-        </section>
-
-        <section class="recommendations hidden" id="admin-users-page" aria-hidden="true">
-          <div class="section-head">
-            <h2 data-i18n="admin_users_title">Admin users</h2>
-            <button class="pill icon-button" id="admin-users-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="section-actions">
-            <span class="section-hint" data-i18n="admin_users_hint">Search users</span>
-            <input id="admin-users-search-page" type="search" placeholder="Search users" data-i18n-placeholder="admin_users_search">
-          </div>
-          <div class="form-grid" id="admin-users-page-list"></div>
-          <div class="load-more">
-            <button class="ghost" id="admin-users-load-more" type="button" data-i18n="feed_load_more">Load more</button>
-          </div>
-        </section>
-
-        <section class="recommendations hidden" id="admin-channels-page" aria-hidden="true">
-          <div class="section-head">
-            <h2 data-i18n="admin_channels_title">Admin channels</h2>
-            <button class="pill icon-button" id="admin-channels-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="section-actions">
-            <span class="section-hint" data-i18n="admin_channels_hint">Artists and channels</span>
-            <input id="admin-channels-search-page" type="search" placeholder="Search channels" data-i18n-placeholder="admin_channels_search">
-          </div>
-          <div class="form-grid" id="admin-channels-page-list"></div>
-          <div class="load-more">
-            <button class="ghost" id="admin-channels-load-more" type="button" data-i18n="feed_load_more">Load more</button>
-          </div>
-        </section>
-
-        <section class="recommendations hidden" id="admin-videos-page" aria-hidden="true">
-          <div class="section-head">
-            <h2 data-i18n="admin_videos_page_title">Admin videos</h2>
-            <button class="pill icon-button" id="admin-videos-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="section-actions">
-            <span class="section-hint" data-i18n="admin_videos_hint">All videos</span>
-            <input id="admin-videos-search" type="search" placeholder="Search videos" data-i18n-placeholder="admin_videos_search">
-          </div>
-          <div class="form-grid" id="admin-videos-page-list"></div>
-          <div class="load-more">
-            <button class="ghost" id="admin-videos-load-more" type="button" data-i18n="feed_load_more">Load more</button>
-          </div>
-        </section>
-
-        <section class="recommendations hidden" id="admin-reports-page" aria-hidden="true">
-          <div class="section-head">
-            <h2 data-i18n="admin_reports_title">Admin reports</h2>
-            <button class="pill icon-button" id="admin-reports-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="form-grid" id="admin-reports-page-list"></div>
-        </section>
-
-        <section class="recommendations hidden" id="admin-imports-page" aria-hidden="true">
-          <div class="section-head">
-            <h2 data-i18n="admin_imports_title">Admin imports</h2>
-            <button class="pill icon-button" id="admin-imports-back" type="button" aria-label="Back to feed" data-i18n-aria="search_back">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15.5 5 8 12l7.5 7 1.4-1.4L10.8 12l6.1-5.6z"/>
-              </svg>
-            </button>
-          </div>
-          <div class="admin-tools">
-            <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
-            <label class="card-meta" for="admin-csv-page" data-i18n="admin_csv_label">CSV file</label>
-            <input id="admin-csv-page" name="admin-csv-page" type="file" accept=".csv,text/csv">
-            <div class="form-actions">
-              <button class="ghost" type="button" id="admin-import-csv-page" data-i18n="admin_import_csv">Import CSV</button>
-              <button class="ghost" type="button" id="admin-export-sql-page" data-i18n="admin_export_sql">Download SQL</button>
+          <div class="admin-accordion">
+            <div class="admin-section open" data-admin-section="overview">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="overview">
+                <span data-i18n="admin_tab_overview">Overview</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="form-grid" id="admin-overview-page-list"></div>
+              </div>
             </div>
-            <label class="card-meta" for="admin-sql-page" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
-            <textarea id="admin-sql-page" name="admin-sql-page" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
-            <div class="form-actions">
-              <button class="ghost" type="button" id="admin-import-sql-page" data-i18n="admin_import_sql">Import SQL</button>
+            <div class="admin-section" data-admin-section="users">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="users">
+                <span data-i18n="admin_tab_users">Users</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="section-actions">
+                  <span class="section-hint" data-i18n="admin_users_hint">Search users</span>
+                  <input id="admin-users-search-page" type="search" placeholder="Search users" data-i18n-placeholder="admin_users_search">
+                </div>
+                <div class="form-grid" id="admin-users-page-list"></div>
+                <div class="load-more">
+                  <button class="ghost" id="admin-users-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+                </div>
+              </div>
             </div>
-            <div class="card-meta" id="admin-import-message-page"></div>
+            <div class="admin-section" data-admin-section="channels">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="channels">
+                <span data-i18n="admin_tab_channels">Channels</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="section-actions">
+                  <span class="section-hint" data-i18n="admin_channels_hint">Artists and channels</span>
+                  <input id="admin-channels-search-page" type="search" placeholder="Search channels" data-i18n-placeholder="admin_channels_search">
+                </div>
+                <div class="form-grid" id="admin-channels-page-list"></div>
+                <div class="load-more">
+                  <button class="ghost" id="admin-channels-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="admin-section" data-admin-section="videos">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="videos">
+                <span data-i18n="admin_tab_videos">Videos</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="section-actions">
+                  <span class="section-hint" data-i18n="admin_videos_hint">All videos</span>
+                  <input id="admin-videos-search" type="search" placeholder="Search videos" data-i18n-placeholder="admin_videos_search">
+                </div>
+                <div class="form-grid" id="admin-videos-page-list"></div>
+                <div class="load-more">
+                  <button class="ghost" id="admin-videos-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+                </div>
+              </div>
+            </div>
+            <div class="admin-section" data-admin-section="reports">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="reports">
+                <span data-i18n="admin_tab_reports">Reports</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="form-grid" id="admin-reports-page-list"></div>
+              </div>
+            </div>
+            <div class="admin-section" data-admin-section="imports">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="imports">
+                <span data-i18n="admin_tab_imports">Imports</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="admin-tools">
+                  <div class="card-meta" data-i18n="admin_import_hint">Bulk import approved YouTube links (CSV or SQL).</div>
+                  <label class="card-meta" for="admin-csv-page" data-i18n="admin_csv_label">CSV file</label>
+                  <input id="admin-csv-page" name="admin-csv-page" type="file" accept=".csv,text/csv">
+                  <div class="form-actions">
+                    <button class="ghost" type="button" id="admin-import-csv-page" data-i18n="admin_import_csv">Import CSV</button>
+                    <button class="ghost" type="button" id="admin-export-sql-page" data-i18n="admin_export_sql">Download SQL</button>
+                  </div>
+                  <label class="card-meta" for="admin-sql-page" data-i18n="admin_sql_label">SQL import (INSERT INTO videos)</label>
+                  <textarea id="admin-sql-page" name="admin-sql-page" placeholder="Paste SQL export here..." data-i18n-placeholder="admin_sql_placeholder"></textarea>
+                  <div class="form-actions">
+                    <button class="ghost" type="button" id="admin-import-sql-page" data-i18n="admin_import_sql">Import SQL</button>
+                  </div>
+                  <div class="card-meta" id="admin-import-message-page"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -689,6 +703,7 @@
           <form class="form-grid" id="settings-form">
             <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
             <div class="settings-chips">
+              <label class="pill"><input type="checkbox" id="settings-language-all" value="all"> <span data-i18n="settings_language_all">All</span></label>
               <label class="pill"><input type="checkbox" name="settings-language" value="english"> <span data-i18n="lang_english">English</span></label>
               <label class="pill"><input type="checkbox" name="settings-language" value="russian"> <span data-i18n="lang_russian">Russian</span></label>
               <label class="pill"><input type="checkbox" name="settings-language" value="chinese"> <span data-i18n="lang_chinese">Chinese</span></label>
@@ -735,7 +750,7 @@
               </div>
             </div>
             <label for="max-watch" data-i18n="settings_watch_limit">Daily watch limit (hours)</label>
-            <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="0">
+            <input id="max-watch" name="max-watch" type="number" min="0" max="24" step="1" value="24">
             <label for="settings-password" data-i18n="settings_password">Confirm with your password</label>
             <input id="settings-password" name="settings-password" type="password" autocomplete="current-password" required>
             <div class="form-actions">

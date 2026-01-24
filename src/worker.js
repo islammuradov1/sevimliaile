@@ -1,4 +1,22 @@
 const JSON_HEADERS = { "Content-Type": "application/json" };
+const SCHEMA_TTL_MS = 5 * 60 * 1000;
+const schemaCache = {};
+
+async function getTableColumns(env, table) {
+  const cached = schemaCache[table];
+  const now = Date.now();
+  if (cached && now - cached.checkedAt < SCHEMA_TTL_MS) {
+    return cached.columns;
+  }
+  try {
+    const result = await env.DB.prepare(`PRAGMA table_info(${table})`).all();
+    const columns = new Set((result.results || []).map((row) => row.name));
+    schemaCache[table] = { columns, checkedAt: now };
+    return columns;
+  } catch (err) {
+    return new Set();
+  }
+}
 
 function jsonResponse(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
@@ -276,8 +294,20 @@ function safeJsonArray(value) {
 
 async function loadUserSettings(env, userId) {
   try {
+    const columns = await getTableColumns(env, "user_settings");
+    const select = ["allowed_languages", "allowed_topics", "topic_mode"];
+    const hasChannels = columns.has("allowed_channels");
+    const hasChannelMode = columns.has("channel_mode");
+    const hasReligions = columns.has("allowed_religions");
+    const hasReligionMode = columns.has("religion_mode");
+    const hasMaxDaily = columns.has("max_daily_minutes");
+    if (hasChannels) select.push("allowed_channels");
+    if (hasChannelMode) select.push("channel_mode");
+    if (hasReligions) select.push("allowed_religions");
+    if (hasReligionMode) select.push("religion_mode");
+    if (hasMaxDaily) select.push("max_daily_minutes");
     const settings = await env.DB.prepare(
-      "SELECT allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes FROM user_settings WHERE user_id = ?"
+      "SELECT " + select.join(", ") + " FROM user_settings WHERE user_id = ?"
     )
       .bind(userId)
       .first();
@@ -285,12 +315,14 @@ async function loadUserSettings(env, userId) {
       hasSettings: Boolean(settings),
       allowedLanguages: safeJsonArray(settings?.allowed_languages),
       allowedTopics: safeJsonArray(settings?.allowed_topics),
-      allowedChannels: safeJsonArray(settings?.allowed_channels),
-      allowedReligions: normalizeAllowedReligions(safeJsonArray(settings?.allowed_religions)),
+      allowedChannels: hasChannels ? safeJsonArray(settings?.allowed_channels) : [],
+      allowedReligions: hasReligions
+        ? normalizeAllowedReligions(safeJsonArray(settings?.allowed_religions))
+        : [],
       topicMode: settings?.topic_mode || "allow",
-      channelMode: settings?.channel_mode || "allow",
-      religionMode: settings?.religion_mode || "allow",
-      maxDailyMinutes: settings?.max_daily_minutes || 0
+      channelMode: hasChannelMode ? settings?.channel_mode || "allow" : "off",
+      religionMode: hasReligionMode ? settings?.religion_mode || "allow" : "off",
+      maxDailyMinutes: hasMaxDaily ? settings?.max_daily_minutes || 0 : 0
     };
   } catch (err) {
     return {
@@ -484,23 +516,56 @@ export default {
       const religionMode =
         body.religionMode === "block" ? "block" : body.religionMode === "off" ? "off" : "allow";
       const maxDailyMinutes = Math.max(0, Math.min(24 * 60, parseInt(body.maxDailyMinutes || "0", 10)));
+      const columns = await getTableColumns(env, "user_settings");
+      const insertCols = ["user_id", "allowed_languages", "allowed_topics"];
+      const values = [user.id, JSON.stringify(languages), JSON.stringify(topics)];
+      const updates = [
+        "allowed_languages = excluded.allowed_languages",
+        "allowed_topics = excluded.allowed_topics"
+      ];
+      if (columns.has("allowed_channels")) {
+        insertCols.push("allowed_channels");
+        values.push(JSON.stringify(channels));
+        updates.push("allowed_channels = excluded.allowed_channels");
+      }
+      if (columns.has("allowed_religions")) {
+        insertCols.push("allowed_religions");
+        values.push(JSON.stringify(religions));
+        updates.push("allowed_religions = excluded.allowed_religions");
+      }
+      if (columns.has("topic_mode")) {
+        insertCols.push("topic_mode");
+        values.push(topicMode);
+        updates.push("topic_mode = excluded.topic_mode");
+      }
+      if (columns.has("channel_mode")) {
+        insertCols.push("channel_mode");
+        values.push(channelMode);
+        updates.push("channel_mode = excluded.channel_mode");
+      }
+      if (columns.has("religion_mode")) {
+        insertCols.push("religion_mode");
+        values.push(religionMode);
+        updates.push("religion_mode = excluded.religion_mode");
+      }
+      if (columns.has("max_daily_minutes")) {
+        insertCols.push("max_daily_minutes");
+        values.push(maxDailyMinutes);
+        updates.push("max_daily_minutes = excluded.max_daily_minutes");
+      }
+      insertCols.push("updated_at");
+      values.push(nowIso());
+      updates.push("updated_at = excluded.updated_at");
+      const placeholders = insertCols.map(() => "?").join(", ");
       await env.DB.prepare(
-        "INSERT INTO user_settings (user_id, allowed_languages, allowed_topics, allowed_channels, allowed_religions, topic_mode, channel_mode, religion_mode, max_daily_minutes, updated_at) " +
-          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-          "ON CONFLICT(user_id) DO UPDATE SET allowed_languages = excluded.allowed_languages, allowed_topics = excluded.allowed_topics, allowed_channels = excluded.allowed_channels, allowed_religions = excluded.allowed_religions, topic_mode = excluded.topic_mode, channel_mode = excluded.channel_mode, religion_mode = excluded.religion_mode, max_daily_minutes = excluded.max_daily_minutes, updated_at = excluded.updated_at"
+        "INSERT INTO user_settings (" +
+          insertCols.join(", ") +
+          ") VALUES (" +
+          placeholders +
+          ") ON CONFLICT(user_id) DO UPDATE SET " +
+          updates.join(", ")
       )
-        .bind(
-          user.id,
-          JSON.stringify(languages),
-          JSON.stringify(topics),
-          JSON.stringify(channels),
-          JSON.stringify(religions),
-          topicMode,
-          channelMode,
-          religionMode,
-          maxDailyMinutes,
-          nowIso()
-        )
+        .bind(...values)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -888,7 +953,7 @@ export default {
 
     if (path.startsWith("/videos/") && request.method === "DELETE") {
       const videoId = path.split("/")[2];
-      const video = await env.DB.prepare("SELECT owner_id, religion, religion_detail FROM videos WHERE id = ?")
+      const video = await env.DB.prepare("SELECT owner_id FROM videos WHERE id = ?")
         .bind(videoId)
         .first();
       if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
@@ -901,7 +966,15 @@ export default {
 
     if (path.startsWith("/videos/") && path.endsWith("/update") && request.method === "POST") {
       const videoId = path.split("/")[2];
-      const video = await env.DB.prepare("SELECT owner_id FROM videos WHERE id = ?")
+      const videoColumns = await getTableColumns(env, "videos");
+      const selectCols = ["owner_id"];
+      if (videoColumns.has("religion")) {
+        selectCols.push("religion");
+      }
+      if (videoColumns.has("religion_detail")) {
+        selectCols.push("religion_detail");
+      }
+      const video = await env.DB.prepare("SELECT " + selectCols.join(", ") + " FROM videos WHERE id = ?")
         .bind(videoId)
         .first();
       if (!video) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
@@ -914,25 +987,32 @@ export default {
       const languages = normalizeLanguages(body.languages || language);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
-      const rawReligion = body.religion;
-      const nextReligion = rawReligion ? normalizeReligion(rawReligion) : video.religion || "none";
-      const nextReligionDetail = body.religion_detail
-        ? normalizeReligionDetail(nextReligion, body.religion_detail)
-        : rawReligion
-        ? normalizeReligionDetail(nextReligion, rawReligion)
-        : video.religion_detail || "";
-      await env.DB.prepare(
-        "UPDATE videos SET title = ?, language = ?, languages = ?, religion = ?, religion_detail = ?, topics = ? WHERE id = ?"
-      )
-        .bind(
-          title || "Untitled video",
-          language || "unspecified",
-          JSON.stringify(storedLanguages),
-          nextReligion,
-          nextReligionDetail,
-          JSON.stringify(topics),
-          videoId
-        )
+      const updates = ["title = ?", "language = ?", "languages = ?", "topics = ?"];
+      const values = [
+        title || "Untitled video",
+        language || "unspecified",
+        JSON.stringify(storedLanguages),
+        JSON.stringify(topics)
+      ];
+      if (videoColumns.has("religion")) {
+        const rawReligion = body.religion;
+        const nextReligion = rawReligion ? normalizeReligion(rawReligion) : video.religion || "none";
+        updates.splice(3, 0, "religion = ?");
+        values.splice(3, 0, nextReligion);
+        if (videoColumns.has("religion_detail")) {
+          const nextReligionDetail = body.religion_detail
+            ? normalizeReligionDetail(nextReligion, body.religion_detail)
+            : rawReligion
+            ? normalizeReligionDetail(nextReligion, rawReligion)
+            : video.religion_detail || "";
+          const topicsIndex = updates.indexOf("topics = ?");
+          updates.splice(topicsIndex, 0, "religion_detail = ?");
+          values.splice(topicsIndex, 0, nextReligionDetail);
+        }
+      }
+      values.push(videoId);
+      await env.DB.prepare("UPDATE videos SET " + updates.join(", ") + " WHERE id = ?")
+        .bind(...values)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -961,23 +1041,45 @@ export default {
       const rawReligion = body.religion;
       const religion = normalizeReligion(rawReligion);
       const religionDetail = normalizeReligionDetail(religion, body.religion_detail || rawReligion);
+      const videoColumns = await getTableColumns(env, "videos");
+      const insertCols = [
+        "title",
+        "youtube_url",
+        "youtube_id",
+        "owner_id",
+        "views",
+        "duration",
+        "language",
+        "languages",
+        "topics",
+        "created_at"
+      ];
+      const values = [
+        meta.title,
+        youtubeUrl,
+        youtubeId,
+        user.id,
+        0,
+        meta.duration || 0,
+        language,
+        JSON.stringify(storedLanguages),
+        JSON.stringify(topics),
+        nowIso()
+      ];
+      if (videoColumns.has("religion")) {
+        insertCols.splice(8, 0, "religion");
+        values.splice(8, 0, religion);
+      }
+      if (videoColumns.has("religion_detail")) {
+        const index = insertCols.indexOf("topics");
+        insertCols.splice(index, 0, "religion_detail");
+        values.splice(index, 0, religionDetail);
+      }
+      const placeholders = insertCols.map(() => "?").join(", ");
       await env.DB.prepare(
-        "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
-          "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + placeholders + ")"
       )
-        .bind(
-          meta.title,
-          youtubeUrl,
-          youtubeId,
-          user.id,
-          meta.duration || 0,
-          language,
-          JSON.stringify(storedLanguages),
-          religion,
-          religionDetail,
-          JSON.stringify(topics),
-          nowIso()
-        )
+        .bind(...values)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -1312,8 +1414,19 @@ export default {
       if (!requireRole(user, "admin")) {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasReligion = videoColumns.has("religion");
+      const hasReligionDetail = videoColumns.has("religion_detail");
+      const selectCols = ["youtube_url", "language", "languages"];
+      if (hasReligion) {
+        selectCols.push("religion");
+      }
+      if (hasReligionDetail) {
+        selectCols.push("religion_detail");
+      }
+      selectCols.push("topics");
       const result = await env.DB.prepare(
-        "SELECT youtube_url, language, languages, religion, religion_detail, topics FROM videos ORDER BY created_at DESC"
+        "SELECT " + selectCols.join(", ") + " FROM videos ORDER BY created_at DESC"
       ).all();
       const lines = (result.results || []).map((row) => {
         const safeUrl = String(row.youtube_url || "").replace(/'/g, "''");
@@ -1331,20 +1444,24 @@ export default {
         const safeTopics = String(topics).replace(/'/g, "''");
         const safeReligion = String(row.religion || "none").replace(/'/g, "''");
         const safeReligionDetail = String(row.religion_detail || "").replace(/'/g, "''");
+        const columnNames = ["youtube_url", "language", "languages"];
+        const valueParts = [`'${safeUrl}'`, `'${safeLanguage}'`, `'${safeLanguages}'`];
+        if (hasReligion) {
+          columnNames.push("religion");
+          valueParts.push(`'${safeReligion}'`);
+        }
+        if (hasReligionDetail) {
+          columnNames.push("religion_detail");
+          valueParts.push(`'${safeReligionDetail}'`);
+        }
+        columnNames.push("topics");
+        valueParts.push(`'${safeTopics}'`);
         return (
-          "INSERT INTO videos (youtube_url, language, languages, religion, religion_detail, topics) VALUES ('" +
-          safeUrl +
-          "', '" +
-          safeLanguage +
-          "', '" +
-          safeLanguages +
-          "', '" +
-          safeReligion +
-          "', '" +
-          safeReligionDetail +
-          "', '" +
-          safeTopics +
-          "');"
+          "INSERT INTO videos (" +
+          columnNames.join(", ") +
+          ") VALUES (" +
+          valueParts.join(", ") +
+          ");"
         );
       });
       const content = lines.join("\n");
@@ -1364,6 +1481,30 @@ export default {
       const rows = parseCsv(body.csv);
       const inserted = [];
       const skipped = [];
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasReligion = videoColumns.has("religion");
+      const hasReligionDetail = videoColumns.has("religion_detail");
+      const insertCols = [
+        "title",
+        "youtube_url",
+        "youtube_id",
+        "owner_id",
+        "views",
+        "duration",
+        "language",
+        "languages",
+        "topics",
+        "created_at"
+      ];
+      if (hasReligion) {
+        insertCols.splice(8, 0, "religion");
+      }
+      if (hasReligionDetail) {
+        const topicsIndex = insertCols.indexOf("topics");
+        insertCols.splice(topicsIndex, 0, "religion_detail");
+      }
+      const insertSql =
+        "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + insertCols.map(() => "?").join(", ") + ")";
       for (const row of rows) {
         const youtubeUrl = row.youtube_url || row.url || "";
         const youtubeId = extractYouTubeId(youtubeUrl);
@@ -1389,24 +1530,26 @@ export default {
           religion,
           row.religion_detail || row.faith_detail || row.religion || row.faith
         );
-        const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
-        )
-          .bind(
-            meta.title,
-            youtubeUrl,
-            youtubeId,
-            user.id,
-            meta.duration || 0,
-            language,
-            JSON.stringify(storedLanguages),
-            religion,
-            religionDetail,
-            JSON.stringify(topics),
-            nowIso()
-          )
-          .run();
+        const values = [
+          meta.title,
+          youtubeUrl,
+          youtubeId,
+          user.id,
+          0,
+          meta.duration || 0,
+          language,
+          JSON.stringify(storedLanguages),
+          JSON.stringify(topics),
+          nowIso()
+        ];
+        if (hasReligion) {
+          values.splice(8, 0, religion);
+        }
+        if (hasReligionDetail) {
+          const topicsIndex = insertCols.indexOf("topics");
+          values.splice(topicsIndex, 0, religionDetail);
+        }
+        const result = await env.DB.prepare(insertSql).bind(...values).run();
         inserted.push(result.meta.last_row_id);
       }
       return jsonResponse({ inserted: inserted.length, skipped }, 200, withCors({}, origin));
@@ -1421,6 +1564,30 @@ export default {
       const rows = parseSqlInserts(body.sql);
       const inserted = [];
       const skipped = [];
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasReligion = videoColumns.has("religion");
+      const hasReligionDetail = videoColumns.has("religion_detail");
+      const insertCols = [
+        "title",
+        "youtube_url",
+        "youtube_id",
+        "owner_id",
+        "views",
+        "duration",
+        "language",
+        "languages",
+        "topics",
+        "created_at"
+      ];
+      if (hasReligion) {
+        insertCols.splice(8, 0, "religion");
+      }
+      if (hasReligionDetail) {
+        const topicsIndex = insertCols.indexOf("topics");
+        insertCols.splice(topicsIndex, 0, "religion_detail");
+      }
+      const insertSql =
+        "INSERT INTO videos (" + insertCols.join(", ") + ") VALUES (" + insertCols.map(() => "?").join(", ") + ")";
       for (const row of rows) {
         const youtubeUrl = row.youtube_url || row.url || "";
         const youtubeId = extractYouTubeId(youtubeUrl);
@@ -1446,24 +1613,26 @@ export default {
           religion,
           row.religion_detail || row.faith_detail || row.religion || row.faith
         );
-        const result = await env.DB.prepare(
-          "INSERT INTO videos (title, youtube_url, youtube_id, owner_id, views, duration, language, languages, religion, religion_detail, topics, created_at) " +
-            "VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?, ?, ?)"
-        )
-          .bind(
-            meta.title,
-            youtubeUrl,
-            youtubeId,
-            user.id,
-            meta.duration || 0,
-            language,
-            JSON.stringify(storedLanguages),
-            religion,
-            religionDetail,
-            JSON.stringify(topics),
-            nowIso()
-          )
-          .run();
+        const values = [
+          meta.title,
+          youtubeUrl,
+          youtubeId,
+          user.id,
+          0,
+          meta.duration || 0,
+          language,
+          JSON.stringify(storedLanguages),
+          JSON.stringify(topics),
+          nowIso()
+        ];
+        if (hasReligion) {
+          values.splice(8, 0, religion);
+        }
+        if (hasReligionDetail) {
+          const topicsIndex = insertCols.indexOf("topics");
+          values.splice(topicsIndex, 0, religionDetail);
+        }
+        const result = await env.DB.prepare(insertSql).bind(...values).run();
         inserted.push(result.meta.last_row_id);
       }
       return jsonResponse({ inserted: inserted.length, skipped }, 200, withCors({}, origin));

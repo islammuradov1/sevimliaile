@@ -53,6 +53,7 @@ const ui = {
       viralView: document.getElementById("viral-view"),
       requestView: document.getElementById("request-view"),
       channelView: document.getElementById("channel-view"),
+      errorView: document.getElementById("error-view"),
       adminOverviewPage: document.getElementById("admin-overview-page"),
       adminOverviewPageList: document.getElementById("admin-overview-page-list"),
       adminOverviewBack: document.getElementById("admin-overview-back"),
@@ -76,6 +77,8 @@ const ui = {
       adminReportsBack: document.getElementById("admin-reports-back"),
       adminImportsPage: document.getElementById("admin-imports-page"),
       adminImportsBack: document.getElementById("admin-imports-back"),
+      adminSectionToggles: document.querySelectorAll("[data-admin-toggle]"),
+      adminSections: document.querySelectorAll(".admin-section"),
       channelTitle: document.getElementById("channel-title"),
       channelStats: document.getElementById("channel-stats"),
       channelSloganView: document.getElementById("channel-slogan-view"),
@@ -115,6 +118,9 @@ const ui = {
       requestDetails: document.getElementById("request-details"),
       requestContact: document.getElementById("request-contact"),
       requestMessage: document.getElementById("request-message"),
+      errorMessage: document.getElementById("error-message"),
+      errorRetry: document.getElementById("error-retry"),
+      errorHome: document.getElementById("error-home"),
       uploadModal: document.getElementById("upload-modal"),
       adminModal: document.getElementById("admin-modal"),
       settingsModal: document.getElementById("settings-modal"),
@@ -151,6 +157,7 @@ const ui = {
       settingsTopics: document.getElementById("settings-topics"),
       settingsChannelSearch: document.getElementById("channel-search"),
       settingsChannels: document.getElementById("settings-channels"),
+      settingsLanguageAll: document.getElementById("settings-language-all"),
       settingsReligions: document.getElementById("settings-religions"),
       uploadTopics: document.getElementById("upload-topics"),
       topicsList: document.getElementById("topics-list"),
@@ -197,6 +204,7 @@ const ui = {
       adminReports: document.getElementById("admin-reports"),
       uiLanguage: document.getElementById("ui-language"),
       authLanguage: document.getElementById("auth-language"),
+      errorLanguage: document.getElementById("error-language"),
       controlsHeart: document.getElementById("controls-heart"),
       controlsReport: document.getElementById("controls-report"),
       controlsReplay: document.getElementById("controls-replay"),
@@ -315,6 +323,11 @@ const ui = {
         request_success: "Request sent. We'll get back to you.",
         request_error: "Couldn't send. Try again.",
         request_required: "Please fill all fields.",
+        error_title: "Something went wrong",
+        error_message: "We couldn't open this page. Try again or go back home.",
+        error_retry: "Try again",
+        error_home: "Back to home",
+        error_not_found: "This page is not available.",
         ui_language_label: "Language",
         sidebar_subscribed: "Subscribed",
         sidebar_channels: "Channels",
@@ -416,6 +429,7 @@ const ui = {
         studio_stats: "Your stats",
         settings_title: "Parent controls",
         settings_languages: "Languages to show",
+        settings_language_all: "All",
         settings_topics: "Topics to control",
         settings_topic_allow: "Allow only selected",
         settings_topic_block: "Hide selected",
@@ -604,6 +618,11 @@ const ui = {
         ui_language_label: "Язык",
         sidebar_subscribed: "Подписки",
         sidebar_channels: "Каналы",
+        error_title: "Что-то пошло не так",
+        error_message: "Не удалось открыть эту страницу. Попробуйте еще раз или вернитесь домой.",
+        error_retry: "Попробовать снова",
+        error_home: "На главную",
+        error_not_found: "Страница недоступна.",
         status_loading: "Загрузка",
         player_loading: "Готовим плеер...",
         overlay_ready: "Готово к воспроизведению",
@@ -694,6 +713,7 @@ const ui = {
         studio_stats: "Ваша статистика",
         settings_title: "Родительский контроль",
         settings_languages: "Показываемые языки",
+        settings_language_all: "Все",
         settings_topics: "Темы для контроля",
         settings_topic_allow: "Показывать только выбранные",
         settings_topic_block: "Скрыть выбранные",
@@ -882,6 +902,11 @@ const ui = {
         ui_language_label: "语言",
         sidebar_subscribed: "已订阅",
         sidebar_channels: "频道",
+        error_title: "出错了",
+        error_message: "无法打开此页面。请重试或返回首页。",
+        error_retry: "重试",
+        error_home: "返回首页",
+        error_not_found: "页面不可用。",
         status_loading: "加载中",
         player_loading: "正在准备播放器...",
         overlay_ready: "准备播放",
@@ -972,6 +997,7 @@ const ui = {
         studio_stats: "你的数据",
         settings_title: "家长控制",
         settings_languages: "显示语言",
+        settings_language_all: "全部",
         settings_topics: "主题控制",
         settings_topic_allow: "仅显示所选",
         settings_topic_block: "隐藏所选",
@@ -1160,6 +1186,11 @@ const ui = {
         ui_language_label: "Dil",
         sidebar_subscribed: "Abonelikler",
         sidebar_channels: "Kanallar",
+        error_title: "Bir hata oluştu",
+        error_message: "Bu sayfa açılamadı. Tekrar deneyin ya da ana sayfaya dönün.",
+        error_retry: "Tekrar dene",
+        error_home: "Ana sayfa",
+        error_not_found: "Sayfa kullanılamıyor.",
         status_loading: "Yükleniyor",
         player_loading: "Oynatıcı hazırlanıyor...",
         overlay_ready: "Oynatmaya hazır",
@@ -1250,6 +1281,7 @@ const ui = {
         studio_stats: "İstatistiklerin",
         settings_title: "Ebeveyn kontrolleri",
         settings_languages: "Gösterilecek diller",
+        settings_language_all: "Hepsi",
         settings_topics: "Kontrol edilecek konular",
         settings_topic_allow: "Yalnızca seçilenleri göster",
         settings_topic_block: "Seçilenleri gizle",
@@ -1438,6 +1470,11 @@ const ui = {
         ui_language_label: "Dil",
         sidebar_subscribed: "Abunələr",
         sidebar_channels: "Kanallar",
+        error_title: "Xəta baş verdi",
+        error_message: "Bu səhifə açıla bilmədi. Yenidən cəhd edin və ya ana səhifəyə dönün.",
+        error_retry: "Yenidən cəhd et",
+        error_home: "Ana səhifə",
+        error_not_found: "Səhifə əlçatan deyil.",
         status_loading: "Yüklənir",
         player_loading: "Pleyer hazırlanır...",
         overlay_ready: "Oynatma hazırdır",
@@ -1528,6 +1565,7 @@ const ui = {
         studio_stats: "Statistikanız",
         settings_title: "Valideyn nəzarəti",
         settings_languages: "Göstəriləcək dillər",
+        settings_language_all: "Hamısı",
         settings_topics: "İdarə olunacaq mövzular",
         settings_topic_allow: "Yalnız seçilənləri göstər",
         settings_topic_block: "Seçilənləri gizlət",
@@ -1716,6 +1754,11 @@ const ui = {
         ui_language_label: "اللغة",
         sidebar_subscribed: "المشتركات",
         sidebar_channels: "القنوات",
+        error_title: "حدث خطأ",
+        error_message: "تعذر فتح هذه الصفحة. حاول مرة أخرى أو ارجع إلى الصفحة الرئيسية.",
+        error_retry: "حاول مرة أخرى",
+        error_home: "الصفحة الرئيسية",
+        error_not_found: "الصفحة غير متاحة.",
         status_loading: "جارٍ التحميل",
         player_loading: "جارٍ تجهيز المشغل...",
         overlay_ready: "جاهز للتشغيل",
@@ -1806,6 +1849,7 @@ const ui = {
         studio_stats: "إحصاءاتك",
         settings_title: "رقابة الوالدين",
         settings_languages: "اللغات المعروضة",
+        settings_language_all: "الكل",
         settings_topics: "المواضيع للتحكم",
         settings_topic_allow: "عرض المحدد فقط",
         settings_topic_block: "إخفاء المحدد",
@@ -2011,6 +2055,9 @@ const ui = {
       updateNextUp();
       updateVideoMeta(currentVideo);
       updateStatus(currentStatusKey);
+      if (ui.errorMessage && errorMessageKey) {
+        ui.errorMessage.textContent = t(errorMessageKey);
+      }
     }
 
     function setUiLanguage(lang) {
@@ -2021,6 +2068,9 @@ const ui = {
       }
       if (ui.authLanguage) {
         ui.authLanguage.value = next;
+      }
+      if (ui.errorLanguage) {
+        ui.errorLanguage.value = next;
       }
       applyTranslations();
       if (ui.navRequests && ui.navRequests.querySelector("span")) {
@@ -2171,12 +2221,15 @@ const ui = {
     let adminChannelsPageOffset = 0;
     let adminChannelsPageHasMore = true;
     let adminChannelsPageFetching = false;
+    let adminSectionFocus = "overview";
     let dockCollapsed = localStorage.getItem("dockCollapsed") === "true";
     let navFocus = "home";
+    let errorMessageKey = "error_message";
     let settingsUnlockedAt = 0;
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
     const PLAYER_RELOAD_TIMEOUT_MS = 12000;
     const PLAYER_RELOAD_KEY = "playerReloads";
+    const ADMIN_SECTIONS = new Set(["overview", "users", "channels", "videos", "reports", "imports"]);
 
     function setTheme() {
       document.body.setAttribute("data-theme", "light");
@@ -2304,45 +2357,37 @@ const ui = {
       const showSearch = view === "search";
       const showChannels = view === "channels";
       const showRequest = view === "request";
-      const showAdminOverview = view === "admin-overview";
-      const showAdminUsers = view === "admin-users";
-      const showAdminChannels = view === "admin-channels";
-      const showAdminVideos = view === "admin-videos";
-      const showAdminReports = view === "admin-reports";
-      const showAdminImports = view === "admin-imports";
-      const isAdminView =
-        showAdminOverview ||
-        showAdminUsers ||
-        showAdminChannels ||
-        showAdminVideos ||
-        showAdminReports ||
-        showAdminImports;
-      ui.feedView.classList.toggle("hidden", !showFeed);
-      ui.feedView.setAttribute("aria-hidden", String(!showFeed));
-      ui.viralView.classList.toggle("hidden", !showViral);
-      ui.viralView.setAttribute("aria-hidden", String(!showViral));
+      const showError = view === "error";
+      const showAdmin = view.startsWith("admin");
+      const showAdminOverview = showAdmin;
+      const showAdminUsers = false;
+      const showAdminChannels = false;
+      const showAdminVideos = false;
+      const showAdminReports = false;
+      const showAdminImports = false;
+      const isAdminView = showAdmin;
+      const toggleView = (node, show) => {
+        if (!node) return;
+        node.classList.toggle("hidden", !show);
+        node.setAttribute("aria-hidden", String(!show));
+      };
+      toggleView(ui.feedView, showFeed);
+      toggleView(ui.viralView, showViral);
       if (ui.requestView) {
-        ui.requestView.classList.toggle("hidden", !showRequest);
-        ui.requestView.setAttribute("aria-hidden", String(!showRequest));
+        toggleView(ui.requestView, showRequest);
       }
-      ui.channelView.classList.toggle("hidden", !showChannel);
-      ui.channelView.setAttribute("aria-hidden", String(!showChannel));
-      ui.searchView.classList.toggle("hidden", !showSearch);
-      ui.searchView.setAttribute("aria-hidden", String(!showSearch));
-      ui.channelsPage.classList.toggle("hidden", !showChannels);
-      ui.channelsPage.setAttribute("aria-hidden", String(!showChannels));
-      ui.adminOverviewPage.classList.toggle("hidden", !showAdminOverview);
-      ui.adminOverviewPage.setAttribute("aria-hidden", String(!showAdminOverview));
-      ui.adminUsersPage.classList.toggle("hidden", !showAdminUsers);
-      ui.adminUsersPage.setAttribute("aria-hidden", String(!showAdminUsers));
-      ui.adminChannelsPage.classList.toggle("hidden", !showAdminChannels);
-      ui.adminChannelsPage.setAttribute("aria-hidden", String(!showAdminChannels));
-      ui.adminVideosPage.classList.toggle("hidden", !showAdminVideos);
-      ui.adminVideosPage.setAttribute("aria-hidden", String(!showAdminVideos));
-      ui.adminReportsPage.classList.toggle("hidden", !showAdminReports);
-      ui.adminReportsPage.setAttribute("aria-hidden", String(!showAdminReports));
-      ui.adminImportsPage.classList.toggle("hidden", !showAdminImports);
-      ui.adminImportsPage.setAttribute("aria-hidden", String(!showAdminImports));
+      if (ui.errorView) {
+        toggleView(ui.errorView, showError);
+      }
+      toggleView(ui.channelView, showChannel);
+      toggleView(ui.searchView, showSearch);
+      toggleView(ui.channelsPage, showChannels);
+      toggleView(ui.adminOverviewPage, showAdminOverview);
+      toggleView(ui.adminUsersPage, showAdminUsers);
+      toggleView(ui.adminChannelsPage, showAdminChannels);
+      toggleView(ui.adminVideosPage, showAdminVideos);
+      toggleView(ui.adminReportsPage, showAdminReports);
+      toggleView(ui.adminImportsPage, showAdminImports);
       if (ui.adminNav) {
         ui.adminNav.style.display = isAdminView && currentUser && currentUser.role === "admin" ? "flex" : "none";
       }
@@ -2375,6 +2420,87 @@ const ui = {
       setPrimaryNav(view);
       document.body.setAttribute("data-view", view);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showErrorPage(messageKey) {
+      if (ui.errorMessage) {
+        if (messageKey && translations.en[messageKey]) {
+          errorMessageKey = messageKey;
+          ui.errorMessage.textContent = t(messageKey);
+        } else if (messageKey) {
+          errorMessageKey = null;
+          ui.errorMessage.textContent = messageKey;
+        } else {
+          errorMessageKey = "error_message";
+          ui.errorMessage.textContent = t("error_message");
+        }
+      } else {
+        errorMessageKey = messageKey && translations.en[messageKey] ? messageKey : "error_message";
+      }
+      setPageView("error");
+    }
+
+    function resolveAdminSection(section) {
+      if (ADMIN_SECTIONS.has(section)) {
+        return section;
+      }
+      return "overview";
+    }
+
+    function setAdminSection(section) {
+      const next = resolveAdminSection(section);
+      adminSectionFocus = next;
+      if (ui.adminSections && ui.adminSections.length) {
+        ui.adminSections.forEach((node) => {
+          node.classList.toggle("open", node.dataset.adminSection === next);
+        });
+      }
+      if (ui.adminSectionToggles && ui.adminSectionToggles.length) {
+        ui.adminSectionToggles.forEach((button) => {
+          const isActive = button.dataset.adminToggle === next;
+          button.setAttribute("aria-expanded", isActive ? "true" : "false");
+        });
+      }
+    }
+
+    function openAdminSection(section) {
+      setPageView("admin-overview");
+      setAdminSection(section);
+    }
+
+    function ensureAdminSection(section, reset) {
+      const view = document.body.getAttribute("data-view") || "";
+      if (!view.startsWith("admin") || reset) {
+        openAdminSection(section);
+        return;
+      }
+      setAdminSection(section);
+    }
+
+    function buildAdminSectionUrl(section) {
+      const target = resolveAdminSection(section);
+      const params = new URLSearchParams();
+      if (target === "users" && ui.adminUsersSearchPage) {
+        const query = ui.adminUsersSearchPage.value.trim();
+        if (query) {
+          params.set("q", query);
+        }
+      }
+      if (target === "channels" && ui.adminChannelsSearchPage) {
+        const query = ui.adminChannelsSearchPage.value.trim();
+        if (query) {
+          params.set("q", query);
+        }
+      }
+      if (target === "videos" && ui.adminVideosSearchPage) {
+        const query = ui.adminVideosSearchPage.value.trim();
+        if (query) {
+          params.set("q", query);
+        }
+      }
+      const base = target === "overview" ? "/admin" : "/admin/" + target;
+      const queryString = params.toString();
+      return queryString ? base + "?" + queryString : base;
     }
 
     function openModal(modal) {
@@ -3705,6 +3831,9 @@ const ui = {
     }
 
     function renderAdminStats(statsData, container) {
+      if (!container) {
+        return;
+      }
       if (statsData && statsData.totals) {
         const summary = document.createElement("div");
         summary.className = "card-meta";
@@ -3745,6 +3874,9 @@ const ui = {
     }
 
     function renderAdminUsers(list, container = ui.adminList, append = false) {
+      if (!container) {
+        return;
+      }
       if (!append) {
         container.innerHTML = "";
       }
@@ -3809,6 +3941,9 @@ const ui = {
     }
 
     function renderAdminChannels(list, container = ui.adminChannelsList, append = false) {
+      if (!container) {
+        return;
+      }
       if (!append) {
         container.innerHTML = "";
       }
@@ -3854,6 +3989,9 @@ const ui = {
     }
 
     function renderAdminVideos(list) {
+      if (!ui.adminVideosList) {
+        return;
+      }
       ui.adminVideosList.innerHTML = "";
       list.forEach((video) => {
         const row = document.createElement("div");
@@ -4024,6 +4162,9 @@ const ui = {
     }
 
     function renderAdminReports(reports, container) {
+      if (!container) {
+        return;
+      }
       container.innerHTML = "";
       if (!reports.length) {
         container.textContent = t("message_reports_empty");
@@ -4104,7 +4245,7 @@ const ui = {
         adminVideosQuery = query.trim();
         ui.adminVideosPageList.innerHTML = t("status_loading");
       }
-      setPageView("admin-videos");
+      ensureAdminSection("videos", reset);
       const params = new URLSearchParams();
       params.set("limit", "40");
       params.set("offset", String(adminVideosOffset));
@@ -4133,7 +4274,7 @@ const ui = {
         return;
       }
       ui.adminOverviewPageList.innerHTML = t("status_loading");
-      setPageView("admin-overview");
+      openAdminSection("overview");
       const res = await apiFetch("/api/stats");
       if (!res.ok) {
         ui.adminOverviewPageList.textContent = t("message_stats_unavailable");
@@ -4155,7 +4296,7 @@ const ui = {
         adminUsersPageQuery = query.trim();
         ui.adminUsersPageList.innerHTML = t("status_loading");
       }
-      setPageView("admin-users");
+      ensureAdminSection("users", reset);
       const params = new URLSearchParams();
       params.set("limit", "40");
       params.set("offset", String(adminUsersPageOffset));
@@ -4187,7 +4328,7 @@ const ui = {
         adminChannelsPageQuery = query.trim();
         ui.adminChannelsPageList.innerHTML = t("status_loading");
       }
-      setPageView("admin-channels");
+      ensureAdminSection("channels", reset);
       const params = new URLSearchParams();
       params.set("limit", "40");
       params.set("offset", String(adminChannelsPageOffset));
@@ -4214,7 +4355,7 @@ const ui = {
         return;
       }
       ui.adminReportsPageList.innerHTML = t("status_loading");
-      setPageView("admin-reports");
+      openAdminSection("reports");
       const res = await apiFetch("/api/reports");
       if (!res.ok) {
         ui.adminReportsPageList.textContent = t("message_reports_failed");
@@ -4228,41 +4369,47 @@ const ui = {
       if (!currentUser || currentUser.role !== "admin") {
         return;
       }
-      setPageView("admin-imports");
+      openAdminSection("imports");
     }
 
     function refreshAdminView() {
-      const view = document.body.getAttribute("data-view");
-      if (view === "admin-overview") {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      const view = document.body.getAttribute("data-view") || "";
+      if (!view.startsWith("admin")) {
+        return;
+      }
+      const section = resolveAdminSection(adminSectionFocus);
+      if (section === "overview") {
         fetchAdminOverviewPage();
         return;
       }
-      if (view === "admin-users") {
+      if (section === "users") {
         fetchAdminUsersPage(adminUsersPageQuery, true);
         return;
       }
-      if (view === "admin-channels") {
+      if (section === "channels") {
         fetchAdminChannelsPage(adminChannelsPageQuery, true);
         return;
       }
-      if (view === "admin-videos") {
+      if (section === "videos") {
         fetchAdminVideosPage(adminVideosQuery, true);
         return;
       }
-      if (view === "admin-reports") {
+      if (section === "reports") {
         fetchAdminReportsPage();
         return;
       }
-      if (view === "admin-imports") {
+      if (section === "imports") {
         openAdminImportsPage();
-        return;
-      }
-      if (ui.adminModal.classList.contains("active")) {
-        openAdmin();
       }
     }
 
     function setAdminTab(tab) {
+      if (!ui.adminOverview) {
+        return;
+      }
       ui.adminTabs.forEach((button) => {
         button.classList.toggle("active", button.dataset.adminTab === tab);
       });
@@ -4573,21 +4720,42 @@ const ui = {
         document.querySelectorAll("input[name='religion-mode']").forEach((input) => {
           input.checked = input.value === religionMode;
         });
-        document.querySelectorAll("input[name='settings-language']").forEach((input) => {
-          input.checked = languages.has(input.value);
-        });
+        const languageInputs = Array.from(
+          document.querySelectorAll("input[name='settings-language']")
+        );
+        if (languages.size === 0) {
+          if (ui.settingsLanguageAll) {
+            ui.settingsLanguageAll.checked = true;
+          }
+          languageInputs.forEach((input) => {
+            input.checked = false;
+          });
+        } else {
+          if (ui.settingsLanguageAll) {
+            ui.settingsLanguageAll.checked = false;
+          }
+          languageInputs.forEach((input) => {
+            input.checked = languages.has(input.value);
+          });
+        }
         settingsSelectedTopics = topics;
         settingsSelectedChannels = channels;
         settingsSelectedReligions = religions;
-        ui.maxWatch.value = Math.round((data.settings.max_daily_minutes || 0) / 60);
+        const maxMinutes = Number(data.settings.max_daily_minutes || 0);
+        ui.maxWatch.value = Math.round((maxMinutes > 0 ? maxMinutes : 24 * 60) / 60);
       } else {
         renderSettingsReligions(settingsSelectedReligions);
+        if (ui.settingsLanguageAll) {
+          ui.settingsLanguageAll.checked = true;
+        }
+        ui.maxWatch.value = 24;
       }
       const unlocked = Date.now() - settingsUnlockedAt < SETTINGS_UNLOCK_MS;
       ui.settingsPassword.required = !unlocked;
       ui.settingsPassword.value = "";
       await fetchTopics();
       await fetchSettingsChannels("");
+      syncLanguageAllState();
       renderSettingsReligions(settingsSelectedReligions);
       await loadHistory();
       openModal(ui.settingsModal);
@@ -4745,6 +4913,47 @@ const ui = {
       });
     }
 
+    let languageControlsReady = false;
+
+    function getLanguageInputs() {
+      return Array.from(document.querySelectorAll("input[name='settings-language']"));
+    }
+
+    function syncLanguageAllState() {
+      if (!ui.settingsLanguageAll) return;
+      const inputs = getLanguageInputs();
+      const anyChecked = inputs.some((input) => input.checked);
+      ui.settingsLanguageAll.checked = !anyChecked;
+    }
+
+    function initLanguageControls() {
+      if (languageControlsReady) return;
+      const allInput = ui.settingsLanguageAll;
+      const inputs = getLanguageInputs();
+      if (allInput) {
+        allInput.addEventListener("change", () => {
+          if (allInput.checked) {
+            inputs.forEach((input) => {
+              input.checked = false;
+            });
+          } else if (!inputs.some((input) => input.checked)) {
+            allInput.checked = true;
+          }
+        });
+      }
+      inputs.forEach((input) => {
+        input.addEventListener("change", () => {
+          if (!allInput) return;
+          if (inputs.some((item) => item.checked)) {
+            allInput.checked = false;
+          } else {
+            allInput.checked = true;
+          }
+        });
+      });
+      languageControlsReady = true;
+    }
+
     async function loadHistory() {
       const res = await apiFetch("/api/history");
       const data = await res.json();
@@ -4817,9 +5026,11 @@ const ui = {
           return;
         }
       }
-      const languages = Array.from(
+      const languageInputs = Array.from(
         document.querySelectorAll("input[name='settings-language']:checked")
       ).map((input) => input.value);
+      const useAllLanguages = ui.settingsLanguageAll && ui.settingsLanguageAll.checked;
+      const languages = useAllLanguages ? [] : languageInputs;
       const topics = Array.from(settingsSelectedTopics);
       const topicMode = document.querySelector("input[name='topic-mode']:checked").value;
       const channels = Array.from(settingsSelectedChannels);
@@ -5203,13 +5414,6 @@ const ui = {
       ui.requestReason.addEventListener("change", (event) => updateRequestFields(event.target.value));
       updateRequestFields(ui.requestReason.value);
     }
-    if (ui.requestForm) {
-      ui.requestForm.addEventListener("submit", sendRequest);
-    }
-    if (ui.requestReason) {
-      ui.requestReason.addEventListener("change", (event) => updateRequestFields(event.target.value));
-      updateRequestFields(ui.requestReason.value);
-    }
     if (ui.playerShell) {
       ui.playerShell.addEventListener("dblclick", togglePlay);
     }
@@ -5252,12 +5456,31 @@ const ui = {
     ui.authOpen.addEventListener("click", () => lockApp(t("message_sign_in")));
     ui.authLogout.addEventListener("click", openSignout);
     ui.uploadOpen.addEventListener("click", () => openModal(ui.uploadModal));
-    ui.adminOpen.addEventListener("click", () => navigateTo("/admin"));
-    ui.adminOverviewOpen.addEventListener("click", () => navigateTo("/admin"));
-    ui.adminUsersOpen.addEventListener("click", () => navigateTo("/admin/users"));
-    ui.adminChannelsOpen.addEventListener("click", () => navigateTo("/admin/channels"));
-    ui.adminReportsOpen.addEventListener("click", () => navigateTo("/admin/reports"));
-    ui.adminImportsOpen.addEventListener("click", () => navigateTo("/admin/imports"));
+    if (ui.adminOpen) {
+      ui.adminOpen.addEventListener("click", () => navigateTo("/admin"));
+    }
+    if (ui.adminOverviewOpen) {
+      ui.adminOverviewOpen.addEventListener("click", () => navigateTo("/admin"));
+    }
+    if (ui.adminUsersOpen) {
+      ui.adminUsersOpen.addEventListener("click", () => navigateTo("/admin/users"));
+    }
+    if (ui.adminChannelsOpen) {
+      ui.adminChannelsOpen.addEventListener("click", () => navigateTo("/admin/channels"));
+    }
+    if (ui.adminReportsOpen) {
+      ui.adminReportsOpen.addEventListener("click", () => navigateTo("/admin/reports"));
+    }
+    if (ui.adminImportsOpen) {
+      ui.adminImportsOpen.addEventListener("click", () => navigateTo("/admin/imports"));
+    }
+    if (ui.adminSectionToggles && ui.adminSectionToggles.length) {
+      ui.adminSectionToggles.forEach((button) => {
+        button.addEventListener("click", () => {
+          navigateTo(buildAdminSectionUrl(button.dataset.adminToggle), { replace: true });
+        });
+      });
+    }
     if (ui.studioOpen) {
       ui.studioOpen.addEventListener("click", openStudio);
     }
@@ -5278,60 +5501,108 @@ const ui = {
         fetchChannelsPage(channelsQuery, false);
       }
     });
-    ui.adminVideosBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminVideosSearchPage.addEventListener("input", () =>
-      navigateTo("/admin/videos?q=" + encodeURIComponent(ui.adminVideosSearchPage.value.trim()), { replace: true })
-    );
-    ui.adminVideosLoadMore.addEventListener("click", () => {
-      if (adminVideosHasMore) {
-        fetchAdminVideosPage(adminVideosQuery, false);
-      }
-    });
-    ui.adminVideosOpen.addEventListener("click", () => navigateTo("/admin/videos"));
-    ui.adminOverviewBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminUsersBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminChannelsBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminReportsBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminImportsBack.addEventListener("click", () => navigateTo("/"));
-    ui.adminUsersSearchPage.addEventListener("input", () =>
-      navigateTo("/admin/users?q=" + encodeURIComponent(ui.adminUsersSearchPage.value.trim()), { replace: true })
-    );
-    ui.adminChannelsSearchPage.addEventListener("input", () =>
-      navigateTo("/admin/channels?q=" + encodeURIComponent(ui.adminChannelsSearchPage.value.trim()), { replace: true })
-    );
-    ui.adminUsersLoadMore.addEventListener("click", () => {
-      if (adminUsersPageHasMore) {
-        fetchAdminUsersPage(adminUsersPageQuery, false);
-      }
-    });
-    ui.adminChannelsLoadMore.addEventListener("click", () => {
-      if (adminChannelsPageHasMore) {
-        fetchAdminChannelsPage(adminChannelsPageQuery, false);
-      }
-    });
+    if (ui.adminVideosBack) {
+      ui.adminVideosBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminVideosSearchPage) {
+      ui.adminVideosSearchPage.addEventListener("input", () =>
+        navigateTo("/admin/videos?q=" + encodeURIComponent(ui.adminVideosSearchPage.value.trim()), { replace: true })
+      );
+    }
+    if (ui.adminVideosLoadMore) {
+      ui.adminVideosLoadMore.addEventListener("click", () => {
+        if (adminVideosHasMore) {
+          fetchAdminVideosPage(adminVideosQuery, false);
+        }
+      });
+    }
+    if (ui.adminVideosOpen) {
+      ui.adminVideosOpen.addEventListener("click", () => navigateTo("/admin/videos"));
+    }
+    if (ui.adminOverviewBack) {
+      ui.adminOverviewBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminUsersBack) {
+      ui.adminUsersBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminChannelsBack) {
+      ui.adminChannelsBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminReportsBack) {
+      ui.adminReportsBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminImportsBack) {
+      ui.adminImportsBack.addEventListener("click", () => navigateTo("/"));
+    }
+    if (ui.adminUsersSearchPage) {
+      ui.adminUsersSearchPage.addEventListener("input", () =>
+        navigateTo("/admin/users?q=" + encodeURIComponent(ui.adminUsersSearchPage.value.trim()), { replace: true })
+      );
+    }
+    if (ui.adminChannelsSearchPage) {
+      ui.adminChannelsSearchPage.addEventListener("input", () =>
+        navigateTo("/admin/channels?q=" + encodeURIComponent(ui.adminChannelsSearchPage.value.trim()), {
+          replace: true
+        })
+      );
+    }
+    if (ui.adminUsersLoadMore) {
+      ui.adminUsersLoadMore.addEventListener("click", () => {
+        if (adminUsersPageHasMore) {
+          fetchAdminUsersPage(adminUsersPageQuery, false);
+        }
+      });
+    }
+    if (ui.adminChannelsLoadMore) {
+      ui.adminChannelsLoadMore.addEventListener("click", () => {
+        if (adminChannelsPageHasMore) {
+          fetchAdminChannelsPage(adminChannelsPageQuery, false);
+        }
+      });
+    }
     ui.contactOpen.addEventListener("click", () => openModal(ui.contactModal));
-    ui.adminImportCsv.addEventListener("click", importCsv);
-    ui.adminImportSql.addEventListener("click", importSql);
-    ui.adminExportSql.addEventListener("click", exportSql);
-    ui.adminImportCsvPage.addEventListener("click", () =>
-      importCsv({ csv: ui.adminCsvPage, message: ui.adminImportMessagePage })
-    );
-    ui.adminImportSqlPage.addEventListener("click", () =>
-      importSql({ sql: ui.adminSqlPage, message: ui.adminImportMessagePage })
-    );
-    ui.adminExportSqlPage.addEventListener("click", () => exportSql(ui.adminImportMessagePage));
-    ui.adminUserSearch.addEventListener("input", () =>
-      fetchAdminUsersRemote(ui.adminUserSearch.value.trim(), "")
-    );
-    ui.adminChannelSearch.addEventListener("input", () =>
-      fetchAdminUsersRemote(ui.adminChannelSearch.value.trim(), "artist")
-    );
-    ui.adminVideoSearch.addEventListener("input", () =>
-      fetchAdminVideosRemote(ui.adminVideoSearch.value.trim())
-    );
-    ui.adminTabs.forEach((button) => {
-      button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
-    });
+    if (ui.adminImportCsv) {
+      ui.adminImportCsv.addEventListener("click", importCsv);
+    }
+    if (ui.adminImportSql) {
+      ui.adminImportSql.addEventListener("click", importSql);
+    }
+    if (ui.adminExportSql) {
+      ui.adminExportSql.addEventListener("click", exportSql);
+    }
+    if (ui.adminImportCsvPage) {
+      ui.adminImportCsvPage.addEventListener("click", () =>
+        importCsv({ csv: ui.adminCsvPage, message: ui.adminImportMessagePage })
+      );
+    }
+    if (ui.adminImportSqlPage) {
+      ui.adminImportSqlPage.addEventListener("click", () =>
+        importSql({ sql: ui.adminSqlPage, message: ui.adminImportMessagePage })
+      );
+    }
+    if (ui.adminExportSqlPage) {
+      ui.adminExportSqlPage.addEventListener("click", () => exportSql(ui.adminImportMessagePage));
+    }
+    if (ui.adminUserSearch) {
+      ui.adminUserSearch.addEventListener("input", () =>
+        fetchAdminUsersRemote(ui.adminUserSearch.value.trim(), "")
+      );
+    }
+    if (ui.adminChannelSearch) {
+      ui.adminChannelSearch.addEventListener("input", () =>
+        fetchAdminUsersRemote(ui.adminChannelSearch.value.trim(), "artist")
+      );
+    }
+    if (ui.adminVideoSearch) {
+      ui.adminVideoSearch.addEventListener("input", () =>
+        fetchAdminVideosRemote(ui.adminVideoSearch.value.trim())
+      );
+    }
+    if (ui.adminTabs && ui.adminTabs.length) {
+      ui.adminTabs.forEach((button) => {
+        button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
+      });
+    }
 
     ui.loginForm.addEventListener("submit", handleLogin);
     ui.registerForm.addEventListener("submit", handleRegister);
@@ -5359,6 +5630,10 @@ const ui = {
     if (ui.authLanguage) {
       ui.authLanguage.addEventListener("change", (event) => setUiLanguage(event.target.value));
     }
+    if (ui.errorLanguage) {
+      ui.errorLanguage.addEventListener("change", (event) => setUiLanguage(event.target.value));
+    }
+    initLanguageControls();
     if (ui.forgotPassword) {
       ui.forgotPassword.addEventListener("click", sendPasswordReset);
     }
@@ -5475,6 +5750,12 @@ const ui = {
     ui.searchBack.addEventListener("click", () => {
       navigateTo("/");
     });
+    if (ui.errorRetry) {
+      ui.errorRetry.addEventListener("click", () => window.location.reload());
+    }
+    if (ui.errorHome) {
+      ui.errorHome.addEventListener("click", () => navigateTo("/"));
+    }
 
     function navigateTo(path, options = {}) {
       const target = path || "/";
@@ -5527,20 +5808,26 @@ const ui = {
       }
       if (path === "/admin/users") {
         const query = params.get("q") || "";
-        ui.adminUsersSearchPage.value = query;
+        if (ui.adminUsersSearchPage) {
+          ui.adminUsersSearchPage.value = query;
+        }
         fetchAdminUsersPage(query, true);
         return;
       }
       if (path === "/admin/channels") {
         const query = params.get("q") || "";
-        ui.adminChannelsSearchPage.value = query;
+        if (ui.adminChannelsSearchPage) {
+          ui.adminChannelsSearchPage.value = query;
+        }
         fetchAdminChannelsPage(query, true);
         return;
       }
       if (path === "/admin/videos") {
         const query = params.get("q") || "";
         adminVideosOwnerId = params.get("owner") || "";
-        ui.adminVideosSearchPage.value = query;
+        if (ui.adminVideosSearchPage) {
+          ui.adminVideosSearchPage.value = query;
+        }
         fetchAdminVideosPage(query, true);
         return;
       }
@@ -5568,13 +5855,38 @@ const ui = {
           return;
         }
       }
+      if (path !== "/") {
+        showErrorPage("error_not_found");
+        return;
+      }
       setPageView("feed");
     }
 
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) {
+        return;
+      }
+      if (window.location.protocol !== "https:" && window.location.protocol !== "http:") {
+        return;
+      }
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
     window.addEventListener("popstate", handleRoute);
+    window.addEventListener("error", (event) => {
+      if (event && event.target && event.target !== window) {
+        return;
+      }
+      showErrorPage("error_message");
+    });
+    window.addEventListener("unhandledrejection", () => showErrorPage("error_message"));
+    window.addEventListener("offline", () => {
+      window.location.assign("/offline.html");
+    });
 
     lockApp(t("message_sign_in"));
     initFirebase();
+    registerServiceWorker();
     handleRoute();
 
     function onYouTubeIframeAPIReady() {

@@ -25,6 +25,13 @@ function injectAssets() {
 
   fs.mkdirSync(distDir, { recursive: true });
   fs.writeFileSync(distIndexPath, withJs, "utf8");
+  const staticAssets = ["logo.png", "bg.png", "offline.html", "sw.js"];
+  staticAssets.forEach((asset) => {
+    const source = path.join(root, asset);
+    if (fs.existsSync(source)) {
+      fs.copyFileSync(source, path.join(distDir, asset));
+    }
+  });
   console.log("Built dist/index.html with inlined CSS/JS");
 }
 

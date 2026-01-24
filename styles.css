@@ -43,12 +43,12 @@
       content: "";
       position: fixed;
       inset: 0;
-      background-image: url("logo.png");
+      background-image: url("bg.png");
       background-repeat: no-repeat;
-      background-position: center 24%;
-      background-size: min(36vw, 520px);
-      opacity: 0.08;
-      filter: saturate(1.05);
+      background-position: center;
+      background-size: cover;
+      opacity: 0.18;
+      filter: saturate(1.1) contrast(1.02);
       pointer-events: none;
       z-index: 0;
     }
@@ -70,6 +70,143 @@
       overflow-x: hidden;
       position: relative;
       z-index: 1;
+    }
+
+    body[data-view="request"] header,
+    body[data-view="request"] .search-row,
+    body[data-view="request"] aside {
+      display: none !important;
+    }
+
+    body[data-view="request"] .layout {
+      grid-template-columns: 1fr;
+      padding-top: 24px;
+    }
+
+    body[data-view="request"] #player-area,
+    body[data-view="request"] #feed-view,
+    body[data-view="request"] #viral-view,
+    body[data-view="request"] #channel-view,
+    body[data-view="request"] #search-view,
+    body[data-view="request"] #channels-page,
+    body[data-view="request"] #admin-overview-page,
+    body[data-view="request"] #admin-users-page,
+    body[data-view="request"] #admin-channels-page,
+    body[data-view="request"] #admin-videos-page,
+    body[data-view="request"] #admin-reports-page,
+    body[data-view="request"] #admin-imports-page {
+      display: none !important;
+    }
+
+    body[data-view="request"] #request-view {
+      display: block !important;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    body[data-view="error"] header,
+    body[data-view="error"] .search-row,
+    body[data-view="error"] aside {
+      display: none !important;
+    }
+
+    body[data-view="error"] .layout {
+      grid-template-columns: 1fr;
+      padding-top: 24px;
+    }
+
+    body[data-view="error"] #player-area,
+    body[data-view="error"] #feed-view,
+    body[data-view="error"] #viral-view,
+    body[data-view="error"] #channel-view,
+    body[data-view="error"] #search-view,
+    body[data-view="error"] #channels-page,
+    body[data-view="error"] #request-view,
+    body[data-view="error"] #admin-overview-page,
+    body[data-view="error"] #admin-users-page,
+    body[data-view="error"] #admin-channels-page,
+    body[data-view="error"] #admin-videos-page,
+    body[data-view="error"] #admin-reports-page,
+    body[data-view="error"] #admin-imports-page {
+      display: none !important;
+    }
+
+    body[data-view="error"] #error-view {
+      display: block !important;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    body[data-view="search"] #feed-view,
+    body[data-view="search"] #viral-view,
+    body[data-view="search"] #channel-view,
+    body[data-view="search"] #channels-page,
+    body[data-view="search"] #request-view,
+    body[data-view="search"] #admin-overview-page,
+    body[data-view="search"] #admin-users-page,
+    body[data-view="search"] #admin-channels-page,
+    body[data-view="search"] #admin-videos-page,
+    body[data-view="search"] #admin-reports-page,
+    body[data-view="search"] #admin-imports-page,
+    body[data-view="search"] #player-area {
+      display: none !important;
+    }
+
+    body[data-view="search"] #search-view {
+      display: block !important;
+    }
+
+    body[data-view^="admin"] #feed-view,
+    body[data-view^="admin"] #viral-view,
+    body[data-view^="admin"] #channel-view,
+    body[data-view^="admin"] #channels-page,
+    body[data-view^="admin"] #request-view,
+    body[data-view^="admin"] #search-view,
+    body[data-view^="admin"] #player-area {
+      display: none !important;
+    }
+
+    .error-view {
+      padding: 12px 0 24px;
+    }
+
+    .error-card {
+      background: var(--bg-alt);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--stroke);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .error-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 0 auto;
+      background: rgba(255, 214, 102, 0.4);
+      color: var(--accent-2);
+    }
+
+    .error-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .error-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .error-card .lang-select {
+      display: flex;
+      justify-content: center;
     }
 
     .auth-gate {
@@ -1530,6 +1667,46 @@
       border: 1px solid var(--stroke);
       background: rgba(255, 255, 255, 0.82);
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03);
+    }
+
+    .admin-accordion {
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-section {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--stroke);
+      background: var(--bg-alt);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .admin-section-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .admin-section-body {
+      display: none;
+      padding: 14px 16px 18px;
+      border-top: 1px solid var(--stroke);
+      background: var(--bg-soft);
+      gap: 12px;
+    }
+
+    .admin-section.open .admin-section-body {
+      display: grid;
     }
 
     .admin-panel input[type="search"] {
