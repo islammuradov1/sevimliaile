@@ -16,6 +16,12 @@
 </head>
 <body data-theme="light" class="locked">
   <div class="app">
+    <div class="login-splash" id="login-splash" aria-hidden="true">
+      <div class="login-splash-card" role="status" aria-live="polite">
+        <img src="/logo.png" alt="Sevimli Aile logo" class="login-splash-logo">
+        <div class="login-splash-title">Sevimli Aile</div>
+      </div>
+    </div>
     <header>
       <div class="topbar">
         <div class="topbar-left">
@@ -51,10 +57,7 @@
               <div class="account-plan" id="account-plan">Not signed in</div>
             </div>
           </div>
-          <button class="pill icon-button" id="games-open" type="button" aria-label="Games"></button>
-          <button class="pill icon-button" id="settings-bar" type="button" aria-label="Settings (pro)" data-i18n-aria="nav_settings">
-            <span data-i18n="nav_settings">Settings</span>
-          </button>
+          <button class="pill icon-button show-label" id="games-open" type="button" aria-label="Games"></button>
           <button class="pill icon-button drawer-toggle" id="drawer-toggle" type="button" aria-expanded="false" aria-controls="action-drawer">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -268,6 +271,14 @@
               </div>
             </div>
           </div>
+
+          <div class="related-section hidden" id="related-section" aria-hidden="true">
+            <div class="section-head">
+              <h3 data-i18n="related_title">Related videos</h3>
+            </div>
+            <div class="grid related-grid" id="related-grid"></div>
+            <div class="empty-state hidden" id="related-empty" data-i18n="related_empty">No related videos yet.</div>
+          </div>
         </section>
 
         <section class="recommendations" id="feed-view">
@@ -384,8 +395,22 @@
           </div>
         </section>
 
+        <section class="recommendations hidden" id="viral-view" aria-hidden="true">
+          <div class="section-head">
+            <h2 data-i18n="feed_viral">Viral</h2>
+          </div>
+          <div class="grid" id="viral-grid"></div>
+          <div class="load-more">
+            <div class="card-meta" data-i18n="feed_load_hint">More videos below</div>
+            <button class="ghost" id="viral-load-more" type="button" data-i18n="feed_load_more">Load more</button>
+          </div>
+        </section>
+
         <section class="error-view hidden" id="error-view" aria-hidden="true">
           <div class="error-card">
+            <button class="error-logo" id="error-logo" type="button" aria-label="Back to home">
+              <img src="/logo.png" alt="Sevimli Aile logo">
+            </button>
             <div class="error-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 3 2 21h20L12 3zm0 6v5m0 4h.01" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -987,7 +1012,13 @@
           </form>
         </div>
         <div class="settings-side">
-          <div class="card-meta" data-i18n="settings_history">Today's history</div>
+          <div class="card-meta" data-i18n="settings_history_title">History</div>
+          <label class="sr-only" for="history-range" data-i18n="history_range_label">History range</label>
+          <select id="history-range" class="pill" aria-label="History range" data-i18n-aria="history_range_label">
+            <option value="today" data-i18n="history_range_today">Today</option>
+            <option value="week" data-i18n="history_range_week">This week</option>
+            <option value="month" data-i18n="history_range_month">This month</option>
+          </select>
           <div class="form-grid" id="history-list"></div>
           <div class="card-meta" id="settings-message"></div>
         </div>

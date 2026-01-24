@@ -471,6 +471,14 @@ function safeJsonArray(value) {
   }
 }
 
+function tokenizeText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u00c0-\u024f\u0400-\u04ff\u4e00-\u9fff\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length >= 3);
+}
+
 async function loadUserSettings(env, userId) {
   try {
     const columns = await getTableColumns(env, "user_settings");
@@ -516,6 +524,78 @@ async function loadUserSettings(env, userId) {
       maxDailyMinutes: 0
     };
   }
+}
+
+function buildVideoFilters(settings, applyFilters, videoColumns) {
+  let where = "WHERE videos.youtube_id IS NOT NULL";
+  const binds = [];
+  if (applyFilters && settings.allowedChannels.length && settings.channelMode !== "off") {
+    const list = settings.allowedChannels.map(() => "?").join(",");
+    if (settings.channelMode === "block") {
+      where += " AND videos.owner_id NOT IN (" + list + ")";
+    } else {
+      where += " AND videos.owner_id IN (" + list + ")";
+    }
+    binds.push(...settings.allowedChannels);
+  }
+  if (applyFilters) {
+    if (settings.allowedLanguages.length) {
+      const list = settings.allowedLanguages.map(() => "?").join(",");
+      where +=
+        " AND (EXISTS (SELECT 1 FROM json_each(videos.languages) WHERE value IN (" +
+        list +
+        ")) OR videos.language IN (" +
+        list +
+        "))";
+      binds.push(...settings.allowedLanguages, ...settings.allowedLanguages);
+    }
+    if (settings.allowedTopics.length && settings.topicMode !== "off") {
+      const inList = settings.allowedTopics.map(() => "?").join(",");
+      if (settings.topicMode === "block") {
+        where +=
+          " AND NOT EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+      } else {
+        where +=
+          " AND EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" + inList + "))";
+      }
+      binds.push(...settings.allowedTopics);
+    }
+    if (settings.allowedReligions.length && settings.religionMode !== "off") {
+      const list = settings.allowedReligions.map(() => "?").join(",");
+      const clauses = [];
+      let repeats = 0;
+      if (videoColumns.has("religions")) {
+        clauses.push(
+          "EXISTS (SELECT 1 FROM json_each(videos.religions) WHERE value IN (" + list + "))"
+        );
+        repeats += 1;
+      }
+      if (videoColumns.has("religion_details")) {
+        clauses.push(
+          "EXISTS (SELECT 1 FROM json_each(videos.religion_details) WHERE value IN (" + list + "))"
+        );
+        repeats += 1;
+      }
+      if (videoColumns.has("religion")) {
+        clauses.push("COALESCE(videos.religion, 'none') IN (" + list + ")");
+        repeats += 1;
+      }
+      if (videoColumns.has("religion_detail")) {
+        clauses.push("COALESCE(videos.religion_detail, '') IN (" + list + ")");
+        repeats += 1;
+      }
+      if (clauses.length) {
+        where +=
+          (settings.religionMode === "block" ? " AND NOT (" : " AND (") +
+          clauses.join(" OR ") +
+          ")";
+        for (let i = 0; i < repeats; i += 1) {
+          binds.push(...settings.allowedReligions);
+        }
+      }
+    }
+  }
+  return { where, binds };
 }
 
 async function verifyFirebaseToken(env, token) {
@@ -1708,6 +1788,10 @@ export default {
     if (path.startsWith("/videos/") && path.endsWith("/view") && request.method === "POST") {
       const videoId = path.split("/")[2];
       await env.DB.prepare("UPDATE videos SET views = views + 1 WHERE id = ?").bind(videoId).run();
+      const videoMeta = await env.DB.prepare("SELECT duration FROM videos WHERE id = ?")
+        .bind(videoId)
+        .first();
+      const watchSeconds = videoMeta?.duration || 0;
       if (user.plan === "pro") {
         const settings = await loadUserSettings(env, user.id);
         const maxMinutes = settings.maxDailyMinutes || 0;
@@ -1726,15 +1810,12 @@ export default {
             return jsonResponse({ error: "Daily watch limit reached." }, 403, withCors({}, origin));
           }
         }
-        const video = await env.DB.prepare("SELECT duration FROM videos WHERE id = ?")
-          .bind(videoId)
-          .first();
-        await env.DB.prepare(
-          "INSERT INTO view_history (user_id, video_id, watched_at, watch_seconds) VALUES (?, ?, ?, ?)"
-        )
-          .bind(user.id, videoId, nowIso(), video?.duration || 0)
-          .run();
       }
+      await env.DB.prepare(
+        "INSERT INTO view_history (user_id, video_id, watched_at, watch_seconds) VALUES (?, ?, ?, ?)"
+      )
+        .bind(user.id, videoId, nowIso(), watchSeconds)
+        .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
@@ -1884,15 +1965,27 @@ export default {
       if (user.plan !== "pro") {
         return jsonResponse({ error: "History available on pro plan only." }, 403, withCors({}, origin));
       }
+      const range = url.searchParams.get("range") || "";
       const day = url.searchParams.get("day") || "";
-      const date = day ? new Date(day) : new Date();
-      if (Number.isNaN(date.getTime())) {
-        return jsonResponse({ error: "Invalid day." }, 400, withCors({}, origin));
+      const now = new Date();
+      let start = null;
+      let end = new Date(now);
+      if (range === "week") {
+        start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+        start.setDate(start.getDate() - 6);
+      } else if (range === "month") {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else {
+        const date = day ? new Date(day) : now;
+        if (Number.isNaN(date.getTime())) {
+          return jsonResponse({ error: "Invalid day." }, 400, withCors({}, origin));
+        }
+        start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(date);
+        end.setHours(23, 59, 59, 999);
       }
-      const start = new Date(date);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(date);
-      end.setHours(23, 59, 59, 999);
       const result = await env.DB.prepare(
         "SELECT view_history.watched_at, videos.title, videos.youtube_id, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel " +
@@ -1908,6 +2001,7 @@ export default {
 
     if (path === "/viral" && request.method === "GET") {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
       const settings = await loadUserSettings(env, user.id);
       const applyFilters = user.plan === "pro" && settings.hasSettings;
       const allowedLanguages = settings.allowedLanguages;
@@ -1997,11 +2091,227 @@ export default {
           "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
           "FROM videos JOIN users ON videos.owner_id = users.id " +
           where +
-          " ORDER BY videos.views DESC, hearts DESC LIMIT ?"
+          " ORDER BY videos.views DESC, hearts DESC LIMIT ? OFFSET ?"
       )
-        .bind(...binds, limit)
+        .bind(...binds, limit + 1, offset)
         .all();
-      const videos = (result.results || []).map((row) => ({
+      const rows = result.results || [];
+      const hasMore = rows.length > limit;
+      const videos = rows.slice(0, limit).map((row) => ({
+        ...row,
+        topics: safeJsonArray(row.topics),
+        languages: safeJsonArray(row.languages),
+        religions: safeJsonArray(row.religions),
+        religion_details: safeJsonArray(row.religion_details)
+      }));
+      return jsonResponse({ videos, hasMore }, 200, withCors({}, origin));
+    }
+
+    if (path === "/recommendations" && request.method === "GET") {
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "24", 10), 50);
+      const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
+      const videoColumns = await getTableColumns(env, "videos");
+      const { where, binds } = buildVideoFilters(settings, applyFilters, videoColumns);
+      const historyResult = await env.DB.prepare(
+        "SELECT videos.id, videos.title, videos.owner_id, videos.topics " +
+          "FROM view_history JOIN videos ON view_history.video_id = videos.id " +
+          "WHERE view_history.user_id = ? " +
+          "ORDER BY view_history.watched_at DESC LIMIT 50"
+      )
+        .bind(user.id)
+        .all();
+      const history = historyResult.results || [];
+      const watchedIds = new Set(history.map((row) => String(row.id)));
+      if (!history.length) {
+        const fallback = await env.DB.prepare(
+          "SELECT videos.*, " +
+            "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+            "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+            "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+            "FROM videos JOIN users ON videos.owner_id = users.id " +
+            where +
+            " ORDER BY videos.views DESC, videos.created_at DESC LIMIT ? OFFSET ?"
+        )
+          .bind(...binds, limit + 1, offset)
+          .all();
+        const fallbackRows = fallback.results || [];
+        const fallbackHasMore = fallbackRows.length > limit;
+        const videos = fallbackRows.slice(0, limit).map((row) => ({
+          ...row,
+          topics: safeJsonArray(row.topics),
+          languages: safeJsonArray(row.languages),
+          religions: safeJsonArray(row.religions),
+          religion_details: safeJsonArray(row.religion_details)
+        }));
+        return jsonResponse({ videos, hasMore: fallbackHasMore }, 200, withCors({}, origin));
+      }
+      const channelScores = new Map();
+      const topicScores = new Map();
+      const tokenScores = new Map();
+      history.forEach((row) => {
+        const ownerKey = String(row.owner_id || "");
+        if (ownerKey) {
+          channelScores.set(ownerKey, (channelScores.get(ownerKey) || 0) + 1);
+        }
+        safeJsonArray(row.topics).forEach((topic) => {
+          const key = String(topic || "").toLowerCase();
+          if (key) {
+            topicScores.set(key, (topicScores.get(key) || 0) + 1);
+          }
+        });
+        tokenizeText(row.title).forEach((token) => {
+          tokenScores.set(token, (tokenScores.get(token) || 0) + 1);
+        });
+      });
+      const subsResult = await env.DB.prepare(
+        "SELECT channel_id FROM subscriptions WHERE user_id = ?"
+      )
+        .bind(user.id)
+        .all();
+      const subscribed = new Set((subsResult.results || []).map((row) => String(row.channel_id)));
+      const candidateLimit = Math.min(limit + offset + 80, 300);
+      const candidateResult = await env.DB.prepare(
+        "SELECT videos.*, " +
+          "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+          "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+          "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+          "FROM videos JOIN users ON videos.owner_id = users.id " +
+          where +
+          " ORDER BY videos.created_at DESC LIMIT ?"
+      )
+        .bind(...binds, candidateLimit)
+        .all();
+      const scored = [];
+      (candidateResult.results || []).forEach((row) => {
+        if (watchedIds.has(String(row.id))) {
+          return;
+        }
+        let score = 0;
+        const ownerKey = String(row.owner_id || "");
+        if (ownerKey && channelScores.has(ownerKey)) {
+          score += channelScores.get(ownerKey) * 4;
+        }
+        if (ownerKey && subscribed.has(ownerKey)) {
+          score += 6;
+        }
+        safeJsonArray(row.topics).forEach((topic) => {
+          const key = String(topic || "").toLowerCase();
+          if (key && topicScores.has(key)) {
+            score += topicScores.get(key) * 3;
+          }
+        });
+        tokenizeText(row.title).forEach((token) => {
+          if (tokenScores.has(token)) {
+            score += tokenScores.get(token);
+          }
+        });
+        score += Math.min((row.views || 0) / 200, 4);
+        scored.push({ row, score });
+      });
+      if (!scored.length) {
+        const fallback = await env.DB.prepare(
+          "SELECT videos.*, " +
+            "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+            "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+            "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+            "FROM videos JOIN users ON videos.owner_id = users.id " +
+            where +
+            " ORDER BY videos.views DESC, videos.created_at DESC LIMIT ? OFFSET ?"
+        )
+          .bind(...binds, limit + 1, offset)
+          .all();
+        const fallbackRows = fallback.results || [];
+        const fallbackHasMore = fallbackRows.length > limit;
+        const videos = fallbackRows.slice(0, limit).map((row) => ({
+          ...row,
+          topics: safeJsonArray(row.topics),
+          languages: safeJsonArray(row.languages),
+          religions: safeJsonArray(row.religions),
+          religion_details: safeJsonArray(row.religion_details)
+        }));
+        return jsonResponse({ videos, hasMore: fallbackHasMore }, 200, withCors({}, origin));
+      }
+      scored.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        const viewsA = a.row.views || 0;
+        const viewsB = b.row.views || 0;
+        if (viewsB !== viewsA) return viewsB - viewsA;
+        const dateA = a.row.created_at || "";
+        const dateB = b.row.created_at || "";
+        return dateB.localeCompare(dateA);
+      });
+      const sliced = scored.slice(offset, offset + limit).map((item) => ({
+        ...item.row,
+        topics: safeJsonArray(item.row.topics),
+        languages: safeJsonArray(item.row.languages),
+        religions: safeJsonArray(item.row.religions),
+        religion_details: safeJsonArray(item.row.religion_details)
+      }));
+      const hasMore = scored.length > offset + limit;
+      return jsonResponse({ videos: sliced, hasMore }, 200, withCors({}, origin));
+    }
+
+    if (path === "/related" && request.method === "GET") {
+      const videoId = url.searchParams.get("videoId") || "";
+      const limit = Math.min(parseInt(url.searchParams.get("limit") || "8", 10), 20);
+      if (!videoId) {
+        return jsonResponse({ videos: [] }, 200, withCors({}, origin));
+      }
+      const video = await env.DB.prepare("SELECT id, owner_id, topics FROM videos WHERE id = ?")
+        .bind(videoId)
+        .first();
+      if (!video) {
+        return jsonResponse({ videos: [] }, 200, withCors({}, origin));
+      }
+      const settings = await loadUserSettings(env, user.id);
+      const applyFilters = user.plan === "pro" && settings.hasSettings;
+      const videoColumns = await getTableColumns(env, "videos");
+      const base = buildVideoFilters(settings, applyFilters, videoColumns);
+      let where = base.where + " AND videos.id <> ?";
+      const binds = [...base.binds, videoId];
+      const topics = safeJsonArray(video.topics)
+        .map((topic) => String(topic || "").toLowerCase())
+        .filter(Boolean);
+      if (topics.length) {
+        const list = topics.map(() => "?").join(",");
+        where +=
+          " AND (videos.owner_id = ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value IN (" +
+          list +
+          ")))";
+        binds.push(video.owner_id, ...topics);
+      } else {
+        where += " AND videos.owner_id = ?";
+        binds.push(video.owner_id);
+      }
+      const query =
+        "SELECT videos.*, " +
+        "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+        "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+        "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+        "FROM videos JOIN users ON videos.owner_id = users.id " +
+        where +
+        " ORDER BY CASE WHEN videos.owner_id = ? THEN 1 ELSE 0 END DESC, videos.views DESC, hearts DESC LIMIT ?";
+      const result = await env.DB.prepare(query)
+        .bind(...binds, video.owner_id, limit)
+        .all();
+      let rows = result.results || [];
+      if (!rows.length) {
+        const fallback = await env.DB.prepare(
+          "SELECT videos.*, " +
+            "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
+            "users.avatar_url as channel_avatar, users.slogan as channel_slogan, users.role as channel_role, " +
+            "(SELECT COUNT(*) FROM likes WHERE likes.video_id = videos.id) as hearts " +
+            "FROM videos JOIN users ON videos.owner_id = users.id " +
+            base.where +
+            " AND videos.id <> ? ORDER BY videos.views DESC, hearts DESC LIMIT ?"
+        )
+          .bind(...base.binds, videoId, limit)
+          .all();
+        rows = fallback.results || [];
+      }
+      const videos = rows.map((row) => ({
         ...row,
         topics: safeJsonArray(row.topics),
         languages: safeJsonArray(row.languages),

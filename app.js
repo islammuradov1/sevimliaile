@@ -46,6 +46,7 @@ const ui = {
       searchFallbackRecommended: document.getElementById("search-fallback-recommended"),
       searchFallbackViral: document.getElementById("search-fallback-viral"),
       searchLoadMore: document.getElementById("search-load-more"),
+      viralLoadMore: document.getElementById("viral-load-more"),
       searchTitle: document.getElementById("search-title"),
       searchBack: document.getElementById("search-back"),
       searchContext: document.getElementById("search-context"),
@@ -78,6 +79,8 @@ const ui = {
       gamesBack: document.getElementById("games-back"),
       channelView: document.getElementById("channel-view"),
       errorView: document.getElementById("error-view"),
+      errorLogo: document.getElementById("error-logo"),
+      loginSplash: document.getElementById("login-splash"),
       adminOverviewPage: document.getElementById("admin-overview-page"),
       adminOverviewPageList: document.getElementById("admin-overview-page-list"),
       adminOverviewBack: document.getElementById("admin-overview-back"),
@@ -125,6 +128,9 @@ const ui = {
       channelAvatar: document.getElementById("channel-avatar"),
       channelName: document.getElementById("channel-name"),
       channelSlogan: document.getElementById("channel-slogan"),
+      relatedSection: document.getElementById("related-section"),
+      relatedGrid: document.getElementById("related-grid"),
+      relatedEmpty: document.getElementById("related-empty"),
       statusChip: document.getElementById("status-chip"),
       stateSignal: document.getElementById("state-signal"),
       stateSignalIcon: document.getElementById("state-signal-icon"),
@@ -205,6 +211,7 @@ const ui = {
       settingsMessage: document.getElementById("settings-message"),
       settingsAuthMessage: document.getElementById("settings-auth-message"),
       historyList: document.getElementById("history-list"),
+      historyRange: document.getElementById("history-range"),
       settingsTopicSearch: document.getElementById("topic-search"),
       settingsTopics: document.getElementById("settings-topics"),
       settingsChannelSearch: document.getElementById("channel-search"),
@@ -609,8 +616,14 @@ const ui = {
         request_pro: "Free Pro for 1 month",
         request_details_label: "Details",
         request_details_placeholder: "Channel name, link, or what you want to see",
+        request_details_video: "Channel name, links, and topics you want",
+        request_details_partnership: "Who you are, brand/channel, how we collaborate",
+        request_details_feature: "Describe the feature you need",
+        request_details_pro: "Why you need Pro for a month",
+        request_details_default: "Tell us what you need",
         request_contact_label: "How to reach you",
         request_contact_placeholder: "Email or phone",
+        request_submit: "Send request",
         request_success: "Request sent. We'll get back to you.",
         request_error: "Couldn't send. Try again.",
         request_required: "Please fill all fields.",
@@ -643,6 +656,8 @@ const ui = {
         feed_load_hint: "More videos below",
         feed_load_more: "Load more",
         feed_viral: "Viral",
+        related_title: "Related videos",
+        related_empty: "No related videos yet.",
         channel_title: "Channel",
         games_preview_note: "Tap a game to play on its own page.",
         games_back: "Back to games",
@@ -757,7 +772,11 @@ const ui = {
         settings_watch_limit: "Daily watch limit (hours)",
         settings_password: "Confirm with your password",
         settings_save: "Save settings",
-        settings_history: "Today's history",
+        settings_history_title: "History",
+        history_range_label: "History range",
+        history_range_today: "Today",
+        history_range_week: "This week",
+        history_range_month: "This month",
         report_title: "Report video",
         report_reason: "Reason",
         report_placeholder: "Tell us what is wrong (min 5 characters)",
@@ -913,7 +932,7 @@ const ui = {
         message_stats_unavailable: "Stats unavailable.",
         message_settings_save_failed: "Unable to save settings.",
         message_no_topics: "No topics found.",
-        message_no_history: "No watches today.",
+        message_no_history: "No watches in this period.",
         message_report_failed: "Report failed.",
         message_no_video_selected: "No video selected.",
         message_reason_short: "Reason must be at least 5 characters.",
@@ -1001,6 +1020,15 @@ const ui = {
         games_math_status_skip: "Пропуск. Ответ: {answer}",
         games_math_status_done: "Отлично! {correct}/{total} верных.",
         games_math_pick_level: "Выберите уровень",
+        games_points_label: "Очки",
+        games_points_note: "Выигрывайте игры, чтобы получить Pro.",
+        games_redeem: "Получить Pro на 1 месяц",
+        games_redeem_cost: "Обмен за {points} очков.",
+        games_redeem_need_signin: "Войдите, чтобы копить очки.",
+        games_redeem_need_points: "Нужно ещё {points} очков.",
+        games_redeem_success: "Pro на 1 месяц открыт 🎉",
+        games_points_earned: "Вы получили {points} очков!",
+        games_points_limit: "Дневной лимит очков исчерпан. Попробуйте завтра.",
         games_leaderboard_title: "Таблица лидеров",
         games_leaderboard_note: "Дети с самыми высокими очками.",
         games_leaderboard_name: "Ребенок",
@@ -1016,6 +1044,26 @@ const ui = {
         fruit_orange: "Апельсин",
         fruit_grapes: "Виноград",
         fruit_watermelon: "Арбуз",
+        request_title: "Запрос",
+        request_subtitle: "Напишите, что нужно, и мы подготовим.",
+        request_reason: "Причина",
+        request_video: "Запросить видео с YouTube-канала",
+        request_partnership: "Партнёрство",
+        request_feature: "Новая функция",
+        request_pro: "Бесплатный Pro на 1 месяц",
+        request_details_label: "Детали",
+        request_details_placeholder: "Название канала, ссылка или то, что хотите",
+        request_details_video: "Название канала, ссылки и желаемые темы",
+        request_details_partnership: "Кто вы, бренд/канал, как сотрудничать",
+        request_details_feature: "Опишите нужную функцию",
+        request_details_pro: "Почему нужен Pro на месяц",
+        request_details_default: "Напишите, что вам нужно",
+        request_contact_label: "Как связаться с вами",
+        request_contact_placeholder: "Email или телефон",
+        request_submit: "Отправить",
+        request_success: "Запрос отправлен. Мы свяжемся.",
+        request_error: "Не удалось отправить. Попробуйте ещё раз.",
+        request_required: "Пожалуйста, заполните все поля.",
         ui_language_label: "Язык",
         sidebar_subscribed: "Подписки",
         sidebar_channels: "Каналы",
@@ -1045,6 +1093,8 @@ const ui = {
         feed_load_hint: "Еще видео ниже",
         feed_load_more: "Загрузить ещё",
         feed_viral: "Вирусное",
+        related_title: "Похожие видео",
+        related_empty: "Похожих видео пока нет.",
         channel_title: "Канал",
         games_preview_note: "Нажмите игру, чтобы открыть её страницу.",
         games_back: "Назад к играм",
@@ -1159,7 +1209,11 @@ const ui = {
         settings_watch_limit: "Лимит просмотра в день (часы)",
         settings_password: "Подтвердите паролем",
         settings_save: "Сохранить",
-        settings_history: "История за сегодня",
+        settings_history_title: "История",
+        history_range_label: "Период истории",
+        history_range_today: "Сегодня",
+        history_range_week: "Эта неделя",
+        history_range_month: "Этот месяц",
         report_title: "Пожаловаться на видео",
         report_reason: "Причина",
         report_placeholder: "Опишите проблему (мин. 5 символов)",
@@ -1315,7 +1369,7 @@ const ui = {
         message_stats_unavailable: "Статистика недоступна.",
         message_settings_save_failed: "Не удалось сохранить настройки.",
         message_no_topics: "Темы не найдены.",
-        message_no_history: "Сегодня просмотров нет.",
+        message_no_history: "За этот период просмотров нет.",
         message_report_failed: "Жалоба не отправлена.",
         message_no_video_selected: "Видео не выбрано.",
         message_reason_short: "Причина должна быть не короче 5 символов.",
@@ -1403,6 +1457,15 @@ const ui = {
         games_math_status_skip: "已跳过。答案：{answer}",
         games_math_status_done: "太棒了！{correct}/{total} 题正确。",
         games_math_pick_level: "请选择难度",
+        games_points_label: "积分",
+        games_points_note: "赢游戏赚积分换 Pro 时间。",
+        games_redeem: "领取 1 个月 Pro",
+        games_redeem_cost: "用 {points} 积分兑换。",
+        games_redeem_need_signin: "登录后才能收集积分。",
+        games_redeem_need_points: "还需要 {points} 积分。",
+        games_redeem_success: "已解锁 1 个月 Pro 🎉",
+        games_points_earned: "你获得了 {points} 积分！",
+        games_points_limit: "今日积分已达上限，请明天再试。",
         games_leaderboard_title: "排行榜",
         games_leaderboard_note: "积分最高的孩子。",
         games_leaderboard_name: "孩子",
@@ -1418,6 +1481,26 @@ const ui = {
         fruit_orange: "橙子",
         fruit_grapes: "葡萄",
         fruit_watermelon: "西瓜",
+        request_title: "提交请求",
+        request_subtitle: "告诉我们你的需求，我们来准备。",
+        request_reason: "原因",
+        request_video: "请求某个 YouTube 频道的视频",
+        request_partnership: "合作",
+        request_feature: "新功能",
+        request_pro: "免费 Pro 1 个月",
+        request_details_label: "详情",
+        request_details_placeholder: "频道名称、链接或你想要的内容",
+        request_details_video: "频道名称、链接和你想要的主题",
+        request_details_partnership: "你是谁、品牌/频道、如何合作",
+        request_details_feature: "描述你需要的功能",
+        request_details_pro: "说明为什么需要 1 个月 Pro",
+        request_details_default: "告诉我们你的需求",
+        request_contact_label: "联系方式",
+        request_contact_placeholder: "邮箱或电话",
+        request_submit: "发送",
+        request_success: "已发送请求。我们会联系你。",
+        request_error: "发送失败，请重试。",
+        request_required: "请填写所有字段。",
         ui_language_label: "语言",
         sidebar_subscribed: "已订阅",
         sidebar_channels: "频道",
@@ -1447,6 +1530,8 @@ const ui = {
         feed_load_hint: "更多视频在下方",
         feed_load_more: "加载更多",
         feed_viral: "热门",
+        related_title: "相关视频",
+        related_empty: "暂无相关视频。",
         channel_title: "频道",
         games_preview_note: "点击游戏访问独立页面。",
         games_back: "返回游戏",
@@ -1561,7 +1646,11 @@ const ui = {
         settings_watch_limit: "每日观看时长（小时）",
         settings_password: "用密码确认",
         settings_save: "保存设置",
-        settings_history: "今日观看记录",
+        settings_history_title: "观看记录",
+        history_range_label: "记录范围",
+        history_range_today: "今天",
+        history_range_week: "本周",
+        history_range_month: "本月",
         report_title: "举报视频",
         report_reason: "原因",
         report_placeholder: "说明问题（至少 5 个字符）",
@@ -1717,7 +1806,7 @@ const ui = {
         message_stats_unavailable: "统计不可用。",
         message_settings_save_failed: "无法保存设置。",
         message_no_topics: "未找到主题。",
-        message_no_history: "今天没有观看记录。",
+        message_no_history: "此时间段没有观看记录。",
         message_report_failed: "举报失败。",
         message_no_video_selected: "未选择视频。",
         message_reason_short: "原因至少 5 个字符。",
@@ -1805,6 +1894,15 @@ const ui = {
         games_math_status_skip: "Atlandı. Cevap: {answer}",
         games_math_status_done: "Harika! {correct}/{total} doğru.",
         games_math_pick_level: "Seviye seç",
+        games_points_label: "Puan",
+        games_points_note: "Oyun kazanarak Pro süresi için puan biriktir.",
+        games_redeem: "1 ay Pro al",
+        games_redeem_cost: "{points} puanla al.",
+        games_redeem_need_signin: "Puan toplamak için giriş yap.",
+        games_redeem_need_points: "{points} puan daha gerekiyor.",
+        games_redeem_success: "1 aylık Pro açıldı 🎉",
+        games_points_earned: "{points} puan kazandın!",
+        games_points_limit: "Günlük puan limiti doldu. Yarın tekrar dene.",
         games_leaderboard_title: "Liderlik Tablosu",
         games_leaderboard_note: "En çok puanı olan çocuklar.",
         games_leaderboard_name: "Çocuk",
@@ -1820,6 +1918,26 @@ const ui = {
         fruit_orange: "Portakal",
         fruit_grapes: "Üzüm",
         fruit_watermelon: "Karpuz",
+        request_title: "İstek gönder",
+        request_subtitle: "İhtiyacını yaz, hazırlayalım.",
+        request_reason: "Sebep",
+        request_video: "Bir YouTube kanalından video iste",
+        request_partnership: "Ortaklık",
+        request_feature: "Yeni özellik",
+        request_pro: "1 ay ücretsiz Pro",
+        request_details_label: "Detaylar",
+        request_details_placeholder: "Kanal adı, link veya istediğin şey",
+        request_details_video: "Kanal adı, linkler ve istediğiniz konular",
+        request_details_partnership: "Kimsiniz, marka/kanal, nasıl işbirliği",
+        request_details_feature: "İhtiyacın olan özelliği anlat",
+        request_details_pro: "Neden 1 ay Pro gerektiğini yaz",
+        request_details_default: "Neye ihtiyacın var yaz",
+        request_contact_label: "Size nasıl ulaşalım",
+        request_contact_placeholder: "E-posta veya telefon",
+        request_submit: "Gönder",
+        request_success: "İstek gönderildi. Döneceğiz.",
+        request_error: "Gönderilemedi. Tekrar dene.",
+        request_required: "Lütfen tüm alanları doldurun.",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abonelikler",
         sidebar_channels: "Kanallar",
@@ -1849,6 +1967,8 @@ const ui = {
         feed_load_hint: "Daha fazla video aşağıda",
         feed_load_more: "Daha fazla",
         feed_viral: "Viral",
+        related_title: "Benzer videolar",
+        related_empty: "Henüz benzer video yok.",
         channel_title: "Kanal",
         games_preview_note: "Oyunu açmak için dokunun.",
         games_back: "Oyunlara geri dön",
@@ -1963,7 +2083,11 @@ const ui = {
         settings_watch_limit: "Günlük izleme limiti (saat)",
         settings_password: "Şifre ile onayla",
         settings_save: "Ayarları kaydet",
-        settings_history: "Bugünün geçmişi",
+        settings_history_title: "Geçmiş",
+        history_range_label: "Geçmiş aralığı",
+        history_range_today: "Bugün",
+        history_range_week: "Bu hafta",
+        history_range_month: "Bu ay",
         report_title: "Videoyu bildir",
         report_reason: "Sebep",
         report_placeholder: "Sorunu yazın (en az 5 karakter)",
@@ -2119,7 +2243,7 @@ const ui = {
         message_stats_unavailable: "İstatistikler kullanılamıyor.",
         message_settings_save_failed: "Ayarlar kaydedilemedi.",
         message_no_topics: "Konu bulunamadı.",
-        message_no_history: "Bugün izleme yok.",
+        message_no_history: "Bu zaman aralığında izleme yok.",
         message_report_failed: "Rapor gönderilemedi.",
         message_no_video_selected: "Video seçilmedi.",
         message_reason_short: "Neden en az 5 karakter olmalı.",
@@ -2207,6 +2331,15 @@ const ui = {
         games_math_status_skip: "Keçildi. Cavab: {answer}",
         games_math_status_done: "Əla! {correct}/{total} düz.",
         games_math_pick_level: "Səviyyə seç",
+        games_points_label: "Puan",
+        games_points_note: "Oyunlarda qazanıb Pro vaxtı üçün puan topla.",
+        games_redeem: "1 ay Pro al",
+        games_redeem_cost: "{points} puanla al.",
+        games_redeem_need_signin: "Puan toplamaq üçün daxil ol.",
+        games_redeem_need_points: "Daha {points} puan lazımdır.",
+        games_redeem_success: "1 aylıq Pro açıldı 🎉",
+        games_points_earned: "{points} puan qazandın!",
+        games_points_limit: "Günlük puan limiti doldu. Sabah yenə yoxla.",
         games_leaderboard_title: "Xal liderləri",
         games_leaderboard_note: "Ən çox xal toplayan uşaqlar.",
         games_leaderboard_name: "Uşaq",
@@ -2222,6 +2355,26 @@ const ui = {
         fruit_orange: "Portağal",
         fruit_grapes: "Üzüm",
         fruit_watermelon: "Qarpız",
+        request_title: "Xahiş et",
+        request_subtitle: "Nəyə ehtiyacınız olduğunu yazın, biz hazırlayaq.",
+        request_reason: "Səbəb",
+        request_video: "YouTube kanalından videolar xahiş et",
+        request_partnership: "Əməkdaşlıq",
+        request_feature: "Yeni funksiya",
+        request_pro: "1 ay pulsuz Pro",
+        request_details_label: "Detallar",
+        request_details_placeholder: "Kanal adı, link və ya istədiyiniz mövzu",
+        request_details_video: "Kanal adı, linklər və istədiyiniz mövzular",
+        request_details_partnership: "Kim olduğunuz, brend/kanal, necə əməkdaşlıq edək",
+        request_details_feature: "Lazım olan funksiyanı təsvir edin",
+        request_details_pro: "Niyə 1 ay Pro lazım olduğunu yazın",
+        request_details_default: "Nəyə ehtiyacınız olduğunu yazın",
+        request_contact_label: "Sizə necə çatmaq olar",
+        request_contact_placeholder: "Email və ya telefon",
+        request_submit: "Göndər",
+        request_success: "Xahiş göndərildi. Geri dönüş edəcəyik.",
+        request_error: "Göndərmək olmadı. Yenidən cəhd edin.",
+        request_required: "Zəhmət olmasa, bütün sahələri doldurun.",
         ui_language_label: "Dil",
         sidebar_subscribed: "Abunələr",
         sidebar_channels: "Kanallar",
@@ -2251,6 +2404,8 @@ const ui = {
         feed_load_hint: "Daha çox video aşağıda",
         feed_load_more: "Daha çox",
         feed_viral: "Viral",
+        related_title: "Oxşar videolar",
+        related_empty: "Hələ oxşar video yoxdur.",
         channel_title: "Kanal",
         games_preview_note: "Oyunu xüsusi səhifəsində açmaq üçün toxunun.",
         games_back: "Oyunlara qayıt",
@@ -2365,7 +2520,11 @@ const ui = {
         settings_watch_limit: "Gündəlik izləmə limiti (saat)",
         settings_password: "Şifrə ilə təsdiqlə",
         settings_save: "Ayarları yadda saxla",
-        settings_history: "Bugünkü tarixçə",
+        settings_history_title: "Tarixçə",
+        history_range_label: "Tarixçə aralığı",
+        history_range_today: "Bugün",
+        history_range_week: "Bu həftə",
+        history_range_month: "Bu ay",
         report_title: "Videonu şikayət et",
         report_reason: "Səbəb",
         report_placeholder: "Problemi yazın (min 5 simvol)",
@@ -2521,7 +2680,7 @@ const ui = {
         message_stats_unavailable: "Statistika əlçatan deyil.",
         message_settings_save_failed: "Ayarlar yadda saxlanmadı.",
         message_no_topics: "Mövzu tapılmadı.",
-        message_no_history: "Bu gün baxış yoxdur.",
+        message_no_history: "Bu aralıqda baxış yoxdur.",
         message_report_failed: "Şikayət göndərilmədi.",
         message_no_video_selected: "Video seçilməyib.",
         message_reason_short: "Səbəb ən az 5 simvol olmalıdır.",
@@ -2609,6 +2768,15 @@ const ui = {
         games_math_status_skip: "تم التخطي. الإجابة: {answer}",
         games_math_status_done: "رائع! {correct}/{total} صحيح.",
         games_math_pick_level: "اختر مستوى",
+        games_points_label: "النقاط",
+        games_points_note: "اربح الألعاب لتحصل على وقت Pro.",
+        games_redeem: "احصل على Pro لمدة شهر",
+        games_redeem_cost: "استبدل بـ {points} نقطة.",
+        games_redeem_need_signin: "سجّل الدخول لتجميع النقاط.",
+        games_redeem_need_points: "تحتاج {points} نقطة إضافية.",
+        games_redeem_success: "تم تفعيل Pro لمدة شهر 🎉",
+        games_points_earned: "لقد ربحت {points} نقطة!",
+        games_points_limit: "تم الوصول للحد اليومي للنقاط. جرّب غداً.",
         games_leaderboard_title: "لوحة المتصدرين",
         games_leaderboard_note: "الأطفال الأعلى نقاطًا.",
         games_leaderboard_name: "الطفل",
@@ -2624,6 +2792,26 @@ const ui = {
         fruit_orange: "برتقال",
         fruit_grapes: "عنب",
         fruit_watermelon: "بطيخ",
+        request_title: "أرسل طلبًا",
+        request_subtitle: "أخبرنا بما تحتاجه وسنجهزه.",
+        request_reason: "السبب",
+        request_video: "طلب فيديوهات من قناة يوتيوب",
+        request_partnership: "شراكة",
+        request_feature: "ميزة جديدة",
+        request_pro: "برو مجاني لشهر",
+        request_details_label: "التفاصيل",
+        request_details_placeholder: "اسم القناة أو الرابط أو ما تريده",
+        request_details_video: "اسم القناة والروابط والموضوعات المطلوبة",
+        request_details_partnership: "من أنت، العلامة/القناة، وكيف نتعاون",
+        request_details_feature: "صف الميزة المطلوبة",
+        request_details_pro: "لماذا تحتاج برو لمدة شهر",
+        request_details_default: "أخبرنا بما تحتاجه",
+        request_contact_label: "طريقة التواصل",
+        request_contact_placeholder: "البريد الإلكتروني أو الهاتف",
+        request_submit: "إرسال",
+        request_success: "تم إرسال الطلب. سنعود إليك.",
+        request_error: "تعذر الإرسال. حاول مرة أخرى.",
+        request_required: "يرجى تعبئة جميع الحقول.",
         ui_language_label: "اللغة",
         sidebar_subscribed: "المشتركات",
         sidebar_channels: "القنوات",
@@ -2653,6 +2841,8 @@ const ui = {
         feed_load_hint: "المزيد من الفيديوهات بالأسفل",
         feed_load_more: "تحميل المزيد",
         feed_viral: "شائع",
+        related_title: "فيديوهات مشابهة",
+        related_empty: "لا توجد فيديوهات مشابهة بعد.",
         channel_title: "القناة",
         games_preview_note: "اضغط لعبة لفتح صفحتها الخاصة.",
         games_back: "العودة إلى الألعاب",
@@ -2767,7 +2957,11 @@ const ui = {
         settings_watch_limit: "حد المشاهدة اليومي (بالساعات)",
         settings_password: "التأكيد بكلمة المرور",
         settings_save: "حفظ الإعدادات",
-        settings_history: "سجل اليوم",
+        settings_history_title: "السجل",
+        history_range_label: "نطاق السجل",
+        history_range_today: "اليوم",
+        history_range_week: "هذا الأسبوع",
+        history_range_month: "هذا الشهر",
         report_title: "الإبلاغ عن فيديو",
         report_reason: "السبب",
         report_placeholder: "اكتب المشكلة (حد أدنى 5 أحرف)",
@@ -2923,7 +3117,7 @@ const ui = {
         message_stats_unavailable: "الإحصاءات غير متاحة.",
         message_settings_save_failed: "تعذر حفظ الإعدادات.",
         message_no_topics: "لم يتم العثور على مواضيع.",
-        message_no_history: "لا توجد مشاهدة اليوم.",
+        message_no_history: "لا توجد مشاهدة في هذا النطاق.",
         message_report_failed: "فشل إرسال البلاغ.",
         message_no_video_selected: "لم يتم اختيار فيديو.",
         message_reason_short: "يجب أن يكون السبب 5 أحرف على الأقل.",
@@ -2970,6 +3164,9 @@ const ui = {
       updateUploadReligionDetails();
       renderSettingsReligions(settingsSelectedReligions);
       syncGamesCopy();
+      if (ui.requestReason) {
+        updateRequestFields(ui.requestReason.value);
+      }
     }
 
     function setUiLanguage(lang) {
@@ -2996,7 +3193,7 @@ const ui = {
       }
       const extra = suffix ? "<span class=\"count\">" + suffix + "</span>" : "";
       const label = labelKey ? t(labelKey) : "";
-      const showLabel = button.closest(".action-drawer");
+      const showLabel = button.closest(".action-drawer") || button.classList.contains("show-label");
       const text = showLabel && label ? "<span class=\"drawer-label\">" + escapeHtml(label) + "</span>" : "";
       button.innerHTML = icon + extra + text;
       if (labelKey) {
@@ -3199,6 +3396,7 @@ const ui = {
     let pageOffset = 0;
     const pageLimit = 32;
     const searchLimit = 20;
+    const viralLimit = 8;
     let hasMore = true;
     let isFetching = false;
     let subscriptions = [];
@@ -3210,6 +3408,10 @@ const ui = {
     let searchOffset = 0;
     let searchHasMore = true;
     let searchFetching = false;
+    let viralOffset = 0;
+    let viralHasMore = true;
+    let viralFetching = false;
+    let viralObserver = null;
     let searchFilters = {
       day: "all",
       languages: [],
@@ -3304,7 +3506,8 @@ const ui = {
       activePointerId: null,
       skipClick: false,
       statusKey: "games_fruit_status_ready",
-      awarded: false
+      awarded: false,
+      winTimeoutId: null
     };
 
     const memoryGameState = {
@@ -3314,7 +3517,8 @@ const ui = {
       locked: false,
       statusKey: "games_memory_status_ready",
       timeoutId: null,
-      awarded: false
+      awarded: false,
+      winTimeoutId: null
     };
 
     const findGameState = {
@@ -3322,11 +3526,13 @@ const ui = {
       cards: [],
       solved: false,
       statusKey: "games_find_status_ready",
-      awarded: false
+      awarded: false,
+      winTimeoutId: null
     };
 
     const mathGameState = {
       level: "",
+      lastLevel: "",
       question: "",
       answer: 0,
       statusKey: "games_math_status_choose",
@@ -3425,17 +3631,14 @@ const ui = {
 
     function updateRequestFields(reason) {
       if (!ui.requestDetails) return;
-      if (reason === "video") {
-        ui.requestDetails.placeholder = "Channel name, links, and topics you want";
-      } else if (reason === "partnership") {
-        ui.requestDetails.placeholder = "Who you are, brand/channel, how we collaborate";
-      } else if (reason === "feature") {
-        ui.requestDetails.placeholder = "Describe the feature you need";
-      } else if (reason === "pro") {
-        ui.requestDetails.placeholder = "Why you need Pro for a month";
-      } else {
-        ui.requestDetails.placeholder = "Tell us what you need";
-      }
+      const placeholderMap = {
+        video: "request_details_video",
+        partnership: "request_details_partnership",
+        feature: "request_details_feature",
+        pro: "request_details_pro"
+      };
+      const key = placeholderMap[reason] || "request_details_default";
+      ui.requestDetails.placeholder = t(key);
     }
 
     function collectSelectValues(select) {
@@ -3827,6 +4030,10 @@ const ui = {
     }
 
     function buildFruitBoard() {
+      if (fruitGameState.winTimeoutId) {
+        clearTimeout(fruitGameState.winTimeoutId);
+        fruitGameState.winTimeoutId = null;
+      }
       const preset = FRUIT_PRESETS[Math.floor(Math.random() * FRUIT_PRESETS.length)];
       fruitGameState.grid = preset.slice();
       fruitGameState.selected = null;
@@ -3927,6 +4134,13 @@ const ui = {
         if (!fruitGameState.awarded) {
           fruitGameState.awarded = true;
           awardGameWin("fruit");
+        }
+        if (!fruitGameState.winTimeoutId) {
+          fruitGameState.winTimeoutId = window.setTimeout(() => {
+            fruitGameState.winTimeoutId = null;
+            buildFruitBoard();
+            renderFruitGrid();
+          }, 1200);
         }
       } else {
         swapFruit(a, b);
@@ -4064,6 +4278,10 @@ const ui = {
         clearTimeout(memoryGameState.timeoutId);
         memoryGameState.timeoutId = null;
       }
+      if (memoryGameState.winTimeoutId) {
+        clearTimeout(memoryGameState.winTimeoutId);
+        memoryGameState.winTimeoutId = null;
+      }
       memoryGameState.cards = shuffleArray(MEMORY_FRUITS.concat(MEMORY_FRUITS));
       memoryGameState.revealed = [];
       memoryGameState.matched = new Set();
@@ -4099,6 +4317,12 @@ const ui = {
           if (!memoryGameState.awarded) {
             memoryGameState.awarded = true;
             awardGameWin("memory");
+          }
+          if (!memoryGameState.winTimeoutId) {
+            memoryGameState.winTimeoutId = window.setTimeout(() => {
+              memoryGameState.winTimeoutId = null;
+              buildMemoryBoard();
+            }, 1400);
           }
         } else {
           memoryGameState.statusKey = "games_memory_status_match";
@@ -4151,6 +4375,10 @@ const ui = {
     }
 
     function buildFindRound() {
+      if (findGameState.winTimeoutId) {
+        clearTimeout(findGameState.winTimeoutId);
+        findGameState.winTimeoutId = null;
+      }
       const target = FIND_FRUITS[Math.floor(Math.random() * FIND_FRUITS.length)];
       const cards = [target];
       while (cards.length < 6) {
@@ -4176,6 +4404,12 @@ const ui = {
         if (!findGameState.awarded) {
           findGameState.awarded = true;
           awardGameWin("find");
+        }
+        if (!findGameState.winTimeoutId) {
+          findGameState.winTimeoutId = window.setTimeout(() => {
+            findGameState.winTimeoutId = null;
+            buildFindRound();
+          }, 1000);
         }
       } else {
         findGameState.statusKey = "games_find_status_try";
@@ -4324,6 +4558,7 @@ const ui = {
           button.classList.toggle("active", button.dataset.mathLevel === level);
         });
       }
+      mathGameState.lastLevel = level;
       startMathRound(level);
     }
 
@@ -4386,7 +4621,13 @@ const ui = {
         ui.gamesMathAnswer.value = "";
       }
       updateMathProgress();
+      const nextLevel = mathGameState.level || mathGameState.lastLevel;
       mathGameState.level = "";
+      if (nextLevel) {
+        window.setTimeout(() => {
+          startMathRound(nextLevel);
+        }, 1400);
+      }
     }
 
     function checkMathAnswer() {
@@ -4611,6 +4852,9 @@ const ui = {
       toggleView(ui.channelView, showChannel);
       toggleView(ui.searchView, showSearch);
       toggleView(ui.channelsPage, showChannels);
+      if (ui.relatedSection) {
+        toggleView(ui.relatedSection, showWatch);
+      }
       toggleView(ui.adminOverviewPage, showAdminOverview);
       toggleView(ui.adminUsersPage, showAdminUsers);
       toggleView(ui.adminChannelsPage, showAdminChannels);
@@ -4820,6 +5064,7 @@ const ui = {
 
     function lockApp(message) {
       document.body.classList.add("locked");
+      sessionStorage.removeItem("loginSplashShown");
       if (message) {
         ui.authMessage.textContent = message;
       }
@@ -4827,6 +5072,19 @@ const ui = {
 
     function unlockApp() {
       document.body.classList.remove("locked");
+    }
+
+    function triggerLoginSplash() {
+      if (!ui.loginSplash || sessionStorage.getItem("loginSplashShown")) {
+        return;
+      }
+      sessionStorage.setItem("loginSplashShown", "true");
+      ui.loginSplash.classList.add("active");
+      ui.loginSplash.setAttribute("aria-hidden", "false");
+      window.setTimeout(() => {
+        ui.loginSplash.classList.remove("active");
+        ui.loginSplash.setAttribute("aria-hidden", "true");
+      }, 1100);
     }
 
     const API_BASE = window.__API_BASE__ || "";
@@ -5179,6 +5437,10 @@ const ui = {
         ui.channelName.textContent = "";
         ui.channelSlogan.textContent = "";
         setAvatar(ui.channelAvatar, "");
+        if (ui.relatedSection) {
+          ui.relatedSection.classList.add("hidden");
+          ui.relatedSection.setAttribute("aria-hidden", "true");
+        }
         return;
       }
       const durationLabel = video.duration ? formatTime(video.duration) : "--:--";
@@ -5286,6 +5548,7 @@ const ui = {
       updateNextUp();
       updateHeartButton();
       updateVideoMeta(video);
+      fetchRelatedVideos(video);
       if (player.loadVideoById) {
         player.loadVideoById(video.youtube_id);
         setTimeout(setPreferredQuality, 120);
@@ -5404,6 +5667,50 @@ const ui = {
       list.forEach((video) => {
         container.appendChild(buildVideoCard(video, onSelect));
       });
+    }
+
+    function renderRelatedVideos(list) {
+      if (!ui.relatedSection || !ui.relatedGrid || !ui.relatedEmpty) {
+        return;
+      }
+      ui.relatedGrid.innerHTML = "";
+      ui.relatedSection.classList.remove("hidden");
+      ui.relatedSection.setAttribute("aria-hidden", "false");
+      if (!list.length) {
+        ui.relatedEmpty.classList.remove("hidden");
+        return;
+      }
+      ui.relatedEmpty.classList.add("hidden");
+      list.forEach((video) => {
+        const card = buildVideoCard(video, (item) => {
+          openVideoPage(item);
+        });
+        ui.relatedGrid.appendChild(card);
+      });
+    }
+
+    async function fetchRelatedVideos(video) {
+      if (!video || !ui.relatedGrid) {
+        return;
+      }
+      if (!currentUser) {
+        renderRelatedVideos([]);
+        return;
+      }
+      ui.relatedGrid.innerHTML = t("status_loading");
+      if (ui.relatedEmpty) {
+        ui.relatedEmpty.classList.add("hidden");
+      }
+      const params = new URLSearchParams();
+      params.set("videoId", String(video.id));
+      params.set("limit", "8");
+      const res = await apiFetch("/api/related?" + params.toString());
+      if (!res.ok) {
+        renderRelatedVideos([]);
+        return;
+      }
+      const data = await res.json();
+      renderRelatedVideos(data.videos || []);
     }
 
     function renderRecommendations(list, append = false) {
@@ -5642,10 +5949,12 @@ const ui = {
       if (query) {
         params.set("search", query);
       }
+      const useRecommendations = !query && feedFilter !== "subscribed";
       if (feedFilter === "subscribed") {
         params.set("subscribed", "1");
       }
-      const res = await apiFetch("/api/videos?" + params.toString());
+      const endpoint = useRecommendations ? "/api/recommendations" : "/api/videos";
+      const res = await apiFetch(endpoint + "?" + params.toString());
       const data = await res.json();
       if (res.status === 401) {
         isFetching = false;
@@ -5798,7 +6107,7 @@ const ui = {
       ui.searchFallbackRecommended.innerHTML = t("status_loading");
       ui.searchFallbackViral.innerHTML = t("status_loading");
       const [recRes, viralRes] = await Promise.all([
-        apiFetch("/api/videos?limit=8&offset=0"),
+        apiFetch("/api/recommendations?limit=8&offset=0"),
         apiFetch("/api/viral?limit=8")
       ]);
       if (recRes.ok) {
@@ -5819,19 +6128,69 @@ const ui = {
       }
     }
 
-    async function fetchViral() {
+    async function fetchViral(reset = false) {
       if (!currentUser || !ui.viralGrid) {
         return;
       }
-      const res = await apiFetch("/api/viral?limit=8");
-      const data = await res.json();
-      if (!res.ok) {
-        ui.viralGrid.textContent = t("message_fetch_viral_failed");
+      if (viralFetching) {
         return;
       }
-      renderVideoGrid(data.videos || [], ui.viralGrid, false, t("message_no_viral"), (video) => {
+      viralFetching = true;
+      if (reset) {
+        viralOffset = 0;
+        viralHasMore = true;
+        ui.viralGrid.innerHTML = t("status_loading");
+      }
+      const params = new URLSearchParams();
+      params.set("limit", String(viralLimit));
+      params.set("offset", String(viralOffset));
+      const res = await apiFetch("/api/viral?" + params.toString());
+      const data = await res.json();
+      if (!res.ok) {
+        if (reset) {
+          ui.viralGrid.textContent = t("message_fetch_viral_failed");
+        }
+        viralFetching = false;
+        return;
+      }
+      const batch = data.videos || [];
+      viralHasMore = Boolean(data.hasMore);
+      renderVideoGrid(batch, ui.viralGrid, !reset, t("message_no_viral"), (video) => {
         openVideoPage(video);
       });
+      if (ui.viralLoadMore) {
+        ui.viralLoadMore.style.display = viralHasMore ? "inline-flex" : "none";
+        if (ui.viralLoadMore.parentElement) {
+          ui.viralLoadMore.parentElement.style.display =
+            viralHasMore || batch.length ? "flex" : "none";
+        }
+      }
+      viralOffset += batch.length;
+      viralFetching = false;
+    }
+
+    function setupViralObserver() {
+      if (!ui.viralLoadMore || typeof IntersectionObserver === "undefined") {
+        return;
+      }
+      if (viralObserver) {
+        viralObserver.disconnect();
+      }
+      viralObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (
+              entry.isIntersecting &&
+              document.body.getAttribute("data-view") === "viral" &&
+              viralHasMore
+            ) {
+              fetchViral(false);
+            }
+          });
+        },
+        { root: null, rootMargin: "200px" }
+      );
+      viralObserver.observe(ui.viralLoadMore);
     }
 
     async function sendRequest(event) {
@@ -6066,6 +6425,7 @@ const ui = {
       fetchLeaderboard();
       fetchSubscriptions();
       unlockApp();
+      triggerLoginSplash();
       handleRoute();
       refreshNotificationBadge();
     }
@@ -7335,7 +7695,10 @@ const ui = {
       await fetchSettingsChannels("");
       syncLanguageAllState();
       renderSettingsReligions(settingsSelectedReligions);
-      await loadHistory();
+      if (ui.historyRange) {
+        ui.historyRange.value = "today";
+      }
+      await loadHistory("today");
       openModal(ui.settingsModal);
     }
 
@@ -7603,8 +7966,13 @@ const ui = {
       languageControlsReady = true;
     }
 
-    async function loadHistory() {
-      const res = await apiFetch("/api/history");
+    async function loadHistory(rangeOverride) {
+      const range = rangeOverride || (ui.historyRange ? ui.historyRange.value : "today");
+      const params = new URLSearchParams();
+      if (range && range !== "today") {
+        params.set("range", range);
+      }
+      const res = await apiFetch("/api/history" + (params.toString() ? "?" + params.toString() : ""));
       const data = await res.json();
       ui.historyList.innerHTML = "";
       if (!res.ok) {
@@ -7618,6 +7986,11 @@ const ui = {
       data.history.forEach((item) => {
         const row = document.createElement("div");
         row.className = "channel";
+        const watchedAt = new Date(item.watched_at);
+        const timeLabel =
+          range && range !== "today"
+            ? watchedAt.toLocaleDateString() + " " + watchedAt.toLocaleTimeString()
+            : watchedAt.toLocaleTimeString();
         row.innerHTML =
           "<span class=\"avatar\" aria-hidden=\"true\"></span>" +
           "<div><div class=\"channel-name\">" +
@@ -7625,7 +7998,7 @@ const ui = {
           "</div><div class=\"card-meta\">" +
           escapeHtml(item.channel) +
           " · " +
-          new Date(item.watched_at).toLocaleTimeString() +
+          timeLabel +
           "</div></div>";
         const actions = document.createElement("div");
         actions.className = "channel-actions";
@@ -7641,7 +8014,7 @@ const ui = {
         deleteBtn.addEventListener("click", async () => {
           const del = await apiFetch("/api/history/" + item.id, { method: "DELETE" });
           if (del.ok) {
-            loadHistory();
+            loadHistory(range);
           }
         });
         actions.appendChild(playBtn);
@@ -7900,6 +8273,20 @@ const ui = {
       }
     }
 
+    function handlePlayerShellClick(event) {
+      const target = event.target;
+      if (!target) {
+        return;
+      }
+      if (target.closest(".control-dock") || target.closest(".control-dock-toggle")) {
+        return;
+      }
+      if (target.closest("button") || target.closest("input") || target.closest("select") || target.closest("a")) {
+        return;
+      }
+      togglePlay();
+    }
+
     function toggleMute() {
       if (!player) {
         return;
@@ -8135,8 +8522,13 @@ const ui = {
       ui.requestReason.addEventListener("change", (event) => updateRequestFields(event.target.value));
       updateRequestFields(ui.requestReason.value);
     }
+    if (ui.historyRange) {
+      ui.historyRange.addEventListener("change", () => {
+        loadHistory(ui.historyRange.value);
+      });
+    }
     if (ui.playerShell) {
-      ui.playerShell.addEventListener("dblclick", togglePlay);
+      ui.playerShell.addEventListener("click", handlePlayerShellClick);
     }
     if (ui.fullscreenExitBtn) {
       ui.fullscreenExitBtn.addEventListener("click", toggleFullscreen);
@@ -8530,6 +8922,14 @@ const ui = {
         fetchVideos(ui.searchInput.value.trim(), false);
       }
     });
+    if (ui.viralLoadMore) {
+      ui.viralLoadMore.addEventListener("click", () => {
+        if (viralHasMore) {
+          fetchViral(false);
+        }
+      });
+      setupViralObserver();
+    }
     ui.searchLoadMore.addEventListener("click", () => {
       if (searchHasMore) {
         fetchSearchResults(searchQuery, false);
@@ -8593,6 +8993,9 @@ const ui = {
     if (ui.errorHome) {
       ui.errorHome.addEventListener("click", () => navigateTo("/"));
     }
+    if (ui.errorLogo) {
+      ui.errorLogo.addEventListener("click", () => navigateTo("/"));
+    }
 
     function navigateTo(path, options = {}) {
       const target = path || "/";
@@ -8622,7 +9025,7 @@ const ui = {
       if (path === "/viral") {
         navFocus = "viral";
         setPageView("viral");
-        fetchViral();
+        fetchViral(true);
         return;
       }
       if (path === "/games") {
