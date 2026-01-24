@@ -3556,10 +3556,10 @@ const ui = {
           "')\"></div>" +
           "<div class=\"ad-copy\">" +
           "<div class=\"ad-title\">" +
-          escapeHtml(ad.title || t(\"label_update\")) +
+          escapeHtml(ad.title || t("label_update")) +
           "</div>" +
           "<div class=\"card-meta\">" +
-          escapeHtml(ad.slot || \"\") +
+          escapeHtml(ad.slot || "") +
           "</div></div>";
         container.appendChild(card);
       });

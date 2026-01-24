@@ -77,12 +77,12 @@
         <div class="lang-select">
           <label class="sr-only" for="ui-language" data-i18n="ui_language_label">Language</label>
           <select id="ui-language" name="ui-language" aria-label="App language" data-i18n-aria="ui_language_label">
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-            <option value="zh">中文</option>
-            <option value="tr">Türkçe</option>
-            <option value="az">Azərbaycan</option>
-            <option value="ar">العربية</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="az">🇦🇿 Azərbaycan</option>
+            <option value="ar">🇸🇦 العربية</option>
           </select>
         </div>
         <button class="pill icon-button" id="theme-toggle" type="button" aria-label="Dark mode"></button>
@@ -373,12 +373,12 @@
             <div class="lang-select">
               <label class="sr-only" for="error-language" data-i18n="ui_language_label">Language</label>
               <select id="error-language" name="error-language" aria-label="App language" data-i18n-aria="ui_language_label">
-                <option value="en">English</option>
-                <option value="ru">Русский</option>
-                <option value="zh">中文</option>
-                <option value="tr">Türkçe</option>
-                <option value="az">Azərbaycan</option>
-                <option value="ar">العربية</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="ru">🇷🇺 Русский</option>
+                <option value="zh">🇨🇳 中文</option>
+                <option value="tr">🇹🇷 Türkçe</option>
+                <option value="az">🇦🇿 Azərbaycan</option>
+                <option value="ar">🇸🇦 العربية</option>
               </select>
             </div>
           </div>
@@ -497,7 +497,7 @@
                 <div class="section-actions">
                   <span class="section-hint" data-i18n="admin_ads_hint">Place ads in the games section.</span>
                 </div>
-                <form class="form-grid" id="admin-ads-form">
+                <form class="form-grid" id="admin-ads-form" method="post" action="#">
                   <label for="admin-ads-slot" data-i18n="admin_ads_slot">Ad slot</label>
                   <select id="admin-ads-slot" name="admin-ads-slot">
                     <option value="games" data-i18n="admin_ads_slot_games">Games</option>
@@ -558,7 +558,7 @@
             <h2 data-i18n="request_title">Xahiş et</h2>
             <p class="card-meta" data-i18n="request_subtitle">Let us know what you need.</p>
           </div>
-          <form class="request-card" id="request-form">
+          <form class="request-card" id="request-form" method="post" action="#">
             <div class="form-grid">
               <label for="request-reason" data-i18n="request_reason">Reason</label>
               <select id="request-reason" name="request-reason" required>
@@ -765,17 +765,17 @@
       <div class="lang-select">
         <label class="sr-only" for="auth-language" data-i18n="ui_language_label">Language</label>
         <select id="auth-language" name="auth-language" aria-label="App language" data-i18n-aria="ui_language_label">
-          <option value="en">English</option>
-          <option value="ru">Русский</option>
-          <option value="zh">中文</option>
-          <option value="tr">Türkçe</option>
-          <option value="az">Azərbaycan</option>
-          <option value="ar">العربية</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="ru">🇷🇺 Русский</option>
+          <option value="zh">🇨🇳 中文</option>
+          <option value="tr">🇹🇷 Türkçe</option>
+          <option value="az">🇦🇿 Azərbaycan</option>
+          <option value="ar">🇸🇦 العربية</option>
         </select>
       </div>
       <h2 data-i18n="auth_welcome">Welcome to Sevimli Aile</h2>
       <p class="card-meta" data-i18n="auth_subtitle">Log in or create an account to start watching.</p>
-      <form class="form-grid" id="login-form">
+      <form class="form-grid" id="login-form" method="post" action="#">
         <label for="login-email" data-i18n="auth_email">Email</label>
         <input id="login-email" name="login-email" type="email" autocomplete="email" required>
         <label for="login-password" data-i18n="auth_password">Password</label>
@@ -784,7 +784,7 @@
           <button class="primary" type="submit" data-i18n="auth_sign_in">Sign in</button>
         </div>
       </form>
-      <form class="form-grid" id="register-form">
+      <form class="form-grid" id="register-form" method="post" action="#">
         <label for="register-email" data-i18n="auth_new_email">New email</label>
         <input id="register-email" name="register-email" type="email" autocomplete="email" required>
         <label for="register-password" data-i18n="auth_new_password">New password</label>
@@ -802,7 +802,7 @@
   <div class="modal" id="upload-modal" aria-hidden="true">
     <div class="modal-card">
       <h2 data-i18n="upload_title">Add YouTube video</h2>
-      <form class="form-grid" id="upload-form">
+      <form class="form-grid" id="upload-form" method="post" action="#">
         <label for="upload-url" data-i18n="upload_url">YouTube URL</label>
         <input id="upload-url" name="upload-url" type="url" placeholder="https://www.youtube.com/watch?v=..." data-i18n-placeholder="upload_url_placeholder" required>
         <div id="upload-metadata" class="form-grid">
@@ -918,7 +918,7 @@
   <div class="modal" id="studio-modal" aria-hidden="true">
     <div class="modal-card">
       <h2 data-i18n="studio_title">Studio</h2>
-      <form class="form-grid" id="profile-form">
+      <form class="form-grid" id="profile-form" method="post" action="#">
         <div class="card-meta" data-i18n="studio_profile">Profile</div>
         <label for="profile-name" data-i18n="studio_name">Display name</label>
         <input id="profile-name" name="profile-name" type="text" placeholder="Kid name" data-i18n-placeholder="studio_name_placeholder">
@@ -956,7 +956,7 @@
       <div class="settings-layout">
         <div class="settings-main">
           <h2 data-i18n="settings_title">Parent settings</h2>
-          <form class="form-grid" id="settings-form">
+          <form class="form-grid" id="settings-form" method="post" action="#">
             <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
             <div class="settings-chips">
               <label class="pill"><input type="checkbox" id="settings-language-all" value="all"> <span data-i18n="settings_language_all">All</span></label>
@@ -1033,7 +1033,7 @@
     <div class="modal-card settings-card">
       <h2 data-i18n="settings_unlock_title">Unlock settings</h2>
       <p class="card-meta" data-i18n="settings_unlock_copy">Enter your password to open parent settings.</p>
-      <form class="form-grid" id="settings-auth-form">
+      <form class="form-grid" id="settings-auth-form" method="post" action="#">
         <label for="settings-auth-password" data-i18n="settings_password">Confirm with your password</label>
         <input id="settings-auth-password" name="settings-auth-password" type="password" autocomplete="current-password" required>
         <div class="form-actions">
@@ -1048,7 +1048,7 @@
   <div class="modal" id="report-modal" aria-hidden="true">
     <div class="modal-card">
       <h2 data-i18n="report_title">Report video</h2>
-      <form class="form-grid" id="report-form">
+      <form class="form-grid" id="report-form" method="post" action="#">
         <label for="report-reason" data-i18n="report_reason">Reason</label>
         <textarea id="report-reason" name="report-reason" rows="4" placeholder="Tell us what is wrong (min 5 characters)" data-i18n-placeholder="report_placeholder" required></textarea>
         <div class="form-actions">
@@ -1063,7 +1063,7 @@
   <div class="modal" id="signout-modal" aria-hidden="true">
     <div class="modal-card">
       <h2 data-i18n="signout_title">Confirm sign out</h2>
-      <form class="form-grid" id="signout-form">
+      <form class="form-grid" id="signout-form" method="post" action="#">
         <label for="signout-password" data-i18n="auth_password">Password</label>
         <input id="signout-password" name="signout-password" type="password" autocomplete="current-password" required>
         <div class="form-actions">
