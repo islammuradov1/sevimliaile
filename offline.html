@@ -142,6 +142,8 @@
         font-weight: 700;
         color: #5a2b2b;
         width: fit-content;
+        font-size: 1.2rem;
+        justify-self: center;
       }
 
       .game-grid {
@@ -225,6 +227,10 @@
         font-weight: 700;
         color: var(--muted);
         min-height: 24px;
+      }
+
+      .game-status.success {
+        color: #1f9d5c;
       }
 
       .game-actions {
@@ -327,7 +333,7 @@
             game_instruction: "Tap the fruit we ask for.",
             game_prompt: "Find {fruit}",
             game_status_ready: "Tap the right fruit 👆",
-            game_status_win: "Yeehoo! +1 point 🎉 Total: {score}",
+            game_status_win: "RIGHT! ✅ +1 point 🎉 Total: {score}",
             game_status_try: "Oops, try again ✨",
             game_next: "Next round",
             fruit_apple: "Apple 🍎",
@@ -347,7 +353,7 @@
             game_instruction: "Нажмите на фрукт, который мы попросим.",
             game_prompt: "Найди {fruit}",
             game_status_ready: "Нажмите правильный фрукт 👆",
-            game_status_win: "Ура! +1 очко 🎉 Всего: {score}",
+            game_status_win: "Верно! ✅ +1 очко 🎉 Всего: {score}",
             game_status_try: "Ой, попробуйте снова ✨",
             game_next: "Следующий раунд",
             fruit_apple: "Яблоко 🍎",
@@ -367,7 +373,7 @@
             game_instruction: "点击我们要找的水果。",
             game_prompt: "找到 {fruit}",
             game_status_ready: "点击正确的水果 👆",
-            game_status_win: "太棒了！+1 分 🎉 总分：{score}",
+            game_status_win: "正确！✅ +1 分 🎉 总分：{score}",
             game_status_try: "哎呀，再试一次 ✨",
             game_next: "下一轮",
             fruit_apple: "苹果 🍎",
@@ -387,7 +393,7 @@
             game_instruction: "İstediğimiz meyveyi seç.",
             game_prompt: "{fruit} bul",
             game_status_ready: "Doğru meyveyi seç 👆",
-            game_status_win: "Yeehoo! +1 puan 🎉 Toplam: {score}",
+            game_status_win: "Doğru! ✅ +1 puan 🎉 Toplam: {score}",
             game_status_try: "Olmadı, tekrar dene ✨",
             game_next: "Yeni tur",
             fruit_apple: "Elma 🍎",
@@ -407,7 +413,7 @@
             game_instruction: "İstədiyimiz meyvəni seç.",
             game_prompt: "{fruit} tap",
             game_status_ready: "Düzgün meyvəni seç 👆",
-            game_status_win: "Yeehoo! +1 xal 🎉 Cəmi: {score}",
+            game_status_win: "Düzdür! ✅ +1 xal 🎉 Cəmi: {score}",
             game_status_try: "Olmadı, yenə dene ✨",
             game_next: "Növbəti tur",
             fruit_apple: "Alma 🍎",
@@ -427,7 +433,7 @@
             game_instruction: "اضغط على الفاكهة التي نطلبها.",
             game_prompt: "اعثر على {fruit}",
             game_status_ready: "اضغط على الفاكهة الصحيحة 👆",
-            game_status_win: "ياي! +1 نقطة 🎉 المجموع: {score}",
+            game_status_win: "صحيح! ✅ +1 نقطة 🎉 المجموع: {score}",
             game_status_try: "اوه، حاول مرة اخرى ✨",
             game_next: "جولة جديدة",
             fruit_apple: "تفاح 🍎",
@@ -519,11 +525,34 @@
           state.solved = false;
           updatePrompt();
           renderGrid();
-          els.gameStatus.textContent = t("game_status_ready");
+          setStatus(t("game_status_ready"), false);
         }
 
         function updatePrompt() {
           els.gamePrompt.textContent = t("game_prompt").replace("{fruit}", t("fruit_" + state.target));
+        }
+
+        function playSuccessSound() {
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.45);
+            osc.onended = () => ctx.close();
+          } catch (err) {}
+        }
+
+        function setStatus(text, isSuccess) {
+          els.gameStatus.textContent = text;
+          els.gameStatus.classList.toggle("success", Boolean(isSuccess));
         }
 
         function handlePick(fruit, button) {
@@ -534,10 +563,11 @@
             state.solved = true;
             state.score += 1;
             button.classList.add("correct");
-            els.gameStatus.textContent = t("game_status_win").replace("{score}", state.score);
-            setTimeout(buildRound, 800);
+            setStatus(t("game_status_win").replace("{score}", state.score), true);
+            playSuccessSound();
+            setTimeout(buildRound, 1200);
           } else {
-            els.gameStatus.textContent = t("game_status_try");
+            setStatus(t("game_status_try"), false);
           }
         }
 

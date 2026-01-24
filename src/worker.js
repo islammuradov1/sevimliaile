@@ -789,7 +789,7 @@ export default {
     if (path === "/leaderboard" && request.method === "GET") {
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
       const result = await env.DB.prepare(
-        "SELECT id, display_name, email, points, created_at FROM users WHERE role != 'admin' ORDER BY points DESC, created_at ASC LIMIT ?"
+        "SELECT id, display_name, email, avatar_url, points, created_at FROM users WHERE role != 'admin' ORDER BY points DESC, created_at ASC LIMIT ?"
       )
         .bind(limit)
         .all();
@@ -798,6 +798,7 @@ export default {
         display_name: row.display_name || "",
         name: row.display_name || (row.email ? row.email.split("@")[0] : ""),
         email: row.email || "",
+        avatar_url: row.avatar_url || "",
         points: Number(row.points || 0)
       }));
       return jsonResponse({ leaders }, 200, withCors({}, origin));

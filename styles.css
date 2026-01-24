@@ -1726,6 +1726,71 @@
   font-weight: 700;
 }
 
+.leaderboard-list {
+  display: grid;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.leaderboard-item {
+  display: grid;
+  grid-template-columns: 32px 44px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  border: 2px solid rgba(47, 126, 230, 0.2);
+  background: #ffffff;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+}
+
+.leaderboard-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #2f7ee6;
+  color: #fff;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+}
+
+.leaderboard-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #f2f7ff;
+  background-image: url("logo.png");
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(47, 126, 230, 0.2);
+}
+
+.leaderboard-name {
+  font-weight: 700;
+  color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-points {
+  font-weight: 800;
+  color: #1f9d5c;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(47, 191, 113, 0.15);
+}
+
+.leaderboard-empty {
+  text-align: center;
+  padding: 12px;
+}
+
 .ad-slot {
   display: grid;
   gap: 12px;

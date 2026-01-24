@@ -3556,7 +3556,7 @@ const ui = {
       }
       if (!currentUser) {
         ui.gamesScoreboardBody.innerHTML =
-          "<tr><td colspan=\"2\" class=\"card-meta\">" + t("games_leaderboard_empty") + "</td></tr>";
+          "<div class=\"leaderboard-empty card-meta\">" + t("games_leaderboard_empty") + "</div>";
         return;
       }
       const res = await apiFetch("/api/leaderboard");
@@ -3567,19 +3567,30 @@ const ui = {
       const leaders = data.leaders || [];
       if (!leaders.length) {
         ui.gamesScoreboardBody.innerHTML =
-          "<tr><td colspan=\"2\" class=\"card-meta\">" + t("games_leaderboard_empty") + "</td></tr>";
+          "<div class=\"leaderboard-empty card-meta\">" + t("games_leaderboard_empty") + "</div>";
         return;
       }
       ui.gamesScoreboardBody.innerHTML = "";
-      leaders.forEach((entry) => {
-        const row = document.createElement("tr");
+      leaders.forEach((entry, index) => {
+        const row = document.createElement("div");
+        row.className = "leaderboard-item";
         const name = entry.display_name || entry.name || entry.email || t("games_leaderboard_kid");
+        const avatar = entry.avatar_url || "";
         row.innerHTML =
-          "<td>" +
+          "<div class=\"leaderboard-rank\">" +
+          escapeHtml(String(index + 1)) +
+          "</div>" +
+          "<div class=\"leaderboard-avatar\" " +
+          (avatar
+            ? "style=\\\"background-image: url('" + escapeHtml(avatar) + "')\\\""
+            : "") +
+          "></div>" +
+          "<div class=\"leaderboard-name\">" +
           escapeHtml(name) +
-          "</td><td class=\"score-positive\">" +
+          "</div>" +
+          "<div class=\"leaderboard-points\">" +
           escapeHtml(String(entry.points || 0)) +
-          "</td>";
+          "</div>";
         ui.gamesScoreboardBody.appendChild(row);
       });
     }
