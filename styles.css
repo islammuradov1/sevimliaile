@@ -116,6 +116,10 @@
       display: none !important;
     }
 
+    body[data-view="channels"] .search-row {
+      display: none !important;
+    }
+
     body[data-view="viral"] .search-row {
       display: none !important;
     }
