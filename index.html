@@ -614,6 +614,7 @@
       display: none;
     }
 
+    body[data-view="feed"] #player-area,
     body[data-view="search"] #player-area,
     body[data-view="channels"] #player-area,
     body[data-view="admin-overview"] #player-area,
@@ -646,7 +647,15 @@
     body[data-view="feed"] #admin-channels-page,
     body[data-view="feed"] #admin-videos-page,
     body[data-view="feed"] #admin-reports-page,
-    body[data-view="feed"] #admin-imports-page {
+    body[data-view="feed"] #admin-imports-page,
+    body[data-view="watch"] #search-view,
+    body[data-view="watch"] #channels-page,
+    body[data-view="watch"] #admin-overview-page,
+    body[data-view="watch"] #admin-users-page,
+    body[data-view="watch"] #admin-channels-page,
+    body[data-view="watch"] #admin-videos-page,
+    body[data-view="watch"] #admin-reports-page,
+    body[data-view="watch"] #admin-imports-page {
       display: none;
     }
 
@@ -891,23 +900,32 @@
 
     body.fullscreen-mode .controls button,
     body.fullscreen-mode .controls select {
-      pointer-events: none;
-      opacity: 0.6;
-    }
-
-    body.fullscreen-mode #controls-fullscreen {
       pointer-events: auto;
       opacity: 1;
     }
 
-    body.fullscreen-mode .fullscreen-exit {
+    body.fullscreen-mode .control-dock {
+      pointer-events: auto;
+      width: min(1120px, calc(100% - 24px));
+      bottom: 12px;
+      transform: translateX(-50%);
+    }
+
+    body.fullscreen-mode .control-dock.collapsed {
+      right: 12px;
+      left: auto;
+      transform: none;
+    }
+
+    body.fullscreen-mode .fullscreen-exit-btn {
       position: fixed;
-      right: 24px;
-      bottom: 24px;
-      z-index: 50;
-      pointer-events: auto;
-      opacity: 1;
-      box-shadow: var(--shadow);
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+    }
+
+    body.fullscreen-mode .player-ratio {
+      max-height: 100vh;
     }
 
     .player-area.theater {
@@ -933,6 +951,24 @@
       max-height: calc(100vh - 260px);
     }
 
+    .player-ratio::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.45));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .player-shell[data-state="paused"] .player-ratio::after {
+      opacity: 0.16;
+    }
+
+    .player-shell[data-state="buffering"] .player-ratio::after {
+      opacity: 0.26;
+    }
+
     #player {
       position: absolute;
       inset: 0;
@@ -952,6 +988,77 @@
       background: rgba(12, 12, 12, 0.75);
       color: #f7f1e8;
       letter-spacing: 0.01em;
+    }
+
+    .signal-hub {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .player-signal,
+    .seek-signal {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(12, 12, 12, 0.88);
+      color: #f7f1e8;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .player-signal {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    .seek-signal {
+      bottom: 16px;
+      left: 50%;
+      transform: translate(-50%, 6px) scale(0.98);
+      background: rgba(12, 12, 12, 0.92);
+    }
+
+    .player-signal.show,
+    .seek-signal.show {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+
+    .player-signal.show {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    body[data-theme="dark"] .player-signal,
+    body[data-theme="dark"] .seek-signal {
+      background: rgba(20, 18, 34, 0.92);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .player-signal .signal-icon svg,
+    .seek-signal .signal-icon svg {
+      width: 26px;
+      height: 26px;
+      display: block;
+    }
+
+    .player-signal .signal-label,
+    .seek-signal .signal-label {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .player-signal .loader {
+      width: 22px;
+      height: 22px;
+      border-width: 2px;
     }
 
     .overlay {
@@ -1888,6 +1995,16 @@
             <div class="player-ratio">
               <div id="player" aria-label="YouTube player"></div>
               <div class="status-chip hidden" id="status-chip" data-i18n="status_loading">Loading</div>
+              <div class="signal-hub" aria-hidden="true">
+                <div class="player-signal" id="state-signal">
+                  <span class="signal-icon" id="state-signal-icon"></span>
+                  <span class="signal-label" id="state-signal-label"></span>
+                </div>
+                <div class="seek-signal" id="seek-signal">
+                  <span class="signal-icon" id="seek-signal-icon"></span>
+                  <span class="signal-label" id="seek-signal-label"></span>
+                </div>
+              </div>
               <div class="overlay loading active" id="loading-layer">
                 <div class="loader" aria-hidden="true"></div>
                 <p data-i18n="player_loading">Loading player...</p>
@@ -1968,7 +2085,7 @@
                       <option value="medium">360p</option>
                       <option value="large">480p</option>
                       <option value="hd720">720p</option>
-                      <option value="hd1080">1080p</option>
+                      <option value="hd1080" selected>1080p</option>
                       <option value="hd1440">2K</option>
                       <option value="hd2160">4K</option>
                     </select>
@@ -2604,6 +2721,12 @@
       channelName: document.getElementById("channel-name"),
       channelSlogan: document.getElementById("channel-slogan"),
       statusChip: document.getElementById("status-chip"),
+      stateSignal: document.getElementById("state-signal"),
+      stateSignalIcon: document.getElementById("state-signal-icon"),
+      stateSignalLabel: document.getElementById("state-signal-label"),
+      seekSignal: document.getElementById("seek-signal"),
+      seekSignalIcon: document.getElementById("seek-signal-icon"),
+      seekSignalLabel: document.getElementById("seek-signal-label"),
       loadingLayer: document.getElementById("loading-layer"),
       startLayer: document.getElementById("start-layer"),
       endCard: document.getElementById("end-card"),
@@ -4489,6 +4612,16 @@
       }
     }
 
+    function stopPlayback() {
+      if (player && player.pauseVideo) {
+        player.pauseVideo();
+      }
+      currentVideo = null;
+      updateVideoMeta(null);
+      setOverlayState(false, false, false);
+      updateStatus("status_empty");
+    }
+
     function updateNotificationBadge(hasUnread) {
       if (!ui.notificationsOpen) {
         return;
@@ -4563,6 +4696,9 @@
     let isSeeking = false;
     let token = "";
     let currentUser = null;
+    let stateSignalTimer = null;
+    let seekSignalTimer = null;
+    let userQualityChoice = false;
     let pageOffset = 0;
     const pageLimit = 32;
     const searchLimit = 20;
@@ -4746,16 +4882,7 @@
       ui.adminReportsPage.setAttribute("aria-hidden", String(!showAdminReports));
       ui.adminImportsPage.classList.toggle("hidden", !showAdminImports);
       ui.adminImportsPage.setAttribute("aria-hidden", String(!showAdminImports));
-      const hidePlayer =
-        showChannel ||
-        showSearch ||
-        showChannels ||
-        showAdminOverview ||
-        showAdminUsers ||
-        showAdminChannels ||
-        showAdminVideos ||
-        showAdminReports ||
-        showAdminImports;
+      const hidePlayer = !showWatch;
       ui.playerArea.classList.toggle("hidden", hidePlayer);
       ui.playerArea.style.display = hidePlayer ? "none" : "grid";
       if (hidePlayer && player && player.pauseVideo) {
@@ -4939,7 +5066,48 @@
     function updateStatus(label) {
       currentStatusKey = label;
       const title = videos[currentIndex] ? videos[currentIndex].title : t("message_no_videos");
-      ui.statusChip.textContent = t(label) + ": " + title;
+      if (ui.statusChip) {
+        ui.statusChip.textContent = t(label) + ": " + title;
+        ui.statusChip.dataset.state = label;
+        ui.statusChip.classList.remove("hidden");
+      }
+    }
+
+    function flashState(type) {
+      if (!ui.stateSignal || !ui.stateSignalIcon || !ui.stateSignalLabel) {
+        return;
+      }
+      let iconMarkup = icons.play;
+      let label = t("status_playing");
+      let useLoader = false;
+      if (type === "pause") {
+        iconMarkup = icons.pause;
+        label = t("status_paused");
+      } else if (type === "buffer") {
+        useLoader = true;
+        label = t("status_buffering");
+      } else if (type === "ended") {
+        iconMarkup = icons.replay;
+        label = t("status_ended");
+      }
+      ui.stateSignalIcon.innerHTML = useLoader ? '<span class="loader"></span>' : iconMarkup;
+      ui.stateSignalLabel.textContent = label;
+      ui.stateSignal.classList.add("show");
+      clearTimeout(stateSignalTimer);
+      stateSignalTimer = setTimeout(() => ui.stateSignal.classList.remove("show"), 900);
+    }
+
+    function flashSeek(deltaSeconds) {
+      if (!ui.seekSignal || !ui.seekSignalIcon || !ui.seekSignalLabel) {
+        return;
+      }
+      const isForward = deltaSeconds >= 0;
+      const seconds = Math.max(1, Math.round(Math.abs(deltaSeconds)));
+      ui.seekSignalIcon.innerHTML = isForward ? icons.seekForward : icons.seekBack;
+      ui.seekSignalLabel.textContent = (isForward ? "+" : "-") + seconds + "s";
+      ui.seekSignal.classList.add("show");
+      clearTimeout(seekSignalTimer);
+      seekSignalTimer = setTimeout(() => ui.seekSignal.classList.remove("show"), 800);
     }
 
     function updateSearchContext(query) {
@@ -5014,6 +5182,20 @@
       ui.startLayer.setAttribute("aria-hidden", String(!start));
       ui.endCard.classList.toggle("active", ended);
       ui.endCard.setAttribute("aria-hidden", String(!ended));
+      if (loading || start || ended) {
+        if (ui.stateSignal) {
+          ui.stateSignal.classList.remove("show");
+        }
+        if (ui.seekSignal) {
+          ui.seekSignal.classList.remove("show");
+        }
+      }
+    }
+
+    function setPlayerState(state) {
+      if (ui.playerShell) {
+        ui.playerShell.dataset.state = state;
+      }
     }
 
     function updateNextUp() {
@@ -5033,12 +5215,13 @@
         return;
       }
       const currentView = document.body.getAttribute("data-view");
-      if (currentView !== "feed" && currentView !== "watch") {
+      if (currentView !== "watch") {
         navigateTo("/watch/" + videos[index].id, { replace: true });
       }
       currentIndex = (index + videos.length) % videos.length;
       const video = videos[currentIndex];
       currentVideo = video;
+      setPlayerState("loading");
       setOverlayState(true, false, false);
       updateStatus("status_loading");
       updateNextUp();
@@ -5046,6 +5229,7 @@
       updateVideoMeta(video);
       if (player.loadVideoById) {
         player.loadVideoById(video.youtube_id);
+        setTimeout(setPreferredQuality, 120);
       }
       const res = await apiFetch("/api/videos/" + video.id + "/view", { method: "POST" });
       if (res.ok) {
@@ -5413,9 +5597,7 @@
       updateSearchContext(query);
       updateNextUp();
       ui.loadMore.style.display = hasMore ? "inline-flex" : "none";
-      if (reset && videos.length && player) {
-        loadVideo(0);
-      } else if (!videos.length) {
+      if (!videos.length) {
         setOverlayState(false, false, false);
         updateStatus("status_empty");
         updateVideoMeta(null);
@@ -5787,6 +5969,9 @@
       const isAdmin = currentUser && currentUser.role === "admin";
       ui.authLogout.style.display = currentUser ? "inline-flex" : "none";
       ui.authOpen.style.display = currentUser ? "none" : "inline-flex";
+      if (!currentUser) {
+        stopPlayback();
+      }
       ui.uploadOpen.style.display =
         currentUser && (currentUser.role === "artist" || currentUser.role === "admin")
           ? "inline-flex"
@@ -7190,9 +7375,11 @@
         clearTimeout(playerReloadTimer);
       }
       updateStatus("status_ready");
+      setPlayerState("ready");
       setOverlayState(false, true, false);
       attemptAutoplay();
       syncControlLabels();
+      setPreferredQuality();
       startTicker();
       setCaptions();
       if (videos.length) {
@@ -7203,6 +7390,8 @@
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.ENDED) {
         updateStatus("status_ended");
+        setPlayerState("ended");
+        flashState("ended");
         if (autoNextEnabled) {
           loadNextVideo();
         } else {
@@ -7211,16 +7400,23 @@
       } else if (event.data === YT.PlayerState.PLAYING) {
         setOverlayState(false, false, false);
         updateStatus("status_playing");
+        setPlayerState("playing");
+        flashState("play");
       } else if (event.data === YT.PlayerState.PAUSED) {
         updateStatus("status_paused");
+        setPlayerState("paused");
+        flashState("pause");
       } else if (event.data === YT.PlayerState.BUFFERING) {
         updateStatus("status_buffering");
+        setPlayerState("buffering");
+        flashState("buffer");
       }
       syncControlLabels();
     }
 
     function onPlayerError() {
       updateStatus("status_error");
+      setPlayerState("error");
       setOverlayState(false, false, false);
     }
 
@@ -7232,7 +7428,10 @@
         player.unMute();
       }
       player.playVideo();
+      setPreferredQuality();
+      setPlayerState("playing");
       setOverlayState(false, false, false);
+      flashState("play");
     }
 
     function togglePlay() {
@@ -7242,8 +7441,13 @@
       const state = player.getPlayerState ? player.getPlayerState() : null;
       if (state === YT.PlayerState.PLAYING) {
         player.pauseVideo();
+        setPlayerState("paused");
+        flashState("pause");
       } else {
         player.playVideo();
+        setPreferredQuality();
+        setPlayerState("playing");
+        flashState("play");
       }
     }
 
@@ -7279,10 +7483,13 @@
 
     function handleSeekCommit() {
       isSeeking = false;
+      const currentTime = player && player.getCurrentTime ? player.getCurrentTime() : 0;
+      const target = Number(ui.seekBar.value);
       if (player && player.seekTo) {
-        player.seekTo(Number(ui.seekBar.value), true);
+        player.seekTo(target, true);
       }
       syncTimelineDisplay();
+      flashSeek(target - currentTime);
     }
 
     function toggleAutoNext() {
@@ -7302,15 +7509,26 @@
       }
     }
 
+    function setPreferredQuality() {
+      if (!player || !player.setPlaybackQuality) {
+        return;
+      }
+      const selected = ui.qualitySelect ? ui.qualitySelect.value : "default";
+      const target = selected === "default" || !userQualityChoice ? "hd1080" : selected;
+      if (ui.qualitySelect && !userQualityChoice && target !== ui.qualitySelect.value) {
+        ui.qualitySelect.value = target;
+      }
+      player.setPlaybackQuality(target);
+    }
+
     function setQuality() {
       if (!player || !player.setPlaybackQuality) {
         return;
       }
-      const value = ui.qualitySelect.value;
-      if (value === "default") {
-        return;
-      }
+      userQualityChoice = true;
+      const value = ui.qualitySelect.value === "default" ? "hd1080" : ui.qualitySelect.value;
       player.setPlaybackQuality(value);
+      flashState("play");
     }
 
     function setCaptions() {
@@ -7349,6 +7567,7 @@
       const next = Math.max(0, Math.min(duration || current + seconds, current + seconds));
       player.seekTo(next, true);
       syncTimelineDisplay();
+      flashSeek(next - current);
     }
 
     async function toggleHeart() {
