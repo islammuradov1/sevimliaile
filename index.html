@@ -127,6 +127,7 @@
       </form>
       <div class="search-hint">Search all videos and channels</div>
     </div>
+    <div class="ad-slot ad-slot--banner hidden" id="video-top-ad-slot" data-max="1" data-slot="video_top" aria-label="Video ads"></div>
 
     <div class="layout">
       <main>
@@ -185,6 +186,7 @@
               <span>Exit</span>
             </button>
           </div>
+          <div class="ad-slot ad-slot--banner hidden" id="video-mid-ad-slot" data-max="1" data-slot="video_mid" aria-label="Video ads"></div>
 
           <div class="player-meta">
             <div class="meta-title" id="video-title" data-i18n="video_select">Select a video</div>
@@ -547,23 +549,33 @@
               </button>
               <div class="admin-section-body">
                 <div class="section-actions">
-                  <span class="section-hint" data-i18n="admin_ads_hint">Place ads in the games section.</span>
-                </div>
-                <form class="form-grid" id="admin-ads-form" method="post" action="#">
-                  <label for="admin-ads-slot" data-i18n="admin_ads_slot">Ad slot</label>
-                  <select id="admin-ads-slot" name="admin-ads-slot">
-                    <option value="games" data-i18n="admin_ads_slot_games">Games</option>
-                  </select>
+                <span class="section-hint" data-i18n="admin_ads_hint">Place ads on games and video pages.</span>
+              </div>
+              <form class="form-grid" id="admin-ads-form" method="post" action="#">
+                <label for="admin-ads-slot" data-i18n="admin_ads_slot">Ad slot</label>
+                <select id="admin-ads-slot" name="admin-ads-slot">
+                  <option value="games" data-i18n="admin_ads_slot_games">Games</option>
+                  <option value="video_top" data-i18n="admin_ads_slot_video_top">Video page top</option>
+                  <option value="video_mid" data-i18n="admin_ads_slot_video_mid">Video page middle</option>
+                </select>
                   <label for="admin-ads-title" data-i18n="admin_ads_title_label">Title</label>
                   <input id="admin-ads-title" name="admin-ads-title" type="text" placeholder="Kids puzzle books" data-i18n-placeholder="admin_ads_title_placeholder" required>
-                  <label for="admin-ads-image" data-i18n="admin_ads_image_label">Image URL</label>
-                  <input id="admin-ads-image" name="admin-ads-image" type="url" placeholder="https://..." required>
-                  <label for="admin-ads-link" data-i18n="admin_ads_link_label">Link URL</label>
-                  <input id="admin-ads-link" name="admin-ads-link" type="url" placeholder="https://...">
-                  <label class="pill">
-                    <input type="checkbox" id="admin-ads-active" checked>
-                    <span data-i18n="admin_ads_active_label">Active</span>
-                  </label>
+                <label for="admin-ads-image" data-i18n="admin_ads_image_label">Image URL</label>
+                <input id="admin-ads-image" name="admin-ads-image" type="url" placeholder="https://..." required>
+                <label for="admin-ads-link" data-i18n="admin_ads_link_label">Link URL</label>
+                <input id="admin-ads-link" name="admin-ads-link" type="url" placeholder="https://...">
+                <label for="admin-ads-end-date" data-i18n="admin_ads_end_date">End date</label>
+                <input id="admin-ads-end-date" name="admin-ads-end-date" type="date">
+                <label for="admin-ads-max-views" data-i18n="admin_ads_max_views">Total views limit</label>
+                <input id="admin-ads-max-views" name="admin-ads-max-views" type="number" min="0" step="1" placeholder="1000000">
+                <label for="admin-ads-max-unique" data-i18n="admin_ads_max_unique">Unique views limit</label>
+                <input id="admin-ads-max-unique" name="admin-ads-max-unique" type="number" min="0" step="1" placeholder="250000">
+                <label for="admin-ads-max-watch" data-i18n="admin_ads_max_watch">Total watch time (hours)</label>
+                <input id="admin-ads-max-watch" name="admin-ads-max-watch" type="number" min="0" step="1" placeholder="1200">
+                <label class="pill">
+                  <input type="checkbox" id="admin-ads-active" checked>
+                  <span data-i18n="admin_ads_active_label">Active</span>
+                </label>
                   <div class="form-actions">
                     <button class="ghost" type="submit" id="admin-ads-save" data-i18n="admin_ads_save">Save ad</button>
                   </div>
@@ -717,7 +729,7 @@
           </div>
         </section>
           <div class="leaderboard-wrap">
-            <div class="ad-slot ad-slot--tall" id="games-ad-slot-left" data-max="1" aria-label="Game ads"></div>
+            <div class="ad-slot ad-slot--tall" id="games-ad-slot-left" data-max="1" data-slot="games" aria-label="Game ads"></div>
             <div class="scoreboard chalkboard" id="games-scoreboard">
               <div class="scoreboard-head">
                 <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
@@ -727,9 +739,9 @@
                 <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
               </div>
             </div>
-            <div class="ad-slot ad-slot--tall" id="games-ad-slot-right" data-max="1" aria-label="Game ads"></div>
+            <div class="ad-slot ad-slot--tall" id="games-ad-slot-right" data-max="1" data-slot="games" aria-label="Game ads"></div>
           </div>
-          <div class="ad-slot" id="games-ad-slot" aria-label="Game ads"></div>
+          <div class="ad-slot" id="games-ad-slot" data-slot="games" aria-label="Game ads"></div>
           <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
           <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
         </section>

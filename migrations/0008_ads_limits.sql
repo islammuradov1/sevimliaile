@@ -1,0 +1,4 @@
+ALTER TABLE ads ADD COLUMN end_date TEXT;
+ALTER TABLE ads ADD COLUMN max_views INTEGER;
+ALTER TABLE ads ADD COLUMN max_unique_views INTEGER;
+ALTER TABLE ads ADD COLUMN max_watch_seconds INTEGER;

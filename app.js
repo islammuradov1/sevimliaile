@@ -57,6 +57,8 @@ const ui = {
       searchFilterTopic: document.getElementById("search-filter-topic"),
       searchFilterLength: document.getElementById("search-filter-length"),
       searchFilterClear: document.getElementById("search-filter-clear"),
+      videoTopAdSlot: document.getElementById("video-top-ad-slot"),
+      videoMidAdSlot: document.getElementById("video-mid-ad-slot"),
       filterSubscribed: document.getElementById("filter-subscribed"),
       feedView: document.getElementById("feed-view"),
       viralView: document.getElementById("viral-view"),
@@ -116,6 +118,10 @@ const ui = {
       adminAdsTitle: document.getElementById("admin-ads-title"),
       adminAdsImage: document.getElementById("admin-ads-image"),
       adminAdsLink: document.getElementById("admin-ads-link"),
+      adminAdsEndDate: document.getElementById("admin-ads-end-date"),
+      adminAdsMaxViews: document.getElementById("admin-ads-max-views"),
+      adminAdsMaxUnique: document.getElementById("admin-ads-max-unique"),
+      adminAdsMaxWatch: document.getElementById("admin-ads-max-watch"),
       adminAdsActive: document.getElementById("admin-ads-active"),
       adminAdsSave: document.getElementById("admin-ads-save"),
       adminAdsList: document.getElementById("admin-ads-list"),
@@ -592,13 +598,19 @@ const ui = {
         games_score_type_win: "Game win",
         games_score_type_redeem: "Spent on Pro",
         admin_tab_ads: "Ads",
-        admin_ads_hint: "Place ads in the games section.",
+        admin_ads_hint: "Place ads on games and video pages.",
         admin_ads_slot: "Ad slot",
         admin_ads_slot_games: "Games",
+        admin_ads_slot_video_top: "Video page top",
+        admin_ads_slot_video_mid: "Video page middle",
         admin_ads_title_label: "Title",
         admin_ads_title_placeholder: "Kids puzzle books",
         admin_ads_image_label: "Image URL",
         admin_ads_link_label: "Link URL",
+        admin_ads_end_date: "End date",
+        admin_ads_max_views: "Total views limit",
+        admin_ads_max_unique: "Unique views limit",
+        admin_ads_max_watch: "Total watch time (hours)",
         admin_ads_active_label: "Active",
         admin_ads_save: "Save ad",
         admin_ads_empty: "No ads yet.",
@@ -917,7 +929,10 @@ const ui = {
         action_resolve: "Resolve",
         action_delete: "Delete",
         action_save: "Save",
+        action_enable: "Enable",
+        action_disable: "Disable",
         action_mark_read: "Mark read",
+        status_inactive: "Inactive",
         message_auth_required: "Auth setup required.",
         message_verify_needed: "Verify your email to continue.",
         message_queue_single_auto: "Auto next is on, but the queue has one video.",
@@ -1337,7 +1352,27 @@ const ui = {
         admin_tab_channels: "Каналы",
         admin_tab_videos: "Видео",
         admin_tab_reports: "Жалобы",
+        admin_tab_ads: "Реклама",
         admin_tab_imports: "Импорт",
+        admin_ads_hint: "Размещайте рекламу на играх и видео.",
+        admin_ads_slot: "Рекламное место",
+        admin_ads_slot_games: "Игры",
+        admin_ads_slot_video_top: "Верх страницы видео",
+        admin_ads_slot_video_mid: "Середина страницы видео",
+        admin_ads_title_label: "Заголовок",
+        admin_ads_title_placeholder: "Детские пазлы",
+        admin_ads_image_label: "URL изображения",
+        admin_ads_link_label: "URL ссылки",
+        admin_ads_end_date: "Дата окончания",
+        admin_ads_max_views: "Лимит просмотров",
+        admin_ads_max_unique: "Лимит уникальных просмотров",
+        admin_ads_max_watch: "Лимит времени (часы)",
+        admin_ads_active_label: "Активно",
+        admin_ads_save: "Сохранить рекламу",
+        admin_ads_empty: "Рекламы пока нет.",
+        admin_ads_message_saved: "Реклама сохранена.",
+        admin_ads_message_failed: "Не удалось сохранить рекламу.",
+        admin_ads_message_deleted: "Реклама удалена.",
         admin_users_hint: "Поиск пользователей",
         admin_users_search: "Поиск пользователей",
         admin_channels_hint: "Авторы и каналы",
@@ -1356,7 +1391,10 @@ const ui = {
         action_resolve: "Решено",
         action_delete: "Удалить",
         action_save: "Сохранить",
+        action_enable: "Включить",
+        action_disable: "Выключить",
         action_mark_read: "Отметить как прочитанное",
+        status_inactive: "Неактивно",
         message_auth_required: "Требуется настройка авторизации.",
         message_verify_needed: "Подтвердите почту для продолжения.",
         message_queue_single_auto: "Авто далее включено, но в очереди одно видео.",
@@ -1776,7 +1814,27 @@ const ui = {
         admin_tab_channels: "频道",
         admin_tab_videos: "视频",
         admin_tab_reports: "举报",
+        admin_tab_ads: "广告",
         admin_tab_imports: "导入",
+        admin_ads_hint: "在游戏和视频页放置广告。",
+        admin_ads_slot: "广告位",
+        admin_ads_slot_games: "游戏",
+        admin_ads_slot_video_top: "视频页顶部",
+        admin_ads_slot_video_mid: "视频页中部",
+        admin_ads_title_label: "标题",
+        admin_ads_title_placeholder: "儿童拼图",
+        admin_ads_image_label: "图片 URL",
+        admin_ads_link_label: "链接 URL",
+        admin_ads_end_date: "结束日期",
+        admin_ads_max_views: "总观看次数上限",
+        admin_ads_max_unique: "独立观看上限",
+        admin_ads_max_watch: "总观看时长（小时）",
+        admin_ads_active_label: "启用",
+        admin_ads_save: "保存广告",
+        admin_ads_empty: "暂无广告。",
+        admin_ads_message_saved: "广告已保存。",
+        admin_ads_message_failed: "广告保存失败。",
+        admin_ads_message_deleted: "广告已删除。",
         admin_users_hint: "搜索用户",
         admin_users_search: "搜索用户",
         admin_channels_hint: "作者与频道",
@@ -1795,7 +1853,10 @@ const ui = {
         action_resolve: "处理",
         action_delete: "删除",
         action_save: "保存",
+        action_enable: "启用",
+        action_disable: "停用",
         action_mark_read: "标记已读",
+        status_inactive: "未启用",
         message_auth_required: "需要完成认证设置。",
         message_verify_needed: "请先验证邮箱。",
         message_queue_single_auto: "自动下一个已开启，但队列只有一个视频。",
@@ -2215,7 +2276,27 @@ const ui = {
         admin_tab_channels: "Kanallar",
         admin_tab_videos: "Videolar",
         admin_tab_reports: "Raporlar",
+        admin_tab_ads: "Reklamlar",
         admin_tab_imports: "İçe aktarma",
+        admin_ads_hint: "Oyun ve video sayfalarına reklam yerleştirin.",
+        admin_ads_slot: "Reklam alanı",
+        admin_ads_slot_games: "Oyunlar",
+        admin_ads_slot_video_top: "Video sayfası üst",
+        admin_ads_slot_video_mid: "Video sayfası orta",
+        admin_ads_title_label: "Başlık",
+        admin_ads_title_placeholder: "Çocuk bulmacaları",
+        admin_ads_image_label: "Görsel URL",
+        admin_ads_link_label: "Bağlantı URL",
+        admin_ads_end_date: "Bitiş tarihi",
+        admin_ads_max_views: "Toplam görüntülenme limiti",
+        admin_ads_max_unique: "Benzersiz görüntülenme limiti",
+        admin_ads_max_watch: "Toplam izleme süresi (saat)",
+        admin_ads_active_label: "Aktif",
+        admin_ads_save: "Reklamı kaydet",
+        admin_ads_empty: "Henüz reklam yok.",
+        admin_ads_message_saved: "Reklam kaydedildi.",
+        admin_ads_message_failed: "Reklam kaydedilemedi.",
+        admin_ads_message_deleted: "Reklam silindi.",
         admin_users_hint: "Kullanıcı ara",
         admin_users_search: "Kullanıcı ara",
         admin_channels_hint: "Sanatçılar ve kanallar",
@@ -2234,7 +2315,10 @@ const ui = {
         action_resolve: "Çöz",
         action_delete: "Sil",
         action_save: "Kaydet",
+        action_enable: "Aktif et",
+        action_disable: "Devre dışı",
         action_mark_read: "Okundu işaretle",
+        status_inactive: "Pasif",
         message_auth_required: "Kimlik doğrulama kurulumu gerekli.",
         message_verify_needed: "Devam etmek için e-postayı doğrulayın.",
         message_queue_single_auto: "Oto sonraki açık, ama sırada tek video var.",
@@ -2654,7 +2738,27 @@ const ui = {
         admin_tab_channels: "Kanallar",
         admin_tab_videos: "Videolar",
         admin_tab_reports: "Şikayətlər",
+        admin_tab_ads: "Reklamlar",
         admin_tab_imports: "İdxal",
+        admin_ads_hint: "Oyun və video səhifələrinə reklam yerləşdirin.",
+        admin_ads_slot: "Reklam yeri",
+        admin_ads_slot_games: "Oyunlar",
+        admin_ads_slot_video_top: "Video səhifəsi yuxarı",
+        admin_ads_slot_video_mid: "Video səhifəsi orta",
+        admin_ads_title_label: "Başlıq",
+        admin_ads_title_placeholder: "Uşaq puzzelləri",
+        admin_ads_image_label: "Şəkil URL",
+        admin_ads_link_label: "Link URL",
+        admin_ads_end_date: "Bitmə tarixi",
+        admin_ads_max_views: "Ümumi baxış limiti",
+        admin_ads_max_unique: "Unikal baxış limiti",
+        admin_ads_max_watch: "Ümumi izləmə vaxtı (saat)",
+        admin_ads_active_label: "Aktiv",
+        admin_ads_save: "Reklamı yadda saxla",
+        admin_ads_empty: "Hələ reklam yoxdur.",
+        admin_ads_message_saved: "Reklam yadda saxlandı.",
+        admin_ads_message_failed: "Reklamı yadda saxlamaq olmadı.",
+        admin_ads_message_deleted: "Reklam silindi.",
         admin_users_hint: "İstifadəçi axtar",
         admin_users_search: "İstifadəçi axtar",
         admin_channels_hint: "Artistlər və kanallar",
@@ -2673,7 +2777,10 @@ const ui = {
         action_resolve: "Həll et",
         action_delete: "Sil",
         action_save: "Yadda saxla",
+        action_enable: "Aktiv et",
+        action_disable: "Deaktiv et",
         action_mark_read: "Oxundu işarələ",
+        status_inactive: "Deaktiv",
         message_auth_required: "Auth qurulması tələb olunur.",
         message_verify_needed: "Davam etmək üçün emaili təsdiqləyin.",
         message_queue_single_auto: "Avto növbəti aktivdir, amma sırada bir video var.",
@@ -3093,7 +3200,27 @@ const ui = {
         admin_tab_channels: "القنوات",
         admin_tab_videos: "الفيديوهات",
         admin_tab_reports: "البلاغات",
+        admin_tab_ads: "الإعلانات",
         admin_tab_imports: "الاستيراد",
+        admin_ads_hint: "ضع الإعلانات في صفحات الألعاب والفيديو.",
+        admin_ads_slot: "مكان الإعلان",
+        admin_ads_slot_games: "الألعاب",
+        admin_ads_slot_video_top: "أعلى صفحة الفيديو",
+        admin_ads_slot_video_mid: "وسط صفحة الفيديو",
+        admin_ads_title_label: "العنوان",
+        admin_ads_title_placeholder: "ألغاز للأطفال",
+        admin_ads_image_label: "رابط الصورة",
+        admin_ads_link_label: "رابط الوجهة",
+        admin_ads_end_date: "تاريخ الانتهاء",
+        admin_ads_max_views: "حد المشاهدات",
+        admin_ads_max_unique: "حد المشاهدات الفريدة",
+        admin_ads_max_watch: "إجمالي وقت المشاهدة (ساعات)",
+        admin_ads_active_label: "نشط",
+        admin_ads_save: "حفظ الإعلان",
+        admin_ads_empty: "لا توجد إعلانات بعد.",
+        admin_ads_message_saved: "تم حفظ الإعلان.",
+        admin_ads_message_failed: "تعذر حفظ الإعلان.",
+        admin_ads_message_deleted: "تم حذف الإعلان.",
         admin_users_hint: "ابحث عن المستخدمين",
         admin_users_search: "ابحث عن المستخدمين",
         admin_channels_hint: "الفنانون والقنوات",
@@ -3112,7 +3239,10 @@ const ui = {
         action_resolve: "حل",
         action_delete: "حذف",
         action_save: "حفظ",
+        action_enable: "تفعيل",
+        action_disable: "تعطيل",
         action_mark_read: "وضع كمقروء",
+        status_inactive: "غير نشط",
         message_auth_required: "يلزم إعداد المصادقة.",
         message_verify_needed: "يرجى تأكيد البريد للمتابعة.",
         message_queue_single_auto: "التالي تلقائياً مفعّل لكن هناك فيديو واحد فقط.",
@@ -3959,6 +4089,44 @@ const ui = {
       });
     }
 
+    function hashString(value) {
+      let hash = 0;
+      for (let i = 0; i < value.length; i += 1) {
+        hash = (hash << 5) - hash + value.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function getAdRotationKey(slot) {
+      const userKey = currentUser ? String(currentUser.id || "user") : "guest";
+      const videoKey = slot.startsWith("video_") && currentVideo ? ":" + currentVideo.id : "";
+      return "adRotation:" + slot + videoKey + ":" + userKey;
+    }
+
+    function getRotatingAds(list, slot, max) {
+      if (!list.length) {
+        return [];
+      }
+      const safeMax = Math.max(1, max);
+      const videoKey = slot.startsWith("video_") && currentVideo ? ":" + currentVideo.id : "";
+      const seed = currentUser ? String(currentUser.id || "") + ":" + slot + videoKey : slot + videoKey;
+      const baseOffset = hashString(seed) % list.length;
+      const key = getAdRotationKey(slot);
+      let cursor = Number(localStorage.getItem(key) || "0");
+      if (!Number.isFinite(cursor) || cursor < 0) {
+        cursor = 0;
+      }
+      const start = (baseOffset + cursor) % list.length;
+      const selected = [];
+      for (let i = 0; i < Math.min(safeMax, list.length); i += 1) {
+        selected.push(list[(start + i) % list.length]);
+      }
+      cursor = (cursor + selected.length) % list.length;
+      localStorage.setItem(key, String(cursor));
+      return selected;
+    }
+
     function renderAdSlot(container, ads) {
       if (!container) {
         return;
@@ -3966,6 +4134,8 @@ const ui = {
       container.innerHTML = "";
       const list = Array.isArray(ads) ? ads : [];
       const max = Math.max(1, Number(container.dataset.max || "2"));
+      const slot = container.dataset.slot || (list[0] && list[0].slot) || "games";
+      const selectedAds = getRotatingAds(list, slot, max);
       container.classList.remove("hidden");
       if (!list.length) {
         const placeholder = document.createElement("div");
@@ -3980,7 +4150,7 @@ const ui = {
         container.appendChild(placeholder);
         return;
       }
-      list.slice(0, max).forEach((ad) => {
+      selectedAds.forEach((ad) => {
         const card = document.createElement("a");
         card.className = "ad-card";
         card.href = ad.link_url || "#";
@@ -3999,28 +4169,33 @@ const ui = {
           "</div></div>";
         container.appendChild(card);
       });
-      startAdViewTracking(list.slice(0, max));
+      startAdViewTracking(selectedAds);
     }
 
-    async function fetchAds(slot) {
+    async function fetchAds() {
       if (!currentUser || adsFetching) {
         return;
       }
       adsFetching = true;
-      const params = new URLSearchParams();
-      if (slot) {
-        params.set("slot", slot);
-      }
-      const res = await apiFetch("/api/ads?" + params.toString());
+      const res = await apiFetch("/api/ads");
       if (res.ok) {
         const data = await res.json();
-        adsCache[slot || "all"] = data.ads || [];
+        adsCache = {};
+        (data.ads || []).forEach((ad) => {
+          const slot = String(ad.slot || "games");
+          if (!adsCache[slot]) {
+            adsCache[slot] = [];
+          }
+          adsCache[slot].push(ad);
+        });
       }
       adsFetching = false;
       renderAdSlot(ui.gamesAdSlot, adsCache.games || []);
       renderAdSlot(ui.gamesAdSlotLeft, adsCache.games || []);
       renderAdSlot(ui.gamesAdSlotRight, adsCache.games || []);
       renderAdSlot(ui.gamesAdSlotDetail, adsCache.games || []);
+      renderAdSlot(ui.videoTopAdSlot, adsCache.video_top || []);
+      renderAdSlot(ui.videoMidAdSlot, adsCache.video_mid || []);
     }
 
     async function awardGameWin(gameId) {
@@ -4788,7 +4963,7 @@ const ui = {
         gamesInitialized = true;
       }
       syncGamesCopy();
-      fetchAds("games");
+      fetchAds();
       fetchPointsSummary();
       fetchLeaderboard();
     }
@@ -4863,7 +5038,7 @@ const ui = {
 
     function setPageView(view) {
       const previousView = document.body.getAttribute("data-view") || "";
-      if (previousView === "games" && view !== "games") {
+      if ((previousView === "games" || previousView === "watch") && view !== previousView) {
         flushAdViews();
       }
       const showFeed = view === "feed";
@@ -6481,6 +6656,7 @@ const ui = {
       fetchPointsSummary();
       fetchLeaderboard();
       fetchSubscriptions();
+      fetchAds();
       unlockApp();
       triggerLoginSplash();
       handleRoute();
@@ -7234,14 +7410,25 @@ const ui = {
         const value = Number(seconds || 0) / 3600;
         return value.toFixed(1);
       };
+      const formatDate = (value) => {
+        if (!value) {
+          return "-";
+        }
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return "-";
+        }
+        return date.toLocaleDateString();
+      };
       list.forEach((ad) => {
         const row = document.createElement("div");
-        row.className = "channel";
+        row.className = "channel ad-row";
         const preview = document.createElement("div");
         preview.className = "avatar avatar-image";
         if (ad.image_url) {
           preview.style.backgroundImage = "url('" + escapeHtml(ad.image_url) + "')";
         }
+        const statusLabel = ad.active ? t("admin_ads_active_label") : t("status_inactive");
         const info = document.createElement("div");
         info.innerHTML =
           "<div class=\"channel-name\">" +
@@ -7249,7 +7436,7 @@ const ui = {
           "</div><div class=\"card-meta\">" +
           escapeHtml(ad.slot || "") +
           " · " +
-          (ad.active ? "active" : "inactive") +
+          statusLabel +
           " · " +
           (ad.views || 0) +
           " views · " +
@@ -7257,13 +7444,37 @@ const ui = {
           " kids · " +
           formatHours(ad.watch_seconds || 0) +
           " hrs</div>";
+        const details = document.createElement("div");
+        details.className = "ad-details hidden";
+        details.innerHTML =
+          "<div class=\"card-meta\"><strong>" +
+          t("admin_ads_end_date") +
+          ":</strong> " +
+          formatDate(ad.end_date) +
+          "</div>" +
+          "<div class=\"card-meta\"><strong>" +
+          t("admin_ads_max_views") +
+          ":</strong> " +
+          (ad.max_views ? escapeHtml(String(ad.max_views)) : "-") +
+          "</div>" +
+          "<div class=\"card-meta\"><strong>" +
+          t("admin_ads_max_unique") +
+          ":</strong> " +
+          (ad.max_unique_views ? escapeHtml(String(ad.max_unique_views)) : "-") +
+          "</div>" +
+          "<div class=\"card-meta\"><strong>" +
+          t("admin_ads_max_watch") +
+          ":</strong> " +
+          (ad.max_watch_seconds ? escapeHtml(formatHours(ad.max_watch_seconds)) + " h" : "-") +
+          "</div>";
         const actions = document.createElement("div");
         actions.className = "channel-actions";
         const toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "pill";
-        toggle.textContent = ad.active ? "Disable" : "Enable";
-        toggle.addEventListener("click", async () => {
+        toggle.textContent = ad.active ? t("action_disable") : t("action_enable");
+        toggle.addEventListener("click", async (event) => {
+          event.stopPropagation();
           await apiFetch("/api/admin/ads/" + ad.id, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -7275,7 +7486,8 @@ const ui = {
         remove.type = "button";
         remove.className = "ghost";
         remove.textContent = t("action_delete");
-        remove.addEventListener("click", async () => {
+        remove.addEventListener("click", async (event) => {
+          event.stopPropagation();
           await apiFetch("/api/admin/ads/" + ad.id, { method: "DELETE" });
           if (ui.adminAdsMessage) {
             ui.adminAdsMessage.textContent = t("admin_ads_message_deleted");
@@ -7286,7 +7498,11 @@ const ui = {
         actions.appendChild(remove);
         row.appendChild(preview);
         row.appendChild(info);
+        row.appendChild(details);
         row.appendChild(actions);
+        row.addEventListener("click", () => {
+          details.classList.toggle("hidden");
+        });
         ui.adminAdsList.appendChild(row);
       });
     }
@@ -7322,6 +7538,10 @@ const ui = {
         title: ui.adminAdsTitle ? ui.adminAdsTitle.value.trim() : "",
         image_url: ui.adminAdsImage ? ui.adminAdsImage.value.trim() : "",
         link_url: ui.adminAdsLink ? ui.adminAdsLink.value.trim() : "",
+        end_date: ui.adminAdsEndDate ? ui.adminAdsEndDate.value : "",
+        max_views: ui.adminAdsMaxViews ? ui.adminAdsMaxViews.value : "",
+        max_unique_views: ui.adminAdsMaxUnique ? ui.adminAdsMaxUnique.value : "",
+        max_watch_hours: ui.adminAdsMaxWatch ? ui.adminAdsMaxWatch.value : "",
         active: ui.adminAdsActive ? ui.adminAdsActive.checked : true
       };
       const res = await apiFetch("/api/admin/ads", {
@@ -7341,7 +7561,7 @@ const ui = {
         }
       }
       fetchAdminAdsPage();
-      fetchAds("games");
+      fetchAds();
     }
 
     function openAdminImportsPage() {

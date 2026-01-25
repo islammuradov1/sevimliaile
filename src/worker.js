@@ -81,6 +81,56 @@ function sanitizeUrl(value) {
   }
 }
 
+function parseLimitInt(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) {
+    return null;
+  }
+  return Math.floor(num);
+}
+
+function parseEndDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return null;
+  }
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    date.setHours(23, 59, 59, 999);
+  }
+  return date.toISOString();
+}
+
+function parseWatchSeconds(value) {
+  const hours = Number(value);
+  if (!Number.isFinite(hours) || hours <= 0) {
+    return null;
+  }
+  return Math.round(hours * 3600);
+}
+
+function adLimitReached(ad, nowMs) {
+  if (ad.end_date) {
+    const endMs = new Date(ad.end_date).getTime();
+    if (Number.isFinite(endMs) && endMs <= nowMs) {
+      return true;
+    }
+  }
+  if (ad.max_views && Number(ad.views || 0) >= Number(ad.max_views)) {
+    return true;
+  }
+  if (ad.max_unique_views && Number(ad.kids || 0) >= Number(ad.max_unique_views)) {
+    return true;
+  }
+  if (ad.max_watch_seconds && Number(ad.watch_seconds || 0) >= Number(ad.max_watch_seconds)) {
+    return true;
+  }
+  return false;
+}
+
 function isPngUrl(value) {
   if (!value) return false;
   return /\.png($|[?#])/i.test(String(value));
@@ -887,17 +937,41 @@ export default {
     if (path === "/ads" && request.method === "GET") {
       const slot = String(url.searchParams.get("slot") || "").trim().toLowerCase();
       const binds = [];
-      let where = "WHERE active = 1";
+      let where = "WHERE 1=1";
       if (slot) {
-        where += " AND slot = ?";
+        where += " AND ads.slot = ?";
         binds.push(slot);
       }
       const result = await env.DB.prepare(
-        "SELECT id, slot, title, image_url, link_url FROM ads " + where + " ORDER BY created_at DESC"
+        "SELECT ads.id, ads.slot, ads.title, ads.image_url, ads.link_url, ads.active, ads.end_date, " +
+          "ads.max_views, ads.max_unique_views, ads.max_watch_seconds, " +
+          "COUNT(ad_views.id) as views, COUNT(DISTINCT ad_views.user_id) as kids, " +
+          "COALESCE(SUM(ad_views.duration_seconds), 0) as watch_seconds " +
+          "FROM ads LEFT JOIN ad_views ON ad_views.ad_id = ads.id " +
+          where +
+          " GROUP BY ads.id ORDER BY ads.created_at DESC"
       )
         .bind(...binds)
         .all();
-      return jsonResponse({ ads: result.results || [] }, 200, withCors({}, origin));
+      const nowMs = Date.now();
+      const ads = [];
+      for (const ad of result.results || []) {
+        if (!ad.active) {
+          continue;
+        }
+        if (adLimitReached(ad, nowMs)) {
+          await env.DB.prepare("UPDATE ads SET active = 0 WHERE id = ?").bind(ad.id).run();
+          continue;
+        }
+        ads.push({
+          id: ad.id,
+          slot: ad.slot,
+          title: ad.title,
+          image_url: ad.image_url,
+          link_url: ad.link_url
+        });
+      }
+      return jsonResponse({ ads }, 200, withCors({}, origin));
     }
 
     if (path === "/ads/view" && request.method === "POST") {
@@ -936,6 +1010,18 @@ export default {
       )
         .bind(adId, user.id, duration, nowIso())
         .run();
+      const stats = await env.DB.prepare(
+        "SELECT ads.id, ads.end_date, ads.max_views, ads.max_unique_views, ads.max_watch_seconds, " +
+          "COUNT(ad_views.id) as views, COUNT(DISTINCT ad_views.user_id) as kids, " +
+          "COALESCE(SUM(ad_views.duration_seconds), 0) as watch_seconds " +
+          "FROM ads LEFT JOIN ad_views ON ad_views.ad_id = ads.id " +
+          "WHERE ads.id = ? GROUP BY ads.id"
+      )
+        .bind(adId)
+        .first();
+      if (stats && adLimitReached(stats, Date.now())) {
+        await env.DB.prepare("UPDATE ads SET active = 0 WHERE id = ?").bind(adId).run();
+      }
       return jsonResponse({ ok: true }, 200, withCors({}, origin));
     }
 
@@ -1204,12 +1290,23 @@ export default {
       }
       const result = await env.DB.prepare(
         "SELECT ads.id, ads.slot, ads.title, ads.image_url, ads.link_url, ads.active, ads.created_at, " +
+          "ads.end_date, ads.max_views, ads.max_unique_views, ads.max_watch_seconds, " +
           "COUNT(ad_views.id) as views, COUNT(DISTINCT ad_views.user_id) as kids, " +
           "COALESCE(SUM(ad_views.duration_seconds), 0) as watch_seconds " +
           "FROM ads LEFT JOIN ad_views ON ad_views.ad_id = ads.id " +
           "GROUP BY ads.id ORDER BY ads.created_at DESC"
       ).all();
-      return jsonResponse({ ads: result.results || [] }, 200, withCors({}, origin));
+      const nowMs = Date.now();
+      const ads = [];
+      for (const ad of result.results || []) {
+        let active = Boolean(ad.active);
+        if (active && adLimitReached(ad, nowMs)) {
+          await env.DB.prepare("UPDATE ads SET active = 0 WHERE id = ?").bind(ad.id).run();
+          active = false;
+        }
+        ads.push({ ...ad, active: active ? 1 : 0 });
+      }
+      return jsonResponse({ ads }, 200, withCors({}, origin));
     }
 
     if (path === "/admin/ads" && request.method === "POST") {
@@ -1221,17 +1318,35 @@ export default {
       const title = String(body.title || "").trim().slice(0, 120);
       const imageUrl = sanitizeUrl(body.image_url);
       const linkUrl = sanitizeUrl(body.link_url);
-      const active = typeof body.active === "boolean" ? body.active : true;
-      if (!slot || slot !== "games") {
+      const endDate = parseEndDate(body.end_date);
+      const maxViews = parseLimitInt(body.max_views);
+      const maxUniqueViews = parseLimitInt(body.max_unique_views);
+      const maxWatchSeconds = parseWatchSeconds(body.max_watch_hours);
+      const hasLimit = Boolean(endDate || maxViews || maxUniqueViews || maxWatchSeconds);
+      const active = hasLimit && (typeof body.active === "boolean" ? body.active : true);
+      const allowedSlots = new Set(["games", "video_top", "video_mid"]);
+      if (!slot || !allowedSlots.has(slot)) {
         return jsonResponse({ error: "slot" }, 400, withCors({}, origin));
       }
       if (!imageUrl) {
         return jsonResponse({ error: "image" }, 400, withCors({}, origin));
       }
       await env.DB.prepare(
-        "INSERT INTO ads (slot, title, image_url, link_url, active, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO ads (slot, title, image_url, link_url, active, created_at, end_date, max_views, max_unique_views, max_watch_seconds) " +
+          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       )
-        .bind(slot, title, imageUrl, linkUrl || null, active ? 1 : 0, nowIso())
+        .bind(
+          slot,
+          title,
+          imageUrl,
+          linkUrl || null,
+          active ? 1 : 0,
+          nowIso(),
+          endDate,
+          maxViews,
+          maxUniqueViews,
+          maxWatchSeconds
+        )
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
@@ -1244,12 +1359,26 @@ export default {
       if (!Number.isFinite(id)) {
         return jsonResponse({ error: "id" }, 400, withCors({}, origin));
       }
+      const existing = await env.DB.prepare(
+        "SELECT ads.id, ads.slot, ads.title, ads.image_url, ads.link_url, ads.active, " +
+          "ads.end_date, ads.max_views, ads.max_unique_views, ads.max_watch_seconds, " +
+          "COUNT(ad_views.id) as views, COUNT(DISTINCT ad_views.user_id) as kids, " +
+          "COALESCE(SUM(ad_views.duration_seconds), 0) as watch_seconds " +
+          "FROM ads LEFT JOIN ad_views ON ad_views.ad_id = ads.id " +
+          "WHERE ads.id = ? GROUP BY ads.id"
+      )
+        .bind(id)
+        .first();
+      if (!existing) {
+        return jsonResponse({ error: "missing" }, 404, withCors({}, origin));
+      }
       const body = await parseJson(request);
       const fields = [];
       const binds = [];
       if (body.slot) {
         const slot = String(body.slot).trim().toLowerCase();
-        if (slot !== "games") {
+        const allowedSlots = new Set(["games", "video_top", "video_mid"]);
+        if (!allowedSlots.has(slot)) {
           return jsonResponse({ error: "slot" }, 400, withCors({}, origin));
         }
         fields.push("slot = ?");
@@ -1272,9 +1401,64 @@ export default {
         fields.push("link_url = ?");
         binds.push(linkUrl || null);
       }
-      if (typeof body.active === "boolean") {
+      const hasEndDate = Object.prototype.hasOwnProperty.call(body, "end_date");
+      const hasMaxViews = Object.prototype.hasOwnProperty.call(body, "max_views");
+      const hasMaxUnique = Object.prototype.hasOwnProperty.call(body, "max_unique_views");
+      const hasMaxWatch = Object.prototype.hasOwnProperty.call(body, "max_watch_hours");
+      const endDate = hasEndDate ? parseEndDate(body.end_date) : existing.end_date;
+      const maxViews = hasMaxViews ? parseLimitInt(body.max_views) : existing.max_views;
+      const maxUniqueViews = hasMaxUnique ? parseLimitInt(body.max_unique_views) : existing.max_unique_views;
+      const maxWatchSeconds = hasMaxWatch
+        ? parseWatchSeconds(body.max_watch_hours)
+        : existing.max_watch_seconds;
+      if (hasEndDate) {
+        fields.push("end_date = ?");
+        binds.push(endDate);
+      }
+      if (hasMaxViews) {
+        fields.push("max_views = ?");
+        binds.push(maxViews);
+      }
+      if (hasMaxUnique) {
+        fields.push("max_unique_views = ?");
+        binds.push(maxUniqueViews);
+      }
+      if (hasMaxWatch) {
+        fields.push("max_watch_seconds = ?");
+        binds.push(maxWatchSeconds);
+      }
+      const hasLimit = Boolean(endDate || maxViews || maxUniqueViews || maxWatchSeconds);
+      const desiredActive =
+        typeof body.active === "boolean" ? body.active : Boolean(existing.active);
+      let finalActive = desiredActive;
+      if (!hasLimit) {
+        finalActive = false;
+      }
+      if (
+        finalActive &&
+        adLimitReached(
+          {
+            end_date: endDate,
+            max_views: maxViews,
+            max_unique_views: maxUniqueViews,
+            max_watch_seconds: maxWatchSeconds,
+            views: existing.views,
+            kids: existing.kids,
+            watch_seconds: existing.watch_seconds
+          },
+          Date.now()
+        )
+      ) {
+        finalActive = false;
+      }
+      const existingActive = Boolean(existing.active);
+      if (
+        typeof body.active === "boolean" ||
+        finalActive !== existingActive ||
+        !hasLimit
+      ) {
         fields.push("active = ?");
-        binds.push(body.active ? 1 : 0);
+        binds.push(finalActive ? 1 : 0);
       }
       if (!fields.length) {
         return jsonResponse({ error: "payload" }, 400, withCors({}, origin));
