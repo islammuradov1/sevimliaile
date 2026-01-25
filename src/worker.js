@@ -2650,17 +2650,6 @@ export default {
       return jsonResponse({ interests }, 200, withCors({}, origin));
     }
 
-    if (path === "/interests" && request.method === "POST") {
-      const body = await parseJson(request);
-      const interest = normalizeInterestToken(body && body.interest ? body.interest : "");
-      if (!interest) {
-        return jsonResponse({ error: "Interest required." }, 400, withCors({}, origin));
-      }
-      await updateUserInterests(env, user.id, [interest], "");
-      const interests = await loadUserInterests(env, user.id);
-      return jsonResponse({ interests }, 200, withCors({}, origin));
-    }
-
     if (path === "/interests/reset" && request.method === "POST") {
       await env.DB.prepare("DELETE FROM user_interests WHERE user_id = ?")
         .bind(user.id)
