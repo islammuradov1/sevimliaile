@@ -8599,7 +8599,12 @@ const ui = {
       }
     }
 
+    let lastPlayerDblClick = 0;
+
     function handlePlayerShellClick(event) {
+      if (Date.now() - lastPlayerDblClick < 350) {
+        return;
+      }
       const target = event.target;
       if (!target) {
         return;
@@ -8611,6 +8616,22 @@ const ui = {
         return;
       }
       togglePlay();
+    }
+
+    function handlePlayerShellDblClick(event) {
+      const target = event.target;
+      if (!target) {
+        return;
+      }
+      if (target.closest(".control-dock") || target.closest(".control-dock-toggle")) {
+        return;
+      }
+      if (target.closest("button") || target.closest("input") || target.closest("select") || target.closest("a")) {
+        return;
+      }
+      lastPlayerDblClick = Date.now();
+      event.preventDefault();
+      toggleFullscreen();
     }
 
     function toggleMute() {
@@ -8855,6 +8876,7 @@ const ui = {
     }
     if (ui.playerShell) {
       ui.playerShell.addEventListener("click", handlePlayerShellClick);
+      ui.playerShell.addEventListener("dblclick", handlePlayerShellDblClick);
     }
     if (ui.fullscreenExitBtn) {
       ui.fullscreenExitBtn.addEventListener("click", toggleFullscreen);
