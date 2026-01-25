@@ -1072,6 +1072,7 @@
       <div class="settings-layout">
         <div class="settings-main">
           <h2 data-i18n="settings_title">Parent settings</h2>
+          <p class="card-meta" data-i18n="settings_intro">Choose what your child can see. Leave sections off to show everything.</p>
           <form class="form-grid" id="settings-form" method="post" action="#">
             <div class="card-meta" data-i18n="settings_languages">Languages to show</div>
             <div class="settings-chips">
@@ -1145,6 +1146,10 @@
             <option value="month" data-i18n="history_range_month">This month</option>
           </select>
           <div class="form-grid" id="history-list"></div>
+          <div class="card-meta" data-i18n="settings_interests_title">Current interests</div>
+          <div class="card-meta" data-i18n="settings_interests_hint">Auto-learned from watch history. Remove any you want.</div>
+          <div class="settings-chips" id="settings-interests"></div>
+          <button class="ghost" id="settings-interests-reset" type="button" data-i18n="settings_interests_reset">Reset interests</button>
           <div class="card-meta" id="settings-message"></div>
         </div>
       </div>

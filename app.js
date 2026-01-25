@@ -233,6 +233,8 @@ const ui = {
       settingsAuthMessage: document.getElementById("settings-auth-message"),
       historyList: document.getElementById("history-list"),
       historyRange: document.getElementById("history-range"),
+      settingsInterests: document.getElementById("settings-interests"),
+      settingsInterestsReset: document.getElementById("settings-interests-reset"),
       settingsTopicSearch: document.getElementById("topic-search"),
       settingsTopics: document.getElementById("settings-topics"),
       settingsChannelSearch: document.getElementById("channel-search"),
@@ -927,6 +929,7 @@ const ui = {
         studio_save: "Save profile",
         studio_stats: "Your stats",
         settings_title: "Parent controls",
+        settings_intro: "Choose what your child can see. Leave sections off to show everything.",
         settings_languages: "Languages to show",
         settings_language_all: "All",
         settings_topics: "Topics to control",
@@ -948,6 +951,9 @@ const ui = {
         settings_password: "Confirm with your password",
         settings_save: "Save settings",
         settings_history_title: "History",
+        settings_interests_title: "Current interests",
+        settings_interests_hint: "Auto-learned from watch history. Remove any you want.",
+        settings_interests_reset: "Reset interests",
         history_range_label: "History range",
         history_range_today: "Today",
         history_range_week: "This week",
@@ -1099,12 +1105,14 @@ const ui = {
         action_delete: "Delete",
         action_save: "Save",
         action_reset: "Reset",
+        action_remove: "Remove",
         action_enable: "Enable",
         action_disable: "Disable",
         action_mark_read: "Mark read",
         status_inactive: "Inactive",
         confirm_delete_video: "Delete this video? This cannot be undone.",
         confirm_hide_video: "Hide this video from users?",
+        confirm_reset_interests: "Reset all interests?",
         message_auth_required: "Auth setup required.",
         message_verify_needed: "Verify your email to continue.",
         message_queue_single_auto: "Auto next is on, but the queue has one video.",
@@ -1123,10 +1131,12 @@ const ui = {
         message_profile_avatar_png: "Please use a .png image URL.",
         message_profile_saved: "Profile saved.",
         message_history_unavailable: "History unavailable.",
+        message_interests_unavailable: "Interests unavailable.",
         message_stats_unavailable: "Stats unavailable.",
         message_settings_save_failed: "Unable to save settings.",
         message_no_topics: "No topics found.",
         message_no_history: "No watches in this period.",
+        message_no_interests: "No interests yet.",
         message_report_failed: "Report failed.",
         message_no_video_selected: "No video selected.",
         message_reason_short: "Reason must be at least 5 characters.",
@@ -1396,6 +1406,7 @@ const ui = {
         studio_save: "Сохранить профиль",
         studio_stats: "Ваша статистика",
         settings_title: "Родительский контроль",
+        settings_intro: "Выберите, что можно смотреть. Оставьте разделы выключенными, чтобы показать всё.",
         settings_languages: "Показываемые языки",
         settings_language_all: "Все",
         settings_topics: "Темы для контроля",
@@ -1417,6 +1428,9 @@ const ui = {
         settings_password: "Подтвердите паролем",
         settings_save: "Сохранить",
         settings_history_title: "История",
+        settings_interests_title: "Текущие интересы",
+        settings_interests_hint: "Автоопределение по истории. Удаляйте лишнее.",
+        settings_interests_reset: "Сбросить интересы",
         history_range_label: "Период истории",
         history_range_today: "Сегодня",
         history_range_week: "Эта неделя",
@@ -1588,12 +1602,14 @@ const ui = {
         action_delete: "Удалить",
         action_save: "Сохранить",
         action_reset: "Сбросить",
+        action_remove: "Убрать",
         action_enable: "Включить",
         action_disable: "Выключить",
         action_mark_read: "Отметить как прочитанное",
         status_inactive: "Неактивно",
         confirm_delete_video: "Удалить это видео? Это действие нельзя отменить.",
         confirm_hide_video: "Скрыть это видео от пользователей?",
+        confirm_reset_interests: "Сбросить все интересы?",
         message_auth_required: "Требуется настройка авторизации.",
         message_verify_needed: "Подтвердите почту для продолжения.",
         message_queue_single_auto: "Авто далее включено, но в очереди одно видео.",
@@ -1612,10 +1628,12 @@ const ui = {
         message_profile_avatar_png: "Нужна ссылка на .png.",
         message_profile_saved: "Профиль сохранён.",
         message_history_unavailable: "История недоступна.",
+        message_interests_unavailable: "Интересы недоступны.",
         message_stats_unavailable: "Статистика недоступна.",
         message_settings_save_failed: "Не удалось сохранить настройки.",
         message_no_topics: "Темы не найдены.",
         message_no_history: "За этот период просмотров нет.",
+        message_no_interests: "Интересов пока нет.",
         message_report_failed: "Жалоба не отправлена.",
         message_no_video_selected: "Видео не выбрано.",
         message_reason_short: "Причина должна быть не короче 5 символов.",
@@ -1885,6 +1903,7 @@ const ui = {
         studio_save: "保存资料",
         studio_stats: "你的数据",
         settings_title: "家长控制",
+        settings_intro: "选择孩子可以观看的内容。不设置即显示全部。",
         settings_languages: "显示语言",
         settings_language_all: "全部",
         settings_topics: "主题控制",
@@ -1906,6 +1925,9 @@ const ui = {
         settings_password: "用密码确认",
         settings_save: "保存设置",
         settings_history_title: "观看记录",
+        settings_interests_title: "当前兴趣",
+        settings_interests_hint: "根据观看记录自动生成，可手动移除。",
+        settings_interests_reset: "重置兴趣",
         history_range_label: "记录范围",
         history_range_today: "今天",
         history_range_week: "本周",
@@ -2077,12 +2099,14 @@ const ui = {
         action_delete: "删除",
         action_save: "保存",
         action_reset: "重置",
+        action_remove: "移除",
         action_enable: "启用",
         action_disable: "停用",
         action_mark_read: "标记已读",
         status_inactive: "未启用",
         confirm_delete_video: "删除此视频？此操作无法撤销。",
         confirm_hide_video: "对用户隐藏此视频？",
+        confirm_reset_interests: "重置所有兴趣？",
         message_auth_required: "需要完成认证设置。",
         message_verify_needed: "请先验证邮箱。",
         message_queue_single_auto: "自动下一个已开启，但队列只有一个视频。",
@@ -2101,10 +2125,12 @@ const ui = {
         message_profile_avatar_png: "请使用 .png 图片链接。",
         message_profile_saved: "资料已保存。",
         message_history_unavailable: "历史不可用。",
+        message_interests_unavailable: "兴趣不可用。",
         message_stats_unavailable: "统计不可用。",
         message_settings_save_failed: "无法保存设置。",
         message_no_topics: "未找到主题。",
         message_no_history: "此时间段没有观看记录。",
+        message_no_interests: "暂无兴趣。",
         message_report_failed: "举报失败。",
         message_no_video_selected: "未选择视频。",
         message_reason_short: "原因至少 5 个字符。",
@@ -2374,6 +2400,7 @@ const ui = {
         studio_save: "Profili kaydet",
         studio_stats: "İstatistiklerin",
         settings_title: "Ebeveyn kontrolleri",
+        settings_intro: "Çocuğunuzun göreceklerini seçin. Bölümleri kapalı bırakırsanız her şey görünür.",
         settings_languages: "Gösterilecek diller",
         settings_language_all: "Hepsi",
         settings_topics: "Kontrol edilecek konular",
@@ -2395,6 +2422,9 @@ const ui = {
         settings_password: "Şifre ile onayla",
         settings_save: "Ayarları kaydet",
         settings_history_title: "Geçmiş",
+        settings_interests_title: "Mevcut ilgi alanları",
+        settings_interests_hint: "İzleme geçmişinden otomatik öğrenilir. İstediğinizi kaldırın.",
+        settings_interests_reset: "İlgi alanlarını sıfırla",
         history_range_label: "Geçmiş aralığı",
         history_range_today: "Bugün",
         history_range_week: "Bu hafta",
@@ -2566,12 +2596,14 @@ const ui = {
         action_delete: "Sil",
         action_save: "Kaydet",
         action_reset: "Sıfırla",
+        action_remove: "Kaldır",
         action_enable: "Aktif et",
         action_disable: "Devre dışı",
         action_mark_read: "Okundu işaretle",
         status_inactive: "Pasif",
         confirm_delete_video: "Bu videoyu silmek istiyor musunuz? Geri alınamaz.",
         confirm_hide_video: "Bu videoyu kullanıcılardan gizle?",
+        confirm_reset_interests: "Tüm ilgi alanları sıfırlansın mı?",
         message_auth_required: "Kimlik doğrulama kurulumu gerekli.",
         message_verify_needed: "Devam etmek için e-postayı doğrulayın.",
         message_queue_single_auto: "Oto sonraki açık, ama sırada tek video var.",
@@ -2590,10 +2622,12 @@ const ui = {
         message_profile_avatar_png: "Lutfen .png resim linki kullanın.",
         message_profile_saved: "Profil kaydedildi.",
         message_history_unavailable: "Geçmiş kullanılamıyor.",
+        message_interests_unavailable: "İlgi alanları kullanılamıyor.",
         message_stats_unavailable: "İstatistikler kullanılamıyor.",
         message_settings_save_failed: "Ayarlar kaydedilemedi.",
         message_no_topics: "Konu bulunamadı.",
         message_no_history: "Bu zaman aralığında izleme yok.",
+        message_no_interests: "Henüz ilgi alanı yok.",
         message_report_failed: "Rapor gönderilemedi.",
         message_no_video_selected: "Video seçilmedi.",
         message_reason_short: "Neden en az 5 karakter olmalı.",
@@ -2863,6 +2897,7 @@ const ui = {
         studio_save: "Profili yadda saxla",
         studio_stats: "Statistikanız",
         settings_title: "Valideyn nəzarəti",
+        settings_intro: "Uşağın nəyi görə biləcəyini seçin. Bölmələri söndürsəniz hər şey görünər.",
         settings_languages: "Göstəriləcək dillər",
         settings_language_all: "Hamısı",
         settings_topics: "İdarə olunacaq mövzular",
@@ -2884,6 +2919,9 @@ const ui = {
         settings_password: "Şifrə ilə təsdiqlə",
         settings_save: "Ayarları yadda saxla",
         settings_history_title: "Tarixçə",
+        settings_interests_title: "Cari maraqlar",
+        settings_interests_hint: "Baxış tarixçəsindən avtomatik öyrənilir. İstədiyinizi silin.",
+        settings_interests_reset: "Maraqları sıfırla",
         history_range_label: "Tarixçə aralığı",
         history_range_today: "Bugün",
         history_range_week: "Bu həftə",
@@ -3055,12 +3093,14 @@ const ui = {
         action_delete: "Sil",
         action_save: "Yadda saxla",
         action_reset: "Sıfırla",
+        action_remove: "Sil",
         action_enable: "Aktiv et",
         action_disable: "Deaktiv et",
         action_mark_read: "Oxundu işarələ",
         status_inactive: "Deaktiv",
         confirm_delete_video: "Bu videonu silmək istəyirsiniz? Geri qaytarmaq mümkün deyil.",
         confirm_hide_video: "Bu videonu istifadəçilərdən gizlədək?",
+        confirm_reset_interests: "Bütün maraqları sıfırlayaq?",
         message_auth_required: "Auth qurulması tələb olunur.",
         message_verify_needed: "Davam etmək üçün emaili təsdiqləyin.",
         message_queue_single_auto: "Avto növbəti aktivdir, amma sırada bir video var.",
@@ -3079,10 +3119,12 @@ const ui = {
         message_profile_avatar_png: "Zehmet olmasa .png linkinden istifade edin.",
         message_profile_saved: "Profil yadda saxlanıldı.",
         message_history_unavailable: "Tarixçə əlçatan deyil.",
+        message_interests_unavailable: "Maraqlar əlçatan deyil.",
         message_stats_unavailable: "Statistika əlçatan deyil.",
         message_settings_save_failed: "Ayarlar yadda saxlanmadı.",
         message_no_topics: "Mövzu tapılmadı.",
         message_no_history: "Bu aralıqda baxış yoxdur.",
+        message_no_interests: "Hələ maraq yoxdur.",
         message_report_failed: "Şikayət göndərilmədi.",
         message_no_video_selected: "Video seçilməyib.",
         message_reason_short: "Səbəb ən az 5 simvol olmalıdır.",
@@ -3352,6 +3394,7 @@ const ui = {
         studio_save: "حفظ الملف",
         studio_stats: "إحصاءاتك",
         settings_title: "رقابة الوالدين",
+        settings_intro: "اختر ما يمكن لطفلك مشاهدته. اترك الأقسام غير مفعلة لعرض الكل.",
         settings_languages: "اللغات المعروضة",
         settings_language_all: "الكل",
         settings_topics: "المواضيع للتحكم",
@@ -3373,6 +3416,9 @@ const ui = {
         settings_password: "التأكيد بكلمة المرور",
         settings_save: "حفظ الإعدادات",
         settings_history_title: "السجل",
+        settings_interests_title: "الاهتمامات الحالية",
+        settings_interests_hint: "تتعلم تلقائياً من سجل المشاهدة. احذف ما تريد.",
+        settings_interests_reset: "إعادة تعيين الاهتمامات",
         history_range_label: "نطاق السجل",
         history_range_today: "اليوم",
         history_range_week: "هذا الأسبوع",
@@ -3544,12 +3590,14 @@ const ui = {
         action_delete: "حذف",
         action_save: "حفظ",
         action_reset: "إعادة ضبط",
+        action_remove: "إزالة",
         action_enable: "تفعيل",
         action_disable: "تعطيل",
         action_mark_read: "وضع كمقروء",
         status_inactive: "غير نشط",
         confirm_delete_video: "حذف هذا الفيديو؟ لا يمكن التراجع عن ذلك.",
         confirm_hide_video: "إخفاء هذا الفيديو عن المستخدمين؟",
+        confirm_reset_interests: "إعادة تعيين كل الاهتمامات؟",
         message_auth_required: "يلزم إعداد المصادقة.",
         message_verify_needed: "يرجى تأكيد البريد للمتابعة.",
         message_queue_single_auto: "التالي تلقائياً مفعّل لكن هناك فيديو واحد فقط.",
@@ -3568,10 +3616,12 @@ const ui = {
         message_profile_avatar_png: "يرجى استخدام رابط صورة .png.",
         message_profile_saved: "تم حفظ الملف.",
         message_history_unavailable: "السجل غير متاح.",
+        message_interests_unavailable: "الاهتمامات غير متاحة.",
         message_stats_unavailable: "الإحصاءات غير متاحة.",
         message_settings_save_failed: "تعذر حفظ الإعدادات.",
         message_no_topics: "لم يتم العثور على مواضيع.",
         message_no_history: "لا توجد مشاهدة في هذا النطاق.",
+        message_no_interests: "لا توجد اهتمامات بعد.",
         message_report_failed: "فشل إرسال البلاغ.",
         message_no_video_selected: "لم يتم اختيار فيديو.",
         message_reason_short: "يجب أن يكون السبب 5 أحرف على الأقل.",
@@ -6222,7 +6272,7 @@ const ui = {
       title.className = "card-title";
       title.textContent = video.title;
       const meta = document.createElement("div");
-      meta.className = "card-meta";
+      meta.className = "video-meta";
       const channelLine = document.createElement("div");
       channelLine.className = "video-channel";
       const channelName = video.channel_name || t("label_creator");
@@ -6245,20 +6295,32 @@ const ui = {
       });
       channelLine.appendChild(channelAvatar);
       channelLine.appendChild(channelButton);
-      const details = document.createElement("span");
-      details.textContent =
-        " · " +
-        (video.views || 0) +
-        " " +
-        t("label_views") +
-        " · " +
-        (video.hearts || 0) +
-        " " +
-        t("label_hearts");
       meta.appendChild(channelLine);
-      meta.appendChild(details);
+      const metrics = document.createElement("div");
+      metrics.className = "video-metrics";
+      const hearts = document.createElement("div");
+      hearts.className = "video-metric hearts";
+      const heartIcon = document.createElement("span");
+      heartIcon.className = "metric-icon";
+      heartIcon.innerHTML = icons.heart;
+      const heartCount = document.createElement("span");
+      heartCount.textContent = String(video.hearts || 0);
+      hearts.appendChild(heartIcon);
+      hearts.appendChild(heartCount);
+      const views = document.createElement("div");
+      views.className = "video-metric views";
+      const viewIcon = document.createElement("span");
+      viewIcon.className = "metric-icon";
+      viewIcon.textContent = "👁";
+      const viewCount = document.createElement("span");
+      viewCount.textContent = String(video.views || 0);
+      views.appendChild(viewIcon);
+      views.appendChild(viewCount);
+      metrics.appendChild(hearts);
+      metrics.appendChild(views);
       body.appendChild(title);
       body.appendChild(meta);
+      body.appendChild(metrics);
       card.appendChild(thumb);
       card.appendChild(body);
       card.addEventListener("click", () => onSelect(video));
@@ -8813,6 +8875,7 @@ const ui = {
         ui.historyRange.value = "today";
       }
       await loadHistory("today");
+      await loadInterests();
       openModal(ui.settingsModal);
     }
 
@@ -9158,6 +9221,49 @@ const ui = {
         row.appendChild(actions);
         ui.historyList.appendChild(row);
       });
+    }
+
+    async function loadInterests() {
+      if (!ui.settingsInterests) {
+        return;
+      }
+      ui.settingsInterests.innerHTML = t("status_loading");
+      const res = await apiFetch("/api/interests");
+      const data = await res.json();
+      ui.settingsInterests.innerHTML = "";
+      if (!res.ok) {
+        ui.settingsInterests.textContent = data.error || t("message_interests_unavailable");
+        return;
+      }
+      const list = Array.isArray(data.interests) ? data.interests : [];
+      if (!list.length) {
+        ui.settingsInterests.textContent = t("message_no_interests");
+        return;
+      }
+      list.forEach((item) => {
+        const chip = document.createElement("div");
+        chip.className = "interest-chip";
+        const label = document.createElement("span");
+        label.textContent = item.interest || "";
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "ghost";
+        remove.textContent = t("action_remove");
+        remove.addEventListener("click", async () => {
+          const res = await apiFetch("/api/interests/" + encodeURIComponent(item.interest), {
+            method: "DELETE"
+          });
+          if (res.ok) {
+            loadInterests();
+          }
+        });
+        chip.appendChild(label);
+        chip.appendChild(remove);
+        ui.settingsInterests.appendChild(chip);
+      });
+      if (ui.settingsInterestsReset) {
+        ui.settingsInterestsReset.disabled = list.length === 0;
+      }
     }
 
     async function saveSettings(event) {
@@ -9682,6 +9788,18 @@ const ui = {
     if (ui.historyRange) {
       ui.historyRange.addEventListener("change", () => {
         loadHistory(ui.historyRange.value);
+      });
+    }
+    if (ui.settingsInterestsReset) {
+      ui.settingsInterestsReset.addEventListener("click", async () => {
+        if (!confirm(t("confirm_reset_interests"))) {
+          return;
+        }
+        const res = await apiFetch("/api/interests/reset", { method: "POST" });
+        if (res.ok) {
+          loadInterests();
+          fetchVideos(ui.searchInput.value.trim(), true);
+        }
       });
     }
     if (ui.playerShell) {

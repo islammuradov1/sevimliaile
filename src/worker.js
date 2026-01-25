@@ -205,6 +205,9 @@ const RELIGION_DETAIL_BASE = {
   buddist_mahayana: "buddist",
   buddist_vajrayana: "buddist"
 };
+
+const HISTORY_RETENTION_DAYS = 30;
+const INTEREST_LIMIT = 14;
 const RELIGION_DETAILS = new Set(Object.keys(RELIGION_DETAIL_BASE));
 const RELIGION_LABELS = {
   none: "No religion",
@@ -672,6 +675,22 @@ async function fetchYouTubeMeta(env, youtubeId, youtubeUrl) {
       title = data.title || title;
     }
   }
+  if (!duration) {
+    const watchUrl = "https://www.youtube.com/watch?v=" + youtubeId + "&hl=en";
+    const response = await fetch(watchUrl);
+    if (response.ok) {
+      const html = await response.text();
+      const secondsMatch = html.match(/"lengthSeconds":"(\d+)"/);
+      if (secondsMatch) {
+        duration = parseInt(secondsMatch[1], 10) || 0;
+      } else {
+        const msMatch = html.match(/"approxDurationMs":"(\d+)"/);
+        if (msMatch) {
+          duration = Math.round(parseInt(msMatch[1], 10) / 1000) || 0;
+        }
+      }
+    }
+  }
   return { title: title || "Untitled video", duration: duration || 0 };
 }
 
@@ -718,6 +737,83 @@ function tokenizeText(value) {
     .replace(/[^a-z0-9\u00c0-\u024f\u0400-\u04ff\u4e00-\u9fff\s]/g, " ")
     .split(/\s+/)
     .filter((token) => token.length >= 3);
+}
+
+function normalizeInterestToken(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .slice(0, 40);
+}
+
+async function pruneHistory(env) {
+  const cutoff = new Date(Date.now() - HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  await env.DB.prepare("DELETE FROM view_history WHERE watched_at < ?")
+    .bind(cutoff.toISOString())
+    .run();
+}
+
+async function loadUserInterests(env, userId) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT interest, score, updated_at FROM user_interests WHERE user_id = ? ORDER BY score DESC, updated_at DESC"
+    )
+      .bind(userId)
+      .all();
+    return row.results || [];
+  } catch (err) {
+    return [];
+  }
+}
+
+async function updateUserInterests(env, userId, topics, title) {
+  if (!env || !env.DB || !userId) {
+    return;
+  }
+  const values = Array.isArray(topics) ? topics : safeJsonArray(topics);
+  let interestTokens = values
+    .map((topic) => normalizeInterestToken(topic))
+    .filter(Boolean);
+  if (!interestTokens.length) {
+    interestTokens = tokenizeText(title).map((token) => normalizeInterestToken(token));
+  }
+  if (!interestTokens.length) {
+    return;
+  }
+  const now = nowIso();
+  const unique = Array.from(new Set(interestTokens)).slice(0, INTEREST_LIMIT);
+  for (const interest of unique) {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO user_interests (user_id, interest, score, created_at, updated_at) VALUES (?, ?, ?, ?, ?) " +
+          "ON CONFLICT(user_id, interest) DO UPDATE SET score = score + 1, updated_at = excluded.updated_at"
+      )
+        .bind(userId, interest, 1, now, now)
+        .run();
+    } catch (err) {
+      return;
+    }
+  }
+  try {
+    const all = await env.DB.prepare(
+      "SELECT interest FROM user_interests WHERE user_id = ? ORDER BY score DESC, updated_at DESC"
+    )
+      .bind(userId)
+      .all();
+    const list = (all.results || []).map((row) => row.interest);
+    if (list.length > INTEREST_LIMIT) {
+      const toRemove = list.slice(INTEREST_LIMIT);
+      const placeholders = toRemove.map(() => "?").join(",");
+      await env.DB.prepare(
+        "DELETE FROM user_interests WHERE user_id = ? AND interest IN (" + placeholders + ")"
+      )
+        .bind(userId, ...toRemove)
+        .run();
+    }
+  } catch (err) {
+    return;
+  }
 }
 
 async function loadUserSettings(env, userId) {
@@ -2217,7 +2313,16 @@ export default {
     if (path.startsWith("/videos/") && path.endsWith("/update") && request.method === "POST") {
       const videoId = path.split("/")[2];
       const videoColumns = await getTableColumns(env, "videos");
-      const selectCols = ["owner_id", "title", "language", "languages", "topics", "duration"];
+      const selectCols = [
+        "owner_id",
+        "title",
+        "language",
+        "languages",
+        "topics",
+        "duration",
+        "youtube_id",
+        "youtube_url"
+      ];
       if (videoColumns.has("description")) {
         selectCols.push("description");
       }
@@ -2259,7 +2364,11 @@ export default {
       const topicsInput = hasOwn(body, "topics") ? body.topics : safeJsonArray(video.topics || []);
       const topics = normalizeTopics(topicsInput);
       const durationInput = hasOwn(body, "duration") ? body.duration : video.duration;
-      const duration = normalizeDurationValue(durationInput, video.duration || 0);
+      const existingDuration = Number(video.duration) || 0;
+      let duration = normalizeDurationValue(durationInput, existingDuration);
+      if (duration <= 0 && existingDuration > 0) {
+        duration = existingDuration;
+      }
       const descriptionInput = hasOwn(body, "description") ? body.description : video.description;
       const description = normalizeTextField(descriptionInput, 1000);
       const categoryInput = hasOwn(body, "category") ? body.category : video.category;
@@ -2291,6 +2400,12 @@ export default {
         values.push(visibility || "public");
       }
       if (videoColumns.has("duration")) {
+        if (duration <= 0 && video.youtube_id && video.youtube_url) {
+          const meta = await fetchYouTubeMeta(env, video.youtube_id, video.youtube_url);
+          if (meta.duration > 0) {
+            duration = meta.duration;
+          }
+        }
         updates.push("duration = ?");
         values.push(duration || 0);
       }
@@ -2416,8 +2531,9 @@ export default {
 
     if (path.startsWith("/videos/") && path.endsWith("/view") && request.method === "POST") {
       const videoId = path.split("/")[2];
+      await pruneHistory(env);
       await env.DB.prepare("UPDATE videos SET views = views + 1 WHERE id = ?").bind(videoId).run();
-      const videoMeta = await env.DB.prepare("SELECT duration FROM videos WHERE id = ?")
+      const videoMeta = await env.DB.prepare("SELECT duration, topics, title FROM videos WHERE id = ?")
         .bind(videoId)
         .first();
       const watchSeconds = videoMeta?.duration || 0;
@@ -2445,6 +2561,7 @@ export default {
       )
         .bind(user.id, videoId, nowIso(), watchSeconds)
         .run();
+      await updateUserInterests(env, user.id, safeJsonArray(videoMeta?.topics), videoMeta?.title || "");
       return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
@@ -2526,6 +2643,31 @@ export default {
         .bind(user.id)
         .all();
       return jsonResponse({ notifications: result.results || [] }, 200, withCors({}, origin));
+    }
+
+    if (path === "/interests" && request.method === "GET") {
+      const interests = await loadUserInterests(env, user.id);
+      return jsonResponse({ interests }, 200, withCors({}, origin));
+    }
+
+    if (path === "/interests/reset" && request.method === "POST") {
+      await env.DB.prepare("DELETE FROM user_interests WHERE user_id = ?")
+        .bind(user.id)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/interests/") && request.method === "DELETE") {
+      const raw = decodeURIComponent(path.split("/").slice(2).join("/") || "")
+        .trim()
+        .toLowerCase();
+      if (!raw) {
+        return jsonResponse({ error: "Interest required." }, 400, withCors({}, origin));
+      }
+      await env.DB.prepare("DELETE FROM user_interests WHERE user_id = ? AND interest = ?")
+        .bind(user.id, raw)
+        .run();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
     }
 
     if (path === "/requests" && request.method === "POST") {
@@ -2612,6 +2754,7 @@ export default {
       if (user.plan !== "pro") {
         return jsonResponse({ error: "History available on pro plan only." }, 403, withCors({}, origin));
       }
+      await pruneHistory(env);
       const range = url.searchParams.get("range") || "";
       const day = url.searchParams.get("day") || "";
       const now = new Date();
@@ -2761,6 +2904,11 @@ export default {
       const applyFilters = user.plan === "pro" && settings.hasSettings;
       const videoColumns = await getTableColumns(env, "videos");
       const { where, binds } = buildVideoFilters(settings, applyFilters, videoColumns);
+      await pruneHistory(env);
+      const interestRows = await loadUserInterests(env, user.id);
+      const interestTopics = interestRows
+        .map((row) => normalizeInterestToken(row.interest))
+        .filter(Boolean);
       const historyResult = await env.DB.prepare(
         "SELECT videos.id, videos.title, videos.owner_id, videos.topics " +
           "FROM view_history JOIN videos ON view_history.video_id = videos.id " +
@@ -2771,7 +2919,7 @@ export default {
         .all();
       const history = historyResult.results || [];
       const watchedIds = new Set(history.map((row) => String(row.id)));
-      if (!history.length) {
+      if (!history.length && !interestTopics.length) {
         const fallback = await env.DB.prepare(
           "SELECT videos.*, " +
             "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE 'Creator' END as channel_name, " +
@@ -2794,21 +2942,16 @@ export default {
         }));
         return jsonResponse({ videos, hasMore: fallbackHasMore }, 200, withCors({}, origin));
       }
-      const channelScores = new Map();
       const topicScores = new Map();
       const tokenScores = new Map();
-      history.forEach((row) => {
-        const ownerKey = String(row.owner_id || "");
-        if (ownerKey) {
-          channelScores.set(ownerKey, (channelScores.get(ownerKey) || 0) + 1);
+      interestRows.forEach((row) => {
+        const topic = normalizeInterestToken(row.interest);
+        if (!topic) {
+          return;
         }
-        safeJsonArray(row.topics).forEach((topic) => {
-          const key = String(topic || "").toLowerCase();
-          if (key) {
-            topicScores.set(key, (topicScores.get(key) || 0) + 1);
-          }
-        });
-        tokenizeText(row.title).forEach((token) => {
+        const score = Math.max(1, Number(row.score) || 1);
+        topicScores.set(topic, (topicScores.get(topic) || 0) + score);
+        tokenizeText(topic).forEach((token) => {
           tokenScores.set(token, (tokenScores.get(token) || 0) + 1);
         });
       });
@@ -2837,9 +2980,6 @@ export default {
         }
         let score = 0;
         const ownerKey = String(row.owner_id || "");
-        if (ownerKey && channelScores.has(ownerKey)) {
-          score += channelScores.get(ownerKey) * 4;
-        }
         if (ownerKey && subscribed.has(ownerKey)) {
           score += 6;
         }

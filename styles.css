@@ -1787,7 +1787,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 14px;
 }
 
@@ -2639,7 +2639,7 @@
   display: grid;
   grid-template-rows: auto 1fr;
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
@@ -2662,6 +2662,69 @@
   background: rgba(255, 255, 255, 0.96);
   outline: 3px solid var(--accent-2);
   outline-offset: 3px;
+}
+
+.video-card .card-body {
+  padding: 8px 10px 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.video-card .card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.video-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.video-card .video-channel .channel-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  border-width: 1.5px;
+}
+
+.video-card .video-channel .channel-link {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.video-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.video-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.video-metric .metric-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.video-metric .metric-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.video-metric.hearts {
+  color: #e11d48;
+}
+
+.video-metric.views {
+  color: #2563eb;
 }
 
 .related-section {
@@ -2701,7 +2764,7 @@
 }
 
     .search-grid {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
 
 .thumb {
@@ -2710,7 +2773,7 @@
   background-size: cover;
   background-position: center;
   position: relative;
-  border-bottom: 1px solid var(--stroke);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px 12px 0 0;
   overflow: hidden;
 }
@@ -3026,6 +3089,23 @@
       gap: 8px;
       font-weight: 700;
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    }
+
+    .interest-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .interest-chip button {
+      padding: 4px 10px;
+      font-size: 0.8rem;
     }
 
     .settings-religions {
@@ -3555,6 +3635,14 @@
     border-radius: 16px;
   }
 
+  .video-card .card-title {
+    font-size: 0.95rem;
+  }
+
+  .video-metrics {
+    font-size: 0.85rem;
+  }
+
   .control-dock {
     width: calc(100% - 16px);
   }
@@ -3608,6 +3696,21 @@
 
   .card-title {
     font-size: 1.15rem;
+  }
+
+  .video-card .video-channel .channel-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+  }
+
+  .video-metrics {
+    font-size: 1rem;
+  }
+
+  .video-metric .metric-icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   .thumb span {
