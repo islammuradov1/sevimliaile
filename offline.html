@@ -125,6 +125,42 @@
         border: 2px solid rgba(255, 214, 102, 0.5);
       }
 
+      .game-wrap {
+        display: grid;
+        grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) minmax(140px, 180px);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .ad-tall {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: var(--radius-md);
+        border: 2px dashed rgba(15, 23, 42, 0.12);
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+        text-align: center;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .ad-tall .ad-box {
+        width: 100%;
+        height: 140px;
+        border-radius: 16px;
+        background: #ffffff;
+        border: 2px solid rgba(15, 23, 42, 0.08);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .ad-tall img {
+        width: 60%;
+        height: auto;
+        object-fit: contain;
+      }
+
       .game-head h2 {
         margin: 0 0 6px;
         font-family: var(--font-title);
@@ -146,9 +182,10 @@
         background: #fff7f0;
         font-weight: 700;
         color: #5a2b2b;
-        width: fit-content;
-        font-size: 1.2rem;
-        justify-self: center;
+        width: 100%;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        justify-content: center;
+        text-align: center;
       }
 
       .game-grid {
@@ -275,6 +312,10 @@
           align-items: flex-start;
         }
 
+        .game-wrap {
+          grid-template-columns: 1fr;
+        }
+
         .game-grid {
           grid-template-columns: repeat(3, minmax(72px, 1fr));
         }
@@ -310,18 +351,32 @@
           <p class="hint" id="offline-hint">We saved a small game so kids can keep learning.</p>
         </div>
 
-        <section class="game-card" aria-labelledby="game-title">
-          <div class="game-head">
-            <h2 id="game-title">Find the Fruit</h2>
-            <p id="game-instruction">Tap the fruit we ask for.</p>
-          </div>
-          <div class="game-prompt" id="game-prompt"></div>
-          <div class="game-grid" id="game-grid" role="grid" aria-label="Fruit hunt board"></div>
-          <div class="game-status" id="game-status" role="status" aria-live="polite"></div>
-          <div class="game-actions">
-            <button class="game-reset" id="game-next" type="button">Next round</button>
-          </div>
-        </section>
+        <div class="game-wrap">
+          <aside class="ad-tall" aria-label="Game ad">
+            <div class="ad-box">
+              <img src="logo.png" alt="Sevimli Aile logo">
+            </div>
+            <div>Sevimli Aile</div>
+          </aside>
+          <section class="game-card" aria-labelledby="game-title">
+            <div class="game-head">
+              <h2 id="game-title">Find the Fruit</h2>
+              <p id="game-instruction">Tap the fruit we ask for.</p>
+            </div>
+            <div class="game-prompt" id="game-prompt"></div>
+            <div class="game-grid" id="game-grid" role="grid" aria-label="Fruit hunt board"></div>
+            <div class="game-status" id="game-status" role="status" aria-live="polite"></div>
+            <div class="game-actions">
+              <button class="game-reset" id="game-next" type="button">Next round</button>
+            </div>
+          </section>
+          <aside class="ad-tall" aria-label="Game ad">
+            <div class="ad-box">
+              <img src="logo.png" alt="Sevimli Aile logo">
+            </div>
+            <div>Sevimli Aile</div>
+          </aside>
+        </div>
       </main>
 
       <footer id="offline-footer">We'll reconnect when you're back online.</footer>
