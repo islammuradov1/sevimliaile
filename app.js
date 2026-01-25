@@ -235,6 +235,8 @@ const ui = {
       historyRange: document.getElementById("history-range"),
       settingsInterests: document.getElementById("settings-interests"),
       settingsInterestsReset: document.getElementById("settings-interests-reset"),
+      settingsInterestInput: document.getElementById("settings-interest-input"),
+      settingsInterestAdd: document.getElementById("settings-interest-add"),
       settingsTopicSearch: document.getElementById("topic-search"),
       settingsTopics: document.getElementById("settings-topics"),
       settingsChannelSearch: document.getElementById("channel-search"),
@@ -953,6 +955,8 @@ const ui = {
         settings_history_title: "History",
         settings_interests_title: "Current interests",
         settings_interests_hint: "Auto-learned from watch history. Remove any you want.",
+        settings_interests_add_label: "Add interest",
+        settings_interests_add_placeholder: "animals, colors",
         settings_interests_reset: "Reset interests",
         history_range_label: "History range",
         history_range_today: "Today",
@@ -1106,6 +1110,7 @@ const ui = {
         action_save: "Save",
         action_reset: "Reset",
         action_remove: "Remove",
+        action_add: "Add",
         action_enable: "Enable",
         action_disable: "Disable",
         action_mark_read: "Mark read",
@@ -1137,6 +1142,8 @@ const ui = {
         message_no_topics: "No topics found.",
         message_no_history: "No watches in this period.",
         message_no_interests: "No interests yet.",
+        message_interest_required: "Add an interest to continue.",
+        message_interest_add_failed: "Unable to add interest.",
         message_report_failed: "Report failed.",
         message_no_video_selected: "No video selected.",
         message_reason_short: "Reason must be at least 5 characters.",
@@ -8802,6 +8809,9 @@ const ui = {
       ui.settingsMessage.textContent = "";
       ui.settingsForm.reset();
       ui.historyList.innerHTML = t("status_loading");
+      if (ui.settingsInterestInput) {
+        ui.settingsInterestInput.value = "";
+      }
       settingsSelectedTopics = new Set();
       settingsSelectedChannels = new Set();
       settingsSelectedReligions = new Set();
@@ -9788,6 +9798,31 @@ const ui = {
     if (ui.historyRange) {
       ui.historyRange.addEventListener("change", () => {
         loadHistory(ui.historyRange.value);
+      });
+    }
+    if (ui.settingsInterestAdd) {
+      ui.settingsInterestAdd.addEventListener("click", async () => {
+        if (!ui.settingsInterestInput) {
+          return;
+        }
+        const value = ui.settingsInterestInput.value.trim();
+        if (!value) {
+          ui.settingsMessage.textContent = t("message_interest_required");
+          return;
+        }
+        ui.settingsMessage.textContent = "";
+        const res = await apiFetch("/api/interests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ interest: value })
+        });
+        if (!res.ok) {
+          ui.settingsMessage.textContent = t("message_interest_add_failed");
+          return;
+        }
+        ui.settingsInterestInput.value = "";
+        await loadInterests();
+        fetchVideos(ui.searchInput.value.trim(), true);
       });
     }
     if (ui.settingsInterestsReset) {
