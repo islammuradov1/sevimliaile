@@ -5336,7 +5336,8 @@ const ui = {
       }, 1100);
     }
 
-    const API_BASE = window.__API_BASE__ || "";
+    const apiMeta = document.querySelector('meta[name="api-base"]');
+    const API_BASE = (apiMeta && apiMeta.getAttribute("content")) || "";
 
     function apiFetch(path, options = {}) {
       const headers = options.headers || {};
