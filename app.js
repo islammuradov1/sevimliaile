@@ -1083,14 +1083,28 @@ const ui = {
         admin_video_religion_detail: "Religion details",
         admin_video_languages: "Languages",
         admin_video_topics: "Topics",
+        admin_video_title_label: "Title",
+        admin_video_description_label: "Description",
+        admin_video_duration_label: "Duration",
+        admin_video_category_label: "Category",
+        admin_video_visibility_label: "Visibility",
+        admin_video_visibility_public: "Public",
+        admin_video_visibility_hidden: "Hidden",
+        admin_video_message_saved: "Changes saved.",
+        admin_video_message_failed: "Unable to save changes.",
+        admin_video_message_invalid_title: "Title is required.",
+        admin_video_message_invalid_duration: "Enter duration as seconds or mm:ss.",
         admin_report_message_placeholder: "Message to reporter (optional)",
         action_resolve: "Resolve",
         action_delete: "Delete",
         action_save: "Save",
+        action_reset: "Reset",
         action_enable: "Enable",
         action_disable: "Disable",
         action_mark_read: "Mark read",
         status_inactive: "Inactive",
+        confirm_delete_video: "Delete this video? This cannot be undone.",
+        confirm_hide_video: "Hide this video from users?",
         message_auth_required: "Auth setup required.",
         message_verify_needed: "Verify your email to continue.",
         message_queue_single_auto: "Auto next is on, but the queue has one video.",
@@ -1558,14 +1572,28 @@ const ui = {
         admin_video_religion_detail: "Детали религии",
         admin_video_languages: "Языки",
         admin_video_topics: "Темы",
+        admin_video_title_label: "Название",
+        admin_video_description_label: "Описание",
+        admin_video_duration_label: "Длительность",
+        admin_video_category_label: "Категория",
+        admin_video_visibility_label: "Видимость",
+        admin_video_visibility_public: "Публично",
+        admin_video_visibility_hidden: "Скрыто",
+        admin_video_message_saved: "Изменения сохранены.",
+        admin_video_message_failed: "Не удалось сохранить изменения.",
+        admin_video_message_invalid_title: "Название обязательно.",
+        admin_video_message_invalid_duration: "Введите длительность в секундах или мм:сс.",
         admin_report_message_placeholder: "Сообщение автору жалобы (необязательно)",
         action_resolve: "Решено",
         action_delete: "Удалить",
         action_save: "Сохранить",
+        action_reset: "Сбросить",
         action_enable: "Включить",
         action_disable: "Выключить",
         action_mark_read: "Отметить как прочитанное",
         status_inactive: "Неактивно",
+        confirm_delete_video: "Удалить это видео? Это действие нельзя отменить.",
+        confirm_hide_video: "Скрыть это видео от пользователей?",
         message_auth_required: "Требуется настройка авторизации.",
         message_verify_needed: "Подтвердите почту для продолжения.",
         message_queue_single_auto: "Авто далее включено, но в очереди одно видео.",
@@ -2033,14 +2061,28 @@ const ui = {
         admin_video_religion_detail: "宗教细分",
         admin_video_languages: "语言",
         admin_video_topics: "主题",
+        admin_video_title_label: "标题",
+        admin_video_description_label: "描述",
+        admin_video_duration_label: "时长",
+        admin_video_category_label: "分类",
+        admin_video_visibility_label: "可见性",
+        admin_video_visibility_public: "公开",
+        admin_video_visibility_hidden: "隐藏",
+        admin_video_message_saved: "更改已保存。",
+        admin_video_message_failed: "无法保存更改。",
+        admin_video_message_invalid_title: "标题不能为空。",
+        admin_video_message_invalid_duration: "请输入秒数或 mm:ss。",
         admin_report_message_placeholder: "给举报者的消息（可选）",
         action_resolve: "处理",
         action_delete: "删除",
         action_save: "保存",
+        action_reset: "重置",
         action_enable: "启用",
         action_disable: "停用",
         action_mark_read: "标记已读",
         status_inactive: "未启用",
+        confirm_delete_video: "删除此视频？此操作无法撤销。",
+        confirm_hide_video: "对用户隐藏此视频？",
         message_auth_required: "需要完成认证设置。",
         message_verify_needed: "请先验证邮箱。",
         message_queue_single_auto: "自动下一个已开启，但队列只有一个视频。",
@@ -2508,14 +2550,28 @@ const ui = {
         admin_video_religion_detail: "Din detayları",
         admin_video_languages: "Diller",
         admin_video_topics: "Konular",
+        admin_video_title_label: "Başlık",
+        admin_video_description_label: "Açıklama",
+        admin_video_duration_label: "Süre",
+        admin_video_category_label: "Kategori",
+        admin_video_visibility_label: "Görünürlük",
+        admin_video_visibility_public: "Herkese açık",
+        admin_video_visibility_hidden: "Gizli",
+        admin_video_message_saved: "Değişiklikler kaydedildi.",
+        admin_video_message_failed: "Değişiklikler kaydedilemedi.",
+        admin_video_message_invalid_title: "Başlık gerekli.",
+        admin_video_message_invalid_duration: "Süreyi saniye veya dd:ss olarak girin.",
         admin_report_message_placeholder: "Bildiren kişiye mesaj (isteğe bağlı)",
         action_resolve: "Çöz",
         action_delete: "Sil",
         action_save: "Kaydet",
+        action_reset: "Sıfırla",
         action_enable: "Aktif et",
         action_disable: "Devre dışı",
         action_mark_read: "Okundu işaretle",
         status_inactive: "Pasif",
+        confirm_delete_video: "Bu videoyu silmek istiyor musunuz? Geri alınamaz.",
+        confirm_hide_video: "Bu videoyu kullanıcılardan gizle?",
         message_auth_required: "Kimlik doğrulama kurulumu gerekli.",
         message_verify_needed: "Devam etmek için e-postayı doğrulayın.",
         message_queue_single_auto: "Oto sonraki açık, ama sırada tek video var.",
@@ -2983,14 +3039,28 @@ const ui = {
         admin_video_religion_detail: "Din detalları",
         admin_video_languages: "Dillər",
         admin_video_topics: "Mövzular",
+        admin_video_title_label: "Başlıq",
+        admin_video_description_label: "Təsvir",
+        admin_video_duration_label: "Müddət",
+        admin_video_category_label: "Kateqoriya",
+        admin_video_visibility_label: "Görünürlük",
+        admin_video_visibility_public: "Açıq",
+        admin_video_visibility_hidden: "Gizli",
+        admin_video_message_saved: "Dəyişikliklər yadda saxlanıldı.",
+        admin_video_message_failed: "Dəyişiklikləri yadda saxlamaq olmadı.",
+        admin_video_message_invalid_title: "Başlıq tələb olunur.",
+        admin_video_message_invalid_duration: "Müddəti saniyə və ya dd:ss kimi daxil edin.",
         admin_report_message_placeholder: "Şikayət edənə mesaj (istəyə bağlı)",
         action_resolve: "Həll et",
         action_delete: "Sil",
         action_save: "Yadda saxla",
+        action_reset: "Sıfırla",
         action_enable: "Aktiv et",
         action_disable: "Deaktiv et",
         action_mark_read: "Oxundu işarələ",
         status_inactive: "Deaktiv",
+        confirm_delete_video: "Bu videonu silmək istəyirsiniz? Geri qaytarmaq mümkün deyil.",
+        confirm_hide_video: "Bu videonu istifadəçilərdən gizlədək?",
         message_auth_required: "Auth qurulması tələb olunur.",
         message_verify_needed: "Davam etmək üçün emaili təsdiqləyin.",
         message_queue_single_auto: "Avto növbəti aktivdir, amma sırada bir video var.",
@@ -3458,14 +3528,28 @@ const ui = {
         admin_video_religion_detail: "تفاصيل الديانة",
         admin_video_languages: "اللغات",
         admin_video_topics: "المواضيع",
+        admin_video_title_label: "العنوان",
+        admin_video_description_label: "الوصف",
+        admin_video_duration_label: "المدة",
+        admin_video_category_label: "التصنيف",
+        admin_video_visibility_label: "الظهور",
+        admin_video_visibility_public: "عام",
+        admin_video_visibility_hidden: "مخفي",
+        admin_video_message_saved: "تم حفظ التغييرات.",
+        admin_video_message_failed: "تعذر حفظ التغييرات.",
+        admin_video_message_invalid_title: "العنوان مطلوب.",
+        admin_video_message_invalid_duration: "أدخل المدة بالثواني أو مم:ثث.",
         admin_report_message_placeholder: "رسالة للمبلّغ (اختياري)",
         action_resolve: "حل",
         action_delete: "حذف",
         action_save: "حفظ",
+        action_reset: "إعادة ضبط",
         action_enable: "تفعيل",
         action_disable: "تعطيل",
         action_mark_read: "وضع كمقروء",
         status_inactive: "غير نشط",
+        confirm_delete_video: "حذف هذا الفيديو؟ لا يمكن التراجع عن ذلك.",
+        confirm_hide_video: "إخفاء هذا الفيديو عن المستخدمين؟",
         message_auth_required: "يلزم إعداد المصادقة.",
         message_verify_needed: "يرجى تأكيد البريد للمتابعة.",
         message_queue_single_auto: "التالي تلقائياً مفعّل لكن هناك فيديو واحد فقط.",
@@ -3680,6 +3764,11 @@ const ui = {
       const detailValues = collectReligionDetails(bases);
       const detailSelect = ui.uploadReligionDetail;
       const selectedDetails = new Set(getSelectValues(detailSelect));
+      selectedDetails.forEach((value) => {
+        if (value && !detailValues.includes(value)) {
+          detailValues.push(value);
+        }
+      });
       detailSelect.innerHTML = "";
       detailValues.forEach((value) => {
         const option = document.createElement("option");
@@ -5662,6 +5751,30 @@ const ui = {
       return minutes + ":" + String(secs).padStart(2, "0");
     }
 
+    function parseDurationInput(value) {
+      if (value === null || value === undefined) {
+        return null;
+      }
+      const raw = String(value || "").trim();
+      if (!raw) {
+        return null;
+      }
+      if (/^\d+$/.test(raw)) {
+        return Math.max(0, parseInt(raw, 10));
+      }
+      const parts = raw.split(":").map((part) => parseInt(part, 10));
+      if (parts.some((part) => Number.isNaN(part))) {
+        return null;
+      }
+      if (parts.length === 2) {
+        return Math.max(0, parts[0] * 60 + parts[1]);
+      }
+      if (parts.length === 3) {
+        return Math.max(0, parts[0] * 3600 + parts[1] * 60 + parts[2]);
+      }
+      return null;
+    }
+
     function updateSeekBarFill() {
       const max = Number(ui.seekBar.max) || 0;
       const value = Number(ui.seekBar.value) || 0;
@@ -7381,6 +7494,98 @@ const ui = {
       });
     }
 
+    function renderAdminVideoMeta(meta, video) {
+      meta.innerHTML = "";
+      const { bases, details: detailValues } = getVideoReligionData(video);
+      const languages = parseArrayValue(video.languages);
+      if (!languages.length && video.language) {
+        languages.push(String(video.language));
+      }
+      const topics = parseArrayValue(video.topics);
+      const postedBy = video.channel || video.channel_name || t("label_creator");
+      const durationLabel = Number(video.duration) ? formatTime(video.duration) : "--:--";
+      const visibilityValue = video.visibility === "hidden"
+        ? t("admin_video_visibility_hidden")
+        : t("admin_video_visibility_public");
+      const categoryValue = video.category ? String(video.category) : "-";
+      const items = [
+        [t("admin_video_posted_by"), postedBy],
+        [t("admin_video_duration_label"), durationLabel],
+        [t("admin_video_category_label"), categoryValue],
+        [t("admin_video_visibility_label"), visibilityValue],
+        [t("admin_video_religion"), formatReligionLabels(bases)],
+        [t("admin_video_religion_detail"), detailValues.length ? formatReligionLabels(detailValues) : "-"],
+        [t("admin_video_languages"), languages.length ? languages.join(", ") : "-"],
+        [t("admin_video_topics"), topics.length ? topics.join(", ") : "-"],
+        [t("label_views"), String(video.views || 0)],
+        [t("label_hearts"), String(video.hearts || 0)]
+      ];
+      items.forEach(([label, value]) => {
+        const line = document.createElement("div");
+        line.className = "card-meta";
+        line.textContent = label + ": " + value;
+        meta.appendChild(line);
+      });
+    }
+
+    function renderAdminReligionBaseOptions(select, selectedValues) {
+      select.innerHTML = "";
+      const noneOption = document.createElement("option");
+      noneOption.value = "none";
+      noneOption.textContent = t(RELIGION_LABEL_KEYS.none || "religion_none");
+      select.appendChild(noneOption);
+      const bases = religionCatalog.filter((item) => !item.detail);
+      bases.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      bases.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.base;
+        option.textContent = RELIGION_LABEL_KEYS[item.base] || item.label || item.base;
+        select.appendChild(option);
+      });
+      selectedValues.forEach((value) => {
+        if (!value || value === "none") {
+          return;
+        }
+        if (select.querySelector(`option[value="${CSS.escape(value)}"]`)) {
+          return;
+        }
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = RELIGION_LABEL_KEYS[value] || value;
+        select.appendChild(option);
+      });
+      Array.from(select.options).forEach((option) => {
+        option.selected = selectedValues.includes(option.value);
+      });
+    }
+
+    function updateAdminReligionDetails(baseSelect, detailSelect, hint) {
+      let bases = getSelectValues(baseSelect);
+      bases = enforceNoneExclusiveOnSelect(baseSelect, bases);
+      let detailValues = [];
+      if (Array.isArray(religionCatalog) && religionCatalog.length) {
+        detailValues = religionCatalog
+          .filter((item) => item.detail && bases.includes(item.base))
+          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+          .map((item) => item.detail);
+      } else {
+        detailValues = collectReligionDetails(bases);
+      }
+      const selectedDetails = new Set(getSelectValues(detailSelect));
+      detailSelect.innerHTML = "";
+      detailValues.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = t(RELIGION_LABEL_KEYS[value] || value);
+        option.selected = selectedDetails.has(value);
+        detailSelect.appendChild(option);
+      });
+      detailSelect.disabled = detailValues.length === 0;
+      if (hint) {
+        hint.style.display = detailValues.length ? "none" : "block";
+      }
+    }
+
     function buildAdminVideoRow(video) {
       const row = document.createElement("div");
       row.className = "channel admin-video-row";
@@ -7406,28 +7611,200 @@ const ui = {
       details.className = "admin-video-details hidden";
       const meta = document.createElement("div");
       meta.className = "admin-video-meta";
+      renderAdminVideoMeta(meta, video);
+
+      const form = document.createElement("form");
+      form.className = "form-grid admin-video-form";
+      const titleId = "admin-video-title-" + video.id;
+      const titleLabel = document.createElement("label");
+      titleLabel.setAttribute("for", titleId);
+      titleLabel.textContent = t("admin_video_title_label");
+      const titleInput = document.createElement("input");
+      titleInput.type = "text";
+      titleInput.id = titleId;
+      titleInput.maxLength = 140;
+      titleInput.value = video.title || "";
+      const descriptionId = "admin-video-description-" + video.id;
+      const descriptionLabel = document.createElement("label");
+      descriptionLabel.setAttribute("for", descriptionId);
+      descriptionLabel.textContent = t("admin_video_description_label");
+      const descriptionInput = document.createElement("textarea");
+      descriptionInput.id = descriptionId;
+      descriptionInput.maxLength = 1000;
+      descriptionInput.value = video.description || "";
+      const durationId = "admin-video-duration-" + video.id;
+      const durationLabel = document.createElement("label");
+      durationLabel.setAttribute("for", durationId);
+      durationLabel.textContent = t("admin_video_duration_label");
+      const durationInput = document.createElement("input");
+      durationInput.type = "text";
+      durationInput.id = durationId;
+      durationInput.placeholder = "0:00";
+      durationInput.value = formatTime(Number(video.duration) || 0);
+      const categoryId = "admin-video-category-" + video.id;
+      const categoryLabel = document.createElement("label");
+      categoryLabel.setAttribute("for", categoryId);
+      categoryLabel.textContent = t("admin_video_category_label");
+      const categoryInput = document.createElement("input");
+      categoryInput.type = "text";
+      categoryInput.id = categoryId;
+      categoryInput.maxLength = 80;
+      categoryInput.value = video.category || "";
+      const religionId = "admin-video-religion-" + video.id;
+      const religionLabel = document.createElement("label");
+      religionLabel.setAttribute("for", religionId);
+      religionLabel.textContent = t("admin_video_religion");
+      const religionSelect = document.createElement("select");
+      religionSelect.id = religionId;
+      religionSelect.multiple = true;
+      const religionDetailId = "admin-video-religion-detail-" + video.id;
+      const religionDetailLabel = document.createElement("label");
+      religionDetailLabel.setAttribute("for", religionDetailId);
+      religionDetailLabel.textContent = t("admin_video_religion_detail");
+      const religionDetailSelect = document.createElement("select");
+      religionDetailSelect.id = religionDetailId;
+      religionDetailSelect.multiple = true;
+      const religionHint = document.createElement("div");
+      religionHint.className = "card-meta";
+      religionHint.textContent = t("upload_religion_hint");
+      const visibilityId = "admin-video-visibility-" + video.id;
+      const visibilityLabel = document.createElement("label");
+      visibilityLabel.setAttribute("for", visibilityId);
+      visibilityLabel.textContent = t("admin_video_visibility_label");
+      const visibilitySelect = document.createElement("select");
+      visibilitySelect.id = visibilityId;
+      const publicOption = document.createElement("option");
+      publicOption.value = "public";
+      publicOption.textContent = t("admin_video_visibility_public");
+      const hiddenOption = document.createElement("option");
+      hiddenOption.value = "hidden";
+      hiddenOption.textContent = t("admin_video_visibility_hidden");
+      visibilitySelect.appendChild(publicOption);
+      visibilitySelect.appendChild(hiddenOption);
+      visibilitySelect.value = video.visibility === "hidden" ? "hidden" : "public";
       const { bases, details: detailValues } = getVideoReligionData(video);
-      const languages = parseArrayValue(video.languages);
-      if (!languages.length && video.language) {
-        languages.push(String(video.language));
-      }
-      const topics = parseArrayValue(video.topics);
-      const postedBy = video.channel || video.channel_name || t("label_creator");
-      const items = [
-        [t("admin_video_posted_by"), postedBy],
-        [t("admin_video_religion"), formatReligionLabels(bases)],
-        [t("admin_video_religion_detail"), detailValues.length ? formatReligionLabels(detailValues) : "-"],
-        [t("admin_video_languages"), languages.length ? languages.join(", ") : "-"],
-        [t("admin_video_topics"), topics.length ? topics.join(", ") : "-"],
-        [t("label_views"), String(video.views || 0)],
-        [t("label_hearts"), String(video.hearts || 0)]
-      ];
-      items.forEach(([label, value]) => {
-        const line = document.createElement("div");
-        line.className = "card-meta";
-        line.textContent = label + ": " + value;
-        meta.appendChild(line);
+      renderAdminReligionBaseOptions(religionSelect, bases);
+      updateAdminReligionDetails(religionSelect, religionDetailSelect, religionHint);
+      Array.from(religionDetailSelect.options).forEach((option) => {
+        option.selected = detailValues.includes(option.value);
       });
+      updateAdminReligionDetails(religionSelect, religionDetailSelect, religionHint);
+      religionSelect.addEventListener("change", () => {
+        updateAdminReligionDetails(religionSelect, religionDetailSelect, religionHint);
+      });
+      const message = document.createElement("div");
+      message.className = "card-meta admin-video-message";
+      const formActions = document.createElement("div");
+      formActions.className = "admin-video-actions";
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "submit";
+      saveBtn.textContent = t("action_save");
+      const resetBtn = document.createElement("button");
+      resetBtn.type = "reset";
+      resetBtn.className = "ghost";
+      resetBtn.textContent = t("action_reset");
+      formActions.appendChild(saveBtn);
+      formActions.appendChild(resetBtn);
+      formActions.appendChild(message);
+      form.appendChild(titleLabel);
+      form.appendChild(titleInput);
+      form.appendChild(descriptionLabel);
+      form.appendChild(descriptionInput);
+      form.appendChild(durationLabel);
+      form.appendChild(durationInput);
+      form.appendChild(categoryLabel);
+      form.appendChild(categoryInput);
+      form.appendChild(religionLabel);
+      form.appendChild(religionSelect);
+      form.appendChild(religionDetailLabel);
+      form.appendChild(religionDetailSelect);
+      form.appendChild(religionHint);
+      form.appendChild(visibilityLabel);
+      form.appendChild(visibilitySelect);
+      form.appendChild(formActions);
+
+      form.addEventListener("reset", () => {
+        message.textContent = "";
+        setTimeout(() => {
+          updateAdminReligionDetails(religionSelect, religionDetailSelect, religionHint);
+        }, 0);
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!currentUser || currentUser.role !== "admin") {
+          return;
+        }
+        message.textContent = "";
+        const titleValue = titleInput.value.trim();
+        if (!titleValue) {
+          message.textContent = t("admin_video_message_invalid_title");
+          return;
+        }
+        const durationValue = durationInput.value.trim();
+        const parsedDuration = durationValue ? parseDurationInput(durationValue) : Number(video.duration) || 0;
+        if (durationValue && parsedDuration === null) {
+          message.textContent = t("admin_video_message_invalid_duration");
+          return;
+        }
+        const descriptionValue = descriptionInput.value.trim();
+        const categoryValue = categoryInput.value.trim();
+        let religions = getSelectValues(religionSelect);
+        religions = enforceNoneExclusiveOnSelect(religionSelect, religions);
+        const religionDetails = getSelectValues(religionDetailSelect);
+        const visibilityValue = visibilitySelect.value === "hidden" ? "hidden" : "public";
+        if (visibilityValue === "hidden" && (video.visibility || "public") !== "hidden") {
+          if (!confirm(t("confirm_hide_video"))) {
+            return;
+          }
+        }
+        saveBtn.disabled = true;
+        const existingLanguages = parseArrayValue(video.languages);
+        const languageValue = (video.language || existingLanguages[0] || "").trim().toLowerCase();
+        const payload = {
+          title: titleValue,
+          description: descriptionValue,
+          category: categoryValue,
+          duration: parsedDuration,
+          visibility: visibilityValue,
+          religions,
+          religion_details: religionDetails,
+          language: languageValue,
+          languages: existingLanguages.length ? existingLanguages : languageValue ? [languageValue] : [],
+          topics: parseArrayValue(video.topics)
+        };
+        const res = await apiFetch("/api/videos/" + video.id + "/update", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        saveBtn.disabled = false;
+        if (!res.ok) {
+          message.textContent = t("admin_video_message_failed");
+          return;
+        }
+        video.title = titleValue;
+        video.description = descriptionValue;
+        video.category = categoryValue;
+        video.duration = parsedDuration || 0;
+        video.visibility = visibilityValue;
+        video.religions = religions;
+        video.religion_details = religionDetails;
+        name.textContent = video.title || t("label_untitled");
+        renderAdminVideoMeta(meta, video);
+        titleInput.defaultValue = titleValue;
+        descriptionInput.defaultValue = descriptionValue;
+        categoryInput.defaultValue = categoryValue;
+        durationInput.defaultValue = formatTime(parsedDuration || 0);
+        durationInput.value = durationInput.defaultValue;
+        Array.from(religionSelect.options).forEach((option) => {
+          option.defaultSelected = option.selected;
+        });
+        Array.from(religionDetailSelect.options).forEach((option) => {
+          option.defaultSelected = option.selected;
+        });
+        message.textContent = t("admin_video_message_saved");
+      });
+
       const actions = document.createElement("div");
       actions.className = "channel-actions";
       const deleteBtn = document.createElement("button");
@@ -7436,6 +7813,9 @@ const ui = {
       deleteBtn.textContent = t("action_delete");
       deleteBtn.addEventListener("click", async (event) => {
         event.stopPropagation();
+        if (!confirm(t("confirm_delete_video"))) {
+          return;
+        }
         const res = await apiFetch("/api/videos/" + video.id, { method: "DELETE" });
         if (res.ok) {
           refreshAdminView();
@@ -7443,6 +7823,7 @@ const ui = {
       });
       actions.appendChild(deleteBtn);
       details.appendChild(meta);
+      details.appendChild(form);
       details.appendChild(actions);
       toggle.addEventListener("click", () => {
         closeAdminVideoDetails(row);

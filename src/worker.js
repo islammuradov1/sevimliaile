@@ -584,6 +584,64 @@ function parseYouTubeDuration(value) {
   return hours * 3600 + minutes * 60 + seconds;
 }
 
+function hasOwn(value, key) {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function normalizeDurationValue(value, fallback = 0) {
+  if (value === null || value === undefined || value === "") {
+    return Number.isFinite(fallback) ? Math.max(0, Math.floor(fallback)) : 0;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.floor(value));
+  }
+  const text = String(value || "").trim();
+  if (!text) {
+    return Number.isFinite(fallback) ? Math.max(0, Math.floor(fallback)) : 0;
+  }
+  if (/^\d+$/.test(text)) {
+    return Math.max(0, parseInt(text, 10));
+  }
+  const parts = text.split(":").map((part) => parseInt(part, 10));
+  if (parts.some((part) => Number.isNaN(part))) {
+    return Number.isFinite(fallback) ? Math.max(0, Math.floor(fallback)) : 0;
+  }
+  let total = 0;
+  if (parts.length === 2) {
+    total = parts[0] * 60 + parts[1];
+  } else if (parts.length === 3) {
+    total = parts[0] * 3600 + parts[1] * 60 + parts[2];
+  } else {
+    return Number.isFinite(fallback) ? Math.max(0, Math.floor(fallback)) : 0;
+  }
+  return Math.max(0, total);
+}
+
+function normalizeVisibility(value, fallback = "public") {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "hidden") {
+    return "hidden";
+  }
+  if (normalized === "public") {
+    return "public";
+  }
+  return fallback;
+}
+
+function normalizeTextField(value, maxLength) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+  if (!Number.isFinite(maxLength)) {
+    return text;
+  }
+  return text.slice(0, Math.max(0, maxLength));
+}
+
 async function fetchYouTubeMeta(env, youtubeId, youtubeUrl) {
   let title = "";
   let duration = 0;
@@ -715,6 +773,9 @@ function buildVideoFilters(settings, applyFilters, videoColumns) {
     "AND LENGTH(videos.youtube_id) = 11 " +
     "AND COALESCE(NULLIF(TRIM(videos.title), ''), '') <> 'Untitled video'";
   const binds = [];
+  if (videoColumns.has("visibility")) {
+    where += " AND COALESCE(videos.visibility, 'public') = 'public'";
+  }
   if (applyFilters && settings.allowedChannels.length && settings.channelMode !== "off") {
     const list = settings.allowedChannels.map(() => "?").join(",");
     if (settings.channelMode === "block") {
@@ -1774,8 +1835,14 @@ export default {
       const hasReligionDetails = videoColumns.has("religion_details");
       const hasReligion = videoColumns.has("religion");
       const hasReligionDetail = videoColumns.has("religion_detail");
+      const hasVisibility = videoColumns.has("visibility");
+      const hasCategory = videoColumns.has("category");
+      const hasDescription = videoColumns.has("description");
       let where = "WHERE videos.youtube_id IS NOT NULL";
       const binds = [];
+      if (hasVisibility) {
+        where += " AND COALESCE(videos.visibility, 'public') = 'public'";
+      }
       if (onlySubscribed) {
         where += " AND videos.owner_id IN (SELECT channel_id FROM subscriptions WHERE user_id = ?)";
         binds.push(user.id);
@@ -1785,9 +1852,20 @@ export default {
         binds.push(channelId);
       }
       if (search) {
-        where +=
-          " AND (videos.title LIKE ? OR EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?))";
+        const searchClauses = [
+          "videos.title LIKE ?",
+          "EXISTS (SELECT 1 FROM json_each(videos.topics) WHERE value LIKE ?)"
+        ];
         binds.push("%" + search + "%", "%" + search + "%");
+        if (hasCategory) {
+          searchClauses.push("videos.category LIKE ?");
+          binds.push("%" + search + "%");
+        }
+        if (hasDescription) {
+          searchClauses.push("videos.description LIKE ?");
+          binds.push("%" + search + "%");
+        }
+        where += " AND (" + searchClauses.join(" OR ") + ")";
       }
       if (since && since !== "all") {
         const now = new Date();
@@ -2002,6 +2080,9 @@ export default {
       const search = url.searchParams.get("search") || "";
       const limit = Math.min(parseInt(url.searchParams.get("limit") || "50", 10), 200);
       const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10), 0);
+      const videoColumns = await getTableColumns(env, "videos");
+      const hasCategory = videoColumns.has("category");
+      const hasDescription = videoColumns.has("description");
       let where = "WHERE 1=1";
       const binds = [];
       if (ownerId) {
@@ -2009,8 +2090,22 @@ export default {
         binds.push(ownerId);
       }
       if (search) {
-        where += " AND (videos.title LIKE ? OR videos.youtube_url LIKE ? OR users.email LIKE ? OR users.display_name LIKE ?)";
+        const clauses = [
+          "videos.title LIKE ?",
+          "videos.youtube_url LIKE ?",
+          "users.email LIKE ?",
+          "users.display_name LIKE ?"
+        ];
         binds.push("%" + search + "%", "%" + search + "%", "%" + search + "%", "%" + search + "%");
+        if (hasCategory) {
+          clauses.push("videos.category LIKE ?");
+          binds.push("%" + search + "%");
+        }
+        if (hasDescription) {
+          clauses.push("videos.description LIKE ?");
+          binds.push("%" + search + "%");
+        }
+        where += " AND (" + clauses.join(" OR ") + ")";
       }
       const query =
         user.role === "admin"
@@ -2040,10 +2135,15 @@ export default {
     ) {
       const videoId = path.split("/")[2];
       if (!videoId) return jsonResponse({ error: "Video not found." }, 404, withCors({}, origin));
+      const videoColumns = await getTableColumns(env, "videos");
+      const visibilityClause = videoColumns.has("visibility")
+        ? " AND COALESCE(videos.visibility, 'public') = 'public'"
+        : "";
       const video = await env.DB.prepare(
         "SELECT videos.*, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel " +
-          "FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = ? AND videos.youtube_id IS NOT NULL AND LENGTH(videos.youtube_id) = 11 AND COALESCE(NULLIF(TRIM(videos.title), ''), '') <> 'Untitled video'"
+          "FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = ? AND videos.youtube_id IS NOT NULL AND LENGTH(videos.youtube_id) = 11 AND COALESCE(NULLIF(TRIM(videos.title), ''), '') <> 'Untitled video'" +
+          visibilityClause
       )
         .bind(videoId)
         .first();
@@ -2117,7 +2217,16 @@ export default {
     if (path.startsWith("/videos/") && path.endsWith("/update") && request.method === "POST") {
       const videoId = path.split("/")[2];
       const videoColumns = await getTableColumns(env, "videos");
-      const selectCols = ["owner_id"];
+      const selectCols = ["owner_id", "title", "language", "languages", "topics", "duration"];
+      if (videoColumns.has("description")) {
+        selectCols.push("description");
+      }
+      if (videoColumns.has("category")) {
+        selectCols.push("category");
+      }
+      if (videoColumns.has("visibility")) {
+        selectCols.push("visibility");
+      }
       if (videoColumns.has("religion")) {
         selectCols.push("religion");
       }
@@ -2138,11 +2247,25 @@ export default {
         return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
       }
       const body = await parseJson(request);
-      const title = String(body.title || "").trim();
-      const language = String(body.language || "").trim().toLowerCase();
-      const languages = normalizeLanguages(body.languages || language);
+      const titleInput = hasOwn(body, "title") ? body.title : video.title;
+      const title = String(titleInput || "").trim();
+      const languageInput = hasOwn(body, "language") ? body.language : video.language;
+      const language = String(languageInput || "").trim().toLowerCase();
+      const languagesInput = hasOwn(body, "languages")
+        ? body.languages
+        : safeJsonArray(video.languages || []);
+      const languages = normalizeLanguages(languagesInput || language);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
-      const topics = normalizeTopics(body.topics);
+      const topicsInput = hasOwn(body, "topics") ? body.topics : safeJsonArray(video.topics || []);
+      const topics = normalizeTopics(topicsInput);
+      const durationInput = hasOwn(body, "duration") ? body.duration : video.duration;
+      const duration = normalizeDurationValue(durationInput, video.duration || 0);
+      const descriptionInput = hasOwn(body, "description") ? body.description : video.description;
+      const description = normalizeTextField(descriptionInput, 1000);
+      const categoryInput = hasOwn(body, "category") ? body.category : video.category;
+      const category = normalizeTextField(categoryInput, 80);
+      const visibilityInput = hasOwn(body, "visibility") ? body.visibility : video.visibility;
+      const visibility = normalizeVisibility(visibilityInput, video.visibility || "public");
       const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
         body.religions || video.religions,
         body.religion_details || video.religion_details,
@@ -2155,6 +2278,22 @@ export default {
         language || "unspecified",
         JSON.stringify(storedLanguages)
       ];
+      if (videoColumns.has("description")) {
+        updates.push("description = ?");
+        values.push(description || null);
+      }
+      if (videoColumns.has("category")) {
+        updates.push("category = ?");
+        values.push(category || null);
+      }
+      if (videoColumns.has("visibility")) {
+        updates.push("visibility = ?");
+        values.push(visibility || "public");
+      }
+      if (videoColumns.has("duration")) {
+        updates.push("duration = ?");
+        values.push(duration || 0);
+      }
       if (videoColumns.has("religion")) {
         updates.push("religion = ?");
         values.push(legacyBase);
@@ -2204,6 +2343,9 @@ export default {
       const languages = normalizeLanguages(body.languages);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
       const topics = normalizeTopics(body.topics);
+      const description = normalizeTextField(body.description, 1000);
+      const category = normalizeTextField(body.category, 80);
+      const visibility = normalizeVisibility(body.visibility, "public");
       const { bases, details, legacyBase, legacyDetail } = normalizeReligionArrays(
         body.religions,
         body.religion_details,
@@ -2246,6 +2388,18 @@ export default {
       if (videoColumns.has("religion_details")) {
         insertCols.push("religion_details");
         values.push(JSON.stringify(details));
+      }
+      if (videoColumns.has("description")) {
+        insertCols.push("description");
+        values.push(description || null);
+      }
+      if (videoColumns.has("category")) {
+        insertCols.push("category");
+        values.push(category || null);
+      }
+      if (videoColumns.has("visibility")) {
+        insertCols.push("visibility");
+        values.push(visibility);
       }
       insertCols.push("topics");
       values.push(JSON.stringify(topics));
