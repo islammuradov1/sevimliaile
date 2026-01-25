@@ -344,7 +344,15 @@ const ui = {
       autoNext:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 17V7l8 5-8 5zm10 0V7l8 5-8 5z\"/></svg>",
       heart:
-        "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 21s-7-4.4-9.3-8.2C1 9.3 3.3 6 6.7 6c2 0 3.4 1.1 4.3 2.3C11.9 7.1 13.3 6 15.3 6 18.7 6 21 9.3 21 12.8 19.3 16.6 12 21 12 21z\"/></svg>",
+  "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"currentColor\">\
+     <path d=\"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 \
+              2 5.42 4.42 3 7.5 3 \
+              9.24 3 10.91 3.81 12 5.08 \
+              13.09 3.81 14.76 3 16.5 3 \
+              19.58 3 22 5.42 22 8.5 \
+              22 12.28 18.6 15.36 13.45 20.04 \
+              L12 21.35z\"/>\
+   </svg>",
       report:
         "<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 2 1 21h22L12 2zm0 7v5m0 4h.01\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
       replay:
@@ -6311,7 +6319,7 @@ const ui = {
       views.className = "video-metric views";
       const viewIcon = document.createElement("span");
       viewIcon.className = "metric-icon";
-      viewIcon.textContent = "👁";
+      viewIcon.textContent = "👀";
       const viewCount = document.createElement("span");
       viewCount.textContent = String(video.views || 0);
       views.appendChild(viewIcon);
