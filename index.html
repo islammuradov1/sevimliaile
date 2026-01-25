@@ -649,9 +649,6 @@
               <h2 data-i18n="games_title">Games</h2>
               <p class="card-meta" data-i18n="games_subtitle">Quick emoji games for kids.</p>
             </div>
-            <div class="games-brand">
-              <img src="/logo.png" alt="Sevimli Aile logo">
-            </div>
           </div>
           <div class="games-points" id="games-points">
             <div class="games-points-meta">
@@ -669,6 +666,10 @@
               <button class="pill" id="games-redeem" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
               <span class="card-meta" id="games-redeem-message" aria-live="polite"></span>
             </div>
+          </div>
+          <div class="games-preview-main">
+            <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
+            <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
           </div>
           <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
           <div class="section-head games-detail-head">
@@ -728,8 +729,11 @@
             </article>
           </div>
         </section>
-          <div class="leaderboard-wrap">
-            <div class="ad-slot ad-slot--tall" id="games-ad-slot-left" data-max="1" data-slot="games" aria-label="Game ads"></div>
+          <details class="leaderboard-collapsible" id="games-leaderboard">
+            <summary>
+              <span data-i18n="games_leaderboard_title">Leaderboard</span>
+              <span aria-hidden="true">▾</span>
+            </summary>
             <div class="scoreboard chalkboard" id="games-scoreboard">
               <div class="scoreboard-head">
                 <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
@@ -739,11 +743,7 @@
                 <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
               </div>
             </div>
-            <div class="ad-slot ad-slot--tall" id="games-ad-slot-right" data-max="1" data-slot="games" aria-label="Game ads"></div>
-          </div>
-          <div class="ad-slot" id="games-ad-slot" data-slot="games" aria-label="Game ads"></div>
-          <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
-          <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
+          </details>
         </section>
 
         

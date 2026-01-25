@@ -1773,21 +1773,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(47, 126, 230, 0.22);
-  background: #ffffff;
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
+  border: 1px solid var(--stroke);
+  background: var(--bg-soft);
   position: relative;
 }
 
 .games-points::before {
-  content: "";
-  position: absolute;
-  inset: -2px auto -2px -2px;
-  width: 8px;
-  border-radius: 12px 0 0 12px;
-  background: linear-gradient(180deg, #2f7ee6, #63b7ff);
+  content: none;
 }
 
 .games-points-meta {
@@ -1908,7 +1902,7 @@
 .leaderboard-list {
   display: grid;
   gap: 10px;
-  max-height: 420px;
+  max-height: 260px;
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -1925,6 +1919,38 @@
   border: 1px solid rgba(9, 59, 36, 0.6);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 10px 24px rgba(15, 23, 42, 0.15);
   color: #e8f5ea;
+}
+
+.leaderboard-collapsible {
+  margin-top: 16px;
+  border: 1px solid rgba(47, 126, 230, 0.22);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.leaderboard-collapsible > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.leaderboard-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.leaderboard-collapsible[open] > summary {
+  border-bottom: 1px solid var(--stroke);
+}
+
+.leaderboard-collapsible .scoreboard {
+  margin: 10px;
+  box-shadow: none;
 }
 
 .scoreboard.chalkboard .card-meta {
@@ -2172,11 +2198,17 @@
   margin: 0;
   font-size: 0.9rem;
   color: var(--muted);
-  text-align: center;
+  text-align: left;
+}
+
+.games-preview-main {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
 }
 
 .games-preview-grid {
-  margin-top: 12px;
+  margin-top: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
