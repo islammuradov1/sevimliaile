@@ -3376,6 +3376,18 @@ const ui = {
       button.setAttribute("data-label", label);
     }
 
+    function isPlayableVideo(video) {
+      const youtubeId = String(video && video.youtube_id ? video.youtube_id : "");
+      const title = String(video && video.title ? video.title : "").trim();
+      if (!/^[a-zA-Z0-9_-]{11}$/.test(youtubeId)) {
+        return false;
+      }
+      if (!title || title.toLowerCase() === "untitled video") {
+        return false;
+      }
+      return true;
+    }
+
     function parseArrayValue(value) {
       if (Array.isArray(value)) {
         return value.map((item) => String(item || "").trim()).filter(Boolean);
@@ -5765,7 +5777,7 @@ const ui = {
     }
 
     function openVideoPage(video) {
-      if (!video) {
+      if (!video || !isPlayableVideo(video)) {
         return;
       }
       const targetPath = "/watch/" + video.id;
@@ -5841,6 +5853,9 @@ const ui = {
     }
 
     function buildVideoCard(video, onSelect) {
+      if (!isPlayableVideo(video)) {
+        return null;
+      }
       const card = document.createElement("button");
       card.type = "button";
       card.className = "video-card";
@@ -5915,8 +5930,17 @@ const ui = {
         return;
       }
       list.forEach((video) => {
-        container.appendChild(buildVideoCard(video, onSelect));
+        const card = buildVideoCard(video, onSelect);
+        if (card) {
+          container.appendChild(card);
+        }
       });
+      if (!append && !container.children.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = emptyMessage || t("message_no_videos");
+        container.appendChild(empty);
+      }
     }
 
     function renderRelatedVideos(list) {
@@ -5931,12 +5955,19 @@ const ui = {
         return;
       }
       ui.relatedEmpty.classList.add("hidden");
+      let appended = 0;
       list.forEach((video) => {
         const card = buildVideoCard(video, (item) => {
           openVideoPage(item);
         });
-        ui.relatedGrid.appendChild(card);
+        if (card) {
+          ui.relatedGrid.appendChild(card);
+          appended += 1;
+        }
       });
+      if (!appended) {
+        ui.relatedEmpty.classList.remove("hidden");
+      }
     }
 
     async function fetchRelatedVideos(video) {

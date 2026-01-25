@@ -2260,7 +2260,23 @@
   }
 
   .games-preview-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .game-preview-card {
+    padding: 10px;
+  }
+
+  .game-preview-art {
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+    border-radius: 16px;
+  }
+
+  .game-preview-title {
+    font-size: 0.85rem;
   }
 }
 
@@ -2276,7 +2292,7 @@
   }
 
   .games-preview-grid {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, minmax(200px, 1fr));
   }
 }
 
@@ -2296,8 +2312,11 @@
 .games-preview-grid {
   margin-top: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 16px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .game-preview-card {
@@ -3320,15 +3339,32 @@
 
       .top-nav {
         width: 100%;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .top-nav::-webkit-scrollbar {
+        display: none;
       }
 
       .top-nav button {
-        flex: 1 1 calc(50% - 8px);
+        flex: 0 0 auto;
         justify-content: center;
-        padding: 8px 10px;
-        font-size: 0.85rem;
+        padding: 6px 10px;
+        font-size: 0.82rem;
+        gap: 6px;
+      }
+
+      .top-nav button svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .logo span {
+        font-size: 1rem;
       }
 
       .topbar-right .account-meta {
@@ -3482,5 +3518,15 @@
 
   .section-head h2 {
     font-size: 1.8rem;
+  }
+
+  .top-nav button {
+    padding: 12px 18px;
+    font-size: 1.05rem;
+  }
+
+  .top-nav button svg {
+    width: 22px;
+    height: 22px;
   }
 }

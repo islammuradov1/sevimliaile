@@ -555,6 +555,11 @@ function safeJsonArray(value) {
   }
 }
 
+function isUsableTitle(title) {
+  const value = String(title || "").trim();
+  return value && value.toLowerCase() !== "untitled video";
+}
+
 async function isRateLimited(env, table, column, userId, windowSeconds) {
   if (!env || !env.DB) return false;
   const row = await env.DB.prepare(
@@ -624,7 +629,10 @@ async function loadUserSettings(env, userId) {
 }
 
 function buildVideoFilters(settings, applyFilters, videoColumns) {
-  let where = "WHERE videos.youtube_id IS NOT NULL";
+  let where =
+    "WHERE videos.youtube_id IS NOT NULL " +
+    "AND LENGTH(videos.youtube_id) = 11 " +
+    "AND COALESCE(NULLIF(TRIM(videos.title), ''), '') <> 'Untitled video'";
   const binds = [];
   if (applyFilters && settings.allowedChannels.length && settings.channelMode !== "off") {
     const list = settings.allowedChannels.map(() => "?").join(",");
@@ -1802,7 +1810,7 @@ export default {
       const video = await env.DB.prepare(
         "SELECT videos.*, " +
           "CASE WHEN users.display_name IS NOT NULL AND users.display_name <> '' THEN users.display_name ELSE users.email END as channel " +
-          "FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = ? AND videos.youtube_id IS NOT NULL"
+          "FROM videos JOIN users ON videos.owner_id = users.id WHERE videos.id = ? AND videos.youtube_id IS NOT NULL AND LENGTH(videos.youtube_id) = 11 AND COALESCE(NULLIF(TRIM(videos.title), ''), '') <> 'Untitled video'"
       )
         .bind(videoId)
         .first();
@@ -1956,6 +1964,9 @@ export default {
         return jsonResponse({ error: "You already uploaded this video." }, 409, withCors({}, origin));
       }
       const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+      if (!isUsableTitle(meta.title)) {
+        return jsonResponse({ error: "Video unavailable or restricted." }, 400, withCors({}, origin));
+      }
       const language = (body.language || "unspecified").toLowerCase();
       const languages = normalizeLanguages(body.languages);
       const storedLanguages = languages.length ? languages : language ? [language] : [];
@@ -2747,6 +2758,10 @@ export default {
           continue;
         }
         const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+        if (!isUsableTitle(meta.title)) {
+          skipped.push({ youtubeUrl, reason: "Video unavailable" });
+          continue;
+        }
         const languages = normalizeLanguages(row.languages || row.language || row.lang);
         const language =
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
@@ -2842,6 +2857,10 @@ export default {
           continue;
         }
         const meta = await fetchYouTubeMeta(env, youtubeId, youtubeUrl);
+        if (!isUsableTitle(meta.title)) {
+          skipped.push({ youtubeUrl, reason: "Video unavailable" });
+          continue;
+        }
         const languages = normalizeLanguages(row.languages || row.language || row.lang);
         const language =
           languages[0] || String(row.language || row.lang || "unspecified").toLowerCase();
