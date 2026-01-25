@@ -555,6 +555,19 @@ function safeJsonArray(value) {
   }
 }
 
+async function isRateLimited(env, table, column, userId, windowSeconds) {
+  if (!env || !env.DB) return false;
+  const row = await env.DB.prepare(
+    "SELECT created_at FROM " + table + " WHERE " + column + " = ? ORDER BY created_at DESC LIMIT 1"
+  )
+    .bind(userId)
+    .first();
+  if (!row || !row.created_at) return false;
+  const last = Date.parse(row.created_at);
+  if (!Number.isFinite(last)) return false;
+  return Date.now() - last < windowSeconds * 1000;
+}
+
 function tokenizeText(value) {
   return String(value || "")
     .toLowerCase()
@@ -2044,6 +2057,16 @@ export default {
       )
         .bind(user.id, videoId)
         .first();
+      if (!existing) {
+        const limited = await isRateLimited(env, "likes", "user_id", user.id, 5);
+        if (limited) {
+          return jsonResponse(
+            { error: "Please wait a moment before liking again." },
+            429,
+            withCors({}, origin)
+          );
+        }
+      }
       if (existing) {
         await env.DB.prepare("DELETE FROM likes WHERE user_id = ? AND video_id = ?")
           .bind(user.id, videoId)
@@ -2133,6 +2156,14 @@ export default {
       const body = await parseJson(request);
       if (!body.videoId || !body.reason || String(body.reason).trim().length < 5) {
         return jsonResponse({ error: "Reason required (min 5 chars)." }, 400, withCors({}, origin));
+      }
+      const limited = await isRateLimited(env, "reports", "reporter_id", user.id, 30);
+      if (limited) {
+        return jsonResponse(
+          { error: "Please wait before sending another report." },
+          429,
+          withCors({}, origin)
+        );
       }
       await env.DB.prepare(
         "INSERT INTO reports (video_id, reporter_id, reason, created_at) VALUES (?, ?, ?, ?)"

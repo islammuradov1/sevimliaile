@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#ff6b4a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; frame-ancestors 'self'; img-src 'self' data: https://img.youtube.com https://i.ytimg.com; script-src 'self' https://www.youtube.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://www.googleapis.com https://www.youtube.com https://www.youtube-nocookie.com https://*.googlevideo.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; media-src 'self' https://*.googlevideo.com; upgrade-insecure-requests">
   <link rel="apple-touch-icon" href="/logo.png">
   <title>Sevimli Aile - Video Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,8 +128,6 @@
       </form>
       <div class="search-hint">Search all videos and channels</div>
     </div>
-    <div class="ad-slot ad-slot--banner hidden" id="video-top-ad-slot" data-max="1" data-slot="video_top" aria-label="Video ads"></div>
-
     <div class="layout">
       <main>
         <section class="player-area" id="player-area">
@@ -158,6 +157,7 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
+                  <span data-i18n="control_start">Start</span>
                 </button>
               </div>
               <div class="overlay end" id="end-card" aria-hidden="true">
@@ -169,11 +169,13 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12 5v4l5-5-5-5v4a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7z"/>
                     </svg>
+                    <span data-i18n="control_replay">Replay</span>
                   </button>
                   <button class="primary icon-button" data-action="next" id="end-next" name="end-next" type="button" aria-label="Next video" data-i18n-aria="control_next">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M6 18 14.5 12 6 6v12zm10-12h2v12h-2z"/>
                     </svg>
+                    <span data-i18n="control_next">Next</span>
                   </button>
                 </div>
                 <div class="card-meta" id="next-up"></div>
@@ -186,7 +188,6 @@
               <span>Exit</span>
             </button>
           </div>
-          <div class="ad-slot ad-slot--banner hidden" id="video-mid-ad-slot" data-max="1" data-slot="video_mid" aria-label="Video ads"></div>
 
           <div class="player-meta">
             <div class="meta-title" id="video-title" data-i18n="video_select">Select a video</div>
@@ -203,10 +204,6 @@
           <div class="control-dock" id="control-dock">
             <button class="pill icon-button control-dock-toggle" id="controls-toggle" type="button" aria-label="Hide controls" data-i18n-aria="controls_hide"></button>
             <div class="control-dock-inner" id="control-dock-inner">
-              <div class="heart-row">
-                <button class="ghost icon-button" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
-              </div>
-
               <div class="controls">
                 <div class="timeline">
                   <label class="sr-only" for="seek-bar" data-i18n="timeline_label">Video timeline</label>
@@ -217,60 +214,75 @@
                   </div>
                   <input type="range" id="seek-bar" name="seek-bar" min="0" max="0" value="0" step="1" aria-label="Seek video timeline" data-i18n-aria="timeline_seek">
                 </div>
-                <div class="control-group">
-                  <div class="control-row control-row--modes">
-                    <button class="ghost icon-button" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
-                    <button class="ghost icon-button" id="view-theater" type="button" aria-label="Theater"></button>
-                    <button class="ghost icon-button" id="view-mini" type="button" aria-label="Mini player"></button>
-                    <button class="ghost icon-button" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
-                    <select class="quality-select" id="speed-select" aria-label="Playback speed" data-i18n-aria="control_speed">
-                      <option value="0.5">0.5x</option>
-                      <option value="0.75">0.75x</option>
-                      <option value="1" selected>1x</option>
-                      <option value="1.25">1.25x</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="2">2x</option>
-                    </select>
-                    <select class="quality-select" id="quality-select" aria-label="Playback quality">
-                      <option value="default" data-i18n="quality_auto">Auto</option>
-                      <option value="tiny">144p</option>
-                      <option value="small">240p</option>
-                      <option value="medium">360p</option>
-                      <option value="large">480p</option>
-                      <option value="hd720">720p</option>
-                      <option value="hd1080" selected>1080p</option>
-                      <option value="hd1440">2K</option>
-                      <option value="hd2160">4K</option>
-                    </select>
-                    <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
-                      <option value="off" data-i18n="captions_off">Captions off</option>
-                      <option value="english" data-i18n="lang_english">English</option>
-                      <option value="russian" data-i18n="lang_russian">Russian</option>
-                      <option value="chinese" data-i18n="lang_chinese">Chinese</option>
-                      <option value="turkish" data-i18n="lang_turkish">Turkish</option>
-                      <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
-                      <option value="arabic" data-i18n="lang_arabic">Arabic</option>
-                    </select>
-                  </div>
-                  <div class="control-row">
-                    <button class="ghost icon-button" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
-                    <button class="ghost icon-button" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
-                    <button class="ghost icon-button" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
-                    <button class="ghost icon-button" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
-                    <input class="volume-range" type="range" id="volume-bar" name="volume-bar" min="0" max="100" step="1" value="100" aria-label="Volume" data-i18n-aria="control_volume">
-                    <span class="volume-readout" id="volume-level">100%</span>
-                    <button class="ghost icon-button" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
-                    <button class="ghost icon-button" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
-                  </div>
-                  <div class="control-row control-row--secondary">
-                    <button class="ghost icon-button" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
-                    <button class="primary icon-button" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
-                  </div>
-                  <div class="control-row control-row--emote">
-                    <button class="ghost icon-button" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
-                  </div>
+                <div class="control-row control-row--primary">
+                  <button class="ghost icon-button show-label" data-action="play-toggle" id="controls-play" name="controls-play" type="button" aria-label="Play"></button>
+                  <button class="ghost icon-button show-label" data-action="mute-toggle" id="controls-mute" name="controls-mute" type="button" aria-label="Mute"></button>
+                  <button class="ghost icon-button show-label" data-action="volume-down" id="controls-volume-down" name="controls-volume-down" type="button" aria-label="Volume down"></button>
+                  <input class="volume-range" type="range" id="volume-bar" name="volume-bar" min="0" max="100" step="1" value="100" aria-label="Volume" data-i18n-aria="control_volume">
+                  <span class="volume-readout" id="volume-level">100%</span>
+                  <button class="ghost icon-button show-label" data-action="volume-up" id="controls-volume-up" name="controls-volume-up" type="button" aria-label="Volume up"></button>
                 </div>
               </div>
+              <details class="controls-advanced" id="controls-advanced">
+                <summary data-i18n="controls_more">More controls</summary>
+                <div class="control-group">
+                  <div class="control-row control-row--secondary">
+                    <button class="ghost icon-button show-label" data-action="seek-back" id="controls-seek-back" name="controls-seek-back" type="button" aria-label="Back 30 seconds"></button>
+                    <button class="ghost icon-button show-label" data-action="seek-forward" id="controls-seek-forward" name="controls-seek-forward" type="button" aria-label="Forward 30 seconds"></button>
+                    <button class="ghost icon-button show-label" data-action="replay" id="controls-replay" name="controls-replay" type="button" aria-label="Replay"></button>
+                    <button class="primary icon-button show-label" data-action="next" id="controls-next" name="controls-next" type="button" aria-label="Next video"></button>
+                  </div>
+                  <div class="control-row control-row--modes">
+                    <button class="ghost icon-button show-label" data-action="auto-next" id="controls-auto-next" name="controls-auto-next" type="button" aria-label="Auto next"></button>
+                    <button class="ghost icon-button show-label" id="view-theater" type="button" aria-label="Theater"></button>
+                    <button class="ghost icon-button show-label" id="view-mini" type="button" aria-label="Mini player"></button>
+                    <button class="ghost icon-button show-label" data-action="fullscreen" id="controls-fullscreen" name="controls-fullscreen" type="button" aria-label="Fullscreen"></button>
+                  </div>
+                  <div class="control-row control-row--selectors">
+                    <label class="control-select">
+                      <span data-i18n="control_speed">Playback speed</span>
+                      <select class="quality-select" id="speed-select" aria-label="Playback speed" data-i18n-aria="control_speed">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                      </select>
+                    </label>
+                    <label class="control-select">
+                      <span data-i18n="control_quality">Quality</span>
+                      <select class="quality-select" id="quality-select" aria-label="Playback quality">
+                        <option value="default" data-i18n="quality_auto">Auto</option>
+                        <option value="tiny">144p</option>
+                        <option value="small">240p</option>
+                        <option value="medium">360p</option>
+                        <option value="large">480p</option>
+                        <option value="hd720">720p</option>
+                        <option value="hd1080" selected>1080p</option>
+                        <option value="hd1440">2K</option>
+                        <option value="hd2160">4K</option>
+                      </select>
+                    </label>
+                    <label class="control-select">
+                      <span data-i18n="captions_label">Captions language</span>
+                      <select class="quality-select" id="caption-select" aria-label="Captions language" data-i18n-aria="captions_label">
+                        <option value="off" data-i18n="captions_off">Captions off</option>
+                        <option value="english" data-i18n="lang_english">English</option>
+                        <option value="russian" data-i18n="lang_russian">Russian</option>
+                        <option value="chinese" data-i18n="lang_chinese">Chinese</option>
+                        <option value="turkish" data-i18n="lang_turkish">Turkish</option>
+                        <option value="azerbaijani" data-i18n="lang_azerbaijani">Azerbaijani</option>
+                        <option value="arabic" data-i18n="lang_arabic">Arabic</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="control-row control-row--emote">
+                    <button class="ghost icon-button show-label" data-action="heart" id="controls-heart" name="controls-heart" type="button" aria-label="Heart"></button>
+                    <button class="ghost icon-button show-label" data-action="report" id="controls-report" name="controls-report" type="button" aria-label="Report"></button>
+                  </div>
+                </div>
+              </details>
             </div>
           </div>
 
@@ -281,6 +293,7 @@
             <div class="grid related-grid" id="related-grid"></div>
             <div class="empty-state hidden" id="related-empty" data-i18n="related_empty">No related videos yet.</div>
           </div>
+          <div class="ad-slot ad-slot--banner hidden video-ad-slot" id="video-mid-ad-slot" data-max="1" data-slot="video_mid" aria-label="Video ads"></div>
         </section>
 
         <section class="recommendations" id="feed-view">

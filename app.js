@@ -471,6 +471,7 @@ const ui = {
         sidebar_show: "Show sidebar",
         controls_hide: "Hide controls",
         controls_show: "Show controls",
+        controls_more: "More controls",
         tech_panel_toggle: "Toggle player tools",
         search_placeholder: "Search videos",
         filter_label_day: "Day",
@@ -814,6 +815,7 @@ const ui = {
         control_volume_up: "Volume up",
         control_volume: "Volume",
         control_speed: "Playback speed",
+        control_quality: "Quality",
         control_report: "Report",
         control_replay: "Replay",
         control_next: "Next video",
@@ -981,6 +983,7 @@ const ui = {
         sidebar_show: "Показать боковую панель",
         controls_hide: "Скрыть управление",
         controls_show: "Показать управление",
+        controls_more: "Доп. управление",
         tech_panel_toggle: "Панель инструментов",
         search_placeholder: "Поиск видео",
         filter_label_day: "День",
@@ -1256,6 +1259,7 @@ const ui = {
         control_volume_up: "Увеличить громкость",
         control_volume: "Громкость",
         control_speed: "Скорость",
+        control_quality: "Качество",
         control_report: "Пожаловаться",
         control_replay: "Повтор",
         control_next: "Следующее видео",
@@ -1443,6 +1447,7 @@ const ui = {
         sidebar_show: "显示侧边栏",
         controls_hide: "隐藏控制栏",
         controls_show: "显示控制栏",
+        controls_more: "更多控制",
         tech_panel_toggle: "切换播放器工具",
         search_placeholder: "搜索视频",
         filter_label_day: "日期",
@@ -1718,6 +1723,7 @@ const ui = {
         control_volume_up: "提高音量",
         control_volume: "音量",
         control_speed: "播放速度",
+        control_quality: "画质",
         control_report: "举报",
         control_replay: "重播",
         control_next: "下一个视频",
@@ -1905,6 +1911,7 @@ const ui = {
         sidebar_show: "Kenar çubuğunu göster",
         controls_hide: "Kontrolleri gizle",
         controls_show: "Kontrolleri göster",
+        controls_more: "Daha fazla kontrol",
         tech_panel_toggle: "Oynatıcı araçları",
         search_placeholder: "Videoları ara",
         filter_label_day: "Gün",
@@ -2180,6 +2187,7 @@ const ui = {
         control_volume_up: "Sesi artır",
         control_volume: "Ses",
         control_speed: "Oynatma hızı",
+        control_quality: "Kalite",
         control_report: "Bildir",
         control_replay: "Tekrar",
         control_next: "Sonraki video",
@@ -2367,6 +2375,7 @@ const ui = {
         sidebar_show: "Yan paneli göstər",
         controls_hide: "İdarələri gizlət",
         controls_show: "İdarələri göstər",
+        controls_more: "Daha çox idarə",
         tech_panel_toggle: "Pleyer alətləri",
         search_placeholder: "Video axtarın",
         filter_label_day: "Gün",
@@ -2642,6 +2651,7 @@ const ui = {
         control_volume_up: "Səsi artır",
         control_volume: "Səs",
         control_speed: "Oxutma sürəti",
+        control_quality: "Keyfiyyət",
         control_report: "Şikayət",
         control_replay: "Təkrar",
         control_next: "Növbəti video",
@@ -2829,6 +2839,7 @@ const ui = {
         sidebar_show: "إظهار الشريط الجانبي",
         controls_hide: "إخفاء عناصر التحكم",
         controls_show: "إظهار عناصر التحكم",
+        controls_more: "عناصر تحكم إضافية",
         tech_panel_toggle: "أدوات المشغل",
         search_placeholder: "ابحث عن الفيديوهات",
         filter_label_day: "اليوم",
@@ -3104,6 +3115,7 @@ const ui = {
         control_volume_up: "رفع الصوت",
         control_volume: "الصوت",
         control_speed: "سرعة التشغيل",
+        control_quality: "الجودة",
         control_report: "إبلاغ",
         control_replay: "إعادة",
         control_next: "الفيديو التالي",
@@ -5177,6 +5189,11 @@ const ui = {
         return;
       }
       const key = event.key ? event.key.toLowerCase() : "";
+      const view = document.body.getAttribute("data-view") || "";
+      if (document.fullscreenElement && view === "watch" && (key === "escape" || key === "f")) {
+        event.preventDefault();
+        return;
+      }
       if (key === " " || key === "spacebar") {
         event.preventDefault();
         togglePlay();
