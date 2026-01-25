@@ -2108,6 +2108,19 @@
   .ad-slot--tall {
     order: 2;
   }
+
+  .games-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .games-sidebar {
+    order: 2;
+  }
+
+  .games-sidebar .ad-slot {
+    position: static;
+    max-width: none;
+  }
 }
 
 .ad-slot.hidden {
@@ -2297,6 +2310,28 @@
 .games-view {
   display: grid;
   gap: 18px;
+}
+
+.games-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: 18px;
+  align-items: start;
+}
+
+.games-main {
+  display: grid;
+  gap: 18px;
+}
+
+.games-sidebar {
+  width: 100%;
+}
+
+.games-sidebar .ad-slot {
+  max-width: 300px;
+  position: sticky;
+  top: 16px;
 }
 
 .games-head {

@@ -644,106 +644,113 @@
         
 
         <section class="games-preview hidden" id="games-view" aria-hidden="true">
-          <div class="section-head games-head">
-            <div>
-              <h2 data-i18n="games_title">Games</h2>
-              <p class="card-meta" data-i18n="games_subtitle">Quick emoji games for kids.</p>
-            </div>
-          </div>
-          <div class="games-points" id="games-points">
-            <div class="games-points-meta">
-              <span class="points-label" data-i18n="games_points_label">Points</span>
-              <span class="points-value" id="games-points-value">0</span>
-              <span class="card-meta" data-i18n="games_points_note">Win games to earn points.</span>
-              <div class="points-progress" aria-live="polite">
-                <div class="points-track" id="games-points-track" role="progressbar" aria-valuemin="0" aria-valuemax="500" aria-valuenow="0">
-                  <div class="points-fill" id="games-points-fill"></div>
+          <div class="games-layout">
+            <div class="games-main">
+              <div class="section-head games-head">
+                <div>
+                  <h2 data-i18n="games_title">Games</h2>
+                  <p class="card-meta" data-i18n="games_subtitle">Quick emoji games for kids.</p>
                 </div>
-                <div class="card-meta points-progress-text" id="games-points-progress-text">0 / 500</div>
               </div>
-            </div>
-            <div class="games-points-actions">
-              <button class="pill" id="games-redeem" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
-              <span class="card-meta" id="games-redeem-message" aria-live="polite"></span>
-            </div>
-          </div>
-          <div class="games-preview-main">
-            <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
-            <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
-          </div>
-          <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
-          <div class="section-head games-detail-head">
-            <button class="pill ghost" id="games-back" type="button" data-i18n="games_back">Back</button>
-            <div>
-              <h2 id="games-detail-title" data-i18n="games_title">Games</h2>
-              <p class="card-meta" id="games-detail-subtitle" data-i18n="games_subtitle">Quick emoji games for kids.</p>
-            </div>
-            <div class="games-detail-tag">
-              <span data-i18n="games_kid_playing">Kid playing</span>
-            </div>
-          </div>
-          <div class="games-detail-board">
-            <article class="game-card hidden" data-game="memory" aria-labelledby="game-memory-title">
-              <div class="game-head">
-                <h3 id="game-memory-title" data-i18n="games_memory_title">Memory Flip</h3>
-                <p class="card-meta" data-i18n="games_memory_instruction">Flip two cards to find matching fruits.</p>
-              </div>
-              <div class="game-grid grid-4" id="games-memory-grid" role="grid" data-i18n-aria="games_memory_aria"></div>
-              <div class="game-status" id="games-memory-status" role="status" aria-live="polite"></div>
-              <div class="game-actions">
-                <button class="ghost" id="games-memory-reset" type="button" data-i18n="games_memory_reset">Restart</button>
-              </div>
-            </article>
-            <article class="game-card hidden" data-game="find" aria-labelledby="game-find-title">
-              <div class="game-head">
-                <h3 id="game-find-title" data-i18n="games_find_title">Find the Fruit</h3>
-                <p class="card-meta" data-i18n="games_find_instruction">Tap the fruit we ask for.</p>
-              </div>
-              <div class="game-prompt" id="games-find-prompt"></div>
-              <div class="game-grid grid-3" id="games-find-grid" role="grid" data-i18n-aria="games_find_aria"></div>
-              <div class="game-status" id="games-find-status" role="status" aria-live="polite"></div>
-              <div class="game-actions">
-                <button class="ghost" id="games-find-next" type="button" data-i18n="games_find_next">Next round</button>
-              </div>
-            </article>
-            <article class="game-card hidden" data-game="math" aria-labelledby="game-math-title">
-              <div class="game-head">
-                <h3 id="game-math-title" data-i18n="games_math_title">Math Mission</h3>
-                <p class="card-meta" data-i18n="games_math_instruction">Choose a level and solve the question.</p>
-              </div>
-              <div class="math-levels" role="group" aria-label="Math levels">
-                <button class="pill" type="button" data-math-level="easy" data-i18n="games_math_easy">Easy</button>
-                <button class="pill" type="button" data-math-level="medium" data-i18n="games_math_medium">Medium</button>
-                <button class="pill" type="button" data-math-level="hard" data-i18n="games_math_hard">Hard</button>
-              </div>
-              <div class="math-card">
-                <div class="math-question" id="games-math-question">1 + 1 = ?</div>
-                <div class="math-progress" id="games-math-progress">0 / 5</div>
-                <input class="math-input" id="games-math-answer" type="text" inputmode="decimal" placeholder="Type the answer" data-i18n-placeholder="games_math_placeholder">
-                <div class="math-actions">
-                  <button class="pill" id="games-math-submit" type="button" data-i18n="games_math_submit">Check</button>
-                  <button class="ghost" id="games-math-next" type="button" data-i18n="games_math_next">Next</button>
+              <div class="games-points" id="games-points">
+                <div class="games-points-meta">
+                  <span class="points-label" data-i18n="games_points_label">Points</span>
+                  <span class="points-value" id="games-points-value">0</span>
+                  <span class="card-meta" data-i18n="games_points_note">Win games to earn points.</span>
+                  <div class="points-progress" aria-live="polite">
+                    <div class="points-track" id="games-points-track" role="progressbar" aria-valuemin="0" aria-valuemax="500" aria-valuenow="0">
+                      <div class="points-fill" id="games-points-fill"></div>
+                    </div>
+                    <div class="card-meta points-progress-text" id="games-points-progress-text">0 / 500</div>
+                  </div>
                 </div>
-                <div class="game-status" id="games-math-status" role="status" aria-live="polite"></div>
+                <div class="games-points-actions">
+                  <button class="pill" id="games-redeem" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
+                  <span class="card-meta" id="games-redeem-message" aria-live="polite"></span>
+                </div>
               </div>
-            </article>
-          </div>
-        </section>
-          <details class="leaderboard-collapsible" id="games-leaderboard">
-            <summary>
-              <span data-i18n="games_leaderboard_title">Leaderboard</span>
-              <span aria-hidden="true">▾</span>
-            </summary>
-            <div class="scoreboard chalkboard" id="games-scoreboard">
-              <div class="scoreboard-head">
-                <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
-                <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
+              <div class="games-preview-main">
+                <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
+                <div class="games-preview-grid" id="games-preview-grid" aria-label="Game shortcuts"></div>
               </div>
-              <div class="leaderboard-list" id="games-scoreboard-body">
-                <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
+              <section class="games-detail hidden" id="games-detail-view" aria-hidden="true">
+              <div class="section-head games-detail-head">
+                <button class="pill ghost" id="games-back" type="button" data-i18n="games_back">Back</button>
+                <div>
+                  <h2 id="games-detail-title" data-i18n="games_title">Games</h2>
+                  <p class="card-meta" id="games-detail-subtitle" data-i18n="games_subtitle">Quick emoji games for kids.</p>
+                </div>
+                <div class="games-detail-tag">
+                  <span data-i18n="games_kid_playing">Kid playing</span>
+                </div>
               </div>
+              <div class="games-detail-board">
+                <article class="game-card hidden" data-game="memory" aria-labelledby="game-memory-title">
+                  <div class="game-head">
+                    <h3 id="game-memory-title" data-i18n="games_memory_title">Memory Flip</h3>
+                    <p class="card-meta" data-i18n="games_memory_instruction">Flip two cards to find matching fruits.</p>
+                  </div>
+                  <div class="game-grid grid-4" id="games-memory-grid" role="grid" data-i18n-aria="games_memory_aria"></div>
+                  <div class="game-status" id="games-memory-status" role="status" aria-live="polite"></div>
+                  <div class="game-actions">
+                    <button class="ghost" id="games-memory-reset" type="button" data-i18n="games_memory_reset">Restart</button>
+                  </div>
+                </article>
+                <article class="game-card hidden" data-game="find" aria-labelledby="game-find-title">
+                  <div class="game-head">
+                    <h3 id="game-find-title" data-i18n="games_find_title">Find the Fruit</h3>
+                    <p class="card-meta" data-i18n="games_find_instruction">Tap the fruit we ask for.</p>
+                  </div>
+                  <div class="game-prompt" id="games-find-prompt"></div>
+                  <div class="game-grid grid-3" id="games-find-grid" role="grid" data-i18n-aria="games_find_aria"></div>
+                  <div class="game-status" id="games-find-status" role="status" aria-live="polite"></div>
+                  <div class="game-actions">
+                    <button class="ghost" id="games-find-next" type="button" data-i18n="games_find_next">Next round</button>
+                  </div>
+                </article>
+                <article class="game-card hidden" data-game="math" aria-labelledby="game-math-title">
+                  <div class="game-head">
+                    <h3 id="game-math-title" data-i18n="games_math_title">Math Mission</h3>
+                    <p class="card-meta" data-i18n="games_math_instruction">Choose a level and solve the question.</p>
+                  </div>
+                  <div class="math-levels" role="group" aria-label="Math levels">
+                    <button class="pill" type="button" data-math-level="easy" data-i18n="games_math_easy">Easy</button>
+                    <button class="pill" type="button" data-math-level="medium" data-i18n="games_math_medium">Medium</button>
+                    <button class="pill" type="button" data-math-level="hard" data-i18n="games_math_hard">Hard</button>
+                  </div>
+                  <div class="math-card">
+                    <div class="math-question" id="games-math-question">1 + 1 = ?</div>
+                    <div class="math-progress" id="games-math-progress">0 / 5</div>
+                    <input class="math-input" id="games-math-answer" type="text" inputmode="decimal" placeholder="Type the answer" data-i18n-placeholder="games_math_placeholder">
+                    <div class="math-actions">
+                      <button class="pill" id="games-math-submit" type="button" data-i18n="games_math_submit">Check</button>
+                      <button class="ghost" id="games-math-next" type="button" data-i18n="games_math_next">Next</button>
+                    </div>
+                    <div class="game-status" id="games-math-status" role="status" aria-live="polite"></div>
+                  </div>
+                </article>
+              </div>
+            </section>
+              <details class="leaderboard-collapsible" id="games-leaderboard">
+                <summary>
+                  <span data-i18n="games_leaderboard_title">Leaderboard</span>
+                  <span aria-hidden="true">▾</span>
+                </summary>
+                <div class="scoreboard chalkboard" id="games-scoreboard">
+                  <div class="scoreboard-head">
+                    <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
+                    <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
+                  </div>
+                  <div class="leaderboard-list" id="games-scoreboard-body">
+                    <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
+                  </div>
+                </div>
+              </details>
             </div>
-          </details>
+            <aside class="games-sidebar" aria-label="Game ads">
+              <div class="ad-slot" id="games-ad-slot" data-slot="games" aria-label="Game ads"></div>
+            </aside>
+          </div>
         </section>
 
         
