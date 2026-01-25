@@ -407,18 +407,20 @@ function parseCsv(text) {
 
 function parseSqlInserts(text) {
   const rows = [];
-  const regex = /INSERT\s+INTO\s+videos\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/gi;
+  const regex = /INSERT\s+INTO\s+videos\s*\(([^)]+)\)\s*VALUES\s*/gi;
   let match;
   while ((match = regex.exec(text)) !== null) {
     const columns = match[1]
       .split(",")
-      .map((col) => col.trim().replace(/\"/g, "").toLowerCase());
-    const values = [];
+      .map((col) => col.trim().replace(/["`]/g, "").toLowerCase());
     let current = "";
+    let currentTuple = null;
     let inString = false;
-    for (let i = 0; i < match[2].length; i++) {
-      const ch = match[2][i];
-      const next = match[2][i + 1];
+    let depth = 0;
+    const startIndex = regex.lastIndex;
+    for (let i = startIndex; i <= text.length; i++) {
+      const ch = text[i] || "";
+      const next = text[i + 1];
       if (ch === "'" && next === "'" && inString) {
         current += "'";
         i += 1;
@@ -428,19 +430,51 @@ function parseSqlInserts(text) {
         inString = !inString;
         continue;
       }
-      if (!inString && ch === ",") {
-        values.push(current.trim());
-        current = "";
-        continue;
+      if (!inString) {
+        if (ch === "(") {
+          depth += 1;
+          if (depth === 1) {
+            currentTuple = [];
+            current = "";
+            continue;
+          }
+        }
+        if (ch === ")") {
+          if (depth === 1 && currentTuple) {
+            currentTuple.push(current.trim());
+            const row = {};
+            columns.forEach((column, index) => {
+              row[column] = currentTuple[index] || "";
+            });
+            rows.push(row);
+            currentTuple = null;
+            current = "";
+          }
+          depth = Math.max(depth - 1, 0);
+          continue;
+        }
+        if (depth === 1 && ch === ",") {
+          if (currentTuple) {
+            currentTuple.push(current.trim());
+          }
+          current = "";
+          continue;
+        }
+        if (depth === 0) {
+          if (ch === ";") {
+            regex.lastIndex = i + 1;
+            break;
+          }
+          if (/i/i.test(ch) && text.slice(i).match(/^insert\s+into\s+videos/i)) {
+            regex.lastIndex = i;
+            break;
+          }
+        }
       }
-      current += ch;
+      if (depth >= 1) {
+        current += ch;
+      }
     }
-    values.push(current.trim());
-    const row = {};
-    columns.forEach((column, index) => {
-      row[column] = values[index] || "";
-    });
-    rows.push(row);
   }
   return rows;
 }
