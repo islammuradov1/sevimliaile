@@ -64,11 +64,16 @@ const ui = {
       gamesPreview: document.getElementById("games-view"),
       gamesPreviewGrid: document.getElementById("games-preview-grid"),
       gamesAdSlot: document.getElementById("games-ad-slot"),
+      gamesAdSlotLeft: document.getElementById("games-ad-slot-left"),
+      gamesAdSlotRight: document.getElementById("games-ad-slot-right"),
       gamesDetailView: document.getElementById("games-detail-view"),
       gamesDetailTitle: document.getElementById("games-detail-title"),
       gamesDetailSubtitle: document.getElementById("games-detail-subtitle"),
       gamesAdSlotDetail: document.getElementById("games-ad-slot-detail"),
       gamesPointsValue: document.getElementById("games-points-value"),
+      gamesPointsFill: document.getElementById("games-points-fill"),
+      gamesPointsTrack: document.getElementById("games-points-track"),
+      gamesPointsProgressText: document.getElementById("games-points-progress-text"),
       gamesRedeem: document.getElementById("games-redeem"),
       gamesRedeemMessage: document.getElementById("games-redeem-message"),
       gamesPointsValueDetail: document.getElementById("games-points-value-detail"),
@@ -530,12 +535,14 @@ const ui = {
         games_redeem_success: "Pro unlocked for 1 month 🎉",
         games_points_earned: "You earned {points} points!",
         games_points_limit: "Daily points limit reached. Try again tomorrow.",
+        games_points_progress: "{points} / {goal} points",
         games_leaderboard_title: "Leaderboard",
         games_leaderboard_note: "Top kids by points.",
         games_leaderboard_name: "Kid",
         games_leaderboard_points: "Points",
         games_leaderboard_empty: "No scores yet.",
         games_leaderboard_kid: "Kid",
+        games_leaderboard_you: "You",
         games_scoreboard_title: "لوحة النقاط",
         games_scoreboard_note: "آخر نشاط للنقاط.",
         games_scoreboard_type: "النوع",
@@ -1029,12 +1036,14 @@ const ui = {
         games_redeem_success: "Pro на 1 месяц открыт 🎉",
         games_points_earned: "Вы получили {points} очков!",
         games_points_limit: "Дневной лимит очков исчерпан. Попробуйте завтра.",
+        games_points_progress: "{points} / {goal} очков",
         games_leaderboard_title: "Таблица лидеров",
         games_leaderboard_note: "Дети с самыми высокими очками.",
         games_leaderboard_name: "Ребенок",
         games_leaderboard_points: "Очки",
         games_leaderboard_empty: "Пока нет очков.",
         games_leaderboard_kid: "Ребенок",
+        games_leaderboard_you: "Вы",
         games_fruit_aria: "Поле фруктового совпадения",
         games_memory_aria: "Поле игры на память",
         games_find_aria: "Поле «Найди фрукт»",
@@ -1466,12 +1475,14 @@ const ui = {
         games_redeem_success: "已解锁 1 个月 Pro 🎉",
         games_points_earned: "你获得了 {points} 积分！",
         games_points_limit: "今日积分已达上限，请明天再试。",
+        games_points_progress: "{points} / {goal} 积分",
         games_leaderboard_title: "排行榜",
         games_leaderboard_note: "积分最高的孩子。",
         games_leaderboard_name: "孩子",
         games_leaderboard_points: "积分",
         games_leaderboard_empty: "暂无积分。",
         games_leaderboard_kid: "孩子",
+        games_leaderboard_you: "你",
         games_fruit_aria: "水果配对棋盘",
         games_memory_aria: "记忆翻翻乐棋盘",
         games_find_aria: "找水果棋盘",
@@ -1903,12 +1914,14 @@ const ui = {
         games_redeem_success: "1 aylık Pro açıldı 🎉",
         games_points_earned: "{points} puan kazandın!",
         games_points_limit: "Günlük puan limiti doldu. Yarın tekrar dene.",
+        games_points_progress: "{points} / {goal} puan",
         games_leaderboard_title: "Liderlik Tablosu",
         games_leaderboard_note: "En çok puanı olan çocuklar.",
         games_leaderboard_name: "Çocuk",
         games_leaderboard_points: "Puan",
         games_leaderboard_empty: "Henüz puan yok.",
         games_leaderboard_kid: "Çocuk",
+        games_leaderboard_you: "Sen",
         games_fruit_aria: "Meyve eşleşme tahtası",
         games_memory_aria: "Hafıza oyunu tahtası",
         games_find_aria: "Meyveyi bul tahtası",
@@ -2340,12 +2353,14 @@ const ui = {
         games_redeem_success: "1 aylıq Pro açıldı 🎉",
         games_points_earned: "{points} puan qazandın!",
         games_points_limit: "Günlük puan limiti doldu. Sabah yenə yoxla.",
+        games_points_progress: "{points} / {goal} puan",
         games_leaderboard_title: "Xal liderləri",
         games_leaderboard_note: "Ən çox xal toplayan uşaqlar.",
         games_leaderboard_name: "Uşaq",
         games_leaderboard_points: "Xal",
         games_leaderboard_empty: "Hələ xal yoxdur.",
         games_leaderboard_kid: "Uşaq",
+        games_leaderboard_you: "Sən",
         games_fruit_aria: "Meyvə uyğunlaşdırma lövhəsi",
         games_memory_aria: "Yaddaş oyunu lövhəsi",
         games_find_aria: "Meyvəni tap lövhəsi",
@@ -2777,12 +2792,14 @@ const ui = {
         games_redeem_success: "تم تفعيل Pro لمدة شهر 🎉",
         games_points_earned: "لقد ربحت {points} نقطة!",
         games_points_limit: "تم الوصول للحد اليومي للنقاط. جرّب غداً.",
+        games_points_progress: "{points} / {goal} نقطة",
         games_leaderboard_title: "لوحة المتصدرين",
         games_leaderboard_note: "الأطفال الأعلى نقاطًا.",
         games_leaderboard_name: "الطفل",
         games_leaderboard_points: "النقاط",
         games_leaderboard_empty: "لا توجد نقاط بعد.",
         games_leaderboard_kid: "الطفل",
+        games_leaderboard_you: "أنت",
         games_fruit_aria: "لوحة مطابقة الفواكه",
         games_memory_aria: "لوحة لعبة الذاكرة",
         games_find_aria: "لوحة اعثر على الفاكهة",
@@ -3772,6 +3789,20 @@ const ui = {
       if (ui.gamesPointsValue) {
         ui.gamesPointsValue.textContent = String(points);
       }
+      if (ui.gamesPointsFill) {
+        const goal = PRO_REDEEM_COST;
+        const percent = Math.min(points / goal, 1) * 100;
+        ui.gamesPointsFill.style.width = percent.toFixed(1) + "%";
+      }
+      if (ui.gamesPointsTrack) {
+        ui.gamesPointsTrack.setAttribute("aria-valuenow", String(points));
+        ui.gamesPointsTrack.setAttribute("aria-valuemax", String(PRO_REDEEM_COST));
+      }
+      if (ui.gamesPointsProgressText) {
+        ui.gamesPointsProgressText.textContent = t("games_points_progress")
+          .replace("{points}", String(points))
+          .replace("{goal}", String(PRO_REDEEM_COST));
+      }
       if (ui.gamesPointsValueDetail) {
         ui.gamesPointsValueDetail.textContent = String(points);
       }
@@ -3838,6 +3869,29 @@ const ui = {
         return;
       }
       ui.gamesScoreboardBody.innerHTML = "";
+      if (currentUser) {
+        const youRow = document.createElement("div");
+        youRow.className = "leaderboard-item is-current";
+        const youName =
+          currentUser.display_name || currentUser.name || currentUser.email || t("games_leaderboard_you");
+        const youAvatar = currentUser.avatar_url || "";
+        youRow.innerHTML =
+          "<div class=\"leaderboard-rank\">★</div>" +
+          "<div class=\"leaderboard-avatar\" " +
+          (youAvatar
+            ? "style=\\\"background-image: url('" + escapeHtml(youAvatar) + "')\\\""
+            : "") +
+          "></div>" +
+          "<div class=\"leaderboard-name\">" +
+          escapeHtml(youName) +
+          " <span class=\"leaderboard-tag\">" +
+          t("games_leaderboard_you") +
+          "</span></div>" +
+          "<div class=\"leaderboard-points\">" +
+          escapeHtml(String(currentUser.points || 0)) +
+          "</div>";
+        ui.gamesScoreboardBody.appendChild(youRow);
+      }
       leaders.forEach((entry, index) => {
         const row = document.createElement("div");
         row.className = "leaderboard-item";
@@ -3911,6 +3965,7 @@ const ui = {
       }
       container.innerHTML = "";
       const list = Array.isArray(ads) ? ads : [];
+      const max = Math.max(1, Number(container.dataset.max || "2"));
       container.classList.remove("hidden");
       if (!list.length) {
         const placeholder = document.createElement("div");
@@ -3925,7 +3980,7 @@ const ui = {
         container.appendChild(placeholder);
         return;
       }
-      list.slice(0, 2).forEach((ad) => {
+      list.slice(0, max).forEach((ad) => {
         const card = document.createElement("a");
         card.className = "ad-card";
         card.href = ad.link_url || "#";
@@ -3944,7 +3999,7 @@ const ui = {
           "</div></div>";
         container.appendChild(card);
       });
-      startAdViewTracking(list.slice(0, 2));
+      startAdViewTracking(list.slice(0, max));
     }
 
     async function fetchAds(slot) {
@@ -3963,6 +4018,8 @@ const ui = {
       }
       adsFetching = false;
       renderAdSlot(ui.gamesAdSlot, adsCache.games || []);
+      renderAdSlot(ui.gamesAdSlotLeft, adsCache.games || []);
+      renderAdSlot(ui.gamesAdSlotRight, adsCache.games || []);
       renderAdSlot(ui.gamesAdSlotDetail, adsCache.games || []);
     }
 

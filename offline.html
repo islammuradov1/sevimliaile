@@ -584,13 +584,13 @@
             const button = document.createElement("button");
             button.type = "button";
             button.className = "tile";
-            button.dataset.fruit = fruit;
-            button.innerHTML =
-              "<span class="tile-emoji" aria-hidden="true">" +
-              fruitEmoji[fruit] +
-              "</span><span class="tile-label">" +
-              t("fruit_" + fruit) +
-              "</span>";
+          button.dataset.fruit = fruit;
+          button.innerHTML =
+            "<span class=\"tile-emoji\" aria-hidden=\"true\">" +
+            fruitEmoji[fruit] +
+            "</span><span class=\"tile-label\">" +
+            t("fruit_" + fruit) +
+            "</span>";
             button.addEventListener("click", () => handlePick(fruit, button));
             els.gameGrid.appendChild(button);
           });

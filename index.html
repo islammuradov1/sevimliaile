@@ -646,6 +646,12 @@
               <span class="points-label" data-i18n="games_points_label">Points</span>
               <span class="points-value" id="games-points-value">0</span>
               <span class="card-meta" data-i18n="games_points_note">Win games to earn points.</span>
+              <div class="points-progress" aria-live="polite">
+                <div class="points-track" id="games-points-track" role="progressbar" aria-valuemin="0" aria-valuemax="500" aria-valuenow="0">
+                  <div class="points-fill" id="games-points-fill"></div>
+                </div>
+                <div class="card-meta points-progress-text" id="games-points-progress-text">0 / 500</div>
+              </div>
             </div>
             <div class="games-points-actions">
               <button class="pill" id="games-redeem" type="button" data-i18n="games_redeem">Get 1 month Pro</button>
@@ -710,14 +716,18 @@
             </article>
           </div>
         </section>
-          <div class="scoreboard" id="games-scoreboard">
-            <div class="scoreboard-head">
-              <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
-              <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
+          <div class="leaderboard-wrap">
+            <div class="ad-slot ad-slot--tall" id="games-ad-slot-left" data-max="1" aria-label="Game ads"></div>
+            <div class="scoreboard chalkboard" id="games-scoreboard">
+              <div class="scoreboard-head">
+                <h3 data-i18n="games_leaderboard_title">Leaderboard</h3>
+                <span class="card-meta" data-i18n="games_leaderboard_note">Top kids by points.</span>
+              </div>
+              <div class="leaderboard-list" id="games-scoreboard-body">
+                <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
+              </div>
             </div>
-            <div class="leaderboard-list" id="games-scoreboard-body">
-              <div class="leaderboard-empty card-meta" data-i18n="games_leaderboard_empty">No scores yet.</div>
-            </div>
+            <div class="ad-slot ad-slot--tall" id="games-ad-slot-right" data-max="1" aria-label="Game ads"></div>
           </div>
           <div class="ad-slot" id="games-ad-slot" aria-label="Game ads"></div>
           <p class="card-meta games-preview-note" data-i18n="games_preview_note">Tap a game to play on its own page.</p>
