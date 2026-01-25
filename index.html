@@ -362,9 +362,20 @@
                   <select id="search-filter-religion" aria-label="Religion filter">
                     <option value="" data-i18n="filter_religion_all">All religions</option>
                     <option value="islam" data-i18n="religion_islam">Islam</option>
+                    <option value="shia" data-i18n="religion_shia">Shia</option>
+                    <option value="sunni" data-i18n="religion_sunni">Sunni</option>
                     <option value="christian" data-i18n="religion_christian">Christian</option>
+                    <option value="catholic" data-i18n="religion_catholic">Catholic</option>
+                    <option value="orthodox" data-i18n="religion_orthodox">Orthodox</option>
+                    <option value="protestant" data-i18n="religion_protestant">Protestant</option>
                     <option value="jews" data-i18n="religion_jews">Jews</option>
+                    <option value="jews_orthodox" data-i18n="religion_jews_orthodox">Orthodox</option>
+                    <option value="jews_conservative" data-i18n="religion_jews_conservative">Conservative</option>
+                    <option value="jews_reform" data-i18n="religion_jews_reform">Reform</option>
                     <option value="buddist" data-i18n="religion_buddist">Buddist</option>
+                    <option value="buddist_theravada" data-i18n="religion_buddist_theravada">Theravada</option>
+                    <option value="buddist_mahayana" data-i18n="religion_buddist_mahayana">Mahayana</option>
+                    <option value="buddist_vajrayana" data-i18n="religion_buddist_vajrayana">Vajrayana</option>
                     <option value="none" data-i18n="religion_none">No religion</option>
                   </select>
                 </div>
@@ -553,6 +564,44 @@
               </button>
               <div class="admin-section-body">
                 <div class="form-grid" id="admin-reports-page-list"></div>
+              </div>
+            </div>
+            <div class="admin-section" data-admin-section="religions">
+              <button class="admin-section-toggle" type="button" data-admin-toggle="religions">
+                <span data-i18n="admin_tab_religions">Religions</span>
+                <span aria-hidden="true">▾</span>
+              </button>
+              <div class="admin-section-body">
+                <div class="card-meta" data-i18n="admin_religions_title">Religion categories</div>
+                <form class="form-grid" id="admin-religions-base-form-page" method="post" action="#">
+                  <label for="admin-religions-base-key-page" data-i18n="admin_religions_key">Base key</label>
+                  <input id="admin-religions-base-key-page" name="admin-religions-base-key-page" type="text" placeholder="islam" required>
+                  <label for="admin-religions-base-label-page" data-i18n="admin_religions_label">Label</label>
+                  <input id="admin-religions-base-label-page" name="admin-religions-base-label-page" type="text" placeholder="Islam" required>
+                  <label class="pill">
+                    <input type="checkbox" id="admin-religions-base-active-page" checked>
+                    <span data-i18n="admin_religions_active">Active</span>
+                  </label>
+                  <div class="form-actions">
+                    <button class="ghost" type="submit" id="admin-religions-base-save-page" data-i18n="admin_religions_add_base">Add base</button>
+                  </div>
+                </form>
+                <form class="form-grid" id="admin-religions-detail-form-page" method="post" action="#">
+                  <label for="admin-religions-detail-base-page" data-i18n="admin_religions_base_select">Base</label>
+                  <select id="admin-religions-detail-base-page" name="admin-religions-detail-base-page"></select>
+                  <label for="admin-religions-detail-key-page" data-i18n="admin_religions_key">Detail key</label>
+                  <input id="admin-religions-detail-key-page" name="admin-religions-detail-key-page" type="text" placeholder="shia" required>
+                  <label for="admin-religions-detail-label-page" data-i18n="admin_religions_label">Label</label>
+                  <input id="admin-religions-detail-label-page" name="admin-religions-detail-label-page" type="text" placeholder="Shia" required>
+                  <label class="pill">
+                    <input type="checkbox" id="admin-religions-detail-active-page" checked>
+                    <span data-i18n="admin_religions_active">Active</span>
+                  </label>
+                  <div class="form-actions">
+                    <button class="ghost" type="submit" id="admin-religions-detail-save-page" data-i18n="admin_religions_add_detail">Add detail</button>
+                  </div>
+                </form>
+                <div class="form-grid" id="admin-religions-page-list"></div>
               </div>
             </div>
             <div class="admin-section" data-admin-section="ads">
@@ -885,6 +934,7 @@
           <button class="pill admin-tab" type="button" data-admin-tab="channels" data-i18n="admin_tab_channels">Channels</button>
           <button class="pill admin-tab" type="button" data-admin-tab="videos" data-i18n="admin_tab_videos">Videos</button>
           <button class="pill admin-tab" type="button" data-admin-tab="reports" data-i18n="admin_tab_reports">Reports</button>
+          <button class="pill admin-tab" type="button" data-admin-tab="religions" data-i18n="admin_tab_religions">Religions</button>
           <button class="pill admin-tab" type="button" data-admin-tab="imports" data-i18n="admin_tab_imports">Imports</button>
         </div>
       </div>
@@ -921,6 +971,39 @@
       <div class="admin-panel hidden" id="admin-reports-panel">
         <div class="card-meta" data-i18n="admin_reports">Reports</div>
         <div id="admin-reports" class="form-grid"></div>
+      </div>
+
+      <div class="admin-panel hidden" id="admin-religions">
+        <div class="card-meta" data-i18n="admin_religions_title">Religion categories</div>
+        <form class="form-grid" id="admin-religions-base-form" method="post" action="#">
+          <label for="admin-religions-base-key" data-i18n="admin_religions_key">Base key</label>
+          <input id="admin-religions-base-key" name="admin-religions-base-key" type="text" placeholder="islam" required>
+          <label for="admin-religions-base-label" data-i18n="admin_religions_label">Label</label>
+          <input id="admin-religions-base-label" name="admin-religions-base-label" type="text" placeholder="Islam" required>
+          <label class="pill">
+            <input type="checkbox" id="admin-religions-base-active" checked>
+            <span data-i18n="admin_religions_active">Active</span>
+          </label>
+          <div class="form-actions">
+            <button class="ghost" type="submit" id="admin-religions-base-save" data-i18n="admin_religions_add_base">Add base</button>
+          </div>
+        </form>
+        <form class="form-grid" id="admin-religions-detail-form" method="post" action="#">
+          <label for="admin-religions-detail-base" data-i18n="admin_religions_base_select">Base</label>
+          <select id="admin-religions-detail-base" name="admin-religions-detail-base"></select>
+          <label for="admin-religions-detail-key" data-i18n="admin_religions_key">Detail key</label>
+          <input id="admin-religions-detail-key" name="admin-religions-detail-key" type="text" placeholder="shia" required>
+          <label for="admin-religions-detail-label" data-i18n="admin_religions_label">Label</label>
+          <input id="admin-religions-detail-label" name="admin-religions-detail-label" type="text" placeholder="Shia" required>
+          <label class="pill">
+            <input type="checkbox" id="admin-religions-detail-active" checked>
+            <span data-i18n="admin_religions_active">Active</span>
+          </label>
+          <div class="form-actions">
+            <button class="ghost" type="submit" id="admin-religions-detail-save" data-i18n="admin_religions_add_detail">Add detail</button>
+          </div>
+        </form>
+        <div class="form-grid" id="admin-religions-list"></div>
       </div>
 
       <div class="admin-panel hidden" id="admin-imports">

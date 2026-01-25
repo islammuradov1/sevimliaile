@@ -3441,9 +3441,28 @@
     max-width: 100%;
   }
 
-  .admin-section-toggle {
-    flex-wrap: wrap;
-    text-align: left;
+.admin-section-toggle {
+  flex-wrap: wrap;
+  text-align: left;
+}
+}
+
+.admin-religion-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(160px, 1fr) 90px auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-religion-row input[type="text"],
+.admin-religion-row input[type="number"] {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .admin-religion-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 }
 

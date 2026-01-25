@@ -109,6 +109,16 @@ const ui = {
       adminReportsPage: document.getElementById("admin-reports-page"),
       adminReportsPageList: document.getElementById("admin-reports-page-list"),
       adminReportsBack: document.getElementById("admin-reports-back"),
+      adminReligionsPageList: document.getElementById("admin-religions-page-list"),
+      adminReligionsBaseFormPage: document.getElementById("admin-religions-base-form-page"),
+      adminReligionsDetailFormPage: document.getElementById("admin-religions-detail-form-page"),
+      adminReligionsBaseKeyPage: document.getElementById("admin-religions-base-key-page"),
+      adminReligionsBaseLabelPage: document.getElementById("admin-religions-base-label-page"),
+      adminReligionsBaseActivePage: document.getElementById("admin-religions-base-active-page"),
+      adminReligionsDetailBasePage: document.getElementById("admin-religions-detail-base-page"),
+      adminReligionsDetailKeyPage: document.getElementById("admin-religions-detail-key-page"),
+      adminReligionsDetailLabelPage: document.getElementById("admin-religions-detail-label-page"),
+      adminReligionsDetailActivePage: document.getElementById("admin-religions-detail-active-page"),
       adminImportsPage: document.getElementById("admin-imports-page"),
       adminImportsBack: document.getElementById("admin-imports-back"),
       adminSectionToggles: document.querySelectorAll("[data-admin-toggle]"),
@@ -254,6 +264,7 @@ const ui = {
       adminChannels: document.getElementById("admin-channels"),
       adminVideos: document.getElementById("admin-videos"),
       adminReportsPanel: document.getElementById("admin-reports-panel"),
+      adminReligionsPanel: document.getElementById("admin-religions"),
       adminImports: document.getElementById("admin-imports"),
       adminTabs: document.querySelectorAll(".admin-tab"),
       adminUserSearch: document.getElementById("admin-user-search"),
@@ -261,6 +272,16 @@ const ui = {
       adminVideoSearch: document.getElementById("admin-video-search"),
       adminChannelsList: document.getElementById("admin-channels-list"),
       adminVideosList: document.getElementById("admin-videos-list"),
+      adminReligionsList: document.getElementById("admin-religions-list"),
+      adminReligionsBaseForm: document.getElementById("admin-religions-base-form"),
+      adminReligionsDetailForm: document.getElementById("admin-religions-detail-form"),
+      adminReligionsBaseKey: document.getElementById("admin-religions-base-key"),
+      adminReligionsBaseLabel: document.getElementById("admin-religions-base-label"),
+      adminReligionsBaseActive: document.getElementById("admin-religions-base-active"),
+      adminReligionsDetailBase: document.getElementById("admin-religions-detail-base"),
+      adminReligionsDetailKey: document.getElementById("admin-religions-detail-key"),
+      adminReligionsDetailLabel: document.getElementById("admin-religions-detail-label"),
+      adminReligionsDetailActive: document.getElementById("admin-religions-detail-active"),
       uploadMetadata: document.getElementById("upload-metadata"),
       studioModal: document.getElementById("studio-modal"),
       statsSummary: document.getElementById("stats-summary"),
@@ -421,6 +442,130 @@ const ui = {
     };
 
     const RELIGION_DETAIL_VALUES = new Set(Object.keys(RELIGION_DETAIL_BASE));
+
+    function applyReligionCatalog(list) {
+      const active = Array.isArray(list) ? list.filter((item) => item.active) : [];
+      if (!active.length) {
+        return;
+      }
+      RELIGION_GROUPS.length = 0;
+      Object.keys(RELIGION_LABEL_KEYS).forEach((key) => {
+        delete RELIGION_LABEL_KEYS[key];
+      });
+      Object.keys(RELIGION_DETAIL_BASE).forEach((key) => {
+        delete RELIGION_DETAIL_BASE[key];
+      });
+      RELIGION_DETAIL_VALUES.clear();
+      const baseMap = new Map();
+      active.forEach((item) => {
+        const base = String(item.base || "").trim().toLowerCase();
+        if (!base) {
+          return;
+        }
+        if (!baseMap.has(base)) {
+          baseMap.set(base, { base, label: base, sort: Number(item.sort_order) || 0, details: [] });
+        }
+        const entry = baseMap.get(base);
+        const detail = item.detail ? String(item.detail).trim().toLowerCase() : "";
+        const label = String(item.label || base).trim() || base;
+        if (!detail) {
+          entry.label = label;
+          entry.sort = Number(item.sort_order) || 0;
+          RELIGION_LABEL_KEYS[base] = label;
+          return;
+        }
+        RELIGION_DETAIL_BASE[detail] = base;
+        RELIGION_DETAIL_VALUES.add(detail);
+        RELIGION_LABEL_KEYS[detail] = label;
+        entry.details.push({ value: detail, label, sort: Number(item.sort_order) || 0 });
+      });
+      const bases = Array.from(baseMap.values()).sort((a, b) => {
+        if (a.sort !== b.sort) return a.sort - b.sort;
+        return a.label.localeCompare(b.label);
+      });
+      bases.forEach((entry) => {
+        entry.details.sort((a, b) => {
+          if (a.sort !== b.sort) return a.sort - b.sort;
+          return a.label.localeCompare(b.label);
+        });
+        RELIGION_GROUPS.push({ value: entry.base, details: entry.details.map((item) => item.value) });
+      });
+    }
+
+    function renderReligionFilterOptions(list) {
+      if (!ui.searchFilterReligion || !Array.isArray(list) || !list.length) {
+        return;
+      }
+      const select = ui.searchFilterReligion;
+      const current = select.value || "";
+      select.innerHTML = "";
+      const allOption = document.createElement("option");
+      allOption.value = "";
+      allOption.textContent = t("filter_religion_all");
+      select.appendChild(allOption);
+      const bases = list.filter((item) => item.active && !item.detail);
+      bases.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      bases.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.base;
+        option.textContent = RELIGION_LABEL_KEYS[item.base] || item.label || item.base;
+        select.appendChild(option);
+        const details = list.filter(
+          (detail) => detail.active && detail.detail && detail.base === item.base
+        );
+        details.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+        details.forEach((detail) => {
+          const detailOption = document.createElement("option");
+          detailOption.value = detail.detail;
+          detailOption.textContent =
+            "— " + (RELIGION_LABEL_KEYS[detail.detail] || detail.label || detail.detail);
+          select.appendChild(detailOption);
+        });
+      });
+      select.value = current;
+    }
+
+    function renderUploadReligionOptions(list) {
+      if (!ui.uploadReligion || !Array.isArray(list) || !list.length) {
+        return;
+      }
+      const select = ui.uploadReligion;
+      const current = getSelectValues(select);
+      select.innerHTML = "";
+      const bases = list.filter((item) => item.active && !item.detail);
+      bases.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      bases.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.base;
+        option.textContent = RELIGION_LABEL_KEYS[item.base] || item.label || item.base;
+        select.appendChild(option);
+      });
+      Array.from(select.options).forEach((option) => {
+        option.selected = current.includes(option.value);
+      });
+    }
+
+    function renderAdminReligionBaseSelects(list) {
+      const selects = [ui.adminReligionsDetailBase, ui.adminReligionsDetailBasePage].filter(Boolean);
+      if (!selects.length || !Array.isArray(list)) {
+        return;
+      }
+      const bases = list.filter((item) => !item.detail);
+      bases.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      selects.forEach((select) => {
+        const current = select.value;
+        select.innerHTML = "";
+        bases.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.base;
+          option.textContent = RELIGION_LABEL_KEYS[item.base] || item.label || item.base;
+          select.appendChild(option);
+        });
+        if (current) {
+          select.value = current;
+        }
+      });
+    }
 
     const GAME_CATALOG = [
       {
@@ -750,6 +895,16 @@ const ui = {
         admin_reports_title: "Admin reports",
         admin_imports_title: "Admin imports",
         admin_reports: "Reports",
+        admin_religions_title: "Religion categories",
+        admin_religions_key: "Key",
+        admin_religions_label: "Label",
+        admin_religions_active: "Active",
+        admin_religions_add_base: "Add base",
+        admin_religions_add_detail: "Add detail",
+        admin_religions_save: "Save",
+        admin_religions_delete: "Delete",
+        admin_religions_empty: "No religion categories yet.",
+        admin_religions_base_select: "Base",
         admin_import_hint: "Bulk import approved YouTube links (CSV or SQL).",
         admin_csv_label: "CSV file",
         admin_import_csv: "Import CSV",
@@ -912,6 +1067,7 @@ const ui = {
         admin_tab_channels: "Channels",
         admin_tab_videos: "Videos",
         admin_tab_reports: "Reports",
+        admin_tab_religions: "Religions",
         admin_tab_imports: "Imports",
         admin_users_hint: "Search users",
         admin_users_search: "Search users",
@@ -1194,6 +1350,16 @@ const ui = {
         admin_reports_title: "Жалобы администратора",
         admin_imports_title: "Импорт администратора",
         admin_reports: "Жалобы",
+        admin_religions_title: "Категории религий",
+        admin_religions_key: "Ключ",
+        admin_religions_label: "Метка",
+        admin_religions_active: "Активно",
+        admin_religions_add_base: "Добавить основу",
+        admin_religions_add_detail: "Добавить деталь",
+        admin_religions_save: "Сохранить",
+        admin_religions_delete: "Удалить",
+        admin_religions_empty: "Категории религий отсутствуют.",
+        admin_religions_base_select: "Основа",
         admin_import_hint: "Импорт одобренных ссылок YouTube (CSV или SQL).",
         admin_csv_label: "CSV файл",
         admin_import_csv: "Импорт CSV",
@@ -1356,6 +1522,7 @@ const ui = {
         admin_tab_channels: "Каналы",
         admin_tab_videos: "Видео",
         admin_tab_reports: "Жалобы",
+        admin_tab_religions: "Религии",
         admin_tab_ads: "Реклама",
         admin_tab_imports: "Импорт",
         admin_ads_hint: "Размещайте рекламу на играх и видео.",
@@ -1658,6 +1825,16 @@ const ui = {
         admin_reports_title: "管理员举报",
         admin_imports_title: "管理员导入",
         admin_reports: "举报",
+        admin_religions_title: "宗教分类",
+        admin_religions_key: "键",
+        admin_religions_label: "标签",
+        admin_religions_active: "启用",
+        admin_religions_add_base: "添加主类",
+        admin_religions_add_detail: "添加子类",
+        admin_religions_save: "保存",
+        admin_religions_delete: "删除",
+        admin_religions_empty: "暂无宗教分类。",
+        admin_religions_base_select: "主类",
         admin_import_hint: "批量导入已批准的 YouTube 链接（CSV 或 SQL）。",
         admin_csv_label: "CSV 文件",
         admin_import_csv: "导入 CSV",
@@ -1820,6 +1997,7 @@ const ui = {
         admin_tab_channels: "频道",
         admin_tab_videos: "视频",
         admin_tab_reports: "举报",
+        admin_tab_religions: "宗教",
         admin_tab_ads: "广告",
         admin_tab_imports: "导入",
         admin_ads_hint: "在游戏和视频页放置广告。",
@@ -2122,6 +2300,16 @@ const ui = {
         admin_reports_title: "Yönetici raporları",
         admin_imports_title: "Yönetici içe aktarma",
         admin_reports: "Raporlar",
+        admin_religions_title: "Din kategorileri",
+        admin_religions_key: "Anahtar",
+        admin_religions_label: "Etiket",
+        admin_religions_active: "Aktif",
+        admin_religions_add_base: "Ana kategori ekle",
+        admin_religions_add_detail: "Alt kategori ekle",
+        admin_religions_save: "Kaydet",
+        admin_religions_delete: "Sil",
+        admin_religions_empty: "Din kategorisi yok.",
+        admin_religions_base_select: "Ana kategori",
         admin_import_hint: "Onaylı YouTube linklerini toplu içe aktar (CSV veya SQL).",
         admin_csv_label: "CSV dosyası",
         admin_import_csv: "CSV içe aktar",
@@ -2284,6 +2472,7 @@ const ui = {
         admin_tab_channels: "Kanallar",
         admin_tab_videos: "Videolar",
         admin_tab_reports: "Raporlar",
+        admin_tab_religions: "Dinler",
         admin_tab_ads: "Reklamlar",
         admin_tab_imports: "İçe aktarma",
         admin_ads_hint: "Oyun ve video sayfalarına reklam yerleştirin.",
@@ -2586,6 +2775,16 @@ const ui = {
         admin_reports_title: "Admin şikayətləri",
         admin_imports_title: "Admin idxal",
         admin_reports: "Şikayətlər",
+        admin_religions_title: "Din kateqoriyaları",
+        admin_religions_key: "Açar",
+        admin_religions_label: "Etiket",
+        admin_religions_active: "Aktiv",
+        admin_religions_add_base: "Əsas əlavə et",
+        admin_religions_add_detail: "Alt əlavə et",
+        admin_religions_save: "Yadda saxla",
+        admin_religions_delete: "Sil",
+        admin_religions_empty: "Din kateqoriyası yoxdur.",
+        admin_religions_base_select: "Əsas",
         admin_import_hint: "Təsdiqlənmiş YouTube linklərini toplu idxal et (CSV və ya SQL).",
         admin_csv_label: "CSV faylı",
         admin_import_csv: "CSV idxal et",
@@ -2748,6 +2947,7 @@ const ui = {
         admin_tab_channels: "Kanallar",
         admin_tab_videos: "Videolar",
         admin_tab_reports: "Şikayətlər",
+        admin_tab_religions: "Dinlər",
         admin_tab_ads: "Reklamlar",
         admin_tab_imports: "İdxal",
         admin_ads_hint: "Oyun və video səhifələrinə reklam yerləşdirin.",
@@ -3050,6 +3250,16 @@ const ui = {
         admin_reports_title: "بلاغات الإدارة",
         admin_imports_title: "استيراد الإدارة",
         admin_reports: "البلاغات",
+        admin_religions_title: "تصنيفات الديانات",
+        admin_religions_key: "المفتاح",
+        admin_religions_label: "التسمية",
+        admin_religions_active: "نشط",
+        admin_religions_add_base: "إضافة أساسي",
+        admin_religions_add_detail: "إضافة فرعي",
+        admin_religions_save: "حفظ",
+        admin_religions_delete: "حذف",
+        admin_religions_empty: "لا توجد تصنيفات ديانات.",
+        admin_religions_base_select: "أساسي",
         admin_import_hint: "استيراد روابط يوتيوب المعتمدة (CSV أو SQL).",
         admin_csv_label: "ملف CSV",
         admin_import_csv: "استيراد CSV",
@@ -3212,6 +3422,7 @@ const ui = {
         admin_tab_channels: "القنوات",
         admin_tab_videos: "الفيديوهات",
         admin_tab_reports: "البلاغات",
+        admin_tab_religions: "الديانات",
         admin_tab_ads: "الإعلانات",
         admin_tab_imports: "الاستيراد",
         admin_ads_hint: "ضع الإعلانات في صفحات الألعاب والفيديو.",
@@ -3322,6 +3533,13 @@ const ui = {
       }
       updateUploadReligionDetails();
       renderSettingsReligions(settingsSelectedReligions);
+      if (religionCatalog.length) {
+        renderReligionFilterOptions(religionCatalog);
+        renderUploadReligionOptions(religionCatalog);
+      }
+      if (adminReligionCatalog.length) {
+        renderAdminReligionBaseSelects(adminReligionCatalog);
+      }
       syncGamesCopy();
       if (ui.requestReason) {
         updateRequestFields(ui.requestReason.value);
@@ -3602,6 +3820,8 @@ const ui = {
     let settingsAvailableChannels = [];
     let settingsSelectedChannels = new Set();
     let settingsSelectedReligions = new Set();
+    let religionCatalog = [];
+    let adminReligionCatalog = [];
     let adminUsersData = [];
     let adminChannelsData = [];
     let adminVideosData = [];
@@ -3630,7 +3850,16 @@ const ui = {
     const SETTINGS_UNLOCK_MS = 10 * 60 * 1000;
     const PLAYER_RELOAD_TIMEOUT_MS = 12000;
     const PLAYER_RELOAD_KEY = "playerReloads";
-    const ADMIN_SECTIONS = new Set(["overview", "users", "channels", "videos", "reports", "ads", "imports"]);
+    const ADMIN_SECTIONS = new Set([
+      "overview",
+      "users",
+      "channels",
+      "videos",
+      "reports",
+      "religions",
+      "ads",
+      "imports"
+    ]);
     let activeGameId = "";
     let gameDetailActive = false;
     const CONTROL_HIDE_DELAY = 2600;
@@ -5335,11 +5564,11 @@ const ui = {
       document.body.classList.remove("locked");
     }
 
-    function triggerLoginSplash() {
-      if (!ui.loginSplash || sessionStorage.getItem("loginSplashShown")) {
+    function triggerLoginSplash(key = "loginSplashShown") {
+      if (!ui.loginSplash || sessionStorage.getItem(key)) {
         return;
       }
-      sessionStorage.setItem("loginSplashShown", "true");
+      sessionStorage.setItem(key, "true");
       ui.loginSplash.classList.add("active");
       ui.loginSplash.setAttribute("aria-hidden", "false");
       window.setTimeout(() => {
@@ -5353,7 +5582,12 @@ const ui = {
 
     function apiFetch(path, options = {}) {
       const headers = options.headers || {};
-      if (!token && path.startsWith("/api/") && path !== "/api/firebase-config") {
+      if (
+        !token &&
+        path.startsWith("/api/") &&
+        path !== "/api/firebase-config" &&
+        path !== "/api/religions"
+      ) {
         lockApp(t("message_sign_in"));
       }
       if (token) {
@@ -6569,6 +6803,7 @@ const ui = {
     }
 
     async function initFirebase() {
+      triggerLoginSplash("loginSplashPrecheck");
       try {
         const res = await fetch(API_BASE + "/api/firebase-config");
         const config = await res.json();
@@ -7446,6 +7681,168 @@ const ui = {
       renderAdminReports(data.reports || [], ui.adminReportsPageList);
     }
 
+    function renderAdminReligions(list, container) {
+      if (!container) {
+        return;
+      }
+      container.innerHTML = "";
+      if (!list.length) {
+        container.textContent = t("admin_religions_empty");
+        return;
+      }
+      const sorted = list.slice().sort((a, b) => {
+        const baseA = String(a.base || "");
+        const baseB = String(b.base || "");
+        if (baseA !== baseB) return baseA.localeCompare(baseB);
+        const detailA = String(a.detail || "");
+        const detailB = String(b.detail || "");
+        return detailA.localeCompare(detailB);
+      });
+      sorted.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "channel admin-religion-row";
+        const title = document.createElement("div");
+        title.className = "card-meta";
+        title.textContent = item.detail ? item.base + " / " + item.detail : item.base;
+        const labelInput = document.createElement("input");
+        labelInput.type = "text";
+        labelInput.value = item.label || item.detail || item.base;
+        const sortInput = document.createElement("input");
+        sortInput.type = "number";
+        sortInput.min = "0";
+        sortInput.step = "1";
+        sortInput.value = String(item.sort_order || 0);
+        const activeLabel = document.createElement("label");
+        activeLabel.className = "pill";
+        const activeInput = document.createElement("input");
+        activeInput.type = "checkbox";
+        activeInput.checked = Boolean(item.active);
+        const activeText = document.createElement("span");
+        activeText.textContent = t("admin_religions_active");
+        activeLabel.appendChild(activeInput);
+        activeLabel.appendChild(activeText);
+        const actions = document.createElement("div");
+        actions.className = "form-actions";
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "ghost";
+        saveBtn.textContent = t("admin_religions_save");
+        saveBtn.addEventListener("click", async () => {
+          const payload = {
+            label: labelInput.value.trim(),
+            active: activeInput.checked,
+            sort_order: Number(sortInput.value || 0)
+          };
+          await apiFetch("/api/admin/religions/" + item.id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          fetchAdminReligionsPage();
+        });
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "ghost";
+        deleteBtn.textContent = t("admin_religions_delete");
+        deleteBtn.addEventListener("click", async () => {
+          await apiFetch("/api/admin/religions/" + item.id, { method: "DELETE" });
+          fetchAdminReligionsPage();
+        });
+        actions.appendChild(saveBtn);
+        actions.appendChild(deleteBtn);
+        row.appendChild(title);
+        row.appendChild(labelInput);
+        row.appendChild(sortInput);
+        row.appendChild(activeLabel);
+        row.appendChild(actions);
+        container.appendChild(row);
+      });
+    }
+
+    async function fetchAdminReligionsPage() {
+      if (!currentUser || currentUser.role !== "admin") {
+        return;
+      }
+      if (ui.adminReligionsPageList) {
+        ui.adminReligionsPageList.innerHTML = t("status_loading");
+      }
+      if (ui.adminReligionsList) {
+        ui.adminReligionsList.innerHTML = t("status_loading");
+      }
+      openAdminSection("religions");
+      const res = await apiFetch("/api/admin/religions");
+      if (!res.ok) {
+        return;
+      }
+      const data = await res.json();
+      adminReligionCatalog = Array.isArray(data.religions) ? data.religions : [];
+      renderAdminReligions(adminReligionCatalog, ui.adminReligionsList);
+      renderAdminReligions(adminReligionCatalog, ui.adminReligionsPageList);
+      renderAdminReligionBaseSelects(adminReligionCatalog);
+    }
+
+    function normalizeReligionKey(value) {
+      return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_]/g, "");
+    }
+
+    async function submitReligionBase(formScope) {
+      const keyInput = formScope.keyInput;
+      const labelInput = formScope.labelInput;
+      const activeInput = formScope.activeInput;
+      if (!keyInput || !labelInput) {
+        return;
+      }
+      const base = normalizeReligionKey(keyInput.value);
+      const label = labelInput.value.trim();
+      if (!base || !label) {
+        return;
+      }
+      await apiFetch("/api/admin/religions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base, label, active: Boolean(activeInput && activeInput.checked) })
+      });
+      keyInput.value = "";
+      labelInput.value = "";
+      if (activeInput) {
+        activeInput.checked = true;
+      }
+      await fetchAdminReligionsPage();
+      fetchReligionCatalog();
+    }
+
+    async function submitReligionDetail(formScope) {
+      const baseSelect = formScope.baseSelect;
+      const keyInput = formScope.keyInput;
+      const labelInput = formScope.labelInput;
+      const activeInput = formScope.activeInput;
+      if (!baseSelect || !keyInput || !labelInput) {
+        return;
+      }
+      const base = normalizeReligionKey(baseSelect.value);
+      const detail = normalizeReligionKey(keyInput.value);
+      const label = labelInput.value.trim();
+      if (!base || !detail || !label) {
+        return;
+      }
+      await apiFetch("/api/admin/religions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base, detail, label, active: Boolean(activeInput && activeInput.checked) })
+      });
+      keyInput.value = "";
+      labelInput.value = "";
+      if (activeInput) {
+        activeInput.checked = true;
+      }
+      await fetchAdminReligionsPage();
+      fetchReligionCatalog();
+    }
+
     function renderAdminAds(list) {
       if (!ui.adminAdsList) {
         return;
@@ -7649,6 +8046,10 @@ const ui = {
         fetchAdminReportsPage();
         return;
       }
+      if (section === "religions") {
+        fetchAdminReligionsPage();
+        return;
+      }
       if (section === "ads") {
         fetchAdminAdsPage();
         return;
@@ -7670,7 +8071,13 @@ const ui = {
       ui.adminChannels.classList.toggle("hidden", tab !== "channels");
       ui.adminVideos.classList.toggle("hidden", tab !== "videos");
       ui.adminReportsPanel.classList.toggle("hidden", tab !== "reports");
+      if (ui.adminReligionsPanel) {
+        ui.adminReligionsPanel.classList.toggle("hidden", tab !== "religions");
+      }
       ui.adminImports.classList.toggle("hidden", tab !== "imports");
+      if (tab === "religions") {
+        fetchAdminReligionsPage();
+      }
     }
 
     async function fetchAdminUsersRemote(query, role) {
@@ -8069,6 +8476,28 @@ const ui = {
         return;
       }
       renderTopicsList(settingsSelectedTopics);
+    }
+
+    async function fetchReligionCatalog() {
+      try {
+        const res = await fetch(API_BASE + "/api/religions");
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        const list = Array.isArray(data.religions) ? data.religions : [];
+        if (!list.length) {
+          return;
+        }
+        religionCatalog = list;
+        applyReligionCatalog(religionCatalog);
+        renderReligionFilterOptions(religionCatalog);
+        renderUploadReligionOptions(religionCatalog);
+        renderSettingsReligions(settingsSelectedReligions);
+        updateUploadReligionDetails();
+      } catch (err) {
+        return;
+      }
     }
 
     function renderTopicsList(selectedTopics) {
@@ -9094,6 +9523,48 @@ const ui = {
         button.addEventListener("click", () => setAdminTab(button.dataset.adminTab));
       });
     }
+    if (ui.adminReligionsBaseForm) {
+      ui.adminReligionsBaseForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitReligionBase({
+          keyInput: ui.adminReligionsBaseKey,
+          labelInput: ui.adminReligionsBaseLabel,
+          activeInput: ui.adminReligionsBaseActive
+        });
+      });
+    }
+    if (ui.adminReligionsDetailForm) {
+      ui.adminReligionsDetailForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitReligionDetail({
+          baseSelect: ui.adminReligionsDetailBase,
+          keyInput: ui.adminReligionsDetailKey,
+          labelInput: ui.adminReligionsDetailLabel,
+          activeInput: ui.adminReligionsDetailActive
+        });
+      });
+    }
+    if (ui.adminReligionsBaseFormPage) {
+      ui.adminReligionsBaseFormPage.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitReligionBase({
+          keyInput: ui.adminReligionsBaseKeyPage,
+          labelInput: ui.adminReligionsBaseLabelPage,
+          activeInput: ui.adminReligionsBaseActivePage
+        });
+      });
+    }
+    if (ui.adminReligionsDetailFormPage) {
+      ui.adminReligionsDetailFormPage.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitReligionDetail({
+          baseSelect: ui.adminReligionsDetailBasePage,
+          keyInput: ui.adminReligionsDetailKeyPage,
+          labelInput: ui.adminReligionsDetailLabelPage,
+          activeInput: ui.adminReligionsDetailActivePage
+        });
+      });
+    }
     if (ui.adminAdsForm) {
       ui.adminAdsForm.addEventListener("submit", handleAdminAdsSubmit);
     }
@@ -9445,6 +9916,10 @@ const ui = {
         fetchAdminReportsPage();
         return;
       }
+      if (path === "/admin/religions") {
+        fetchAdminReligionsPage();
+        return;
+      }
       if (path === "/admin/ads") {
         fetchAdminAdsPage();
         return;
@@ -9515,6 +9990,7 @@ const ui = {
       window.location.assign("/offline.html");
     });
 
+    fetchReligionCatalog();
     lockApp(t("message_sign_in"));
     initFirebase();
     registerServiceWorker();

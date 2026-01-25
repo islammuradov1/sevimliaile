@@ -206,6 +206,79 @@ const RELIGION_DETAIL_BASE = {
   buddist_vajrayana: "buddist"
 };
 const RELIGION_DETAILS = new Set(Object.keys(RELIGION_DETAIL_BASE));
+const RELIGION_LABELS = {
+  none: "No religion",
+  islam: "Islam",
+  christian: "Christian",
+  jews: "Jews",
+  buddist: "Buddist",
+  shia: "Shia",
+  sunni: "Sunni",
+  catholic: "Catholic",
+  orthodox: "Orthodox",
+  protestant: "Protestant",
+  jews_orthodox: "Orthodox",
+  jews_conservative: "Conservative",
+  jews_reform: "Reform",
+  buddist_theravada: "Theravada",
+  buddist_mahayana: "Mahayana",
+  buddist_vajrayana: "Vajrayana"
+};
+
+let religionCatalogCache = { loadedAt: 0 };
+
+function resetReligionCatalogCache() {
+  religionCatalogCache.loadedAt = 0;
+}
+
+async function hydrateReligionCatalog(env) {
+  if (!env || !env.DB) return;
+  const now = Date.now();
+  if (religionCatalogCache.loadedAt && now - religionCatalogCache.loadedAt < 5 * 60 * 1000) {
+    return;
+  }
+  try {
+    const result = await env.DB.prepare(
+      "SELECT base, detail, label FROM religion_categories"
+    ).all();
+    const rows = result.results || [];
+    if (!rows.length) {
+      religionCatalogCache.loadedAt = now;
+      return;
+    }
+    rows.forEach((row) => {
+      const base = String(row.base || "").trim().toLowerCase();
+      const detail = row.detail ? String(row.detail).trim().toLowerCase() : "";
+      if (base) {
+        RELIGION_BASES.add(base);
+      }
+      if (detail) {
+        RELIGION_DETAILS.add(detail);
+        RELIGION_DETAIL_BASE[detail] = base || RELIGION_DETAIL_BASE[detail] || "";
+      }
+      if (row.label) {
+        RELIGION_LABELS[detail || base] = String(row.label);
+      }
+    });
+    religionCatalogCache.loadedAt = now;
+  } catch (err) {
+    religionCatalogCache.loadedAt = now;
+  }
+}
+
+function buildDefaultReligionCatalog() {
+  const items = [];
+  RELIGION_BASES.forEach((base) => {
+    const label = RELIGION_LABELS[base] || base;
+    items.push({ base, detail: null, label, active: 1, sort_order: 0 });
+  });
+  Object.keys(RELIGION_DETAIL_BASE).forEach((detail) => {
+    const base = RELIGION_DETAIL_BASE[detail];
+    const label = RELIGION_LABELS[detail] || detail;
+    items.push({ base, detail, label, active: 1, sort_order: 0 });
+  });
+  return items;
+}
 
 function parseList(input) {
   if (!input) return [];
@@ -560,6 +633,14 @@ function isUsableTitle(title) {
   return value && value.toLowerCase() !== "untitled video";
 }
 
+function normalizeSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+}
+
 async function isRateLimited(env, table, column, userId, windowSeconds) {
   if (!env || !env.DB) return false;
   const row = await env.DB.prepare(
@@ -805,8 +886,20 @@ export default {
             withCors({}, origin)
           );
         }
+        if (path === "/religions" && request.method === "GET") {
+          await hydrateReligionCatalog(env);
+          const result = await env.DB.prepare(
+            "SELECT id, base, detail, label, active, sort_order FROM religion_categories WHERE active = 1 ORDER BY sort_order ASC, label ASC"
+          )
+            .all()
+            .catch(() => null);
+          const rows = result && result.results ? result.results : buildDefaultReligionCatalog();
+          return jsonResponse({ religions: rows }, 200, withCors({}, origin));
+        }
         return jsonResponse({ error: "Unauthorized" }, 401, withCors({}, origin));
       }
+
+      await hydrateReligionCatalog(env);
 
       const plan = effectivePlan(user);
       if (plan !== user.plan) {
@@ -849,6 +942,123 @@ export default {
         .bind(displayName, slogan, avatarUrl, bio, user.id)
         .run();
       return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path === "/religions" && request.method === "GET") {
+      const result = await env.DB.prepare(
+        "SELECT id, base, detail, label, active, sort_order FROM religion_categories WHERE active = 1 ORDER BY sort_order ASC, label ASC"
+      )
+        .all()
+        .catch(() => null);
+      const rows = result && result.results ? result.results : buildDefaultReligionCatalog();
+      return jsonResponse({ religions: rows }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/religions" && request.method === "GET") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const result = await env.DB.prepare(
+        "SELECT id, base, detail, label, active, sort_order FROM religion_categories ORDER BY sort_order ASC, label ASC"
+      )
+        .all()
+        .catch(() => null);
+      const rows = result && result.results ? result.results : [];
+      return jsonResponse({ religions: rows }, 200, withCors({}, origin));
+    }
+
+    if (path === "/admin/religions" && request.method === "POST") {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const body = await parseJson(request);
+      const base = normalizeSlug(body.base);
+      const detail = normalizeSlug(body.detail || "");
+      const label = String(body.label || "").trim();
+      const active = body.active === false ? 0 : 1;
+      if (!base || !label) {
+        return jsonResponse({ error: "Base and label required." }, 400, withCors({}, origin));
+      }
+      if (detail && !/^[a-z0-9_]+$/.test(detail)) {
+        return jsonResponse({ error: "Detail key invalid." }, 400, withCors({}, origin));
+      }
+      if (!/^[a-z0-9_]+$/.test(base)) {
+        return jsonResponse({ error: "Base key invalid." }, 400, withCors({}, origin));
+      }
+      if (detail) {
+        const baseRow = await env.DB.prepare(
+          "SELECT id FROM religion_categories WHERE base = ? AND detail IS NULL"
+        )
+          .bind(base)
+          .first();
+        if (!baseRow) {
+          return jsonResponse({ error: "Base category missing." }, 400, withCors({}, origin));
+        }
+      }
+      const existing = await env.DB.prepare(
+        "SELECT id FROM religion_categories WHERE base = ? AND COALESCE(detail, '') = ?"
+      )
+        .bind(base, detail || "")
+        .first();
+      if (existing) {
+        return jsonResponse({ error: "Category already exists." }, 409, withCors({}, origin));
+      }
+      await env.DB.prepare(
+        "INSERT INTO religion_categories (base, detail, label, active, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+      )
+        .bind(base, detail || null, label, active, Number(body.sort_order || 0), nowIso())
+        .run();
+      resetReligionCatalogCache();
+      return jsonResponse({ success: true }, 200, withCors({}, origin));
+    }
+
+    if (path.startsWith("/admin/religions/")) {
+      if (!requireRole(user, "admin")) {
+        return jsonResponse({ error: "Forbidden" }, 403, withCors({}, origin));
+      }
+      const id = path.split("/")[3];
+      if (!id) {
+        return jsonResponse({ error: "Not found." }, 404, withCors({}, origin));
+      }
+      if (request.method === "PUT") {
+        const body = await parseJson(request);
+        const label = String(body.label || "").trim();
+        const active = body.active === false ? 0 : 1;
+        const sortOrder = Number(body.sort_order || 0);
+        if (!label) {
+          return jsonResponse({ error: "Label required." }, 400, withCors({}, origin));
+        }
+        await env.DB.prepare(
+          "UPDATE religion_categories SET label = ?, active = ?, sort_order = ? WHERE id = ?"
+        )
+          .bind(label, active, sortOrder, id)
+          .run();
+        resetReligionCatalogCache();
+        return jsonResponse({ success: true }, 200, withCors({}, origin));
+      }
+      if (request.method === "DELETE") {
+        const row = await env.DB.prepare(
+          "SELECT base, detail FROM religion_categories WHERE id = ?"
+        )
+          .bind(id)
+          .first();
+        if (!row) {
+          return jsonResponse({ error: "Not found." }, 404, withCors({}, origin));
+        }
+        if (!row.detail) {
+          await env.DB.prepare(
+            "DELETE FROM religion_categories WHERE base = ?"
+          )
+            .bind(row.base)
+            .run();
+        } else {
+          await env.DB.prepare("DELETE FROM religion_categories WHERE id = ?")
+            .bind(id)
+            .run();
+        }
+        resetReligionCatalogCache();
+        return jsonResponse({ success: true }, 200, withCors({}, origin));
+      }
     }
 
     if (path === "/settings" && request.method === "GET") {
@@ -1627,6 +1837,8 @@ export default {
       const religionValue = String(religionFilter || "").trim().toLowerCase();
       if (religionValue) {
         const base = normalizeReligion(religionValue);
+        const isDetail = RELIGION_DETAILS.has(religionValue);
+        const detailValue = isDetail ? religionValue : "";
         if (base === "none") {
           const clauses = [];
           if (hasReligions) {
@@ -1636,6 +1848,27 @@ export default {
           }
           if (hasReligion) {
             clauses.push("COALESCE(videos.religion, 'none') = 'none'");
+          }
+          if (clauses.length) {
+            where += " AND (" + clauses.join(" OR ") + ")";
+          }
+        } else if (isDetail) {
+          const clauses = [];
+          if (hasReligions) {
+            clauses.push("EXISTS (SELECT 1 FROM json_each(videos.religions) WHERE value = ?)");
+            binds.push(base);
+          }
+          if (hasReligion) {
+            clauses.push("COALESCE(videos.religion, 'none') = ?");
+            binds.push(base);
+          }
+          if (hasReligionDetails) {
+            clauses.push("EXISTS (SELECT 1 FROM json_each(videos.religion_details) WHERE value = ?)");
+            binds.push(detailValue);
+          }
+          if (hasReligionDetail) {
+            clauses.push("COALESCE(videos.religion_detail, '') = ?");
+            binds.push(detailValue);
           }
           if (clauses.length) {
             where += " AND (" + clauses.join(" OR ") + ")";
